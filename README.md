@@ -1,5 +1,7 @@
 # EasyClangComplete #
 
+[![Join the chat at https://gitter.im/niosus/EasyClangComplete](https://badges.gitter.im/niosus/EasyClangComplete.svg)](https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
 ![Example](autocomplete_show_off.gif)
