@@ -171,6 +171,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # Verify that character under the cursor is one allowed trigger
         if not Tools.needs_autocompletion(locations[0], view, settings):
+            if settings.complete_all:
+                return ([], sublime.INHIBIT_WORD_COMPLETIONS)
+
             # send None and show completions from other plugins if available
             return None
 
@@ -182,6 +185,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             args=[view, locations[0], settings.errors_on_save])
         completion_thread.deamon = True
         completion_thread.start()
+
+        if settings.complete_all:
+            return ([], sublime.INHIBIT_WORD_COMPLETIONS)
 
         # show default completions for now
         return None

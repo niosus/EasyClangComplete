@@ -151,9 +151,6 @@ class Tools:
         Returns:
             bool: trigger is valid
         """
-        if settings.complete_all:
-            return True
-
         trigger_length = 1
 
         current_char = view.substr(point - trigger_length)
@@ -175,4 +172,9 @@ class Tools:
         for trigger in settings.triggers:
             if current_char in trigger:
                 return True
+
+        if settings.complete_all \
+                and (current_char.isalpha() or current_char == '_'):
+            return True
+
         return False
