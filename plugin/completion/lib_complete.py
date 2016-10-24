@@ -109,12 +109,11 @@ class Completer(BaseCompleter):
             view_id (int): view id
 
         """
-        with self.rlock:
-            if view_id not in self.TUs:
-                log.error(" no tu for view id: %s, so not removing", view_id)
-                return
-            log.debug(" removing translation unit for view id: %s", view_id)
-            del self.TUs[view_id]
+        if view_id not in self.TUs:
+            log.error(" no tu for view id: %s, so not removing", view_id)
+            return
+        log.debug(" removing translation unit for view id: %s", view_id)
+        del self.TUs[view_id]
 
     def exists_for_view(self, view_id):
         """find if there is a completer for the view
