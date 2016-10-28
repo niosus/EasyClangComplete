@@ -29,17 +29,20 @@ class CompileErrors:
             view (sublime.View): current view
             errors (list): list of parsed errors (dict objects)
         """
-        log.debug(" generating error regions for view %s", view.buffer_id())
-        # first clear old regions
-        if view.buffer_id() in self.err_regions:
-            log.debug(" removing old error regions")
-            del self.err_regions[view.buffer_id()]
-        # create an empty region dict for view id
-        self.err_regions[view.buffer_id()] = {}
+        try:
+            log.debug(" generating error regions for view %s", view.buffer_id())
+            # first clear old regions
+            if view.buffer_id() in self.err_regions:
+                log.debug(" removing old error regions")
+                del self.err_regions[view.buffer_id()]
+            # create an empty region dict for view id
+            self.err_regions[view.buffer_id()] = {}
 
-        for error in errors:
-            self.add_error(view, error)
-        log.debug(" %s error regions ready", len(self.err_regions))
+            for error in errors:
+                self.add_error(view, error)
+            log.debug(" %s error regions ready", len(self.err_regions))
+        except:
+            log.debug(" View closed")
 
     def add_error(self, view, error_dict):
         """Put new compile error in the dictionary of errors
