@@ -111,6 +111,7 @@ class Completer(BaseCompleter):
         Args:
             view_id (int): view id
 
+        Returns: view id
         """
         with self.rlock:
             if view_id not in self.TUs:
@@ -118,6 +119,7 @@ class Completer(BaseCompleter):
                 return
             log.debug(" removing translation unit for view id: %s", view_id)
             del self.TUs[view_id]
+            return view_id
 
     def exists_for_view(self, view_id):
         """find if there is a completer for the view
@@ -182,12 +184,15 @@ class Completer(BaseCompleter):
             clang_flags += custom_flags
 
         # now we have the flags and can continue initializing the TU
-        if Tools.get_view_syntax(view) != "C":
+        if current_lang != "C":
             # treat this as c++ even if it is a header
             log.debug(" This is a C++ file. Adding `-x c++` to flags")
             clang_flags = ['-x'] + ['c++'] + clang_flags
         log.debug(" clang flags are: %s", clang_flags)
         v_id = view.buffer_id()
+        if v_id == 0:
+            log.warning(" this is default id. View is closed. Abort!")
+            return
         with self.rlock:
             try:
                 TU = Completer.tu_module

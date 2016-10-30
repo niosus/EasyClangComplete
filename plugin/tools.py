@@ -297,10 +297,15 @@ class Tools:
         Returns:
             str: syntax, e.g. "C", "C++"
         """
-        syntax = re.findall(Tools.syntax_regex,
-                            view.settings().get('syntax'))
-        if len(syntax) > 0:
-            return syntax[0]
+        try:
+            syntax = re.findall(Tools.syntax_regex,
+                                view.settings().get('syntax'))
+            if len(syntax) > 0:
+                return syntax[0]
+        except TypeError as e:
+            # if the view is killed while this is being run, an exception is
+            # thrown. Let's dela with it gracefully.
+            log.error(" error while getting current language: '%s'", e)
         return None
 
     @staticmethod
