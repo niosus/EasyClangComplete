@@ -85,10 +85,10 @@ class FlagsManager:
         Initialize the flags manager
 
         Args:
-            use_cmake (bool): should we search for CMakeLists.txt?
-            flags_update_strategy (str): how to deal with flags conflicts?
-            cmake_prefix_paths (str[], optional): should we add any file paths
-                to the CMAKE_PREFIX_PATH before building a cmake project?
+            view (sublime.View): current view
+            settings (plugin.Settings): current settings
+            compiler_variant (completion.CompilerVariant): current compiler
+                variant picks correct initial flags based on compiler in use
             search_scope (tools.SearchScope, optional): search scope where to
                 search for CMakeLists.txt file and .clang_complete file.
         """
