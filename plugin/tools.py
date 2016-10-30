@@ -431,7 +431,8 @@ class Tools:
         try:
             startupinfo = None
             if isinstance(command, list):
-                log.debug(" command: \n%s", subprocess.list2cmdline(command))
+                command = subprocess.list2cmdline(command)
+                log.debug(" command: \n%s", command)
             if platform.system() == "Windows":
                 # Don't let console window pop-up briefly.
                 startupinfo = subprocess.STARTUPINFO()
