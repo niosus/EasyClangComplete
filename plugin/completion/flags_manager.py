@@ -117,7 +117,7 @@ class FlagsManager:
             self._initial_flags += settings.cpp_flags
 
         home_folder = path.expanduser('~')
-        self._initial_flags += list(FlagsManager.parse_flags(
+        self._initial_flags += list(self.parse_flags(
             home_folder, settings.populate_common_flags(view)))
 
     def any_file_modified(self):
@@ -167,14 +167,13 @@ class FlagsManager:
                 cmake_file=self._cmake_file,
                 prefix_paths=self._cmake_prefix_paths)
             if compilation_db:
-                new_flags = FlagsManager.flags_from_database(
-                    database_file=compilation_db)
+                new_flags = self.flags_from_database(compilation_db)
                 new_clang_file_path = path.join(
                     self._cmake_file.folder(),
                     FlagsManager.CLANG_COMPLETE_FILE_NAME)
                 # there is no need to modify anything if the flags have not
                 # changed since we have last read them
-                curr_flags = FlagsManager.flags_from_clang_file(
+                curr_flags = self.flags_from_clang_file(
                     file=File(new_clang_file_path))
                 if len(new_flags.symmetric_difference(curr_flags)) > 0:
                     log.debug("'%s' is not equal to '%s' by %s so update",
@@ -186,8 +185,9 @@ class FlagsManager:
                         # there are no current flags, so no need to ask user
                         # what to do, just write the new file content
                         strategy = "overwrite"
-                    FlagsManager.write_flags_to_file(
-                        new_flags, new_clang_file_path, strategy)
+                    self.write_flags_to_file(new_flags,
+                                             new_clang_file_path,
+                                             strategy)
                 else:
                     log.debug(" the flags have not changed so we don't "
                               "modify the .clang_complete file")
@@ -204,7 +204,7 @@ class FlagsManager:
         generated_flags = []
         if self._clang_complete_file.was_modified():
             log.debug(" .clang_complete modified. Load new flags.")
-            generated_flags = list(FlagsManager.flags_from_clang_file(
+            generated_flags = list(self.flags_from_clang_file(
                 self._clang_complete_file))
 
         # the flags are now in final state, we can return them
@@ -280,8 +280,7 @@ class FlagsManager:
             return None
         return File(database_path)
 
-    @staticmethod
-    def write_flags_to_file(new_flags, file_path, strategy):
+    def write_flags_to_file(self, new_flags, file_path, strategy):
         """
         Given new set of flags, check if we need to overwrite flags and then if
         needed write these flags to the `.clang_complete` file.
@@ -300,7 +299,7 @@ class FlagsManager:
                 return
             if flag_strategy == "merge":
                 # union of two flags sets
-                curr_flags = set(FlagsManager.flags_from_clang_file(
+                curr_flags = set(self.flags_from_clang_file(
                     File(file_path)))
                 new_flags = new_flags.union(curr_flags)
             # unhandled is only "overwrite". "ask" is not possible here.
@@ -336,8 +335,7 @@ class FlagsManager:
         else:
             return strategy
 
-    @staticmethod
-    def flags_from_database(database_file):
+    def flags_from_database(self, database_file):
         """Get flags from cmake compilation database
         Args: database_file (tools.File): compilation database file
         Returns:
@@ -353,14 +351,13 @@ class FlagsManager:
         for entry in data:
             command = entry['command']
             all_command_parts = command.split(' -')
-            current_flags = FlagsManager.parse_flags(
-                database_file.folder(), all_command_parts)
+            current_flags = self.parse_flags(database_file.folder(),
+                                             all_command_parts)
             flags_set = flags_set.union(current_flags)
         log.debug(" flags set: %s", flags_set)
         return flags_set
 
-    @staticmethod
-    def flags_from_clang_file(file):
+    def flags_from_clang_file(self, file):
         """
         Parse .clang_complete file
 
@@ -380,12 +377,11 @@ class FlagsManager:
         flags = set()
         with open(file.full_path()) as f:
             content = f.readlines()
-            flags = FlagsManager.parse_flags(file.folder(), content)
+            flags = self.parse_flags(file.folder(), content)
         log.debug(" .clang_complete contains flags: %s", flags)
         return flags
 
-    @staticmethod
-    def parse_flags(folder, lines):
+    def parse_flags(self, folder, lines):
         """
         Parse the flags in a given file
 
@@ -397,7 +393,7 @@ class FlagsManager:
             str[]: flags
         """
 
-        def split_if_include(flag):
+        def split_if_include(flag, include_prefixes):
             """ Split flag if it is an include flag
 
             Args:
@@ -406,7 +402,7 @@ class FlagsManager:
             Returns:
                 (str, str): tuple of (prefix, path)
             """
-            for prefix in FlagsManager._include_prefixes:
+            for prefix in include_prefixes:
                 if flag.startswith(prefix):
                     return (prefix, flag[len(prefix):])
             return (None, None)
@@ -416,7 +412,8 @@ class FlagsManager:
             line = line.strip()
             if not line.startswith('-'):
                 line = '-' + line
-            prefix, include_path = split_if_include(line)
+            prefix, include_path = split_if_include(line,
+                                                    self._include_prefixes)
             if include_path:
                 if not path.isabs(include_path):
                     include_path = path.join(folder, include_path)
