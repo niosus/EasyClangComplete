@@ -128,8 +128,6 @@ class BaseCompleter:
             settings=settings,
             compiler_variant=self.compiler_variant,
             search_scope=search_scope)
-        if not self.flags_manager:
-            log.critical(" flags_manager NOT loaded. NO FLAGS AVAILABLE!")
         log.debug(" flags_manager loaded")
 
     def complete(self, view, cursor_pos, current_job_id):
