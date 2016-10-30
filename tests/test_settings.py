@@ -57,10 +57,8 @@ class test_settings(TestCase):
         self.assertIsNotNone(settings.include_file_folder)
         self.assertIsNotNone(settings.include_file_parent_folder)
         self.assertIsNotNone(settings.triggers)
-        self.assertIsNotNone(settings.include_dirs)
+        self.assertIsNotNone(settings.common_flags)
         self.assertIsNotNone(settings.clang_binary)
-        self.assertIsNotNone(settings.std_flag_c)
-        self.assertIsNotNone(settings.std_flag_cpp)
         self.assertIsNotNone(settings.search_clang_complete_file)
         self.assertIsNotNone(settings.errors_on_save)
 
@@ -71,7 +69,7 @@ class test_settings(TestCase):
         settings = Settings()
         self.assertTrue(settings.is_valid())
 
-    def test_populate_includes(self):
+    def test_populate_flags(self):
         """Testing include population
         """
         # open any existing file
@@ -82,17 +80,17 @@ class test_settings(TestCase):
         self.assertTrue(settings.is_valid())
         settings.include_file_folder = True
         settings.include_file_parent_folder = True
-        settings.include_dirs = [
-            path.realpath("/$project_name/src"),
-            path.realpath("/test/test")
+        settings.common_flags = [
+            "-I" + path.realpath("/$project_name/src"),
+            "-I" + path.realpath("/test/test")
         ]
-        initial_dirs = list(settings.include_dirs)
-        dirs = settings.populate_include_dirs(self.view)
+        initial_flags = list(settings.common_flags)
+        dirs = settings.populate_common_flags(self.view)
 
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)
-        self.assertLess(len(initial_dirs), len(dirs))
-        self.assertFalse(initial_dirs[0] in dirs)
-        self.assertTrue(initial_dirs[1] in dirs)
-        self.assertTrue(current_folder in dirs)
-        self.assertTrue(parent_folder in dirs)
+        self.assertLess(len(initial_flags), len(dirs))
+        self.assertFalse(initial_flags[0] in dirs)
+        self.assertTrue(initial_flags[1] in dirs)
+        self.assertTrue(("-I" + current_folder) in dirs)
+        self.assertTrue(("-I" + parent_folder) in dirs)
