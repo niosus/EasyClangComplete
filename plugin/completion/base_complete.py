@@ -119,9 +119,6 @@ class BaseCompleter:
             settings (Settings): plugin settings
 
         """
-        if not view:
-            log.critical(" no view to initialize completer!")
-            return
         current_dir = path.dirname(view.file_name())
         search_scope = SearchScope(
             from_folder=current_dir,
