@@ -410,8 +410,6 @@ class FlagsManager:
         flags = set()
         for line in lines:
             line = line.strip()
-            if not line.startswith('-'):
-                line = '-' + line
             prefix, include_path = split_if_include(line,
                                                     self._include_prefixes)
             if include_path:
