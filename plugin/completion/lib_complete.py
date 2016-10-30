@@ -236,7 +236,7 @@ class Completer(BaseCompleter):
             # do nothing if there in no translation_unit present
             if v_id not in self.TUs:
                 log.error(" cannot complete. No TU for view %s", v_id)
-                return None
+                return (None, None)
             # execute clang code completion
             start = time.time()
             log.debug(" started code complete for view %s", v_id)
