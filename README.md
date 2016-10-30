@@ -14,8 +14,10 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![Codacy Badge][img-codacy]][codacy]
 [![MIT licensed][img-mit]](./LICENSE)
 [![Gitter][img-gitter]][gitter]
+[![Flattr this git repo][img-flattr]][donate-flattr]
+[![Donate][img-paypal]][donate-paypal]
 
-This plugin aims to provide easy-to-use, minimal-setup autocompletions for C++
+This plugin for easy-to-use, minimal-setup autocompletions for C++
 for Sublime Text 3. [Support](#support-it) it if you like it.
 
 # Jump right in! #
@@ -32,7 +34,7 @@ Follow all the following steps to ensure the plugin works as expected!
 ## Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
 - **Windows**: install the latest release from `clang`
-  [website](http://llvm.org/releases/download.html)
+  [website](http://llvm.org/releases/download.html) (v >= 3.9)
 - **OSX**: ships `clang` by default. You are all set!
 - on other systems refer to their package managers or install from `clang`
   [website](http://llvm.org/releases/download.html)
@@ -40,15 +42,8 @@ Follow all the following steps to ensure the plugin works as expected!
 ## Configure your includes ##
 
 ### Are you using CMake? ###
-Then you're good to go! All the flags should be guessed automatically. The
-plugin will create a folder for your project in the temporary folder, will run
-`cmake -DCMAKE_EXPORT_COMPILE_COMMANDS <your_project_location>` to generate the
-compilation database and will parse it to get correct flags for your project.
-The flags will be saved to `.clang_complete` file near a `CMakeLists.txt` that
-contains a `project <name>` line.
-
-**WARNING**: this is in Beta state. Refer to issue [#19][cmake-issue] for
-discussions on the topic.
+Plugin automatically generates `.clang_complete` and uses it for building our
+code.
 
 ### Not using CMake? ###
 You will need a little bit of manual setup for now. `Clang` will automatically
@@ -81,17 +76,16 @@ The plugin has two modes:
 
 - one that uses `libclang` with its python bindings. This is the better method
   as it fully utilizes saving compilation database which makes your completions
-  blazingly fast. It is a default method for Linux and OSX. It is also unit
-  tested to complete STL functions on both platforms. Please help me to bring
-  it to Windows. Check out this [discussion][libclang-issue].
+  blazingly fast. It is a default method. It is also unit tested to complete
+  STL functions on Linux and OSX platforms. It will also work for Windows as
+  soon as clang 4.0 is released. See [issue][libclang-issue]
 - one that parses the output from `clang -Xclang -code-completion-at` run from
-  the command line. This is the default method for Windows. Tested on all
-  platforms (see [Testing](#tests) part). Slower than method with `libclang`.
-  Will be deprecated when we solve [issue #4][libclang-issue].
+  the command line. This is a fallback method if something is wrong with the
+  first one.
 
 This plugin is intended to be easy to use. It should autocomplete STL out of
-the box and you should just add the folders your project uses to `include_dirs`
-list in the settings to make it autocomplete code all your project. If you
+the box and you should just add the folders your project uses as includes to
+the flags in the settings to make it autocomplete code all your project. If you
 experience problems - create an issue. I will try to respond as soon as
 possible.
 
@@ -107,66 +101,11 @@ self explanatory. Open an issue if they are not.
 
 
 ## Settings highlights ##
-I will only cover most important settings here.
+
+Please see the default settings [file](EasyClangComplete.sublime-settings)
+shipped with the plugin for explanations and sane default values.
 
 **PLEASE RESTART SUBLIME TEXT AFTER EACH SETTINGS CHANGE**
-
-- `include_dirs`:
-    + stores the locations where `clang` should be looking for external
-      headers, e.g. `Boost`, `Ros`, `Eigen`, `OpenCV`, etc.
-    + you can use placeholders like `$project_base_name` or
-      `$project_base_path` to make includes more convenient.
-    + it is absolutely ok to include a folder that does not exist. `clang`
-      knows how to deal with it and it will neither break anything nor make
-      things slower.
-- `std_flag_cpp`:
-    + sets the standard flag that will be used for compilation of `C++` code.
-      Defaults to `std=c++11`.
-- `std_flag_c`:
-    + sets the standard flag that will be used for compilation of `C` code.
-      Defaults to `std=c11`.
-- `use_libclang`:
-    + if `true` use libclang as backend.
-    + if `false` or if first option failed, use output from `clang -Xclang
-      -completion-at` command and parse it with regular expressions.
-- `search_clang_complete_file`:
-    + seach for `.clang_complete` file up the tree. Project folder is the last
-      one to search for the file.
-    + If the file is found, its contents of style `-I<some_local_path>` and
-      `-I/<some_absolute_path>` (mind the `/` at the start of the line) are
-      appended to include flags.
-- `errors_on_save`:
-    + highlight errors on save. A tooltip with an error message will be shown
-      if the caret goes over a highlighted line.
-- `triggers`:
-    + defaults are `".", "::", "->"`. The autocompletion does not trigger on
-      `>` or `:`. It also ignores float numbers like `3.14`.
-    + For them to work, the Sublime Text completion triggers have to be
-      configured too. These are already set to match triggers by default. You
-      can also set these settings manually by copying the default ones defined
-      [here](Preferences.sublime-settings) to your User Preferences and
-      modifying them there.
-- Override any setting in your project file! Just define the same setting in
-  project specific settings with either one of two prefixes: `"ecc_"` or
-  `"easy_clang_complete"`. See the project file in this repo for example.
-  Minimal example for clarity (here, `include_dirs` and `verbose` are
-  overridden):
-
-      ```json
-      {
-        "settings":
-        {
-          "ecc_include_dirs":
-          ["-Isrc", "-I/usr/include"],
-          "easy_clang_complete_verbose": true,
-        }
-      }
-      ```
-
-Please see the default settings file in the repo for more settings
-descriptions. Every setting in settings
-[file](EasyClangComplete.sublime-settings) should have an understandable
-comment. Should they not be clear - create an issue.
 
 ## Credits ##
 The whole work seen here was originally a fork of another repository:
@@ -191,8 +130,8 @@ Some functionality is there only because of the help of the following users (in 
 ## Tests ##
 I have tried to cover most crucial functionality with unit tests using
 [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
-Currently tests cover autocompletion of user struct and stl vector using clang
-binary. To check out the current status click on relevant badge below:
+Currently tests cover autocompletion of user struct and stl vector. To check
+out the current status click on relevant badge below:
 
 |           Linux / OSX           |               Windows               |
 |:-------------------------------:|:-----------------------------------:|
@@ -205,7 +144,6 @@ binary. To check out the current status click on relevant badge below:
 Current sponsor of this project is my sleep.
 Please buy me a cup of tea if you appreciate the effort.
 
-
 [release]: https://github.com/niosus/EasyClangComplete/releases
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
 [travis]: https://travis-ci.org/niosus/EasyClangComplete
@@ -214,7 +152,7 @@ Please buy me a cup of tea if you appreciate the effort.
 [gitter]: https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
 [donate-paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS
 [donate-flattr]: https://flattr.com/submit/auto?user_id=niosus&url=https://github.com/niosus/EasyClangComplete&title=EasyClangComplete&language=Python&tags=github&category=software
-[libclang-issue]: https://github.com/niosus/EasyClangComplete/issues/4
+[libclang-issue]: https://github.com/niosus/EasyClangComplete/issues/88
 [cmake-issue]: https://github.com/niosus/EasyClangComplete/issues/19
 
 
