@@ -351,6 +351,7 @@ class FlagsManager:
         for entry in data:
             command = entry['command']
             all_command_parts = command.split(' -')
+            all_command_parts = ['-' + part for part in all_command_parts]
             current_flags = self.parse_flags(database_file.folder(),
                                              all_command_parts)
             flags_set = flags_set.union(current_flags)

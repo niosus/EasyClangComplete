@@ -246,6 +246,7 @@ class base_test_complete(object):
             if line.startswith('-I'):
                 if real_line.endswith('lib') or real_line.endswith('lib"'):
                     found = True
+                    break
             line = file.readline()
         file.close()
         self.assertTrue(found)

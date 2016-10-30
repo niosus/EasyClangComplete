@@ -46,7 +46,6 @@ class Settings:
         "errors_on_save",
         "generate_flags_with_cmake",
         "hide_default_completions",
-        "include_dirs",
         "include_file_folder",
         "include_file_parent_folder",
         "max_tu_age",
@@ -173,7 +172,7 @@ class Settings:
         return True
 
     def populate_common_flags(self, view):
-        """ Populate the variables inside include dirs with real values
+        """ Populate the variables inside common_flags with real values
 
         Args:
             view (sublime.View): current view
