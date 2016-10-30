@@ -179,7 +179,7 @@ class Settings:
             view (sublime.View): current view
 
         Returns:
-            str[]: directories where clang searches for header files
+            str[]: clang common flags with variables expanded
 
         """
         # init folders needed:
@@ -208,6 +208,4 @@ class Settings:
         if self.include_file_parent_folder:
             common_flags.add("-I" + file_parent_folder)
 
-        # print resulting include dirs
-        log.debug(" common_flags = %s", common_flags)
         return common_flags

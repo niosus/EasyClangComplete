@@ -389,7 +389,6 @@ class FlagsManager:
             return (None, None)
 
         flags = set()
-        log.debug(" all lines: %s", lines)
         for line in lines:
             line = line.strip()
             if not line.startswith('-'):
