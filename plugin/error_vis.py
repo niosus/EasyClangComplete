@@ -38,13 +38,13 @@ class CompileErrors:
         # create an empty region dict for view id
         self.err_regions[view_id] = {}
 
+        # If the view is closed while this is running, there will be
+        # errors. We want to handle them gracefully.
         try:
             for error in errors:
                 self.add_error(view, error)
             log.debug(" %s error regions ready", len(self.err_regions))
-        except AttributeError as e:
-            # If the view is closed while this is running, there will be
-            # errors. We want to handle them gracefully.
+        except (AttributeError, KeyError) as e:
             log.error(" view was closed -> cannot generate error vis in it")
             log.info(" original exception: '%s'", e)
 
