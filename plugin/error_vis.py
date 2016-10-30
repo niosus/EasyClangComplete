@@ -30,6 +30,9 @@ class CompileErrors:
             errors (list): list of parsed errors (dict objects)
         """
         view_id = view.buffer_id()
+        if view_id == 0:
+            log.error(" trying to show error on invalid view. Abort.")
+            return
         log.debug(" generating error regions for view %s", view_id)
         # first clear old regions
         if view_id in self.err_regions:
@@ -44,7 +47,7 @@ class CompileErrors:
             for error in errors:
                 self.add_error(view, error)
             log.debug(" %s error regions ready", len(self.err_regions))
-        except (AttributeError, KeyError) as e:
+        except (AttributeError, KeyError, TypeError) as e:
             log.error(" view was closed -> cannot generate error vis in it")
             log.info(" original exception: '%s'", repr(e))
 
