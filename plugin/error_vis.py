@@ -46,7 +46,7 @@ class CompileErrors:
             log.debug(" %s error regions ready", len(self.err_regions))
         except (AttributeError, KeyError) as e:
             log.error(" view was closed -> cannot generate error vis in it")
-            log.info(" original exception: '%s'", e)
+            log.info(" original exception: '%s'", repr(e))
 
     def add_error(self, view, error_dict):
         """Put new compile error in the dictionary of errors
