@@ -134,7 +134,7 @@ class Completer(BaseCompleter):
                 return True
             return False
 
-    def init(self, view, settings):
+    def init_for_view(self, view, settings):
         """Initialize the completer. Builds the view.
 
         Args:
@@ -147,7 +147,7 @@ class Completer(BaseCompleter):
             return
 
         # call initializer from the super class
-        super(Completer, self).init(view, settings)
+        super(Completer, self).init_for_view(view, settings)
 
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))

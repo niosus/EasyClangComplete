@@ -118,7 +118,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             if not self.completer.needs_init(view):
                 return
             log.debug("init completer for view id: %s", view.buffer_id())
-            self.completer.init(view, self.settings)
+            self.completer.init_for_view(view, self.settings)
 
     def on_selection_modified(self, view):
         """Called when selection is modified. Executed in gui thread.

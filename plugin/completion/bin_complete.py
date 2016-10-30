@@ -116,7 +116,7 @@ class Completer(BaseCompleter):
             return True
         return False
 
-    def init(self, view, settings):
+    def init_for_view(self, view, settings):
         """Initialize the completer
 
         Args:
@@ -130,7 +130,7 @@ class Completer(BaseCompleter):
             return
 
         # init procedure from super class
-        super(Completer, self).init(view, settings)
+        super(Completer, self).init_for_view(view, settings)
 
         self.flags_dict[view.buffer_id()] = self.flags_manager.get_flags()
 

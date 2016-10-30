@@ -109,7 +109,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def init(self, view, settings):
+    def init_for_view(self, view, settings):
         """
         Initialize the completer for this view. For real implementation see
         children.
