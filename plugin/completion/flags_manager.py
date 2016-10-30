@@ -404,7 +404,7 @@ class FlagsManager:
             """
             for prefix in include_prefixes:
                 if flag.startswith(prefix):
-                    return (prefix, flag[len(prefix):])
+                    return (prefix, flag[len(prefix):].strip())
             return (None, None)
 
         flags = set()
