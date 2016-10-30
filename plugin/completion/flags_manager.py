@@ -110,7 +110,7 @@ class FlagsManager:
         log.debug(" expanded CMAKE_PREFIX_PATHs: %s", self._cmake_prefix_paths)
 
         # initialize default flags
-        self._initial_flags = compiler_variant.init_flags
+        self._initial_flags = list(compiler_variant.init_flags)
         current_lang = Tools.get_view_syntax(view)
         if current_lang == 'C':
             self._initial_flags += settings.c_flags
@@ -204,11 +204,11 @@ class FlagsManager:
 
         if self._clang_complete_file.was_modified():
             log.debug(" .clang_complete modified. Load new flags.")
-            self._flags = FlagsManager.flags_from_clang_file(
-                self._clang_complete_file)
+            generated_flags = list(FlagsManager.flags_from_clang_file(
+                self._clang_complete_file))
 
         # the flags are now in final state, we can return them
-        return FlagsManager.merge_flags(self._initial_flags, list(self._flags))
+        return FlagsManager.merge_flags(self._initial_flags, generated_flags)
 
     @staticmethod
     def merge_flags(initial_flags, generated_flags):
