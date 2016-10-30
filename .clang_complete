@@ -1,3 +1,4 @@
 -I/home/igor/.config/sublime-text-3/Packages/EasyClangComplete/src blah
 -I/home/igor/.config/sublime-text-3/Packages/EasyClangComplete
 -I/usr/include/opencv
+-std=c++11

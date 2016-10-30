@@ -208,7 +208,20 @@ class FlagsManager:
                 self._clang_complete_file)
 
         # the flags are now in final state, we can return them
-        return self._initial_flags + list(self._flags)
+        return FlagsManager.merge_flags(self._initial_flags, list(self._flags))
+
+    @staticmethod
+    def merge_flags(initial_flags, generated_flags):
+        initial_std_flag_idx = Tools.find_flag_idx(initial_flags, "-std")
+        generated_std_flag_idx = Tools.find_flag_idx(generated_flags, "-std")
+        if initial_std_flag_idx and generated_std_flag_idx:
+            # we have std flags in both the initial flags and generated ones
+            log.debug(" overriding initial std flag with '%s'",
+                      generated_flags[generated_std_flag_idx])
+            initial_flags[initial_std_flag_idx] \
+                = generated_flags[generated_std_flag_idx]
+            generated_flags.pop(generated_std_flag_idx)
+        return initial_flags + generated_flags
 
     @staticmethod
     def compile_cmake(cmake_file, prefix_paths):

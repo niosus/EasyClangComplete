@@ -496,3 +496,10 @@ class Tools:
     def get_position_identifier(view, position_in_file):
         """ Generate unique tuple for file and position in the file """
         return (view.buffer_id(), position_in_file)
+
+    @staticmethod
+    def find_flag_idx(flags, prefix):
+        for idx, flag in enumerate(flags):
+            if flag.startswith("-std"):
+                return idx
+        return None
