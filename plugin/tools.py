@@ -499,6 +499,9 @@ class Tools:
 
     @staticmethod
     def find_flag_idx(flags, prefix):
+        """ Find index of flag with given prefix in list.
+        Returns: index of found flag or None if not found
+        """
         for idx, flag in enumerate(flags):
             if flag.startswith("-std"):
                 return idx

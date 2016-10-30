@@ -212,6 +212,16 @@ class FlagsManager:
 
     @staticmethod
     def merge_flags(initial_flags, generated_flags):
+        """ Handle merging of initial and generated flags. Handles situations
+        where std flag has to be overridden.
+
+        Args:
+            initial_flags (list(str)): initial flags from settings
+            generated_flags (list(str)): flags from .clang_complete file
+
+        Returns:
+            list(str): merged flags
+        """
         initial_std_flag_idx = Tools.find_flag_idx(initial_flags, "-std")
         generated_std_flag_idx = Tools.find_flag_idx(generated_flags, "-std")
         if initial_std_flag_idx and generated_std_flag_idx:
