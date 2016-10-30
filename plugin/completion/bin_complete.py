@@ -171,8 +171,7 @@ class Completer(BaseCompleter):
         as a subprocess. The output is parsed for completions """
         if not view.buffer_id() in self.flags_dict:
             log.error(" cannot complete view: %s", view.buffer_id())
-            return None
-
+            return (None, None)
         start = time.time()
         output_text = self.run_clang_command(view, "complete", cursor_pos)
         raw_complete = output_text.splitlines()
