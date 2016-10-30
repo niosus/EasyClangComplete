@@ -202,6 +202,7 @@ class FlagsManager:
                 from_folder=self._search_scope.from_folder,
                 to_folder=self._search_scope.to_folder)
 
+        generated_flags = []
         if self._clang_complete_file.was_modified():
             log.debug(" .clang_complete modified. Load new flags.")
             generated_flags = list(FlagsManager.flags_from_clang_file(
