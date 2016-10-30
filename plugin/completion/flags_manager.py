@@ -376,6 +376,14 @@ class FlagsManager:
         """
 
         def split_if_include(flag):
+            """ Split flag if it is an include flag
+
+            Args:
+                flag (str): flag to test and split if needed
+
+            Returns:
+                (str, str): tuple of (prefix, path)
+            """
             for prefix in FlagsManager._include_prefixes:
                 if flag.startswith(prefix):
                     return (prefix, flag[len(prefix):])
@@ -392,6 +400,7 @@ class FlagsManager:
             if include_path:
                 if not path.isabs(include_path):
                     include_path = path.join(folder, include_path)
+                include_path = path.normpath(include_path)
                 line = prefix + include_path
             flags.add(line)
         return flags
