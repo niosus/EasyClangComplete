@@ -171,9 +171,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 return
             future = EasyClangComplete.pool_read.submit(
                 self.completer.remove, view.buffer_id())
-            future.add_done_callback(self.completer_removed)
+            future.add_done_callback(EasyClangComplete.completer_removed)
 
-    def completer_removed(self, future):
+    def completer_removed(future):
         """ Callback called when completer has closed object for a view. The
         corresponding view id is saved in future.result()
 
