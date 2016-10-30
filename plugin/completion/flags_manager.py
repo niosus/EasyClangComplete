@@ -62,6 +62,7 @@ class FlagsManager:
     _cmake_file = File()
     _clang_complete_file = File()
     _flags = []
+    _initial_flags = []
     _search_scope = SearchScope()
     _use_cmake = False
     _flags_update_strategy = "ask"
@@ -77,9 +78,9 @@ class FlagsManager:
     CLANG_COMPLETE_FILE_NAME = ".clang_complete"
 
     def __init__(self,
-                 use_cmake,
-                 flags_update_strategy,
-                 cmake_prefix_paths=None,
+                 view,
+                 settings,
+                 compiler_variant,
                  search_scope=SearchScope()):
         """
         Initialize the flags manager
@@ -93,18 +94,33 @@ class FlagsManager:
                 search for CMakeLists.txt file and .clang_complete file.
         """
         if not search_scope.valid():
-            log.error(" search scope is wrong.")
+            log.critical(" search scope is wrong.")
             return
-        if not cmake_prefix_paths:
+        # intialize important variables
+        cmake_prefix_paths = settings.cmake_prefix_paths
+        if cmake_prefix_paths is None:
             cmake_prefix_paths = []
         self._search_scope = search_scope
-        self._use_cmake = use_cmake
-        self._flags_update_strategy = flags_update_strategy
+        self._use_cmake = settings.generate_flags_with_cmake
+        self._flags_update_strategy = settings.cmake_flags_priority
         self._cmake_prefix_paths = cmake_prefix_paths
+        self._use_clang_complete_file = settings.search_clang_complete_file
         # expand all entries containing "~"
         self._cmake_prefix_paths \
             = [path.expanduser(x) for x in self._cmake_prefix_paths]
         log.debug(" expanded CMAKE_PREFIX_PATHs: %s", self._cmake_prefix_paths)
+
+        # initialize default flags
+        self._initial_flags = compiler_variant.init_flags
+        current_lang = Tools.get_view_syntax(view)
+        if current_lang == 'C':
+            self._initial_flags += settings.c_flags
+        else:
+            self._initial_flags += settings.cpp_flags
+
+        home_folder = path.expanduser('~')
+        self._initial_flags += list(FlagsManager.parse_flags(
+            home_folder, settings.populate_common_flags(view)))
 
     def any_file_modified(self):
         """
@@ -119,7 +135,7 @@ class FlagsManager:
             return True
         return False
 
-    def get_flags(self, separate_includes):
+    def get_flags(self):
         """
         A function that handles getting all the flags. It will generate new
         flags in a lazy fashion. When any changes are detected and will update
@@ -127,12 +143,14 @@ class FlagsManager:
         been made to .clang_complete file or to CMakeLists.txt file it will
         just return already existing flags.
 
-        Args: separate_includes (bool): should we separate include path from
-            their identifier?
-
         Returns:
             str[]: flags
         """
+        if not self._use_clang_complete_file:
+            log.debug(" user doesn't want to look for .clang_complete file")
+            log.debug(" use flags from settings only")
+            return self._initial_flags
+
         if self._use_cmake and not self._cmake_file.loaded():
             # CMakeLists.txt was not loaded yet, so search for it
             log.debug(" cmake file not loaded yet. Searching for one...")
@@ -152,16 +170,14 @@ class FlagsManager:
                 prefix_paths=self._cmake_prefix_paths)
             if compilation_db:
                 new_flags = FlagsManager.flags_from_database(
-                    database_file=compilation_db,
-                    separate_includes=separate_includes)
+                    database_file=compilation_db)
                 new_clang_file_path = path.join(
                     self._cmake_file.folder(),
                     FlagsManager.CLANG_COMPLETE_FILE_NAME)
                 # there is no need to modify anything if the flags have not
                 # changed since we have last read them
                 curr_flags = FlagsManager.flags_from_clang_file(
-                    file=File(new_clang_file_path),
-                    separate_includes=separate_includes)
+                    file=File(new_clang_file_path))
                 if len(new_flags.symmetric_difference(curr_flags)) > 0:
                     log.debug("'%s' is not equal to '%s' by %s so update",
                               new_flags, curr_flags,
@@ -190,10 +206,10 @@ class FlagsManager:
         if self._clang_complete_file.was_modified():
             log.debug(" .clang_complete modified. Load new flags.")
             self._flags = FlagsManager.flags_from_clang_file(
-                self._clang_complete_file, separate_includes)
+                self._clang_complete_file)
 
         # the flags are now in final state, we can return them
-        return self._flags
+        return self._initial_flags + list(self._flags)
 
     @staticmethod
     def compile_cmake(cmake_file, prefix_paths):
@@ -263,7 +279,7 @@ class FlagsManager:
             if flag_strategy == "merge":
                 # union of two flags sets
                 curr_flags = set(FlagsManager.flags_from_clang_file(
-                    File(file_path), separate_includes=False))
+                    File(file_path)))
                 new_flags = new_flags.union(curr_flags)
             # unhandled is only "overwrite". "ask" is not possible here.
         f = open(file_path, 'w')
@@ -299,11 +315,9 @@ class FlagsManager:
             return strategy
 
     @staticmethod
-    def flags_from_database(database_file, separate_includes):
+    def flags_from_database(database_file):
         """Get flags from cmake compilation database
         Args: database_file (tools.File): compilation database file
-            separate_includes (bool): separate include specifier from the path
-            by a space
         Returns:
             set(str): flags
         """
@@ -318,23 +332,21 @@ class FlagsManager:
             command = entry['command']
             all_command_parts = command.split(' -')
             current_flags = FlagsManager.parse_flags(
-                database_file.folder(), all_command_parts, separate_includes)
+                database_file.folder(), all_command_parts)
             flags_set = flags_set.union(current_flags)
         log.debug(" flags set: %s", flags_set)
         return flags_set
 
     @staticmethod
-    def flags_from_clang_file(file, separate_includes):
+    def flags_from_clang_file(file):
         """
         Parse .clang_complete file
 
         Args:
-            separate_includes (bool):  Separation is needed for binary complete
-                if True: -I<include> turns to '-I "<include>"'.
-                if False: stays -I<include>
+            file(Tools.File): .clang_complete file handle
 
         Returns:
-            se(tstr): parsed list of includes from the file
+            set(str): parsed list of includes from the file
         """
         if not path.exists(file.full_path()):
             log.debug(" .clang_complete does not exist yet. No flags present.")
@@ -346,44 +358,40 @@ class FlagsManager:
         flags = set()
         with open(file.full_path()) as f:
             content = f.readlines()
-            flags = FlagsManager.parse_flags(file.folder(),
-                                             content,
-                                             separate_includes)
+            flags = FlagsManager.parse_flags(file.folder(), content)
         log.debug(" .clang_complete contains flags: %s", flags)
         return flags
 
     @staticmethod
-    def parse_flags(folder, lines, separate_includes):
+    def parse_flags(folder, lines):
         """
         Parse the flags in a given file
 
         Args:
             folder (str): current folder
             lines (str[]): lines to parse
-            separate_includes (bool): if True "-I/blah" turns to "-I '/blah'"
 
         Returns:
             str[]: flags
         """
+
+        def split_if_include(flag):
+            for prefix in FlagsManager._include_prefixes:
+                if flag.startswith(prefix):
+                    return (prefix, flag[len(prefix):])
+            return (None, None)
+
         mask = '{}{}'
-        separate_mask = '{} "{}"'
         flags = set()
         log.debug(" all lines: %s", lines)
         for line in lines:
-            for prefix in FlagsManager._possible_prefixes:
-                full_prefix = '-' + prefix
-                if not line.startswith('-'):
-                    line = '-' + line
-                if line.startswith(full_prefix):
-                    flag_content = line[len(full_prefix):].strip()
-                    flag_content = flag_content.strip('"')
-                    if prefix in FlagsManager._include_prefixes:
-                        if not path.isabs(flag_content):
-                            flag_content = path.join(folder, flag_content)
-                        if separate_includes:
-                            flags.add(separate_mask.format(full_prefix, flag_content))
-                        else:
-                            flags.add(mask.format(full_prefix, flag_content))
-                    else:
-                        flags.add(mask.format(full_prefix, flag_content))
+            line = line.strip()
+            if not line.startswith('-'):
+                line = '-' + line
+            prefix, include_path = split_if_include(line)
+            if include_path:
+                if not path.isabs(include_path):
+                    include_path = path.join(folder, include_path)
+                line = prefix + include_path
+            flags.add(line)
         return flags

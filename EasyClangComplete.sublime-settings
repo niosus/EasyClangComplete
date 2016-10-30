@@ -1,21 +1,20 @@
 {
-	// Where should clang search for headers
-	// These will be appended to build with `-I` flag each
-	// "$project_base_path" will be replaced with opened project path
-	// "$project_name" will be replaced with opened project name
-	// "$clang_version" will be replaced with numerical version str, e.g. 3.8.0
-	"include_dirs" : [
-		"/usr/include",
-		"$project_base_path/src",
-		"/workspace/$project_name/src",
-		"/usr/lib/clang/$clang_version/include" // example for Ubuntu 16.04
-		],
+	// TODO: add comments for these!
+	"common_flags" : [
+		// some example includes
+		"-I/usr/include",
+		"-I$project_base_path/src",
+		"-I/workspace/$project_name/src",
+		"-I/usr/lib/clang/$clang_version/include"
+	],
 
-	// set the default c standard library flag.
-	"std_flag_c" : "-std=c11",
+	"c_flags" : [
+		"-std=c11"
+	],
 
-	// set the default c++ standard library flag.
-	"std_flag_cpp" : "-std=c++11",
+	"cpp_flags" : [
+		"-std=c++11"
+	],
 
 	// search for .clang_complete file up the tree. Use includes from it if found
 	"search_clang_complete_file": true,

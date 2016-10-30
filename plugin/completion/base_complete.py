@@ -120,16 +120,20 @@ class BaseCompleter:
 
         """
         if not view:
+            log.critical(" no view to initialize completer!")
             return
         current_dir = path.dirname(view.file_name())
         search_scope = SearchScope(
             from_folder=current_dir,
             to_folder=settings.project_base_folder)
         self.flags_manager = FlagsManager(
-            use_cmake=settings.generate_flags_with_cmake,
-            flags_update_strategy=settings.cmake_flags_priority,
-            cmake_prefix_paths=settings.cmake_prefix_paths,
+            view=view,
+            settings=settings,
+            compiler_variant=self.compiler_variant,
             search_scope=search_scope)
+        if not self.flags_manager:
+            log.critical(" flags_manager NOT loaded. NO FLAGS AVAILABLE!")
+        log.debug(" flags_manager loaded")
 
     def complete(self, view, cursor_pos, current_job_id):
         """Function to generate completions. See children for implementation.

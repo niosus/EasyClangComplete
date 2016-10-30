@@ -52,7 +52,6 @@ class Completer(BaseCompleter):
     clang_binary = None
 
     flags_dict = {}
-    std_flag = None
 
     PARAM_TAG = "param"
     TYPE_TAG = "type"
@@ -65,10 +64,7 @@ class Completer(BaseCompleter):
         type_tag=TYPE_TAG,
         type_chars=TYPE_CHARS)
 
-    compl_str_mask = "{complete_flag}={file}:{row}:{col} {file}"
-
-    completion_mask = "{binary} {init} {std} {complete_at} {flags}"
-    update_mask = "{binary} {init} {std} {file} {flags}"
+    compl_str_mask = "{complete_flag}={file}:{row}:{col}"
 
     compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
     compl_content_regex = re.compile(
@@ -136,33 +132,8 @@ class Completer(BaseCompleter):
         # init procedure from super class
         super(Completer, self).init(view, settings)
 
-        # init current flags empty
-        self.flags_dict[view.buffer_id()] = None
-        clang_flags = None
+        self.flags_dict[view.buffer_id()] = self.flags_manager.get_flags()
 
-        # set std_flag
-        current_lang = Tools.get_view_syntax(view)
-        if current_lang != 'C':
-            self.std_flag = settings.std_flag_cpp
-        else:
-            self.std_flag = settings.std_flag_c
-
-        clang_flags = []
-
-        # init includes to start with from settings
-        includes = settings.populate_include_dirs(view)
-
-        for include in includes:
-            clang_flags.append('-I "{}"'.format(include))
-
-        if settings.search_clang_complete_file and self.flags_manager:
-            log.debug(" flags_manager loaded")
-            custom_flags = self.flags_manager.get_flags(
-                separate_includes=True)
-            clang_flags += custom_flags
-
-        # let's print the flags just to be sure
-        self.flags_dict[view.buffer_id()] = clang_flags
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
 
     def complete(self, view, cursor_pos, current_job_id):
@@ -232,24 +203,15 @@ class Completer(BaseCompleter):
         flags = self.flags_dict[view.buffer_id()]
         if task_type == "update":
             # we construct command for update task
-            complete_cmd = Completer.update_mask.format(
-                binary=Completer.clang_binary,
-                init=" ".join(self.compiler_variant.init_flags),
-                std=self.std_flag,
-                file=temp_file_name,
-                flags=" ".join(flags))
+            complete_cmd = [Completer.clang_binary] + flags + [temp_file_name]
         elif task_type == "complete":
             # we construct command for complete task
             (row, col) = SublBridge.cursor_pos(view, cursor_pos)
             complete_at_str = Completer.compl_str_mask.format(
-                complete_flag="-Xclang -code-completion-at",
+                complete_flag="-code-completion-at",
                 file=temp_file_name, row=row, col=col)
-            complete_cmd = Completer.completion_mask.format(
-                binary=Completer.clang_binary,
-                init=" ".join(self.compiler_variant.init_flags),
-                std=self.std_flag,
-                complete_at=complete_at_str,
-                flags=" ".join(flags))
+            complete_cmd = [Completer.clang_binary] + flags + ["-Xclang"] \
+                + [complete_at_str] + [temp_file_name]
         else:
             log.critical(" unknown type of cmd command wanted.")
             return None

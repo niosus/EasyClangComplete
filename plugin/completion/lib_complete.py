@@ -155,37 +155,9 @@ class Completer(BaseCompleter):
         # initialize unsaved files
         files = [(file_name, file_body)]
 
-        # init needed variables from settings
-        clang_flags = []
+        # get flags from manager
+        clang_flags = self.flags_manager.get_flags()
 
-        # set std_flag
-        std_flag = None
-        current_lang = Tools.get_view_syntax(view)
-        if current_lang != 'C':
-            std_flag = settings.std_flag_cpp
-        else:
-            std_flag = settings.std_flag_c
-
-        # add std flag to all flags
-        clang_flags.append(std_flag)
-
-        # init includes to start with from settings
-        includes = settings.populate_include_dirs(view)
-
-        for include in includes:
-            clang_flags.append('-I' + include)
-
-        if settings.search_clang_complete_file and self.flags_manager:
-            log.debug(" flags_manager loaded")
-            custom_flags = self.flags_manager.get_flags(
-                separate_includes=False)
-            clang_flags += custom_flags
-
-        # now we have the flags and can continue initializing the TU
-        if Tools.get_view_syntax(view) != "C":
-            # treat this as c++ even if it is a header
-            log.debug(" This is a C++ file. Adding `-x c++` to flags")
-            clang_flags = ['-x'] + ['c++'] + clang_flags
         log.debug(" clang flags are: %s", clang_flags)
         v_id = view.buffer_id()
         with self.rlock:
