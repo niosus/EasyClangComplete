@@ -68,8 +68,6 @@ class FlagsManager:
     _flags_update_strategy = "ask"
     _cmake_prefix_paths = []
 
-    _include_prefixes = ['-isystem ', '-I']
-
     cmake_mask = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
     CMAKE_FILE_NAME = "CMakeLists.txt"
@@ -104,6 +102,7 @@ class FlagsManager:
         self._flags_update_strategy = settings.cmake_flags_priority
         self._cmake_prefix_paths = cmake_prefix_paths
         self._use_clang_complete_file = settings.search_clang_complete_file
+        self._include_prefixes = compiler_variant.include_prefixes
         # expand all entries containing "~"
         self._cmake_prefix_paths \
             = [path.expanduser(x) for x in self._cmake_prefix_paths]

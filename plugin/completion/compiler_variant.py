@@ -37,6 +37,7 @@ class ClangCompilerVariant(CompilerVariant):
         error_regex (re): regex to find contents of an error
     """
     init_flags = ["-c", "-fsyntax-only", "-x", "c++"]
+    include_prefixes = ['-isystem ', '-I']
     error_regex = re.compile("(?P<file>.*)" +
                              ":(?P<row>\d+):(?P<col>\d+)" +
                              ":\s*.*error: (?P<error>.*)")
@@ -71,6 +72,7 @@ class ClangClCompilerVariant(ClangCompilerVariant):
         error_regex (re): regex to find contents of an error
     """
     init_flags = ["-c", "-fsyntax-only"]
+    include_prefixes = ["-I ", "/I ", "-msvc ", "/imsvc "]
     error_regex = re.compile("(?P<file>.*)" +
                              "\((?P<row>\d+),(?P<col>\d+)\)\s*" +
                              ":\s*.*error: (?P<error>.*)")
