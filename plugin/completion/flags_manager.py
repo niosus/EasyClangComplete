@@ -68,8 +68,7 @@ class FlagsManager:
     _flags_update_strategy = "ask"
     _cmake_prefix_paths = []
 
-    _possible_prefixes = ['std', 'isystem', 'D', 'I']
-    _include_prefixes = ['isystem', 'I']
+    _include_prefixes = ['-isystem', '-I']
 
     cmake_mask = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
@@ -389,7 +388,6 @@ class FlagsManager:
                     return (prefix, flag[len(prefix):])
             return (None, None)
 
-        mask = '{}{}'
         flags = set()
         log.debug(" all lines: %s", lines)
         for line in lines:
