@@ -29,17 +29,27 @@ class CompileErrors:
             view (sublime.View): current view
             errors (list): list of parsed errors (dict objects)
         """
-        log.debug(" generating error regions for view %s", view.buffer_id())
+        view_id = view.buffer_id()
+        if view_id == 0:
+            log.error(" trying to show error on invalid view. Abort.")
+            return
+        log.debug(" generating error regions for view %s", view_id)
         # first clear old regions
-        if view.buffer_id() in self.err_regions:
+        if view_id in self.err_regions:
             log.debug(" removing old error regions")
-            del self.err_regions[view.buffer_id()]
+            del self.err_regions[view_id]
         # create an empty region dict for view id
-        self.err_regions[view.buffer_id()] = {}
+        self.err_regions[view_id] = {}
 
-        for error in errors:
-            self.add_error(view, error)
-        log.debug(" %s error regions ready", len(self.err_regions))
+        # If the view is closed while this is running, there will be
+        # errors. We want to handle them gracefully.
+        try:
+            for error in errors:
+                self.add_error(view, error)
+            log.debug(" %s error regions ready", len(self.err_regions))
+        except (AttributeError, KeyError, TypeError) as e:
+            log.error(" view was closed -> cannot generate error vis in it")
+            log.info(" original exception: '%s'", repr(e))
 
     def add_error(self, view, error_dict):
         """Put new compile error in the dictionary of errors

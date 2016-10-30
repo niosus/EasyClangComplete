@@ -111,6 +111,7 @@ class Completer(BaseCompleter):
         Args:
             view_id (int): view id
 
+        Returns: view id
         """
         with self.rlock:
             if view_id not in self.TUs:
@@ -118,6 +119,7 @@ class Completer(BaseCompleter):
                 return
             log.debug(" removing translation unit for view id: %s", view_id)
             del self.TUs[view_id]
+            return view_id
 
     def exists_for_view(self, view_id):
         """find if there is a completer for the view
@@ -160,6 +162,9 @@ class Completer(BaseCompleter):
 
         log.debug(" clang flags are: %s", clang_flags)
         v_id = view.buffer_id()
+        if v_id == 0:
+            log.warning(" this is default id. View is closed. Abort!")
+            return
         with self.rlock:
             try:
                 TU = Completer.tu_module
@@ -203,7 +208,7 @@ class Completer(BaseCompleter):
             # do nothing if there in no translation_unit present
             if v_id not in self.TUs:
                 log.error(" cannot complete. No TU for view %s", v_id)
-                return None
+                return (None, None)
             # execute clang code completion
             start = time.time()
             log.debug(" started code complete for view %s", v_id)

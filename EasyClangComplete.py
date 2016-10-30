@@ -169,7 +169,22 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" closing view %s", view.buffer_id())
             if not self.completer:
                 return
-            self.completer.remove(view.buffer_id())
+            future = EasyClangComplete.pool_read.submit(
+                self.completer.remove, view.buffer_id())
+            future.add_done_callback(EasyClangComplete.completer_removed)
+
+    @staticmethod
+    def completer_removed(future):
+        """ Callback called when completer has closed object for a view. The
+        corresponding view id is saved in future.result()
+
+        Args:
+            future (concurrent.Future): future holding id of removed view
+        """
+        if future.done():
+            log.debug(" removed completer for id: %s", future.result())
+        elif future.cancelled():
+            log.debug(" could not remove completer -> cancelled")
 
     def completion_finished(self, future):
         """ Callback called when completion async function has returned. Checks
