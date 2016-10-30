@@ -409,6 +409,8 @@ class FlagsManager:
 
         flags = set()
         for line in lines:
+            if line.startswith("#"):
+                continue
             line = line.strip()
             prefix, include_path = split_if_include(line,
                                                     self._include_prefixes)
