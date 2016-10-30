@@ -17,8 +17,8 @@ Sublime Text 3 plugin that offers clang-based auto-completion for C++
 [![Flattr this git repo][img-flattr]][donate-flattr]
 [![Donate][img-paypal]][donate-paypal]
 
-This plugin for easy-to-use, minimal-setup autocompletions for C++
-for Sublime Text 3. [Support](#support-it) it if you like it.
+Plugin for easy-to-use, minimal-setup autocompletions for C++ for Sublime Text
+3. [Support](#support-it) it if you like it.
 
 # Jump right in! #
 Follow all the following steps to ensure the plugin works as expected!
