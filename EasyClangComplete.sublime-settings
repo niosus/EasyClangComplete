@@ -1,22 +1,26 @@
 {
-	// TODO: add comments for these!
+	// Specify common flags that will be passed to clang for EVERY build.
+	// You can use wilcards:
+	// 	- $project_base_path -> will be replaced with the project path being built
+	// 	- $project_name -> replaced by name of the project being built
+	// 	- $clang_version -> replaced by the numeric version of clang in use
 	"common_flags" : [
 		// some example includes
-		"-I/usr/include",
+		"-isystem /usr/include",
 		"-I$project_base_path/src",
 		"-I/workspace/$project_name/src",
 		"-I/usr/lib/clang/$clang_version/include"
 	],
-
+	// C specific flags. Merged with common_flags for C files.
 	"c_flags" : [
 		"-std=c11"
 	],
-
+	// C++ specific flags. These are merged with common_flags for C++ files.
 	"cpp_flags" : [
 		"-std=c++11"
 	],
 
-	// search for .clang_complete file up the tree. Use includes from it if found
+	// search for .clang_complete file up the tree. Use flags from it if found
 	"search_clang_complete_file": true,
 
 	// search for CMakeLists.txt with a "project" command in it. Run cmake on this

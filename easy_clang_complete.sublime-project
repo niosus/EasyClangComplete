@@ -16,7 +16,7 @@
 	],
 	"settings":
 	{
-			"ecc_use_libclang": false,
+			"ecc_use_libclang": true,
 			"easy_clang_complete_verbose": true
 	}
 }

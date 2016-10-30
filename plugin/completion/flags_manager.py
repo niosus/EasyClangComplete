@@ -68,7 +68,7 @@ class FlagsManager:
     _flags_update_strategy = "ask"
     _cmake_prefix_paths = []
 
-    _include_prefixes = ['-isystem', '-I']
+    _include_prefixes = ['-isystem ', '-I']
 
     cmake_mask = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
