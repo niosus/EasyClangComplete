@@ -18,6 +18,7 @@ class CompileErrors:
     """
 
     _TAG = "easy_clang_complete_errors"
+    _MAX_POPUP_WIDTH = 1800
 
     err_regions = {}
 
@@ -108,7 +109,7 @@ class CompileErrors:
         if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
             errors_html = CompileErrors._as_html(errors_dict)
-            view.show_popup(errors_html)
+            view.show_popup(errors_html, max_width=self._MAX_POPUP_WIDTH)
         else:
             log.debug(" no error regions for row: %s", row)
 
