@@ -130,13 +130,11 @@ class BaseCompleter:
             search_scope=search_scope)
         log.debug(" flags_manager loaded")
 
-    def complete(self, view, cursor_pos, current_job_id):
+    def complete(self, completion_request):
         """Function to generate completions. See children for implementation.
 
         Args:
-            view (sublime.View): current view
-            cursor_pos (int): sublime provided poistion of the cursor
-            current_job_id (str): identifier for this completion job
+            completion_request (CompletionRequest): request object
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method

@@ -190,14 +190,16 @@ class Completer(BaseCompleter):
             self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
             self.timer.start()
 
-    def complete(self, view, cursor_pos, current_job_id):
+    def complete(self, completion_request):
         """ This function is called asynchronously to create a list of
         autocompletions. Using the current translation unit it queries libclang
         for the possible completions.
 
         """
+        view = completion_request.get_view()
         file_body = view.substr(sublime.Region(0, view.size()))
-        (row, col) = SublBridge.cursor_pos(view, cursor_pos)
+        (row, col) = SublBridge.cursor_pos(
+            view, completion_request.get_trigger_position())
 
         # unsaved files
         files = [(view.file_name(), file_body)]
@@ -224,7 +226,7 @@ class Completer(BaseCompleter):
         else:
             completions = Completer._parse_completions(complete_obj)
         log.debug(' completions: %s' % completions)
-        return (current_job_id, completions)
+        return (completion_request, completions)
 
     def update(self, view, show_errors):
         """Reparse the translation unit. This speeds up completions

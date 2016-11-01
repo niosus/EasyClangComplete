@@ -11,6 +11,7 @@ sys.path.append(path.dirname(path.dirname(__file__)))
 from plugin.plugin_settings import Settings
 from plugin.completion.bin_complete import Completer as CompleterBin
 from plugin.completion.lib_complete import Completer as CompleterLib
+from plugin.tools import CompletionRequest
 from plugin.tools import PKG_NAME
 
 
@@ -143,7 +144,8 @@ class base_test_complete(object):
 
         # Load the completions.
         settings = Settings()
-        (_, completions) = completer.complete(self.view, pos, "¯\_(ツ)_/¯")
+        request = CompletionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -165,7 +167,8 @@ class base_test_complete(object):
 
         # Load the completions.
         settings = Settings()
-        (_, completions) = completer.complete(self.view, pos, "¯\_(ツ)_/¯")
+        request = CompletionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)

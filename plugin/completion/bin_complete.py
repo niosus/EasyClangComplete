@@ -136,22 +136,24 @@ class Completer(BaseCompleter):
 
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
 
-    def complete(self, view, cursor_pos, current_job_id):
+    def complete(self, completion_request):
         """ This function is called asynchronously to create a list of
         autocompletions. It builds up a clang command that is then executed
         as a subprocess. The output is parsed for completions """
+        view = completion_request.get_view()
         if not view.buffer_id() in self.flags_dict:
             log.error(" cannot complete view: %s", view.buffer_id())
             return (None, None)
         start = time.time()
-        output_text = self.run_clang_command(view, "complete", cursor_pos)
+        output_text = self.run_clang_command(
+            view, "complete", completion_request.get_trigger_position())
         raw_complete = output_text.splitlines()
         end = time.time()
         log.debug(" code complete done in %s seconds", end - start)
 
         completions = Completer._parse_completions(raw_complete)
         log.debug(' completions: %s' % completions)
-        return (current_job_id, completions)
+        return (completion_request, completions)
 
     def update(self, view, show_errors):
         """update build for current view

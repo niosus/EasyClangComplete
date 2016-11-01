@@ -194,15 +194,21 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             future (concurrent.Future): future holding completion result
         """
-        if future.done():
-            (job_id, completions) = future.result()
-            if job_id == self.current_job_id:
-                self.current_completions = completions
-                if self.current_completions:
-                    # we only want to trigger the autocompletion popup if there
-                    # are new completions to show there. Otherwise let it be.
-                    SublBridge.show_auto_complete(
-                        sublime.active_window().active_view())
+        if not future.done():
+            return
+        (completion_request, completions) = future.result()
+        if completion_request.get_identifier() != self.current_job_id:
+            return
+        active_view = sublime.active_window().active_view()
+        if completion_request.is_suitable_for_view(active_view):
+            self.current_completions = completions
+        else:
+            log.debug(" ignoring completions")
+            self.current_completions = []
+        if self.current_completions:
+            # we only want to trigger the autocompletion popup if there
+            # are new completions to show there. Otherwise let it be.
+            SublBridge.show_auto_complete(active_view)
 
     def on_query_completions(self, view, prefix, locations):
         """ Function that is called when user queries completions in the code
@@ -222,7 +228,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug(" on_query_completions view id %s", view.buffer_id())
         log.debug(" prefix: %s, locations: %s" % (prefix, locations))
         trigger_pos = locations[0] - len(prefix)
-        current_pos_id = Tools.get_position_identifier(view, trigger_pos)
+        completion_request = tools.CompletionRequest(view, trigger_pos)
+        current_pos_id = completion_request.get_identifier()
         log.debug(" this position has identifier: '%s'", current_pos_id)
 
         if not self.completer:
@@ -255,10 +262,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug(" starting async auto_complete with id: %s",
                   self.current_job_id)
         future = EasyClangComplete.pool_read.submit(
-            self.completer.complete,
-            view,
-            trigger_pos,
-            self.current_job_id)
+            self.completer.complete, completion_request)
         future.add_done_callback(self.completion_finished)
 
         # show default completions for now if allowed
