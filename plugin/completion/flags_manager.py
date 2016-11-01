@@ -108,7 +108,7 @@ class FlagsManager:
             = [path.expanduser(x) for x in self._cmake_prefix_paths]
         log.debug(" expanded CMAKE_PREFIX_PATHs: %s", self._cmake_prefix_paths)
 
-        # initialize default flags
+        # initialize default flags (init_flags list needs to be copied).
         self._initial_flags = list(compiler_variant.init_flags)
         current_lang = Tools.get_view_syntax(view)
         if current_lang == 'C' or current_lang == 'C99':
@@ -117,8 +117,8 @@ class FlagsManager:
             self._initial_flags += settings.cpp_flags
 
         home_folder = path.expanduser('~')
-        self._initial_flags += list(self.parse_flags(
-            home_folder, settings.populate_common_flags(view)))
+        self._initial_flags += self.parse_flags(
+            home_folder, settings.populate_common_flags(view))
 
     def any_file_modified(self):
         """
@@ -175,10 +175,11 @@ class FlagsManager:
                 # changed since we have last read them
                 curr_flags = self.flags_from_clang_file(
                     file=File(new_clang_file_path))
-                if len(new_flags.symmetric_difference(curr_flags)) > 0:
+                difference = set(new_flags).symmetric_difference(
+                    set(curr_flags))
+                if len(difference) > 0:
                     log.debug("'%s' is not equal to '%s' by %s so update",
-                              new_flags, curr_flags,
-                              new_flags.symmetric_difference(curr_flags))
+                              new_flags, curr_flags, difference)
                     if len(curr_flags) > 0:
                         strategy = self._flags_update_strategy
                     else:
@@ -286,7 +287,7 @@ class FlagsManager:
         needed write these flags to the `.clang_complete` file.
 
         Args:
-            new_flags (set(str)): new flags
+            new_flags (str[]): new flags
             file_path (str): path to .clang_complete file
             strategy (str): strategy to deal with conflicts in flags
 
@@ -298,10 +299,9 @@ class FlagsManager:
             if flag_strategy == "keep_old":
                 return
             if flag_strategy == "merge":
-                # union of two flags sets
-                curr_flags = set(self.flags_from_clang_file(
-                    File(file_path)))
-                new_flags = new_flags.union(curr_flags)
+                # union of two flag arrays
+                curr_flags = self.flags_from_clang_file(File(file_path))
+                new_flags = curr_flags + list(set(new_flags) - set(curr_flags))
             # unhandled is only "overwrite". "ask" is not possible here.
         f = open(file_path, 'w')
         # write file
@@ -339,7 +339,7 @@ class FlagsManager:
         """Get flags from cmake compilation database
         Args: database_file (tools.File): compilation database file
         Returns:
-            set(str): flags
+            str[]: flags
         """
         import json
         data = None
@@ -348,6 +348,10 @@ class FlagsManager:
         if not data:
             return None
         flags_set = set()
+        # TODO: A list should be used so that flag order is preserved but that
+        # is least of a problems when we have an elephant in the room. Namely
+        # combining flags from different compilation units into one set of flags
+        # which is error prone for more complicated projects.
         for entry in data:
             command = entry['command']
             all_command_parts = command.split(' -')
@@ -356,7 +360,7 @@ class FlagsManager:
                                              all_command_parts)
             flags_set = flags_set.union(current_flags)
         log.debug(" flags set: %s", flags_set)
-        return flags_set
+        return list(flags_set)
 
     def flags_from_clang_file(self, file):
         """
@@ -366,7 +370,7 @@ class FlagsManager:
             file(Tools.File): .clang_complete file handle
 
         Returns:
-            set(str): parsed list of includes from the file
+            str[]: parsed list of includes from the file
         """
         if not path.exists(file.full_path()):
             log.debug(" .clang_complete does not exist yet. No flags present.")
@@ -375,7 +379,7 @@ class FlagsManager:
             log.error(" cannot get flags from clang_complete_file. No file.")
             return []
 
-        flags = set()
+        flags = []
         with open(file.full_path()) as f:
             content = f.readlines()
             flags = self.parse_flags(file.folder(), content)
@@ -394,31 +398,27 @@ class FlagsManager:
             str[]: flags
         """
 
-        def split_if_include(flag, include_prefixes):
-            """ Split flag if it is an include flag
+        def to_absolute_include_path(flag, include_prefixes):
+            """ Change path of include paths to absolute if needed.
 
             Args:
-                flag (str): flag to test and split if needed
+                flag (str): flag to check for relative path and fix if needed
 
             Returns:
-                (str, str): tuple of (prefix, path)
+                str: either original flag or modified to have absolute path
             """
             for prefix in include_prefixes:
                 if flag.startswith(prefix):
-                    return (prefix, flag[len(prefix):].strip())
-            return (None, None)
+                    include_path = flag[len(prefix):].strip()
+                    if not path.isabs(include_path):
+                        include_path = path.join(folder, include_path)
+                    return prefix + path.normpath(include_path)
+            return flag
 
-        flags = set()
+        flags = []
         for line in lines:
+            line = line.strip()
             if line.startswith("#"):
                 continue
-            line = line.strip()
-            prefix, include_path = split_if_include(line,
-                                                    self._include_prefixes)
-            if include_path:
-                if not path.isabs(include_path):
-                    include_path = path.join(folder, include_path)
-                include_path = path.normpath(include_path)
-                line = prefix + include_path
-            flags.add(line)
+            flags.append(to_absolute_include_path(line, self._include_prefixes))
         return flags

@@ -183,7 +183,6 @@ class Settings:
         file_current_folder = path.dirname(view.file_name())
         file_parent_folder = path.dirname(file_current_folder)
 
-        common_flags = set()
         log.debug(" populating common_flags with current variables:")
         log.debug(" project_base_name = %s", self.project_base_name)
         log.debug(" project_base_folder = %s", self.project_base_folder)
@@ -192,17 +191,18 @@ class Settings:
         clang_ver_number_str = Tools.get_clang_version_str(self.clang_binary)
 
         # populate variables to real values
+        common_flags = []
         for flag in self.common_flags:
             flag = re.sub(r"\$project_base_path",
                           self.project_base_folder.replace('\\', '\\\\'), flag)
             flag = re.sub(r"\$project_name",
                           self.project_base_name.replace('\\', '\\\\'), flag)
             flag = re.sub(r"\$clang_version", clang_ver_number_str, flag)
-            common_flags.add(flag)
+            common_flags.append(flag)
 
         if self.include_file_folder:
-            common_flags.add("-I" + file_current_folder)
+            common_flags.append("-I" + file_current_folder)
         if self.include_file_parent_folder:
-            common_flags.add("-I" + file_parent_folder)
+            common_flags.append("-I" + file_parent_folder)
 
         return common_flags
