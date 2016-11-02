@@ -1,17 +1,12 @@
 [
     {
-        "caption": "EasyClangComplete: Settings - Default",
-        "command": "open_file",
-        "args": {"file": "${packages}/EasyClangComplete/EasyClangComplete.sublime-settings"}
-    },
-    {
-        "caption": "EasyClangComplete: Settings - User",
-        "command": "open_file",
-        "args": {"file": "${packages}/User/EasyClangComplete.sublime-settings"}
+        "caption": "EasyClangComplete: Settings",
+        "command": "edit_settings",
+        "args": {"base_file": "${packages}/EasyClangComplete/EasyClangComplete.sublime-settings"}
     },
     {
         "caption": "EasyClangComplete: Open completion triggers location",
-        "command": "open_file",
-        "args": {"file": "${packages}/EasyClangComplete/Preferences.sublime-settings"}
+        "command": "edit_settings",
+        "args": {"base_file": "${packages}/EasyClangComplete/Preferences.sublime-settings"}
     },
 ]
