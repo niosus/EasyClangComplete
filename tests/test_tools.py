@@ -10,14 +10,14 @@ import time
 from os import path
 from unittest import TestCase
 
-easy_clang_complete = sys.modules["EasyClangComplete"]
+main_module = sys.modules["EasyClangComplete"]
 
 sys.path.append(path.dirname(path.dirname(__file__)))
-Settings = easy_clang_complete.plugin.plugin_settings.Settings
-SublBridge = easy_clang_complete.plugin.tools.SublBridge
-Tools = easy_clang_complete.plugin.tools.Tools
-File = easy_clang_complete.plugin.tools.File
-PosStatus = easy_clang_complete.plugin.tools.PosStatus
+SettingsManager = main_module.plugin.settings.settings_manager.SettingsManager
+SublBridge = main_module.plugin.tools.SublBridge
+Tools = main_module.plugin.tools.Tools
+File = main_module.plugin.tools.File
+PosStatus = main_module.plugin.tools.PosStatus
 # for testing sublime command
 
 
@@ -127,7 +127,8 @@ class test_tools_command(TestCase):
         self.tearDown()
         self.setUpView('test_wrong_triggers.cpp')
         # Load the completions.
-        settings = Settings()
+        manager = SettingsManager()
+        settings = manager.user_settings()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.getRow(2), "  a > 2.")
@@ -169,7 +170,7 @@ class test_tools(TestCase):
     def test_pkg_name(self):
         """Test if the package name is correct
         """
-        self.assertEqual(easy_clang_complete.plugin.tools.PKG_NAME,
+        self.assertEqual(main_module.plugin.tools.PKG_NAME,
                          "EasyClangComplete")
 
 

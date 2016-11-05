@@ -40,7 +40,7 @@ class SettingsStorage:
     CMAKE_PRIORITIES = ["ask", "merge", "overwrite", "keep_old"]
     PREFIXES = ["ecc_", "easy_clang_complete_"]
 
-    _wildcard_value_dict = {
+    _wildcard_values = {
         Wildcards.PROJECT_PATH: "",
         Wildcards.PROJECT_NAME: "",
         Wildcards.CLANG_VERSION: ""
@@ -152,6 +152,9 @@ class SettingsStorage:
 
         """
         # init current and parrent folders:
+        if not view.file_name():
+            log.error(" no view to populate common flags from")
+            return
         file_current_folder = path.dirname(view.file_name())
         file_parent_folder = path.dirname(file_current_folder)
 
@@ -177,7 +180,7 @@ class SettingsStorage:
         Returns:
             str: flag with replaced wildcards
         """
-        for wildcard, value in self._wildcard_value_dict.items():
+        for wildcard, value in self._wildcard_values.items():
             res = re.sub(re.escape(wildcard), value, flag)
             if res != flag:
                 log.debug(" populating '%s': '%s'", wildcard, res)
@@ -187,16 +190,18 @@ class SettingsStorage:
     def __update_widcard_values(self):
         """ Update values for wildcard variables
         """
-        self.project_base_name = ""
-        self.project_base_folder = ""
         variables = sublime.active_window().extract_variables()
         if 'folder' in variables:
             project_folder = variables['folder'].replace('\\', '\\\\')
-            self._wildcard_value_dict[Wildcards.PROJECT_PATH] = project_folder
+            self._wildcard_values[Wildcards.PROJECT_PATH] = project_folder
         if 'project_base_name' in variables:
             project_name = variables['project_base_name'].replace('\\', '\\\\')
-            self._wildcard_value_dict[Wildcards.PROJECT_NAME] = project_name
+            self._wildcard_values[Wildcards.PROJECT_NAME] = project_name
+
+        # duplicate as fields
+        self.project_base_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
+        self.project_base_name = self._wildcard_values[Wildcards.PROJECT_NAME]
 
         # get clang version string
-        self._wildcard_value_dict[Wildcards.CLANG_VERSION] =\
+        self._wildcard_values[Wildcards.CLANG_VERSION] =\
             Tools.get_clang_version_str(self.clang_binary)

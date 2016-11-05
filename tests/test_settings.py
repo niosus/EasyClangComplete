@@ -5,9 +5,9 @@ import sys
 import time
 from os import path
 from unittest import TestCase
-sys.path.append(path.dirname(path.dirname(__file__)))
 
-from plugin.plugin_settings import Settings
+sys.path.append(path.dirname(path.dirname(__file__)))
+from plugin.settings.settings_manager import SettingsManager
 
 
 class test_settings(TestCase):
@@ -50,9 +50,8 @@ class test_settings(TestCase):
         """Test that settings are correctly initialized
 
         """
-        settings = Settings()
-        self.assertIsNotNone(settings.subl_settings)
-        # test other settings
+        manager = SettingsManager()
+        settings = manager.user_settings()
         self.assertIsNotNone(settings.verbose)
         self.assertIsNotNone(settings.include_file_folder)
         self.assertIsNotNone(settings.include_file_parent_folder)
@@ -66,7 +65,8 @@ class test_settings(TestCase):
         """Test validity
 
         """
-        settings = Settings()
+        manager = SettingsManager()
+        settings = manager.user_settings()
         self.assertTrue(settings.is_valid())
 
     def test_populate_flags(self):
@@ -76,21 +76,18 @@ class test_settings(TestCase):
         self.tearDown()
         self.setUpView('test_wrong_triggers.cpp')
         # now test the things
-        settings = Settings()
+        manager = SettingsManager()
+        settings = manager.user_settings()
         self.assertTrue(settings.is_valid())
-        settings.include_file_folder = True
-        settings.include_file_parent_folder = True
-        settings.common_flags = [
-            "-I" + path.realpath("/$project_name/src"),
-            "-I" + path.realpath("/test/test")
-        ]
-        initial_flags = list(settings.common_flags)
-        dirs = settings.populate_common_flags(self.view)
+
+        initial_common_flags = list(settings.common_flags)
+        settings = manager.settings_for_view(self.view)
+        dirs = settings.common_flags
 
         current_folder = path.dirname(self.view.file_name())
         parent_folder = path.dirname(current_folder)
-        self.assertLess(len(initial_flags), len(dirs))
-        self.assertFalse(initial_flags[0] in dirs)
-        self.assertTrue(initial_flags[1] in dirs)
+        self.assertLess(len(initial_common_flags), len(dirs))
+        self.assertTrue(initial_common_flags[0] in dirs)
+        self.assertFalse(initial_common_flags[1] in dirs)
         self.assertTrue(("-I" + current_folder) in dirs)
         self.assertTrue(("-I" + parent_folder) in dirs)

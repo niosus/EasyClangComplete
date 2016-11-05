@@ -8,7 +8,7 @@ from os import path
 from unittest import TestCase
 
 sys.path.append(path.dirname(path.dirname(__file__)))
-from plugin.plugin_settings import Settings
+from plugin.settings.settings_manager import SettingsManager
 from plugin.completion.bin_complete import Completer as CompleterBin
 from plugin.completion.lib_complete import Completer as CompleterLib
 from plugin.tools import CompletionRequest
@@ -84,7 +84,8 @@ class base_test_complete(object):
             BaseCompleter: completer for the current view.
         """
 
-        settings = Settings()
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
 
         clang_binary = settings.clang_binary
         completer = self.Completer(clang_binary)
@@ -143,7 +144,8 @@ class base_test_complete(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        settings = Settings()
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
         request = CompletionRequest(self.view, pos)
         (_, completions) = completer.complete(request)
 
@@ -166,7 +168,8 @@ class base_test_complete(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        settings = Settings()
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
         request = CompletionRequest(self.view, pos)
         (_, completions) = completer.complete(request)
 
@@ -185,7 +188,8 @@ class base_test_complete(object):
         self.view.set_scratch(True)
 
         # Manually set up a completer.
-        settings = Settings()
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
         clang_binary = settings.clang_binary
         completer = self.Completer(clang_binary)
         completer.init_for_view(
