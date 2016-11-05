@@ -89,10 +89,7 @@ class base_test_complete(object):
 
         clang_binary = settings.clang_binary
         completer = self.Completer(clang_binary)
-        completer.init_for_view(
-            view=self.view,
-            settings=settings)
-
+        completer.init_for_view(self.view, settings=settings)
         return completer
 
     def getRow(self, row):
@@ -144,8 +141,6 @@ class base_test_complete(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        manager = SettingsManager()
-        settings = manager.settings_for_view(self.view)
         request = CompletionRequest(self.view, pos)
         (_, completions) = completer.complete(request)
 
@@ -168,8 +163,6 @@ class base_test_complete(object):
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        manager = SettingsManager()
-        settings = manager.settings_for_view(self.view)
         request = CompletionRequest(self.view, pos)
         (_, completions) = completer.complete(request)
 
