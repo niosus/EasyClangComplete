@@ -138,8 +138,9 @@ class SettingsStorage:
         log.debug(" Settings sucessfully read...")
 
         # process some special settings
-        if hasattr(self, 'max_tu_age') and isinstance(self.max_tu_age, str):
-            self.max_tu_age = Tools.seconds_from_string(self.max_tu_age)
+        if hasattr(self, 'max_tu_age'):
+            if isinstance(self.max_tu_age, str):
+                self.max_tu_age = Tools.seconds_from_string(self.max_tu_age)
 
     def __populate_common_flags(self, view):
         """ Populate the variables inside common_flags with real values
