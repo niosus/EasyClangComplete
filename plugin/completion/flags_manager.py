@@ -117,8 +117,8 @@ class FlagsManager:
             self._initial_flags += settings.cpp_flags
 
         home_folder = path.expanduser('~')
-        self._initial_flags += self.parse_flags(
-            home_folder, settings.populate_common_flags(view))
+        self._initial_flags += self.parse_flags(home_folder,
+                                                settings.common_flags)
 
     def any_file_modified(self):
         """
