@@ -171,6 +171,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if Tools.is_valid_view(view):
             log.debug(" closing view %s", view.buffer_id())
+            self.settings_manager.clear_for_view(view)
             if not self.completer:
                 return
             future = EasyClangComplete.pool_read.submit(
