@@ -37,18 +37,6 @@ class SettingsManager:
         """
         self.__init_default_settings()
 
-    def init_for_view(self, view):
-        """ Generate new SettingsStorage for a view. Builds upon default
-        settings, updating the values from the current view project.
-
-        Args:
-            view (sublime.View): current View
-        """
-        view_id = view.buffer_id()
-        self.__settings_dict[view_id] = copy.deepcopy(self.__default_settings)
-        self.__settings_dict[view_id].update_from_view(view)
-        log.debug(" settings initialized for view: %s", view_id)
-
     def settings_for_view(self, view):
         """ Get settings stored for a view
 
@@ -61,8 +49,19 @@ class SettingsManager:
         view_id = view.buffer_id()
         if view_id not in self.__settings_dict:
             log.debug(" no settings for view %s. Reinitializing.", view_id)
-            self.init_for_view(view)
+            self.__init_for_view(view)
         return self.__settings_dict[view_id]
+
+    def clear_for_view(self, view):
+        """ Clear settings stored for view
+
+        Args:
+            view (sublime.View): current view
+        """
+        view_id = view.buffer_id()
+        if view_id in self.__settings_dict:
+            log.debug(" clearing settings for view: %s", view_id)
+            del self.__settings_dict[view_id]
 
     def user_settings(self):
         """ Get default user settings (not influenced by a current view)
@@ -81,6 +80,18 @@ class SettingsManager:
         if listener in self.__change_listeners:
             log.error(' this settings listener was already added before')
         self.__change_listeners.append(listener)
+
+    def __init_for_view(self, view):
+        """ Generate new SettingsStorage for a view. Builds upon default
+        settings, updating the values from the current view project.
+
+        Args:
+            view (sublime.View): current View
+        """
+        view_id = view.buffer_id()
+        self.__settings_dict[view_id] = copy.deepcopy(self.__default_settings)
+        self.__settings_dict[view_id].update_from_view(view)
+        log.debug(" settings initialized for view: %s", view_id)
 
     def __on_settings_changed(self):
         """ When user changes settings, trigger this.

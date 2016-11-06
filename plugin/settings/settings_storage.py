@@ -3,7 +3,6 @@
 Attributes:
     log (logging.Logger): logger for this module
 """
-import sublime
 import logging
 import re
 
@@ -19,9 +18,9 @@ class Wildcards:
     """ Enum class of supported wildcards
 
     Attributes:
-        CLANG_VERSION (str): Description
-        PROJECT_NAME (str): Description
-        PROJECT_PATH (str): Description
+        CLANG_VERSION (str): a wildcard to be replaced with a clang version
+        PROJECT_NAME (str): a wildcard to be replaced by the project name
+        PROJECT_PATH (str): a wildcard to be replaced by the project path
     """
     PROJECT_PATH = "$project_base_path"
     PROJECT_NAME = "$project_name"
@@ -108,12 +107,8 @@ class SettingsStorage:
 
         Args:
             settings (dict): settings from sublime
-            project_specific (bool, optional): Description
-
-        Deleted Parameters:
-            prefixes (list, optional): package-specific prefixes to
-                disambiguate settings when loading them from project settings
-
+            project_specific (bool, optional): defines if the settings are
+                project-specific and should be read with appropriate prefixes
         """
         if project_specific:
             log.debug(" Overriding settings by project ones if needed:")
@@ -148,28 +143,24 @@ class SettingsStorage:
 
         Args:
             view (sublime.View): current view
-
-        Returns:
-            str[]: clang common flags with variables expanded
-
         """
         # init current and parrent folders:
         if not view.file_name():
             log.error(" no view to populate common flags from")
             return
-        file_current_folder = path.dirname(view.file_name())
-        file_parent_folder = path.dirname(file_current_folder)
 
         # init wildcard variables
-        self.__update_widcard_values()
+        self.__update_widcard_values(view)
 
         # populate variables to real values
         log.debug(" populating common_flags with current variables.")
         for idx, flag in enumerate(self.common_flags):
             self.common_flags[idx] = self.__replace_wildcard_if_needed(flag)
 
+        file_current_folder = path.dirname(view.file_name())
         if self.include_file_folder:
             self.common_flags.append("-I" + file_current_folder)
+        file_parent_folder = path.dirname(file_current_folder)
         if self.include_file_parent_folder:
             self.common_flags.append("-I" + file_parent_folder)
 
@@ -182,27 +173,28 @@ class SettingsStorage:
         Returns:
             str: flag with replaced wildcards
         """
+        # create a copy of a flag
+        res = str(flag)
+        # replace all wildcards in the flag
         for wildcard, value in self._wildcard_values.items():
-            res = re.sub(re.escape(wildcard), value, flag)
-            if res != flag:
-                log.debug(" populating '%s': '%s'", wildcard, res)
-                return res
-        return flag
+            res = re.sub(re.escape(wildcard), value, res)
+        if res != flag:
+            log.debug(" populated '%s' to '%s'", flag, res)
+        return res
 
-    def __update_widcard_values(self):
-        """ Update values for wildcard variables
-        """
-        variables = sublime.active_window().extract_variables()
+    def __update_widcard_values(self, view):
+        """ Update values for wildcard variables """
+        variables = view.window().extract_variables()
         if 'folder' in variables:
             project_folder = variables['folder'].replace('\\', '\\\\')
             self._wildcard_values[Wildcards.PROJECT_PATH] = project_folder
-        if 'project_base_name' in variables:
-            project_name = variables['project_base_name'].replace('\\', '\\\\')
+        if 'project_name' in variables:
+            project_name = variables['project_name'].replace('\\', '\\\\')
             self._wildcard_values[Wildcards.PROJECT_NAME] = project_name
 
         # duplicate as fields
-        self.project_base_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
-        self.project_base_name = self._wildcard_values[Wildcards.PROJECT_NAME]
+        self.project_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
+        self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
 
         # get clang version string
         self._wildcard_values[Wildcards.CLANG_VERSION] =\
