@@ -87,9 +87,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def on_settings_changed(self):
         """ Called when any of the settings changes."""
+        user_settings = self.settings_manager.user_settings()
         # If verbose flag is set then respect default DEBUG level.
         # Otherwise disable level DEBUG and allow INFO and higher levels.
-        user_settings = self.settings_manager.user_settings()
         off_level = logging.NOTSET if user_settings.verbose else logging.DEBUG
         logging.disable(level=off_level)
 
