@@ -3,7 +3,6 @@
 Attributes:
     log (logging.Logger): logger for this module
 """
-import sublime
 import logging
 import re
 
@@ -155,7 +154,7 @@ class SettingsStorage:
             return
 
         # init wildcard variables
-        self.__update_widcard_values()
+        self.__update_widcard_values(view)
 
         # populate variables to real values
         log.debug(" populating common_flags with current variables.")
@@ -187,20 +186,20 @@ class SettingsStorage:
             log.debug(" populated '%s' to '%s'", flag, res)
         return res
 
-    def __update_widcard_values(self):
+    def __update_widcard_values(self, view):
         """ Update values for wildcard variables
         """
-        variables = sublime.active_window().extract_variables()
+        variables = view.window().extract_variables()
         if 'folder' in variables:
             project_folder = variables['folder'].replace('\\', '\\\\')
             self._wildcard_values[Wildcards.PROJECT_PATH] = project_folder
-        if 'project_base_name' in variables:
-            project_name = variables['project_base_name'].replace('\\', '\\\\')
+        if 'project_name' in variables:
+            project_name = variables['project_name'].replace('\\', '\\\\')
             self._wildcard_values[Wildcards.PROJECT_NAME] = project_name
 
         # duplicate as fields
-        self.project_base_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
-        self.project_base_name = self._wildcard_values[Wildcards.PROJECT_NAME]
+        self.project_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
+        self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
 
         # get clang version string
         self._wildcard_values[Wildcards.CLANG_VERSION] =\

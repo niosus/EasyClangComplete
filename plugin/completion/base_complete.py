@@ -122,7 +122,7 @@ class BaseCompleter:
         current_dir = path.dirname(view.file_name())
         search_scope = SearchScope(
             from_folder=current_dir,
-            to_folder=settings.project_base_folder)
+            to_folder=settings.project_folder)
         self.flags_manager = FlagsManager(
             view=view,
             settings=settings,
