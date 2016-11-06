@@ -1,0 +1,7 @@
+[run]
+omit =
+    /*/tests/*
+    /*/clang/*
+
+[report]
+ignore_errors = True
