@@ -148,17 +148,11 @@ class SettingsStorage:
 
         Args:
             view (sublime.View): current view
-
-        Returns:
-            str[]: clang common flags with variables expanded
-
         """
         # init current and parrent folders:
         if not view.file_name():
             log.error(" no view to populate common flags from")
             return
-        file_current_folder = path.dirname(view.file_name())
-        file_parent_folder = path.dirname(file_current_folder)
 
         # init wildcard variables
         self.__update_widcard_values()
@@ -168,8 +162,10 @@ class SettingsStorage:
         for idx, flag in enumerate(self.common_flags):
             self.common_flags[idx] = self.__replace_wildcard_if_needed(flag)
 
+        file_current_folder = path.dirname(view.file_name())
         if self.include_file_folder:
             self.common_flags.append("-I" + file_current_folder)
+        file_parent_folder = path.dirname(file_current_folder)
         if self.include_file_parent_folder:
             self.common_flags.append("-I" + file_parent_folder)
 
@@ -182,12 +178,14 @@ class SettingsStorage:
         Returns:
             str: flag with replaced wildcards
         """
+        # create a copy of a flag
+        res = str(flag)
+        # replace all wildcards in the flag
         for wildcard, value in self._wildcard_values.items():
-            res = re.sub(re.escape(wildcard), value, flag)
-            if res != flag:
-                log.debug(" populating '%s': '%s'", wildcard, res)
-                return res
-        return flag
+            res = re.sub(re.escape(wildcard), value, res)
+        if res != flag:
+            log.debug(" populated '%s' to '%s'", flag, res)
+        return res
 
     def __update_widcard_values(self):
         """ Update values for wildcard variables
