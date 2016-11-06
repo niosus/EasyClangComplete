@@ -27,9 +27,22 @@ install:
     # - sh travis.sh install_package_control
 
 script:
-    - sh travis.sh run_tests
+    - sh travis.sh run_tests --coverage
     # testing syntax_test files
     # - sh travis.sh run_syntax_tests
+
+after_success:
+    - if [ "$SUBLIME_TEXT_VERSION" == "3" ] && [ "$TRAVIS_OS_NAME" == "osx" ]; then
+            brew update;
+            brew install python3;
+            pip3 install python-coveralls;
+      fi
+    - if [ "$SUBLIME_TEXT_VERSION" == "3" ] && [ "$TRAVIS_OS_NAME" == "linux" ]; then
+            pip install python-coveralls;
+      fi
+    - if [ "$SUBLIME_TEXT_VERSION" == "3" ]; then
+            coveralls;
+      fi
 
 notifications:
     email: false
