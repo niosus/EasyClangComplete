@@ -18,9 +18,9 @@ class Wildcards:
     """ Enum class of supported wildcards
 
     Attributes:
-        CLANG_VERSION (str): Description
-        PROJECT_NAME (str): Description
-        PROJECT_PATH (str): Description
+        CLANG_VERSION (str): a wildcard to be replaced with a clang version
+        PROJECT_NAME (str): a wildcard to be replaced by the project name
+        PROJECT_PATH (str): a wildcard to be replaced by the project path
     """
     PROJECT_PATH = "$project_base_path"
     PROJECT_NAME = "$project_name"
@@ -107,12 +107,8 @@ class SettingsStorage:
 
         Args:
             settings (dict): settings from sublime
-            project_specific (bool, optional): Description
-
-        Deleted Parameters:
-            prefixes (list, optional): package-specific prefixes to
-                disambiguate settings when loading them from project settings
-
+            project_specific (bool, optional): defines if the settings are
+                project-specific and should be read with appropriate prefixes
         """
         if project_specific:
             log.debug(" Overriding settings by project ones if needed:")
@@ -187,8 +183,7 @@ class SettingsStorage:
         return res
 
     def __update_widcard_values(self, view):
-        """ Update values for wildcard variables
-        """
+        """ Update values for wildcard variables """
         variables = view.window().extract_variables()
         if 'folder' in variables:
             project_folder = variables['folder'].replace('\\', '\\\\')
