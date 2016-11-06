@@ -13,3 +13,5 @@
 
 # added by GitSavvy
 /tests/cmake_tests/.clang_complete
+
+/plugin/utils/__pycache__/
