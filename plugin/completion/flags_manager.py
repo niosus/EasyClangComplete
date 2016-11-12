@@ -11,6 +11,7 @@ from os import path
 
 from ..tools import Tools
 from ..tools import File
+from ..tools import SearchScope
 
 log = logging.getLogger(__name__)
 
