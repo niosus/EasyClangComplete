@@ -28,8 +28,6 @@ class BaseCompleter:
         completions (list): current list of completions
         error_vis (plugin.CompileErrors): object of compile errors class
         compiler_variant (CompilerVariant): compiler specific options
-        flags_manager (FlagsManager): An object that manages all the flags and
-            how to load them from disk to memory.
         valid (bool): is completer valid
         version_str (str): version string of format "3.4" for clang v. 3.4
     """
@@ -42,7 +40,7 @@ class BaseCompleter:
     valid = False
 
     def __init__(self, clang_binary):
-        """Initialize the BaseCompleter
+        """Initialize the BaseCompleter.
 
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.6++'
@@ -61,7 +59,7 @@ class BaseCompleter:
         self.error_vis = error_vis.CompileErrors()
 
     def needs_init(self, view):
-        """ Check if the completer needs init.
+        """Check if the completer needs init.
 
         Args:
             view (sublime.View): current view
@@ -84,10 +82,9 @@ class BaseCompleter:
         return True
 
     def remove(self, view_id):
-        """
-        Called when completion for this view is not needed anymore. For actual
-        implementation see children of this class.
+        """Call when completion for this view is not needed anymore.
 
+        For actual implementation see children of this class.
         Args:
             view_id (sublime.View): current view
 
@@ -97,9 +94,9 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def exists_for_view(self, view_id):
-        """
-        Check if completer for this view is initialized and is ready to
-        autocomplete. For real implementation see children.
+        """Check if completer for this view is initialized.
+
+        For real implementation see children.
 
         Args:
             view_id (int): view id
@@ -110,9 +107,9 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def init_for_view(self, view, settings):
-        """
-        Initialize the completer for this view. For real implementation see
-        children.
+        """Initialize the completer for this view.
+
+        For real implementation see children.
 
         Args:
             view (sublime.View): current view
@@ -142,8 +139,10 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def update(self, view, show_errors):
-        """Update the completer for this view. This can increase consequent
-        completion speeds or is needed to just show errors.
+        """Update the completer for this view.
+
+        This can increase consequent completion speeds or is needed to just
+        show errors.
 
         Args:
             view (sublime.View): this view
@@ -155,7 +154,7 @@ class BaseCompleter:
         raise NotImplementedError("calling abstract method")
 
     def show_errors(self, view, output):
-        """ Show current complie errors
+        """Show current complie errors.
 
         Args:
             view (sublime.View): Current view

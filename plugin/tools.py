@@ -210,6 +210,7 @@ class File:
         Returns:
             File: found file
         """
+        # TODO(igor): should just take a SearchScope as input param
         log.debug(" searching '%s' from '%s' to '%s'",
                   file_name, from_folder, to_folder)
         current_folder = from_folder
@@ -252,6 +253,40 @@ class File:
                 if line.lower().startswith(query):
                     log.debug(" found needed line: '%s'", line)
                     return True
+        return False
+
+
+class SearchScope:
+    """
+    Encapsulation of a search scope for code cleanness.
+    """
+    from_folder = None
+    to_folder = None
+
+    def __init__(self, from_folder=None, to_folder=None):
+        """
+        Initialize the search scope. If any of the folders in None,
+        set it to root
+
+        Args:
+            from_folder (str, optional): search from this folder
+            to_folder (str, optional): search up to this folder
+        """
+        self.from_folder = from_folder
+        self.to_folder = to_folder
+        if not self.to_folder:
+            self.to_folder = path.abspath('/')
+        if not self.from_folder:
+            self.from_folder = path.abspath('/')
+
+    def valid(self):
+        """Check if the search scope valid.
+
+        Returns:
+            bool: True if valid, False otherwise
+        """
+        if self.from_folder and self.to_folder:
+            return True
         return False
 
 

@@ -15,40 +15,6 @@ from ..tools import File
 log = logging.getLogger(__name__)
 
 
-class SearchScope:
-    """
-    Encapsulation of a search scope for code cleanness.
-    """
-    from_folder = None
-    to_folder = None
-
-    def __init__(self, from_folder=None, to_folder=None):
-        """
-        Initialize the search scope. If any of the folders in None,
-        set it to root
-
-        Args:
-            from_folder (str, optional): search from this folder
-            to_folder (str, optional): search up to this folder
-        """
-        self.from_folder = from_folder
-        self.to_folder = to_folder
-        if not self.to_folder:
-            self.to_folder = path.abspath('/')
-        if not self.from_folder:
-            self.from_folder = path.abspath('/')
-
-    def valid(self):
-        """ Is the search scope valid?
-
-        Returns:
-            bool: True if valid, False otherwise
-        """
-        if self.from_folder and self.to_folder:
-            return True
-        return False
-
-
 class FlagsManager:
     """
     A class that manages all the work with flags generation and update.
@@ -80,7 +46,7 @@ class FlagsManager:
                  compiler_variant,
                  search_scope=SearchScope()):
         """
-        Initialize the flags manager
+        Initialize the flags manager.
 
         Args:
             view (sublime.View): current view
@@ -135,11 +101,12 @@ class FlagsManager:
 
     def get_flags(self):
         """
-        A function that handles getting all the flags. It will generate new
-        flags in a lazy fashion. When any changes are detected and will update
-        the needed files and flags generated from them. In case no changes have
-        been made to .clang_complete file or to CMakeLists.txt file it will
-        just return already existing flags.
+        A function that handles getting all the flags.
+
+        It will generate new flags in a lazy fashion. When any changes are
+        detected and will update the needed files and flags generated from
+        them. In case no changes have been made to .clang_complete file or to
+        CMakeLists.txt file it will just return already existing flags.
 
         Returns:
             str[]: flags
@@ -213,8 +180,9 @@ class FlagsManager:
 
     @staticmethod
     def merge_flags(initial_flags, generated_flags):
-        """ Handle merging of initial and generated flags. Handles situations
-        where std flag has to be overridden.
+        """Handle merging of initial and generated flags.
+
+        Handles situations where std flag has to be overridden.
 
         Args:
             initial_flags (list(str)): initial flags from settings
@@ -237,7 +205,7 @@ class FlagsManager:
     @staticmethod
     def compile_cmake(cmake_file, prefix_paths):
         """
-        Compiles cmake given a CMakeLists.txt file and get a new compilation
+        Compile cmake given a CMakeLists.txt file and get a new compilation
         database path to further parse the generated flags. The build is
         performed in a temporary folder with a unique folder name for the
         project being built - a hex number generated from the pull path to
@@ -250,7 +218,6 @@ class FlagsManager:
         """
         import os
         import shutil
-        import hashlib
         cmake_cmd = FlagsManager.cmake_mask.format(path=cmake_file.folder())
         unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
         tempdir = path.join(
@@ -352,8 +319,8 @@ class FlagsManager:
         flags_set = set()
         # TODO: A list should be used so that flag order is preserved but that
         # is least of a problems when we have an elephant in the room. Namely
-        # combining flags from different compilation units into one set of flags
-        # which is error prone for more complicated projects.
+        # combining flags from different compilation units into one set of
+        # flags which is error prone for more complicated projects.
         for entry in data:
             command = entry['command']
             all_command_parts = command.split(' -')
