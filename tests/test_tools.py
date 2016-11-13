@@ -125,7 +125,7 @@ class test_tools_command(TestCase):
     def test_wrong_triggers(self):
         """ Test that we don't complete on numbers and wrong triggers. """
         self.tearDown()
-        self.setUpView('test_wrong_triggers.cpp')
+        self.setUpView(path.join('test_files', 'test_wrong_triggers.cpp'))
         # Load the completions.
         manager = SettingsManager()
         settings = manager.user_settings()

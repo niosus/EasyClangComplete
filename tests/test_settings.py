@@ -74,7 +74,7 @@ class test_settings(TestCase):
         """
         # open any existing file
         self.tearDown()
-        self.setUpView('test_wrong_triggers.cpp')
+        self.setUpView(path.join('test_files', 'test_wrong_triggers.cpp'))
         # now test the things
         manager = SettingsManager()
         settings = manager.user_settings()

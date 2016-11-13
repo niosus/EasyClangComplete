@@ -1,5 +1,4 @@
-"""Tests for autocompletion
-"""
+"""Tests for autocompletion."""
 import sublime
 import sys
 import time
@@ -105,10 +104,12 @@ class base_test_complete(object):
         return self.view.substr(self.view.line(self.view.text_point(row, 0)))
 
     def test_setup_view(self):
-        """ Test that setup view correctly sets up the view. """
-        self.setUpView('test.cpp')
+        """Test that setup view correctly sets up the view."""
+        self.setUpView(path.join('test_files', 'test.cpp'))
 
-        file_name = path.join(path.dirname(__file__), 'test.cpp')
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
         self.assertEqual(self.view.file_name(), file_name)
         file = open(file_name, 'r')
         row = 0
@@ -121,7 +122,7 @@ class base_test_complete(object):
 
     def test_init(self):
         """ Test that the completer is properly initialized. """
-        self.setUpView('test.cpp')
+        self.setUpView(path.join('test_files', 'test.cpp'))
         completer = self.setUpCompleter()
 
         self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
@@ -129,7 +130,7 @@ class base_test_complete(object):
 
     def test_complete(self):
         """ Test autocompletion for user type. """
-        self.setUpView('test.cpp')
+        self.setUpView(path.join('test_files', 'test.cpp'))
 
         completer = self.setUpCompleter()
         self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
@@ -151,7 +152,7 @@ class base_test_complete(object):
 
     def test_complete_vector(self):
         """ Test that we can complete vector members. """
-        self.setUpView('test_vector.cpp')
+        self.setUpView(path.join('test_files', 'test_vector.cpp'))
 
         completer = self.setUpCompleter()
         self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
@@ -193,10 +194,8 @@ class base_test_complete(object):
         self.assertFalse(completer.exists_for_view(self.view.buffer_id()))
 
     def test_cooperation_with_default_completions(self):
-        """
-        Test that empty clang completions do not hide default completions.
-        """
-        self.setUpView("test_errors.cpp")
+        """Empty clang completions should not hide default completions."""
+        self.setUpView(path.join('test_files', 'test_errors.cpp'))
 
         completer = self.setUpCompleter()
         self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
@@ -212,10 +211,7 @@ class base_test_complete(object):
         self.assertTrue(self.view.is_auto_complete_visible())
 
     def test_cmake_generate(self):
-        """
-        We search for cmakelists and generate .clang_complete file.
-        Here we test that everything has happenede as expected.
-        """
+        """We search for cmakelists and generate .clang_complete file."""
         if platform.system() == "Windows":
             print("windows is not fully supported for cmake")
             return
