@@ -191,7 +191,7 @@ class File:
             return False
         actual_mod_time = path.getmtime(self.__full_path)
         if self.__full_path not in File.__modification_cache:
-            self.update_mod_time(self.__full_path)
+            self.update_mod_time(self)
             return True
         cached_mod_time = File.__modification_cache[self.__full_path]
         log.debug(" last mod time: %s, actual mod time: %s",
