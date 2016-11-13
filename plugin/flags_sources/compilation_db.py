@@ -2,6 +2,8 @@ from .flags_source import FlagsSource
 from ..tools import File
 from ..utils.unique_list import UniqueList
 
+from os import path
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -17,19 +19,19 @@ class CompilationDb(FlagsSource):
         # we treat flags as dictionary
         self._flags = {}
 
-    def get_flags(self, file_name=None):
+    def get_flags(self, file_path=None):
         if not self.__compilation_db_file.loaded():
             log.debug(" .clang_complete not loaded. Searching for one...")
             self.__compilation_db_file = File.search(
-                file_name=CompilationDb._FILE_NAME,
+                file_path=CompilationDb._FILE_NAME,
                 from_folder=self.__search_scope.from_folder,
                 to_folder=self.__search_scope.to_folder)
 
         if self.__compilation_db_file.was_modified() or not self._flags:
             log.debug(" .clang_complete modified. Load new flags.")
             self._flags = self._parse_database(self.__compilation_db_file)
-        if file_name:
-            return self._flags[file_name]
+        if file_path:
+            return self._flags[file_path]
         return self._flags['all']
 
     def _parse_database(self, database_file):
@@ -43,11 +45,11 @@ class CompilationDb(FlagsSource):
         parsed_db = {}
         unique_list_of_flags = UniqueList()
         for entry in data:
-            file_name = entry['file']
+            file_path = path.normpath(entry['file'])
             command_as_list = CompilationDb.line_as_list(entry['command'])
             flags = self._parse_flags(database_file.folder(), command_as_list)
             # set these flags for current file
-            parsed_db[file_name] = flags
+            parsed_db[file_path] = flags
             # also maintain merged flags
             unique_list_of_flags += flags
         # set an entry for merged flags
