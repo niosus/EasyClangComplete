@@ -158,8 +158,6 @@ class File:
         self.__full_path = path.abspath(file_path)
         # initialize the file
         open(self.__full_path, 'a+').close()
-        modification_time = path.getmtime(self.__full_path)
-        File.__modification_cache[self.__full_path] = modification_time
 
     def full_path(self):
         """Get full path to file.
@@ -192,11 +190,14 @@ class File:
         if not self.loaded():
             return False
         actual_mod_time = path.getmtime(self.__full_path)
+        if self.__full_path not in File.__modification_cache:
+            self.update_mod_time(self.__full_path)
+            return True
         cached_mod_time = File.__modification_cache[self.__full_path]
         log.debug(" last mod time: %s, actual mod time: %s",
                   cached_mod_time, actual_mod_time)
         if actual_mod_time > cached_mod_time:
-            self.__last_seen_modification = actual_mod_time
+            File.__modification_cache[self.__full_path] = actual_mod_time
             return True
         return False
 

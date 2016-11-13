@@ -3,8 +3,6 @@ import sys
 from os import path
 from unittest import TestCase
 
-main_module = sys.modules["EasyClangComplete"]
-
 sys.path.append(path.dirname(path.dirname(__file__)))
 from plugin.flags_sources.compilation_db import CompilationDb
 from plugin.tools import SearchScope
