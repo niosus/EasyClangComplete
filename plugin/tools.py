@@ -181,12 +181,29 @@ class File:
             return True
         return False
 
+    @staticmethod
+    def is_unchanged(file_path):
+        if not file_path:
+            return False
+        actual_mod_time = path.getmtime(file_path)
+        if file_path not in File.__modification_cache:
+            log.debug(" never seen file '%s' before. Updating.", file_path)
+            File.__modification_cache[file_path] = actual_mod_time
+            return False
+        cached_mod_time = File.__modification_cache[file_path]
+        if actual_mod_time > cached_mod_time:
+            File.__modification_cache[file_path] = actual_mod_time
+            return False
+        return True
+
     def was_modified(self):
         """Check if the file modified since the last access.
 
         Returns:
             bool: True if modified, False if not. Creation is modification.
         """
+        # TODO(igor): this should be deprecated
+        log.warning(" Deprecated function: 'was_modified'")
         if not self.loaded():
             return False
         actual_mod_time = path.getmtime(self.__full_path)

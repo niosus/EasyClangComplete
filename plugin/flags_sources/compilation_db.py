@@ -12,27 +12,42 @@ log = logging.getLogger(__name__)
 class CompilationDb(FlagsSource):
     _FILE_NAME = "compile_commands.json"
 
+    cache = {}
+    path_for_file = {}
+
     def __init__(self, include_prefixes, search_scope):
         super(CompilationDb, self).__init__(include_prefixes)
-        self.__compilation_db_file = File()
         self.__search_scope = search_scope
-        # we treat flags as dictionary
-        self._flags = {}
 
     def get_flags(self, file_path=None):
-        if not self.__compilation_db_file.loaded():
-            log.debug(" .clang_complete not loaded. Searching for one...")
-            self.__compilation_db_file = File.search(
-                file_name=CompilationDb._FILE_NAME,
-                from_folder=self.__search_scope.from_folder,
-                to_folder=self.__search_scope.to_folder)
+        cached_db_path = None
+        log.debug(" [db: get]: for file %s", file_path)
+        if file_path and file_path in CompilationDb.path_for_file:
+            cached_db_path = CompilationDb.path_for_file[file_path]
+            log.debug(" [db: cached]: '%s'", cached_db_path)
+        current_db_path = File.search(
+            file_name=CompilationDb._FILE_NAME,
+            from_folder=self.__search_scope.from_folder,
+            to_folder=self.__search_scope.to_folder).full_path()
+        log.debug(" [db: current]: '%s'", current_db_path)
+        db = None
+        db_path_unchanged = (current_db_path == cached_db_path)
+        db_is_unchanged = File.is_unchanged(cached_db_path)
+        if db_path_unchanged and db_is_unchanged:
+            log.debug(" [db: load cached]")
+            db = CompilationDb.cache[cached_db_path]
+        else:
+            log.debug(" [db: load new]")
+            # clear old value, parse db and set new value
+            if cached_db_path and cached_db_path in CompilationDb.cache:
+                del CompilationDb.cache[cached_db_path]
+            db = self._parse_database(File(current_db_path))
+            CompilationDb.cache[current_db_path] = db
 
-        if self.__compilation_db_file.was_modified() or not self._flags:
-            log.debug(" .clang_complete modified. Load new flags.")
-            self._flags = self._parse_database(self.__compilation_db_file)
         if file_path:
-            return self._flags[file_path]
-        return self._flags['all']
+            CompilationDb.path_for_file[file_path] = current_db_path
+            return db[file_path]
+        return db['all']
 
     def _parse_database(self, database_file):
         import json
