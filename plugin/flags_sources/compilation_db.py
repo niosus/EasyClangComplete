@@ -23,7 +23,7 @@ class CompilationDb(FlagsSource):
         if not self.__compilation_db_file.loaded():
             log.debug(" .clang_complete not loaded. Searching for one...")
             self.__compilation_db_file = File.search(
-                file_path=CompilationDb._FILE_NAME,
+                file_name=CompilationDb._FILE_NAME,
                 from_folder=self.__search_scope.from_folder,
                 to_folder=self.__search_scope.to_folder)
 
