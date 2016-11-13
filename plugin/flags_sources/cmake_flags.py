@@ -1,4 +1,4 @@
-from .flags import CompilationDbFlags
+from .flags_source import CompilationDb
 from ..tools import File
 from ..tools import Tools
 
@@ -10,12 +10,12 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class CMakeFlags(CompilationDbFlags):
+class CMake(CompilationDb):
     _FILE_NAME = '.clang_complete'
     _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
     def __init__(self, view, include_prefixes, search_scope):
-        super(CMakeFlags, self).__init__(view, include_prefixes, search_scope)
+        super(CMake, self).__init__(view, include_prefixes, search_scope)
         self.__cmake_lists_file = File()
         self.__search_scope = search_scope
 
@@ -24,7 +24,7 @@ class CMakeFlags(CompilationDbFlags):
             # CMakeLists.txt was not loaded yet, so search for it
             log.debug(" cmake file not loaded yet. Searching for one...")
             self.__cmake_lists_file = File.search(
-                file_name=CMakeFlags._FILE_NAME,
+                file_name=CMake._FILE_NAME,
                 from_folder=self.__search_scope.from_folder,
                 to_folder=self.__search_scope.to_folder,
                 search_content="project")
@@ -34,7 +34,7 @@ class CMakeFlags(CompilationDbFlags):
             # exists and was modified
             log.debug(" CMakeLists.txt was modified."
                       " Generate new .clang_complete")
-            compilation_db = CMakeFlags.__compile_cmake(
+            compilation_db = CMake.__compile_cmake(
                 cmake_file=self.__cmake_lists_file,
                 prefix_paths=self._cmake_prefix_paths)
             if compilation_db:
@@ -60,7 +60,7 @@ class CMakeFlags(CompilationDbFlags):
         """
         import os
         import shutil
-        cmake_cmd = CMakeFlags._CMAKE_MASK.format(path=cmake_file.folder())
+        cmake_cmd = CMake._CMAKE_MASK.format(path=cmake_file.folder())
         unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
         tempdir = path.join(
             Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)

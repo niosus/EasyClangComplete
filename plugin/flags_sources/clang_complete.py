@@ -1,4 +1,4 @@
-from .flags import Flags
+from .flags_source import FlagsSource
 from ..tools import File
 
 from os import path
@@ -7,19 +7,20 @@ import logging
 
 log = logging.getLogger(__name__)
 
-class ClangCompleteFlags(Flags):
+
+class ClangComplete(FlagsSource):
     _FILE_NAME = ".clang_complete"
 
     def __init__(self, view, include_prefixes, search_scope):
-        super(ClangCompleteFlags, self).__init__(view, include_prefixes)
+        super(ClangComplete, self).__init__(view, include_prefixes)
         self.__clang_complete_file = File()
         self.__search_scope = search_scope
 
-    def as_list(self):
+    def get_flags(self):
         if not self.__clang_complete_file.loaded():
             log.debug(" .clang_complete not loaded. Searching for one...")
             self.__clang_complete_file = File.search(
-                file_name=ClangCompleteFlags._FILE_NAME,
+                file_name=ClangComplete._FILE_NAME,
                 from_folder=self.__search_scope.from_folder,
                 to_folder=self.__search_scope.to_folder)
 

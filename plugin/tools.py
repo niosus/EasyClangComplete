@@ -127,7 +127,7 @@ class SublBridge:
 
 
 class PosStatus:
-    """ Enum class for position status
+    """Enum class for position status.
 
     Attributes:
         COMPLETION_NEEDED (int): completion needed
@@ -140,23 +140,26 @@ class PosStatus:
 
 
 class File:
-    """Class that handles a path to the file
-    """
-    __full_path = None
-    __last_seen_modification = 0
+    __modification_cache = {}
 
     def __init__(self, file_path=None):
-        """Initialize a new file and create if needed
+        """Initialize a new file and create it if needed.
 
         Args:
             file_path (str, optional): generate file object from this path
         """
+        # intialize full path
+        self.__full_path = None
+
+        # fill the object if possible
         if not file_path or not path:
             # leave the object unitialized
             return
         self.__full_path = path.abspath(file_path)
         # initialize the file
         open(self.__full_path, 'a+').close()
+        modification_time = path.getmtime(self.__full_path)
+        File.__modification_cache[self.__full_path] = modification_time
 
     def full_path(self):
         """Get full path to file.
@@ -175,31 +178,36 @@ class File:
         return path.dirname(self.__full_path)
 
     def loaded(self):
-        """Is the file loaded?
-        """
+        """Check if the file is loaded."""
         if self.__full_path:
             return True
         return False
 
     def was_modified(self):
-        """Was the file modified since the last access?
+        """Check if the file modified since the last access.
 
         Returns:
             bool: True if modified, False if not. Creation is modification.
         """
         if not self.loaded():
             return False
-        actual_modification_time = path.getmtime(self.__full_path)
-        log.debug(" last mod: %s, actual mod: %s",
-                  self.__last_seen_modification, actual_modification_time)
-        if actual_modification_time > self.__last_seen_modification:
-            self.__last_seen_modification = actual_modification_time
+        actual_mod_time = path.getmtime(self.__full_path)
+        cached_mod_time = File.__modification_cache[self.__full_path]
+        log.debug(" last mod time: %s, actual mod time: %s",
+                  cached_mod_time, actual_mod_time)
+        if actual_mod_time > cached_mod_time:
+            self.__last_seen_modification = actual_mod_time
             return True
         return False
 
     @staticmethod
+    def update_mod_time(file):
+        mod_time = path.getmtime(file.full_path())
+        File.__modification_cache[file.full_path()] = mod_time
+
+    @staticmethod
     def search(file_name, from_folder, to_folder, search_content=None):
-        """search for a file up the tree
+        """Search for a file up the tree.
 
         Args:
             file_name (TYPE): Description

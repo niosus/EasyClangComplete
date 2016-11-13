@@ -1,13 +1,14 @@
 import logging
+from os import path
 
 
-class Flags(object):
+class FlagsSource(object):
 
-    def __init__(self, view, include_prefixes):
+    def __init__(self, include_prefixes):
         self._include_prefixes = include_prefixes
         self._flags = []
 
-    def as_list(self):
+    def get_flags(self):
         raise NotImplementedError("calling abstract method")
 
     def valid(self):
@@ -16,8 +17,7 @@ class Flags(object):
         return False
 
     def _parse_flags(self, folder, lines):
-        """
-        Parse the flags in a given file
+        """Parse the flags from given lines.
 
         Args:
             folder (str): current folder
@@ -26,9 +26,8 @@ class Flags(object):
         Returns:
             str[]: flags
         """
-
         def to_absolute_include_path(flag, include_prefixes):
-            """ Change path of include paths to absolute if needed.
+            """Change path of include paths to absolute if needed.
 
             Args:
                 flag (str): flag to check for relative path and fix if needed

@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/main_dir",
+  "command": "/usr/bin/c++    -I/lib_include_dir    -o CMakeFiles/main_obj.o -c /home/user/dummy_main.cpp",
+  "file": "/home/user/dummy_main.cpp"
+},
+{
+  "directory": "/lib_dir",
+  "command": "/usr/bin/c++   -Dlib_EXPORTS  -fPIC   -o CMakeFiles/lib_obj.o -c /home/user/dummy_lib.cpp",
+  "file": "/home/user/dummy_lib.cpp"
+}
+]
