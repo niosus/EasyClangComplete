@@ -7,7 +7,7 @@ import logging
 
 log = logging.getLogger(__name__)
 
-
+# TODO(igor): this file is not done yet. Rewrite it to conform with others.
 class ClangComplete(FlagsSource):
     _FILE_NAME = ".clang_complete"
 
