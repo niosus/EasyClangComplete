@@ -38,7 +38,7 @@ class CompilationDb(FlagsSource):
         super(CompilationDb, self).__init__(include_prefixes)
         self.__search_scope = search_scope
 
-    def get_flags(self, file_path=None):
+    def get_flags(self, file_path=None, current_db_path=None):
         """Get flags for file.
 
         Args:
@@ -48,15 +48,12 @@ class CompilationDb(FlagsSource):
         Returns: str[]: Return a list of flags for a file. If not file given,
             return a list of all unique flags in this compilation database
         """
-        cached_db_path = None
         log.debug(" [db: get]: for file %s", file_path)
-        if file_path and file_path in CompilationDb.path_for_file:
-            cached_db_path = CompilationDb.path_for_file[file_path]
-            log.debug(" [db: cached]: '%s'", cached_db_path)
-        current_db_path = File.search(
-            file_name=CompilationDb._FILE_NAME,
-            from_folder=self.__search_scope.from_folder,
-            to_folder=self.__search_scope.to_folder).full_path()
+        cached_db_path = CompilationDb.get_cached_from(file_path)
+        log.debug(" [db: cached]: '%s'", cached_db_path)
+        if not current_db_path:
+            current_db_path = CompilationDb.find_current_in(
+                self.__search_scope)
         log.debug(" [db: current]: '%s'", current_db_path)
         db = None
         db_path_unchanged = (current_db_path == cached_db_path)
@@ -71,11 +68,44 @@ class CompilationDb(FlagsSource):
                 del CompilationDb.cache[cached_db_path]
             db = self._parse_database(File(current_db_path))
             CompilationDb.cache[current_db_path] = db
-
+            log.debug(" [db:] %s", db)
+        # return nothing if we failed to load the db
+        if not db:
+            return None
+        # TODO(igor): probably strip file_path from extension.
         if file_path:
             CompilationDb.path_for_file[file_path] = current_db_path
             return db[file_path]
         return db['all']
+
+    @classmethod
+    def get_cached_from(cls, file_path):
+        """Get cached path for file path.
+
+        Args:
+            file_path (str): Input file path.
+
+        Returns:
+            str: Path to the cached flag source path.
+        """
+        if file_path and file_path in cls.path_for_file:
+            return cls.path_for_file[file_path]
+        return None
+
+    @classmethod
+    def find_current_in(cls, search_scope):
+        """Find current path in a search scope.
+
+        Args:
+            search_scope (SearchScope): Find in a search scope.
+
+        Returns:
+            str: Path to the current flag source path.
+        """
+        return File.search(
+            file_name=cls._FILE_NAME,
+            from_folder=search_scope.from_folder,
+            to_folder=search_scope.to_folder).full_path()
 
     def _parse_database(self, database_file):
         """Parse a compilation database file.
@@ -91,7 +121,7 @@ class CompilationDb(FlagsSource):
         with open(database_file.full_path()) as data_file:
             data = json.load(data_file)
         if not data:
-            return []
+            return None
 
         parsed_db = {}
         unique_list_of_flags = UniqueList()

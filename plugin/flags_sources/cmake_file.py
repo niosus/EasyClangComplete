@@ -1,6 +1,7 @@
-from .flags_source import CompilationDb
+from .compilation_db import CompilationDb
 from ..tools import File
 from ..tools import Tools
+from ..tools import SearchScope
 
 from os import path
 
@@ -10,39 +11,55 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class CMake(CompilationDb):
-    _FILE_NAME = '.clang_complete'
+class CMakeFile(CompilationDb):
+    _FILE_NAME = 'CMakeLists.txt'
     _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
-    def __init__(self, view, include_prefixes, search_scope):
-        super(CMake, self).__init__(view, include_prefixes, search_scope)
-        self.__cmake_lists_file = File()
+    cache = {}
+    path_for_file = {}
+
+    def __init__(self, include_prefixes, search_scope, prefix_paths):
+        super(CMakeFile, self).__init__(include_prefixes, search_scope)
         self.__search_scope = search_scope
+        self.__cmake_prefix_paths = prefix_paths
 
-    def as_list(self):
-        if not self.__cmake_lists_file.loaded():
-            # CMakeLists.txt was not loaded yet, so search for it
-            log.debug(" cmake file not loaded yet. Searching for one...")
-            self.__cmake_lists_file = File.search(
-                file_name=CMake._FILE_NAME,
-                from_folder=self.__search_scope.from_folder,
-                to_folder=self.__search_scope.to_folder,
-                search_content="project")
+    def get_flags(self, file_path=None):
+        log.debug(" [cmake: get]: for file %s", file_path)
+        cached_cmake_path = super().get_cached_from(file_path)
+        log.debug(" [cmake: cached]: '%s'", cached_cmake_path)
+        current_cmake_path = CMakeFile.find_current_in(self.__search_scope)
+        log.debug(" [cmake: current]: '%s'", current_cmake_path)
 
-        if self._use_cmake and self.__cmake_lists_file.was_modified():
-            # generate a .clang_complete file from cmake file if cmake file
-            # exists and was modified
-            log.debug(" CMakeLists.txt was modified."
-                      " Generate new .clang_complete")
-            compilation_db = CMake.__compile_cmake(
-                cmake_file=self.__cmake_lists_file,
-                prefix_paths=self._cmake_prefix_paths)
-            if compilation_db:
-                self._flags = super(CompilationDbFlags,
-                                    self)._flags_from_database(compilation_db)
-            else:
-                self._flags = []
-        return self._flags
+        db_path = None
+        cmake_path_unchanged = (current_cmake_path == cached_cmake_path)
+        cmake_file_unchanged = File.is_unchanged(cached_cmake_path)
+        if cmake_path_unchanged and cmake_file_unchanged:
+            log.debug(" [cmake: unchanged]: search for db")
+            db_path = CompilationDb.find_current_in(
+                SearchScope(from_folder=path.dirname(cached_cmake_path)))
+            return super(CMakeFile, self).get_flags(file_path, db_path)
+        else:
+            log.debug(" [cmake: generate new db]")
+            db_file = CMakeFile.__compile_cmake(
+                cmake_file=File(current_cmake_path),
+                prefix_paths=self.__cmake_prefix_paths)
+            if not db_file:
+                return None
+            db_path = db_file.full_path()
+            return super(CMakeFile, self).get_flags(file_path, db_path)
+        return None
+
+    @classmethod
+    def get_cached_from(cls, file_path):
+        """Get cached path for file path.
+
+        Args:
+            file_path (str): Input file path.
+
+        Returns:
+            str: Path to the cached flag source path.
+        """
+        return super().get_cached_from(file_path)
 
     @staticmethod
     def __compile_cmake(cmake_file, prefix_paths):
@@ -58,9 +75,12 @@ class CMake(CompilationDb):
             prefix_paths (str[]): paths to add to CMAKE_PREFIX_PATH before
             running `cmake`
         """
+        if not cmake_file or not cmake_file.loaded():
+            return None
+
         import os
         import shutil
-        cmake_cmd = CMake._CMAKE_MASK.format(path=cmake_file.folder())
+        cmake_cmd = CMakeFile._CMAKE_MASK.format(path=cmake_file.folder())
         unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
         tempdir = path.join(
             Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
@@ -84,7 +104,7 @@ class CMake(CompilationDb):
             log.info(" cmake process finished with code: %s", e.returncode)
         log.info(" cmake produced output: \n%s", output_text)
 
-        database_path = path.join(tempdir, CompilationDbFlags._FILE_NAME)
+        database_path = path.join(tempdir, CompilationDb._FILE_NAME)
         if not path.exists(database_path):
             log.error(" cmake has finished, but no compilation database.")
             return None

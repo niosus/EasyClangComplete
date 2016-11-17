@@ -1,4 +1,3 @@
-import logging
 from os import path
 
 
@@ -6,15 +5,9 @@ class FlagsSource(object):
 
     def __init__(self, include_prefixes):
         self._include_prefixes = include_prefixes
-        self._flags = []
 
     def get_flags(self):
         raise NotImplementedError("calling abstract method")
-
-    def valid(self):
-        if self._flags:
-            return True
-        return False
 
     def _parse_flags(self, folder, lines):
         """Parse the flags from given lines.
@@ -48,6 +41,6 @@ class FlagsSource(object):
             line = line.strip()
             if line.startswith("#"):
                 continue
-            flags.append(to_absolute_include_path(line,
-                                                  self._include_prefixes))
+            flags.append(to_absolute_include_path(
+                line, self._include_prefixes))
         return flags

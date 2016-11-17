@@ -41,6 +41,7 @@ class test_compilation_db(TestCase):
 
     def test_persistence(self):
         """Test if compilation db is persistent."""
+        CompilationDb.path_for_file = {}
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
                                'linux')
