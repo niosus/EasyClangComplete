@@ -179,10 +179,10 @@ class Completer(BaseCompleter):
                 self.TUs[v_id] = StampedTu(trans_unit)
                 end = time.time()
                 log.debug(" compilation done in %s seconds", end - start)
+                if settings.errors_on_save:
+                    self.show_errors(view, self.TUs[v_id].tu().diagnostics)
             except Exception as e:
                 log.error(" error while compiling: %s", e)
-            if settings.errors_on_save:
-                self.show_errors(view, self.TUs[v_id].tu().diagnostics)
 
         # start timer if it is not set yet
         self.max_tu_age = settings.max_tu_age

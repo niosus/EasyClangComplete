@@ -202,6 +202,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if not future.done():
             return
         (completion_request, completions) = future.result()
+        if not completion_request:
+            return
         if completion_request.get_identifier() != self.current_job_id:
             return
         active_view = sublime.active_window().active_view()
