@@ -1,3 +1,8 @@
+"""Stores a class that manages compilation database flags.
+
+Attributes:
+    log (logging.Logger): current logger.
+"""
 from .flags_source import FlagsSource
 from ..tools import File
 from ..utils.unique_list import UniqueList
@@ -10,16 +15,39 @@ log = logging.getLogger(__name__)
 
 
 class CompilationDb(FlagsSource):
+    """Manages flags parsing from a compilation database.
+
+    Attributes:
+        cache (dict): Cache of all parsed databases to date. Stored by full
+            database path. Needed to avoid reparsing same database.
+        path_for_file (dict): A path to a database for every source file path.
+            Needed for finding a corresponding database path for a view.
+    """
     _FILE_NAME = "compile_commands.json"
 
     cache = {}
     path_for_file = {}
 
     def __init__(self, include_prefixes, search_scope):
+        """Initialize a compilation database.
+
+        Args:
+            include_prefixes (str[]): A List of valid include prefixes.
+            search_scope (SearchScope): Where to search for a database file.
+        """
         super(CompilationDb, self).__init__(include_prefixes)
         self.__search_scope = search_scope
 
     def get_flags(self, file_path=None):
+        """Get flags for file.
+
+        Args:
+            file_path (str, optional): A path to the query file. This function
+                returns a list of flags for this specific file.
+
+        Returns: str[]: Return a list of flags for a file. If not file given,
+            return a list of all unique flags in this compilation database
+        """
         cached_db_path = None
         log.debug(" [db: get]: for file %s", file_path)
         if file_path and file_path in CompilationDb.path_for_file:
@@ -50,6 +78,14 @@ class CompilationDb(FlagsSource):
         return db['all']
 
     def _parse_database(self, database_file):
+        """Parse a compilation database file.
+
+        Args:
+            database_file (File): a file representing a database.
+
+        Returns: dict: A dict that stores a list of flags per view and all
+            unique entries for 'all' entry.
+        """
         import json
         data = None
         with open(database_file.full_path()) as data_file:
@@ -74,11 +110,16 @@ class CompilationDb(FlagsSource):
 
     @staticmethod
     def line_as_list(line):
+        """Represent line as a list of flags.
+
+        Args:
+            line (str): a line from database file.
+
+        Returns:
+            str[]: A line parsed with shlex.
+        """
         import shlex
         # first argument is always a command, like c++
         # last 4 entries are always object and filename
         # between them there are valuable flags
         return shlex.split(line)[1:-4]
-
-class CompilationDbCache(object):
-    flags_per_file = {}
