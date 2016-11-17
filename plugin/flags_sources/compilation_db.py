@@ -66,6 +66,8 @@ class CompilationDb(FlagsSource):
             # clear old value, parse db and set new value
             if cached_db_path and cached_db_path in CompilationDb.cache:
                 del CompilationDb.cache[cached_db_path]
+            if not current_db_path:
+                return None
             db = self._parse_database(File(current_db_path))
             CompilationDb.cache[current_db_path] = db
             log.debug(" [db:] %s", db)

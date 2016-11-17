@@ -39,6 +39,15 @@ class test_compilation_db(TestCase):
         self.assertEqual(expected_lib, db.get_flags(lib_file_path))
         self.assertEqual(expected_main, db.get_flags(main_file_path))
 
+    def test_no_db_in_folder(self):
+        """Test if compilation db is found."""
+        path_to_db = path.join(path.dirname(__file__))
+        scope = SearchScope(from_folder=path_to_db)
+        include_prefixes = ['-I']
+        db = CompilationDb(include_prefixes, scope)
+        flags = db.get_flags(path.normpath('/home/user/dummy_main.cpp'))
+        self.assertTrue(flags is None)
+
     def test_persistence(self):
         """Test if compilation db is persistent."""
         CompilationDb.path_for_file = {}
