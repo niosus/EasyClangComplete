@@ -45,8 +45,9 @@ class CompilationDb(FlagsSource):
             file_path (str, optional): A path to the query file. This function
                 returns a list of flags for this specific file.
 
-        Returns: str[]: Return a list of flags for a file. If not file given,
-            return a list of all unique flags in this compilation database
+        Returns: str[]: Return a list of flags for a file. If no file is
+            given, return a list of all unique flags in this compilation
+            database
         """
         log.debug(" [db: get]: for file %s", file_path)
         cached_db_path = CompilationDb.get_cached_from(file_path)
@@ -74,7 +75,7 @@ class CompilationDb(FlagsSource):
         if not db:
             return None
         # TODO(igor): probably strip file_path from extension.
-        if file_path:
+        if file_path and file_path in db:
             CompilationDb.path_for_file[file_path] = current_db_path
             return db[file_path]
         return db['all']

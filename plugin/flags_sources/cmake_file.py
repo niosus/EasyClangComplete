@@ -1,3 +1,8 @@
+"""Stores a class that manages flags generation using cmake.
+
+Attributes:
+    log (TYPE): Description
+"""
 from .compilation_db import CompilationDb
 from ..tools import File
 from ..tools import Tools
@@ -12,6 +17,12 @@ log = logging.getLogger(__name__)
 
 
 class CMakeFile(CompilationDb):
+    """Manages generating a compilation database with cmake.
+
+    Attributes:
+        cache (dict): Cache of all parsed cmake files to date.
+        path_for_file (dict): A path to a database for every source file path.
+    """
     _FILE_NAME = 'CMakeLists.txt'
     _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
@@ -19,11 +30,29 @@ class CMakeFile(CompilationDb):
     path_for_file = {}
 
     def __init__(self, include_prefixes, search_scope, prefix_paths):
+        """Initialize a cmake-based flag storage.
+
+        Args:
+            include_prefixes (str[]): A List of valid include prefixes.
+            search_scope (SearchScope): Where to search for a CMakeLists.txt.
+            prefix_paths (str[]): A list of paths to append to
+                CMAKE_PREFIX_PATH before invoking cmake.
+        """
         super(CMakeFile, self).__init__(include_prefixes, search_scope)
         self.__search_scope = search_scope
         self.__cmake_prefix_paths = prefix_paths
 
     def get_flags(self, file_path=None):
+        """Get flags for file.
+
+        Args:
+            file_path (None, optional): A path to the query file. This
+                function returns a list of flags for this specific file.
+
+        Returns:
+            str[]: List of flags for this view, or all flags merged if this
+                view path is not found in the generated compilation db.
+        """
         log.debug(" [cmake: get]: for file %s", file_path)
         cached_cmake_path = super().get_cached_from(file_path)
         log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
@@ -50,12 +79,12 @@ class CMakeFile(CompilationDb):
 
     @staticmethod
     def __compile_cmake(cmake_file, prefix_paths):
-        """
-        Compile cmake given a CMakeLists.txt file and get a new compilation
-        database path to further parse the generated flags. The build is
-        performed in a temporary folder with a unique folder name for the
-        project being built - a hex number generated from the pull path to
-        current CMakeListst.txt file.
+        """Compile cmake given a CMakeLists.txt file.
+
+        This returns  a new compilation database path to further parse the
+        generated flags. The build is performed in a temporary folder with a
+        unique folder name for the project being built - a hex number
+        generated from the pull path to current CMakeListst.txt file.
 
         Args:
             cmake_file (tools.file): file object for CMakeLists.txt file

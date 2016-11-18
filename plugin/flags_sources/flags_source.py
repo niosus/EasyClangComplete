@@ -1,12 +1,25 @@
+"""Holds an abstract class defining a flags source.
+"""
 from os import path
 
 
 class FlagsSource(object):
-
+    """An abstract class defining a Flags Source.
+    """
     def __init__(self, include_prefixes):
+        """Initialize default flags storage.
+
+        Args:
+            include_prefixes (str[]): valid include prefixes.
+        """
         self._include_prefixes = include_prefixes
 
     def get_flags(self, file_path=None):
+        """An abstract function to gets flags for a view path.
+
+        Raises:
+            NotImplementedError: Should not be called directly.
+        """
         raise NotImplementedError("calling abstract method")
 
     def _parse_flags(self, folder, lines):
@@ -24,6 +37,7 @@ class FlagsSource(object):
 
             Args:
                 flag (str): flag to check for relative path and fix if needed
+                include_prefixes (TYPE): Description
 
             Returns:
                 str: either original flag or modified to have absolute path
