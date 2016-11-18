@@ -26,16 +26,15 @@ class CMakeFile(CompilationDb):
     def get_flags(self, file_path=None):
         log.debug(" [cmake: get]: for file %s", file_path)
         cached_cmake_path = super().get_cached_from(file_path)
-        log.debug(" [cmake: cached]: '%s'", cached_cmake_path)
+        log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
         current_cmake_path = CMakeFile.find_current_in(self.__search_scope)
-        log.debug(" [cmake: current]: '%s'", current_cmake_path)
+        log.debug(" [cmake]:[current]: '%s'", current_cmake_path)
 
-        db_path = None
         cmake_path_unchanged = (current_cmake_path == cached_cmake_path)
         cmake_file_unchanged = File.is_unchanged(cached_cmake_path)
         if cmake_path_unchanged and cmake_file_unchanged:
             log.debug(" [cmake: unchanged]: search for db")
-            db_path = CompilationDb.find_current_in(
+            db_path = super().find_current_in(
                 SearchScope(from_folder=path.dirname(cached_cmake_path)))
             return super(CMakeFile, self).get_flags(file_path, db_path)
         else:
@@ -48,18 +47,6 @@ class CMakeFile(CompilationDb):
             db_path = db_file.full_path()
             return super(CMakeFile, self).get_flags(file_path, db_path)
         return None
-
-    @classmethod
-    def get_cached_from(cls, file_path):
-        """Get cached path for file path.
-
-        Args:
-            file_path (str): Input file path.
-
-        Returns:
-            str: Path to the cached flag source path.
-        """
-        return super().get_cached_from(file_path)
 
     @staticmethod
     def __compile_cmake(cmake_file, prefix_paths):

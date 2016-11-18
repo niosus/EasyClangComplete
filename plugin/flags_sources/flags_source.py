@@ -6,7 +6,7 @@ class FlagsSource(object):
     def __init__(self, include_prefixes):
         self._include_prefixes = include_prefixes
 
-    def get_flags(self):
+    def get_flags(self, file_path=None):
         raise NotImplementedError("calling abstract method")
 
     def _parse_flags(self, folder, lines):

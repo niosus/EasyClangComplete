@@ -70,7 +70,6 @@ class CompilationDb(FlagsSource):
                 return None
             db = self._parse_database(File(current_db_path))
             CompilationDb.cache[current_db_path] = db
-            log.debug(" [db:] %s", db)
         # return nothing if we failed to load the db
         if not db:
             return None
