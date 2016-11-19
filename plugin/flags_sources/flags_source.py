@@ -1,11 +1,10 @@
-"""Holds an abstract class defining a flags source.
-"""
+"""Holds an abstract class defining a flags source."""
 from os import path
 
 
 class FlagsSource(object):
-    """An abstract class defining a Flags Source.
-    """
+    """An abstract class defining a Flags Source."""
+
     def __init__(self, include_prefixes):
         """Initialize default flags storage.
 
