@@ -1,15 +1,16 @@
 """Test compilation database flags generation."""
-import sys
 from os import path
 from unittest import TestCase
 
-sys.path.append(path.dirname(path.dirname(__file__)))
-from plugin.flags_sources.compilation_db import CompilationDb
-from plugin.tools import SearchScope
+from EasyClangComplete.plugin.flags_sources import compilation_db
+from EasyClangComplete.plugin import tools
+
+CompilationDb = compilation_db.CompilationDb
+SearchScope = tools.SearchScope
 
 
-class test_compilation_db(TestCase):
-    """Test other things."""
+class TestCompilationDb(TestCase):
+    """Test generating flags with a 'compile_commands.json' file."""
 
     def test_get_all_flags(self):
         """Test if compilation db is found."""
