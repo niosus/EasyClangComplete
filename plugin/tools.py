@@ -47,6 +47,7 @@ def singleton(class_):
     instances = {}
 
     def getinstance(*args, **kwargs):
+        """Get instance of a class."""
         if class_ not in instances:
             instances[class_] = class_(*args, **kwargs)
         return instances[class_]
