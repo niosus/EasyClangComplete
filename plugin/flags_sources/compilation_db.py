@@ -43,11 +43,16 @@ class CompilationDb(FlagsSource):
         Args:
             file_path (str, optional): A path to the query file. This function
                 returns a list of flags for this specific file.
+            search_scope (SearchScope, optional): Where to search for a
+                compile_commands.json file.
+            db_path(str): if the caller knows where the database is, there is
+                no need to search for it.
 
         Returns: str[]: Return a list of flags for a file. If no file is
             given, return a list of all unique flags in this compilation
             database
         """
+        # FIXME(igor): can I avoid deviating from abstract method definition?
         if db_path and search_scope:
             raise RuntimeError(
                 "providing both db_path and search_scope ambiguous.")
@@ -59,6 +64,7 @@ class CompilationDb(FlagsSource):
         cached_db_path = super().get_cached_from(file_path)
         log.debug(" [db]:[cached]: '%s'", cached_db_path)
         if db_path:
+            log.debug(" calling from class %s", self.__class__)
             current_db_path = db_path
         else:
             if not search_scope:

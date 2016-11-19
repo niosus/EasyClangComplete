@@ -15,7 +15,7 @@ class FlagsSource(object):
         """
         self._include_prefixes = include_prefixes
 
-    def get_flags(self, file_path=None):
+    def get_flags(self, file_path=None, search_scope=None):
         """An abstract function to gets flags for a view path.
 
         Raises:
