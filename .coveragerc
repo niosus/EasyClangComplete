@@ -2,6 +2,7 @@
 omit =
     /*/tests/*
     /*/clang/*
+    /*/EasyClangComplete.py
 
 [report]
 ignore_errors = True
