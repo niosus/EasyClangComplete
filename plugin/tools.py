@@ -35,20 +35,36 @@ OSX_CLANG_VERSION_DICT = {
 log = logging.getLogger(__name__)
 
 
-class SublBridge:
+def singleton(class_):
+    """Singleton class wrapper.
 
-    """A small help class that bridges with sublime (maybe will grow)
+    Args:
+      class_ (Class): Class to wrap.
+
+    Returns:
+      class_: unique instance of object.
+    """
+    instances = {}
+
+    def getinstance(*args, **kwargs):
+        if class_ not in instances:
+            instances[class_] = class_(*args, **kwargs)
+        return instances[class_]
+    return getinstance
+
+
+class SublBridge:
+    """A small help class that bridges with sublime (maybe will grow).
 
     Attributes:
         NO_DEFAULT_COMPLETIONS (TYPE): Description
     """
-
     NO_DEFAULT_COMPLETIONS = sublime.INHIBIT_WORD_COMPLETIONS \
         | sublime.INHIBIT_EXPLICIT_COMPLETIONS
 
     @staticmethod
     def active_view_id():
-        """ Get the id of the active view
+        """Get the id of the active view.
 
         Returns:
             int: buffer id of the active view
@@ -57,12 +73,11 @@ class SublBridge:
 
     @staticmethod
     def cursor_pos(view, pos=None):
-        """Get current cursor position. Returns position of the first cursor if
-        multiple are present
+        """Get current cursor position.
 
         Args:
             view (sublime.View): current view
-            pos (int, optional): given position. First selection by default
+            pos (int, optional): given position. First selection by default.
 
         Returns:
             (row, col): tuple of row and col for cursor position
@@ -81,7 +96,7 @@ class SublBridge:
 
     @staticmethod
     def next_line(view):
-        """Get next line as text
+        """Get next line as text.
 
         Args:
             view (sublime.View): current view
@@ -96,13 +111,13 @@ class SublBridge:
 
     @staticmethod
     def format_completions(completions, hide_default_completions):
-        """ Get completions. Manage hiding default ones.
+        """Get completions. Manage hiding default ones.
 
         Args:
             hide_default_completions (bool): True if we hide default ones
 
         Returns:
-            tupple: (completions, flags)
+            tuple: (completions, flags)
         """
         if hide_default_completions:
             log.debug(" hiding default completions")
@@ -113,8 +128,11 @@ class SublBridge:
 
     @staticmethod
     def show_auto_complete(view):
-        """ Calling this function reopens completion popup,
-        subsequently calling EasyClangComplete.on_query_completions(...)
+        """Calling this function reopens completion popup.
+
+        It therefore subsequently calls
+        EasyClangComplete.on_query_completions(...)
+
         Args:
             view (sublime.View): view to open completion window in
         """

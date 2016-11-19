@@ -23,8 +23,7 @@ class FlagsSource(object):
         """
         raise NotImplementedError("calling abstract method")
 
-    @classmethod
-    def get_cached_from(cls, file_path):
+    def get_cached_from(self, file_path):
         """Get cached path for file path.
 
         Args:
@@ -33,12 +32,12 @@ class FlagsSource(object):
         Returns:
             str: Path to the cached flag source path.
         """
-        if file_path and file_path in cls.path_for_file:
-            return cls.path_for_file[file_path]
+        if file_path and file_path in self.cache:
+            return self.cache[file_path]
         return None
 
     @classmethod
-    def find_current_in(cls, search_scope):
+    def find_current_in(cls, search_scope, search_content=None):
         """Find current path in a search scope.
 
         Args:
@@ -50,7 +49,8 @@ class FlagsSource(object):
         return File.search(
             file_name=cls._FILE_NAME,
             from_folder=search_scope.from_folder,
-            to_folder=search_scope.to_folder).full_path()
+            to_folder=search_scope.to_folder,
+            search_content=search_content).full_path()
 
     def _parse_flags(self, folder, lines):
         """Parse the flags from given lines.

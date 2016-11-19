@@ -6,6 +6,7 @@ Attributes:
 from .flags_source import FlagsSource
 from ..tools import File
 from ..tools import SearchScope
+from ..tools import singleton
 from ..utils.unique_list import UniqueList
 
 from os import path
@@ -13,6 +14,10 @@ from os import path
 import logging
 
 log = logging.getLogger(__name__)
+
+
+@singleton
+class ComplationDbCache(dict): pass
 
 
 class CompilationDb(FlagsSource):
@@ -26,9 +31,6 @@ class CompilationDb(FlagsSource):
     """
     _FILE_NAME = "compile_commands.json"
 
-    cache = {}
-    path_for_file = {}
-
     def __init__(self, include_prefixes):
         """Initialize a compilation database.
 
@@ -36,6 +38,7 @@ class CompilationDb(FlagsSource):
             include_prefixes (str[]): A List of valid include prefixes.
         """
         super().__init__(include_prefixes)
+        self.cache = ComplationDbCache()
 
     def get_flags(self, file_path=None, search_scope=None, db_path=None):
         """Get flags for file.
@@ -52,6 +55,8 @@ class CompilationDb(FlagsSource):
             given, return a list of all unique flags in this compilation
             database
         """
+        if file_path:
+            file_path = path.splitext(file_path)[0]
         # FIXME(igor): can I avoid deviating from abstract method definition?
         if db_path and search_scope:
             raise RuntimeError(
@@ -61,10 +66,9 @@ class CompilationDb(FlagsSource):
             search_scope = SearchScope(from_folder=path.dirname(file_path))
         # check if we have a hashed version
         log.debug(" [db]:[get]: for file %s", file_path)
-        cached_db_path = super().get_cached_from(file_path)
+        cached_db_path = self.get_cached_from(file_path)
         log.debug(" [db]:[cached]: '%s'", cached_db_path)
         if db_path:
-            log.debug(" calling from class %s", self.__class__)
             current_db_path = db_path
         else:
             if not search_scope:
@@ -76,23 +80,29 @@ class CompilationDb(FlagsSource):
         db_is_unchanged = File.is_unchanged(cached_db_path)
         if db_path_unchanged and db_is_unchanged:
             log.debug(" [db]:[load cached]")
-            db = CompilationDb.cache[cached_db_path]
+            db = self.cache[cached_db_path]
         else:
             log.debug(" [db]:[load new]")
             # clear old value, parse db and set new value
-            if cached_db_path and cached_db_path in CompilationDb.cache:
-                del CompilationDb.cache[cached_db_path]
             if not current_db_path:
+                log.debug(" [db]:[no new]: return None")
                 return None
+            if cached_db_path and cached_db_path in self.cache:
+                del self.cache[cached_db_path]
             db = self._parse_database(File(current_db_path))
-            CompilationDb.cache[current_db_path] = db
+            log.debug(" [db]: put into cache: '%s'", current_db_path)
+            self.cache[current_db_path] = db
         # return nothing if we failed to load the db
         if not db:
+            log.debug(" return nothing.")
             return None
         # TODO(igor): probably strip file_path from extension.
         if file_path and file_path in db:
-            CompilationDb.path_for_file[file_path] = current_db_path
+            self.cache[file_path] = current_db_path
+            log.debug(" [db]: %s.", db)
+            log.debug(" cache: %s", self.cache)
             return db[file_path]
+        log.debug(" [db]: for all: %s.", db)
         return db['all']
 
     def _parse_database(self, database_file):
@@ -114,7 +124,7 @@ class CompilationDb(FlagsSource):
         parsed_db = {}
         unique_list_of_flags = UniqueList()
         for entry in data:
-            file_path = path.normpath(entry['file'])
+            file_path = path.splitext(path.normpath(entry['file']))[0]
             command_as_list = CompilationDb.line_as_list(entry['command'])
             flags = self._parse_flags(database_file.folder(), command_as_list)
             # set these flags for current file

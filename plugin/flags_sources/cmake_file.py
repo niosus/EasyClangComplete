@@ -3,10 +3,12 @@
 Attributes:
     log (logging.Log): Current logger.
 """
+from .flags_source import FlagsSource
 from .compilation_db import CompilationDb
 from ..tools import File
 from ..tools import Tools
 from ..tools import SearchScope
+from ..tools import singleton
 
 from os import path
 
@@ -16,7 +18,11 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class CMakeFile(CompilationDb):
+@singleton
+class CMakeFileCache(dict): pass
+
+
+class CMakeFile(FlagsSource):
     """Manages generating a compilation database with cmake.
 
     Attributes:
@@ -27,9 +33,6 @@ class CMakeFile(CompilationDb):
     _FILE_NAME = 'CMakeLists.txt'
     _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
 
-    path_for_file = {}
-    cache = {}
-
     def __init__(self, include_prefixes, prefix_paths):
         """Initialize a cmake-based flag storage.
 
@@ -39,6 +42,7 @@ class CMakeFile(CompilationDb):
                 CMAKE_PREFIX_PATH before invoking cmake.
         """
         super().__init__(include_prefixes)
+        self.cache = CMakeFileCache()
         self.__cmake_prefix_paths = prefix_paths
 
     def get_flags(self, file_path=None, search_scope=None):
@@ -59,18 +63,19 @@ class CMakeFile(CompilationDb):
             search_scope = SearchScope(from_folder=path.dirname(file_path))
         # check if we have a hashed version
         log.debug(" [cmake]:[get]: for file %s", file_path)
-        cached_cmake_path = super().get_cached_from(file_path)
+        cached_cmake_path = self.get_cached_from(file_path)
         log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
-        current_cmake_path = super().find_current_in(search_scope)
+        current_cmake_path = super().find_current_in(search_scope, 'project')
         log.debug(" [cmake]:[current]: '%s'", current_cmake_path)
 
         cmake_path_unchanged = (current_cmake_path == cached_cmake_path)
         cmake_file_unchanged = File.is_unchanged(cached_cmake_path)
         if cmake_path_unchanged and cmake_file_unchanged:
             log.debug(" [cmake]:[unchanged]: use existing db.")
-            if cached_cmake_path in CMakeFile.cache:
-                db_file_path = CMakeFile.cache[cached_cmake_path]
-                return super().get_flags(file_path, db_path=db_file_path)
+            if cached_cmake_path in self.cache:
+                db_file_path = self.cache[cached_cmake_path]
+                db = CompilationDb(self._include_prefixes)
+                return db.get_flags(file_path, db_path=db_file_path)
 
         log.debug(" [cmake]:[generate new db]")
         db_file = CMakeFile.__compile_cmake(
@@ -80,9 +85,11 @@ class CMakeFile(CompilationDb):
             return None
         if file_path:
             # write the current cmake file to cache
-            CMakeFile.path_for_file[file_path] = current_cmake_path
-            CMakeFile.cache[current_cmake_path] = db_file.full_path()
-        return super().get_flags(file_path, db_path=db_file.full_path())
+            self.cache[file_path] = current_cmake_path
+            self.cache[current_cmake_path] = db_file.full_path()
+        db = CompilationDb(self._include_prefixes)
+        flags = db.get_flags(file_path, db_path=db_file.full_path())
+        return flags
 
     @staticmethod
     def __compile_cmake(cmake_file, prefix_paths):

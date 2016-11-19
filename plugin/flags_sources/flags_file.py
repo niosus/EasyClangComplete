@@ -6,12 +6,17 @@ Attributes:
 from .flags_source import FlagsSource
 from ..tools import File
 from ..tools import SearchScope
+from ..tools import singleton
 
 from os import path
 
 import logging
 
 log = logging.getLogger(__name__)
+
+
+@singleton
+class FlagsFileCache(dict): pass
 
 
 class FlagsFile(FlagsSource):
@@ -24,10 +29,6 @@ class FlagsFile(FlagsSource):
     """
     _FILE_NAME = ".clang_complete"
 
-    cache = {}
-    # TODO(igor): Do we need to cache the found flags file?
-    path_for_file = {}
-
     def __init__(self, include_prefixes):
         """Initialize a flag file storage.
 
@@ -35,6 +36,7 @@ class FlagsFile(FlagsSource):
             include_prefixes (str[]): A List of valid include prefixes.
         """
         super().__init__(include_prefixes)
+        self.cache = FlagsFileCache()
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -52,7 +54,7 @@ class FlagsFile(FlagsSource):
             search_scope = SearchScope(from_folder=path.dirname(file_path))
         # check if we have a hashed version
         log.debug(" [clang_complete_file]:[get]: for file %s", file_path)
-        cached_flags_path = super().get_cached_from(file_path)
+        cached_flags_path = self.get_cached_from(file_path)
         log.debug(" [clang_complete_file]:[cached]: '%s'", cached_flags_path)
         flags_file_path = super().find_current_in(search_scope)
         log.debug(" [clang_complete_file]:[current]: '%s'", flags_file_path)
@@ -62,17 +64,17 @@ class FlagsFile(FlagsSource):
         flags_file_same = File.is_unchanged(cached_flags_path)
         if flags_file_path_same and flags_file_same:
             log.debug(" [clang_complete_file]:[unchanged]: load cached")
-            flags = FlagsFile.cache[cached_flags_path]
+            flags = self.cache[cached_flags_path]
         else:
             log.debug(" [clang_complete_file]:[changed]: load new")
-            if cached_flags_path and cached_flags_path in FlagsFile.cache:
-                del FlagsFile.cache[cached_flags_path]
+            if cached_flags_path and cached_flags_path in self.cache:
+                del self.cache[cached_flags_path]
             if not flags_file_path:
                 return None
             flags = self.__flags_from_clang_file(File(flags_file_path))
-            FlagsFile.cache[cached_flags_path] = flags
+            self.cache[cached_flags_path] = flags
             if file_path:
-                FlagsFile.path_for_file[file_path] = flags_file_path
+                self.cache[file_path] = flags_file_path
         # now we return whatever we have
         return flags
 
