@@ -1,32 +1,27 @@
-"""Test tools
+"""Test tools.
 
 Attributes:
     easy_clang_complete (module): this plugin module
     SublBridge (SublBridge): class for subl bridge
 """
 import sublime
-import sys
 import time
 from os import path
 from unittest import TestCase
 
-main_module = sys.modules["EasyClangComplete"]
-
-sys.path.append(path.dirname(path.dirname(__file__)))
-SettingsManager = main_module.plugin.settings.settings_manager.SettingsManager
-SublBridge = main_module.plugin.tools.SublBridge
-Tools = main_module.plugin.tools.Tools
-File = main_module.plugin.tools.File
-PosStatus = main_module.plugin.tools.PosStatus
-# for testing sublime command
+from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
+from EasyClangComplete.plugin.tools import SublBridge
+from EasyClangComplete.plugin.tools import Tools
+from EasyClangComplete.plugin.tools import File
+from EasyClangComplete.plugin.tools import PosStatus
+from EasyClangComplete.plugin.tools import PKG_NAME
+from EasyClangComplete.plugin.tools import singleton
 
 
 class test_tools_command(TestCase):
-    """Test commands
-    """
+    """Test sublime commands."""
     def setUp(self):
-        """Set up testing environment
-        """
+        """Set up testing environment."""
         self.view = sublime.active_window().new_file()
         # make sure we have a window to work with
         s = sublime.load_settings("Preferences.sublime-settings")
@@ -48,8 +43,7 @@ class test_tools_command(TestCase):
             time.sleep(0.1)
 
     def tearDown(self):
-        """ Cleanup method run after every test. """
-
+        """Cleanup method run after every test."""
         # If we have a view, close it.
         if self.view:
             self.view.set_scratch(True)
@@ -58,7 +52,7 @@ class test_tools_command(TestCase):
             self.view = None
 
     def setText(self, string):
-        """Set text to a view
+        """Set text to a view.
 
         Args:
             string (str): some string to set
@@ -76,7 +70,7 @@ class test_tools_command(TestCase):
                                          "scroll_to_end": scroll_to_end})
 
     def move(self, dist, forward=True):
-        """Move the cursor by distance
+        """Move the cursor by distance.
 
         Args:
             dist (int): pixels to move
@@ -88,7 +82,7 @@ class test_tools_command(TestCase):
                                   {"by": "characters", "forward": forward})
 
     def getRow(self, row):
-        """Get row text
+        """Get row text.
 
         Args:
             row (int): number of row
@@ -99,8 +93,7 @@ class test_tools_command(TestCase):
         return self.view.substr(self.view.line(self.view.text_point(row, 0)))
 
     def test_cursor_pos(self):
-        """Test cursor position
-        """
+        """Test cursor position."""
         self.setText("hello")
         (row, col) = SublBridge.cursor_pos(self.view)
         self.assertEqual(row, 1)
@@ -115,15 +108,14 @@ class test_tools_command(TestCase):
         self.assertEqual(col, 3)
 
     def test_next_line(self):
-        """Test returning next line
-        """
+        """Test returning next line."""
         self.setText("hello\nworld!")
         self.move(10, forward=False)
         next_line = SublBridge.next_line(self.view)
         self.assertEqual(next_line, "world!")
 
     def test_wrong_triggers(self):
-        """ Test that we don't complete on numbers and wrong triggers. """
+        """Test that we don't complete on numbers and wrong triggers."""
         self.tearDown()
         self.setUpView(path.join('test_files', 'test_wrong_triggers.cpp'))
         # Load the completions.
@@ -165,21 +157,35 @@ class test_tools_command(TestCase):
 
 
 class test_tools(TestCase):
-    """Test other things
-    """
+    """Test other things."""
+
     def test_pkg_name(self):
-        """Test if the package name is correct
-        """
-        self.assertEqual(main_module.plugin.tools.PKG_NAME,
-                         "EasyClangComplete")
+        """Test if the package name is correct."""
+        self.assertEqual(PKG_NAME, "EasyClangComplete")
+
+    def test_singleton(self):
+        """Test if singleton returns a unique reference."""
+        @singleton
+        class A(object):
+            pass
+
+        @singleton
+        class B(object):
+            pass
+
+        a = A()
+        aa = A()
+        b = B()
+        bb = B()
+        self.assertEqual(id(a), id(aa))
+        self.assertEqual(id(b), id(bb))
+        self.assertNotEqual(id(a), id(b))
 
 
 class test_file(TestCase):
-    """ Testing file related stuff
-    """
+    """Testing file related stuff."""
     def test_find_file(self):
-        """ Test if we can find a file
-        """
+        """Test if we can find a file."""
         current_folder = path.dirname(path.abspath(__file__))
         parent_folder = path.dirname(current_folder)
         file = File.search(
