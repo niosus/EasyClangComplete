@@ -39,11 +39,14 @@ class TestCompilationDb(TestCase):
         expected_main = ['-I' + path.normpath('/lib_include_dir')]
         lib_file_path = path.normpath('/home/user/dummy_lib.cpp')
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
+        # also try to test a header
+        lib_file_path_h = path.normpath('/home/user/dummy_lib.h')
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
                                'linux')
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
+        self.assertEqual(expected_lib, db.get_flags(lib_file_path_h, scope))
         self.assertEqual(expected_main, db.get_flags(main_file_path, scope))
         lib_file_path = path.splitext(lib_file_path)[0]
         main_file_path = path.splitext(main_file_path)[0]
