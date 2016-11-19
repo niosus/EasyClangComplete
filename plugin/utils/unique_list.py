@@ -4,9 +4,6 @@
 class UniqueList:
     """A list that guarantees unique insertion."""
 
-    __values_set = set()
-    __values = list()
-
     def __init__(self, other=None):
         """Init with another iterable if it is present."""
         self.__values = list()
