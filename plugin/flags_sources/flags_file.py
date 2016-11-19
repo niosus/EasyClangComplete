@@ -5,6 +5,7 @@ Attributes:
 """
 from .flags_source import FlagsSource
 from ..tools import File
+from ..tools import SearchScope
 
 from os import path
 
@@ -27,30 +28,33 @@ class FlagsFile(FlagsSource):
     # TODO(igor): Do we need to cache the found flags file?
     path_for_file = {}
 
-    def __init__(self, include_prefixes, search_scope):
+    def __init__(self, include_prefixes):
         """Initialize a flag file storage.
 
         Args:
             include_prefixes (str[]): A List of valid include prefixes.
-            search_scope (SearchScope): Where to search for a flags file.
         """
         super().__init__(include_prefixes)
-        # TODO(igor): Do we need a search scope here?
-        self.__search_scope = search_scope
 
-    def get_flags(self, file_path=None):
+    def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
 
         Args:
             file_path (None, optional): A path to the query file.
+            search_scope (SearchScope, optional): Where to search for a
+                .clang_complete file.
 
-        Returns: str[]: Return a list of flags in this .clang_complete file
+        Returns:
+            str[]: Return a list of flags in this .clang_complete file
         """
-        log.debug(" [clang_complete_file]: for file %s", file_path)
+        # initialize search scope if not initialized before
+        if not search_scope:
+            search_scope = SearchScope(from_folder=path.dirname(file_path))
+        # check if we have a hashed version
+        log.debug(" [clang_complete_file]:[get]: for file %s", file_path)
         cached_flags_path = super().get_cached_from(file_path)
         log.debug(" [clang_complete_file]:[cached]: '%s'", cached_flags_path)
-        flags_file_path = super().find_current_in(
-            self.__search_scope)
+        flags_file_path = super().find_current_in(search_scope)
         log.debug(" [clang_complete_file]:[current]: '%s'", flags_file_path)
 
         flags = None

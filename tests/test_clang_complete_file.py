@@ -52,8 +52,7 @@ class TestFlagsFile(GuiTestWrapper):
         file_name = path.join(test_file_path)
         self.assertEqual(self.view.file_name(), file_name)
 
-        search_scope = SearchScope(from_folder=path.dirname(file_name))
-        flags_file = FlagsFile(['-I', '-isystem'], search_scope)
+        flags_file = FlagsFile(['-I', '-isystem'])
         flags = flags_file.get_flags(file_name)
         self.assertIn('-std=c++11', flags)
 
@@ -67,7 +66,7 @@ class TestFlagsFile(GuiTestWrapper):
         self.assertEqual(self.view.file_name(), file_name)
 
         folder = path.dirname(file_name)
-        search_scope = SearchScope(from_folder=folder, to_folder=folder)
-        flags_file = FlagsFile(['-I', '-isystem'], search_scope)
-        flags = flags_file.get_flags(file_name)
+        flags_file = FlagsFile(['-I', '-isystem'])
+        wrong_scope = SearchScope(from_folder=folder, to_folder=folder)
+        flags = flags_file.get_flags(file_name, wrong_scope)
         self.assertIs(flags, None)

@@ -5,6 +5,7 @@ Attributes:
 """
 from .flags_source import FlagsSource
 from ..tools import File
+from ..tools import SearchScope
 from ..utils.unique_list import UniqueList
 
 from os import path
@@ -28,17 +29,15 @@ class CompilationDb(FlagsSource):
     cache = {}
     path_for_file = {}
 
-    def __init__(self, include_prefixes, search_scope):
+    def __init__(self, include_prefixes):
         """Initialize a compilation database.
 
         Args:
             include_prefixes (str[]): A List of valid include prefixes.
-            search_scope (SearchScope): Where to search for a database file.
         """
         super().__init__(include_prefixes)
-        self.__search_scope = search_scope
 
-    def get_flags(self, file_path=None, current_db_path=None):
+    def get_flags(self, file_path=None, search_scope=None, db_path=None):
         """Get flags for file.
 
         Args:
@@ -49,21 +48,31 @@ class CompilationDb(FlagsSource):
             given, return a list of all unique flags in this compilation
             database
         """
-        log.debug(" [db: get]: for file %s", file_path)
+        if db_path and search_scope:
+            raise RuntimeError(
+                "providing both db_path and search_scope ambiguous.")
+        # initialize search scope if not initialized before
+        if not search_scope:
+            search_scope = SearchScope(from_folder=path.dirname(file_path))
+        # check if we have a hashed version
+        log.debug(" [db]:[get]: for file %s", file_path)
         cached_db_path = super().get_cached_from(file_path)
-        log.debug(" [db: cached]: '%s'", cached_db_path)
-        if not current_db_path:
-            current_db_path = super().find_current_in(
-                self.__search_scope)
-        log.debug(" [db: current]: '%s'", current_db_path)
+        log.debug(" [db]:[cached]: '%s'", cached_db_path)
+        if db_path:
+            current_db_path = db_path
+        else:
+            if not search_scope:
+                search_scope = SearchScope(from_folder=path.dirname(file_path))
+            current_db_path = super().find_current_in(search_scope)
+        log.debug(" [db]:[current]: '%s'", current_db_path)
         db = None
         db_path_unchanged = (current_db_path == cached_db_path)
         db_is_unchanged = File.is_unchanged(cached_db_path)
         if db_path_unchanged and db_is_unchanged:
-            log.debug(" [db: load cached]")
+            log.debug(" [db]:[load cached]")
             db = CompilationDb.cache[cached_db_path]
         else:
-            log.debug(" [db: load new]")
+            log.debug(" [db]:[load new]")
             # clear old value, parse db and set new value
             if cached_db_path and cached_db_path in CompilationDb.cache:
                 del CompilationDb.cache[cached_db_path]

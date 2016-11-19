@@ -240,6 +240,8 @@ class File:
         log.debug(" searching '%s' from '%s' to '%s'",
                   file_name, from_folder, to_folder)
         current_folder = from_folder
+        if not path.exists(current_folder):
+            return File()
         one_past_stop_folder = path.dirname(to_folder)
         while current_folder != one_past_stop_folder:
             for file in listdir(current_folder):
