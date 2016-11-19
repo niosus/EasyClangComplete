@@ -6,3 +6,6 @@ omit =
 
 [report]
 ignore_errors = True
+
+[xml]
+output=coverage.xml
