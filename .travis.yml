@@ -32,7 +32,7 @@ script:
     # - sh travis.sh run_syntax_tests
 
 after_success:
-    - python-codacy-coverage -r coverage.xml
+    - python-codacy-coverage -r .coverage
 
 notifications:
     email: false
