@@ -17,7 +17,7 @@ SearchScope = tools.SearchScope
 PKG_NAME = tools.PKG_NAME
 
 
-class TestCmakeFile(GuiTestWrapper):
+class TestCmakeFile(object):
     """Test getting flags from CMakeLists.txt."""
 
     def test_setup_view(self):
@@ -39,9 +39,6 @@ class TestCmakeFile(GuiTestWrapper):
 
     def test_cmake_generate(self):
         """Test that cmake can generate flags."""
-        if platform.system() == "Windows":
-            print("windows is not fully supported for cmake")
-            return
         test_file_path = path.join(
             path.dirname(__file__), 'cmake_tests', 'test_a.cpp')
         self.set_up_view(test_file_path)
@@ -58,9 +55,6 @@ class TestCmakeFile(GuiTestWrapper):
 
     def test_cmake_fail(self):
         """Test behavior when no CMakeLists.txt found."""
-        if platform.system() == "Windows":
-            print("windows is not fully supported for cmake")
-            return
         test_file_path = path.join(
             path.dirname(__file__), 'cmake_tests', 'test_a.cpp')
         self.set_up_view(test_file_path)
@@ -72,3 +66,9 @@ class TestCmakeFile(GuiTestWrapper):
         cmake_file = CMakeFile(['-I', '-isystem'], search_scope, [])
         flags = cmake_file.get_flags(test_file_path)
         self.assertTrue(flags is None)
+
+
+if platform.system() != "Windows":
+    class CMakeTestRunner(TestCmakeFile, GuiTestWrapper):
+        """Run cmake only if we are not on windows."""
+        pass
