@@ -19,7 +19,7 @@ before_install:
             sh -e /etc/init.d/xvfb start;
             sudo apt-get update -qq -y;
             sudo apt-get install -yqq clang-3.4;
-            pip install codacy-coverage;
+            sudo pip install codacy-coverage;
       fi
 
 install:
