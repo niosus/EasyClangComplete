@@ -36,8 +36,7 @@ class FlagsSource(object):
             return self.cache[file_path]
         return None
 
-    @classmethod
-    def find_current_in(cls, search_scope, search_content=None):
+    def find_current_in(self, search_scope, search_content=None):
         """Find current path in a search scope.
 
         Args:
@@ -47,7 +46,7 @@ class FlagsSource(object):
             str: Path to the current flag source path.
         """
         return File.search(
-            file_name=cls._FILE_NAME,
+            file_name=self._FILE_NAME,
             from_folder=search_scope.from_folder,
             to_folder=search_scope.to_folder,
             search_content=search_content).full_path()

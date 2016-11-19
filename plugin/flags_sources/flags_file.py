@@ -16,7 +16,9 @@ log = logging.getLogger(__name__)
 
 
 @singleton
-class FlagsFileCache(dict): pass
+class FlagsFileCache(dict):
+    """Singleton for .clang_fomplete file cache."""
+    pass
 
 
 class FlagsFile(FlagsSource):
@@ -56,7 +58,7 @@ class FlagsFile(FlagsSource):
         log.debug(" [clang_complete_file]:[get]: for file %s", file_path)
         cached_flags_path = self.get_cached_from(file_path)
         log.debug(" [clang_complete_file]:[cached]: '%s'", cached_flags_path)
-        flags_file_path = super().find_current_in(search_scope)
+        flags_file_path = self.find_current_in(search_scope)
         log.debug(" [clang_complete_file]:[current]: '%s'", flags_file_path)
 
         flags = None

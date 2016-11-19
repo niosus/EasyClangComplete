@@ -17,7 +17,9 @@ log = logging.getLogger(__name__)
 
 
 @singleton
-class ComplationDbCache(dict): pass
+class ComplationDbCache(dict):
+    """Singleton for compilation database cache."""
+    pass
 
 
 class CompilationDb(FlagsSource):
@@ -40,7 +42,7 @@ class CompilationDb(FlagsSource):
         super().__init__(include_prefixes)
         self.cache = ComplationDbCache()
 
-    def get_flags(self, file_path=None, search_scope=None, db_path=None):
+    def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
 
         Args:
@@ -57,10 +59,6 @@ class CompilationDb(FlagsSource):
         """
         if file_path:
             file_path = path.splitext(file_path)[0]
-        # FIXME(igor): can I avoid deviating from abstract method definition?
-        if db_path and search_scope:
-            raise RuntimeError(
-                "providing both db_path and search_scope ambiguous.")
         # initialize search scope if not initialized before
         if not search_scope:
             search_scope = SearchScope(from_folder=path.dirname(file_path))
@@ -68,12 +66,9 @@ class CompilationDb(FlagsSource):
         log.debug(" [db]:[get]: for file %s", file_path)
         cached_db_path = self.get_cached_from(file_path)
         log.debug(" [db]:[cached]: '%s'", cached_db_path)
-        if db_path:
-            current_db_path = db_path
-        else:
-            if not search_scope:
-                search_scope = SearchScope(from_folder=path.dirname(file_path))
-            current_db_path = super().find_current_in(search_scope)
+        if not search_scope:
+            search_scope = SearchScope(from_folder=path.dirname(file_path))
+        current_db_path = self.find_current_in(search_scope)
         log.debug(" [db]:[current]: '%s'", current_db_path)
         db = None
         db_path_unchanged = (current_db_path == cached_db_path)

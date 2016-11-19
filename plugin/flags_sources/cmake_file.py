@@ -19,7 +19,9 @@ log = logging.getLogger(__name__)
 
 
 @singleton
-class CMakeFileCache(dict): pass
+class CMakeFileCache(dict):
+    """Singleton for CMakeLists.txt file cache."""
+    pass
 
 
 class CMakeFile(FlagsSource):
@@ -27,8 +29,8 @@ class CMakeFile(FlagsSource):
 
     Attributes:
         cache (dict): Cache of database filenames for each analyzed
-            CMakeLists.txt file.
-        path_for_file (dict): A path to a database for every source file path.
+            CMakeLists.txt file and of CMakeLists.txt file paths for each
+            analyzed view path.
     """
     _FILE_NAME = 'CMakeLists.txt'
     _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
@@ -65,7 +67,7 @@ class CMakeFile(FlagsSource):
         log.debug(" [cmake]:[get]: for file %s", file_path)
         cached_cmake_path = self.get_cached_from(file_path)
         log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
-        current_cmake_path = super().find_current_in(search_scope, 'project')
+        current_cmake_path = self.find_current_in(search_scope, 'project')
         log.debug(" [cmake]:[current]: '%s'", current_cmake_path)
 
         cmake_path_unchanged = (current_cmake_path == cached_cmake_path)
@@ -75,7 +77,8 @@ class CMakeFile(FlagsSource):
             if cached_cmake_path in self.cache:
                 db_file_path = self.cache[cached_cmake_path]
                 db = CompilationDb(self._include_prefixes)
-                return db.get_flags(file_path, db_path=db_file_path)
+                db_search_scope = SearchScope(from_folder=db_file_path)
+                return db.get_flags(file_path, db_search_scope)
 
         log.debug(" [cmake]:[generate new db]")
         db_file = CMakeFile.__compile_cmake(
@@ -88,7 +91,8 @@ class CMakeFile(FlagsSource):
             self.cache[file_path] = current_cmake_path
             self.cache[current_cmake_path] = db_file.full_path()
         db = CompilationDb(self._include_prefixes)
-        flags = db.get_flags(file_path, db_path=db_file.full_path())
+        db_search_scope = SearchScope(from_folder=db_file.folder())
+        flags = db.get_flags(file_path, db_search_scope)
         return flags
 
     @staticmethod
