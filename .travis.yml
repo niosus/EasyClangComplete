@@ -26,21 +26,13 @@ install:
     - sh travis.sh bootstrap
 
 script:
+    - ls
     - sh travis.sh run_tests --coverage
     # testing syntax_test files
     # - sh travis.sh run_syntax_tests
 
 after_success:
     - python-codacy-coverage -r coverage.xml
-    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-            brew update;
-            brew install python3;
-            pip3 install python-coveralls;
-      fi
-    - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-            pip install python-coveralls;
-      fi
-    - coveralls;
 
 notifications:
     email: false
