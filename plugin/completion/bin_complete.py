@@ -81,7 +81,7 @@ class Completer(BaseCompleter):
 
         """
         # init common completer interface
-        super(Completer, self).__init__(clang_binary)
+        super().__init__(clang_binary)
         Completer.clang_binary = clang_binary
 
         # Create compiler options of specific variant of the compiler.
@@ -130,7 +130,7 @@ class Completer(BaseCompleter):
             return
 
         # init procedure from super class
-        super(Completer, self).init_for_view(view, settings)
+        super().init_for_view(view, settings)
 
         self.flags_dict[view.buffer_id()] = self.flags_manager.get_flags()
 

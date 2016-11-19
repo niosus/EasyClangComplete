@@ -1,6 +1,8 @@
 """Holds an abstract class defining a flags source."""
 from os import path
 
+from ..tools import File
+
 
 class FlagsSource(object):
     """An abstract class defining a Flags Source."""
@@ -20,6 +22,35 @@ class FlagsSource(object):
             NotImplementedError: Should not be called directly.
         """
         raise NotImplementedError("calling abstract method")
+
+    @classmethod
+    def get_cached_from(cls, file_path):
+        """Get cached path for file path.
+
+        Args:
+            file_path (str): Input file path.
+
+        Returns:
+            str: Path to the cached flag source path.
+        """
+        if file_path and file_path in cls.path_for_file:
+            return cls.path_for_file[file_path]
+        return None
+
+    @classmethod
+    def find_current_in(cls, search_scope):
+        """Find current path in a search scope.
+
+        Args:
+            search_scope (SearchScope): Find in a search scope.
+
+        Returns:
+            str: Path to the current flag source path.
+        """
+        return File.search(
+            file_name=cls._FILE_NAME,
+            from_folder=search_scope.from_folder,
+            to_folder=search_scope.to_folder).full_path()
 
     def _parse_flags(self, folder, lines):
         """Parse the flags from given lines.

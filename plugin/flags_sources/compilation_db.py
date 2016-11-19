@@ -35,7 +35,7 @@ class CompilationDb(FlagsSource):
             include_prefixes (str[]): A List of valid include prefixes.
             search_scope (SearchScope): Where to search for a database file.
         """
-        super(CompilationDb, self).__init__(include_prefixes)
+        super().__init__(include_prefixes)
         self.__search_scope = search_scope
 
     def get_flags(self, file_path=None, current_db_path=None):
@@ -50,10 +50,10 @@ class CompilationDb(FlagsSource):
             database
         """
         log.debug(" [db: get]: for file %s", file_path)
-        cached_db_path = CompilationDb.get_cached_from(file_path)
+        cached_db_path = super().get_cached_from(file_path)
         log.debug(" [db: cached]: '%s'", cached_db_path)
         if not current_db_path:
-            current_db_path = CompilationDb.find_current_in(
+            current_db_path = super().find_current_in(
                 self.__search_scope)
         log.debug(" [db: current]: '%s'", current_db_path)
         db = None
@@ -79,35 +79,6 @@ class CompilationDb(FlagsSource):
             CompilationDb.path_for_file[file_path] = current_db_path
             return db[file_path]
         return db['all']
-
-    @classmethod
-    def get_cached_from(cls, file_path):
-        """Get cached path for file path.
-
-        Args:
-            file_path (str): Input file path.
-
-        Returns:
-            str: Path to the cached flag source path.
-        """
-        if file_path and file_path in cls.path_for_file:
-            return cls.path_for_file[file_path]
-        return None
-
-    @classmethod
-    def find_current_in(cls, search_scope):
-        """Find current path in a search scope.
-
-        Args:
-            search_scope (SearchScope): Find in a search scope.
-
-        Returns:
-            str: Path to the current flag source path.
-        """
-        return File.search(
-            file_name=cls._FILE_NAME,
-            from_folder=search_scope.from_folder,
-            to_folder=search_scope.to_folder).full_path()
 
     def _parse_database(self, database_file):
         """Parse a compilation database file.

@@ -69,7 +69,7 @@ class Completer(BaseCompleter):
             clang_binary (str): string for clang binary e.g. 'clang++-3.8'
 
         """
-        super(Completer, self).__init__(clang_binary)
+        super().__init__(clang_binary)
 
         # slightly more complicated name retrieving to allow for more complex
         # version strings, e.g. 3.8.0
@@ -149,7 +149,7 @@ class Completer(BaseCompleter):
             return
 
         # call initializer from the super class
-        super(Completer, self).init_for_view(view, settings)
+        super().init_for_view(view, settings)
 
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))

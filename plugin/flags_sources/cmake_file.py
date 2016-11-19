@@ -38,7 +38,7 @@ class CMakeFile(CompilationDb):
             prefix_paths (str[]): A list of paths to append to
                 CMAKE_PREFIX_PATH before invoking cmake.
         """
-        super(CMakeFile, self).__init__(include_prefixes, search_scope)
+        super().__init__(include_prefixes, search_scope)
         self.__search_scope = search_scope
         self.__cmake_prefix_paths = prefix_paths
 
@@ -56,16 +56,16 @@ class CMakeFile(CompilationDb):
         log.debug(" [cmake: get]: for file %s", file_path)
         cached_cmake_path = super().get_cached_from(file_path)
         log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
-        current_cmake_path = CMakeFile.find_current_in(self.__search_scope)
+        current_cmake_path = super().find_current_in(self.__search_scope)
         log.debug(" [cmake]:[current]: '%s'", current_cmake_path)
 
         cmake_path_unchanged = (current_cmake_path == cached_cmake_path)
         cmake_file_unchanged = File.is_unchanged(cached_cmake_path)
         if cmake_path_unchanged and cmake_file_unchanged:
             log.debug(" [cmake: unchanged]: search for db")
-            db_path = super().find_current_in(
+            db_path = CompilationDb.find_current_in(
                 SearchScope(from_folder=path.dirname(cached_cmake_path)))
-            return super(CMakeFile, self).get_flags(file_path, db_path)
+            return super().get_flags(file_path, db_path)
         else:
             log.debug(" [cmake: generate new db]")
             db_file = CMakeFile.__compile_cmake(
@@ -74,7 +74,7 @@ class CMakeFile(CompilationDb):
             if not db_file:
                 return None
             db_path = db_file.full_path()
-            return super(CMakeFile, self).get_flags(file_path, db_path)
+            return super().get_flags(file_path, db_path)
         return None
 
     @staticmethod
