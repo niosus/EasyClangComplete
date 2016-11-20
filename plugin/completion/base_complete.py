@@ -4,7 +4,6 @@ Attributes:
     log (logging.Logger): logger for this module
 
 """
-import re
 import logging
 
 from os import path
@@ -12,8 +11,12 @@ from os import path
 from .. import error_vis
 from .. import tools
 
-from .flags_manager import FlagsManager
 from .flags_manager import SearchScope
+
+from ..flags_sources.cmake_file import CMakeFile
+from ..flags_sources.compilation_db import CompilationDb
+from ..flags_sources.flags_file import FlagsFile
+
 
 log = logging.getLogger(__name__)
 
@@ -21,8 +24,7 @@ Tools = tools.Tools
 
 
 class BaseCompleter:
-
-    """A base class for clang based completions
+    """A base class for clang based completions.
 
     Attributes:
         completions (list): current list of completions
@@ -34,8 +36,6 @@ class BaseCompleter:
     version_str = None
     error_vis = None
     compiler_variant = None
-
-    flags_manager = None
 
     valid = False
 
@@ -67,14 +67,7 @@ class BaseCompleter:
         Returns:
             bool: True if init needed, False if not
         """
-        # TODO: test this approach. Call it in main file
-        if not self.flags_manager:
-            log.debug(" flags handler not initialized. Do it.")
-            return True
-        if self.flags_manager.any_file_modified():
-            log.debug(" .clang_complete or CMakeLists.txt were modified. "
-                      "Need to reinit.")
-            return True
+        # TODO(igor): what if flag source has changed? Do we even need it now?
         if self.exists_for_view(view.buffer_id()):
             log.debug(" view %s, already has a completer", view.buffer_id())
             return False
@@ -116,16 +109,55 @@ class BaseCompleter:
             settings (Settings): plugin settings
 
         """
+        # initialize default flags (init_flags list needs to be copied).
+        self.initial_flags = list(self.compiler_variant.init_flags)
+        current_lang = Tools.get_view_syntax(view)
+        if current_lang == 'C' or current_lang == 'C99':
+            self.initial_flags += settings.c_flags
+        else:
+            self.initial_flags += settings.cpp_flags
+
+        include_prefixes = self.compiler_variant.include_prefixes
+        home_folder = path.expanduser('~')
+        self.initial_flags += self.parse_flags(home_folder,
+                                               settings.common_flags,
+                                               include_prefixes)
+        # get other flags from some flag source
+        self.clang_flags = self.get_flags_from_source(
+            view, settings, include_prefixes)
+
+    def get_flags_from_source(self, view, settings, include_prefixes):
+        """Get flags from a flag source picked in settings.
+
+        Args:
+            view (View): Current view.
+            settings (SettingsStorage): Current settings.
+            include_prefixes (str[]): Valid include prefixes.
+
+        Returns:
+            str[]: Flags for this view.
+        """
+        prefix_paths = settings.cmake_prefix_paths
+        if prefix_paths is None:
+            prefix_paths = []
         current_dir = path.dirname(view.file_name())
         search_scope = SearchScope(
             from_folder=current_dir,
             to_folder=settings.project_folder)
-        self.flags_manager = FlagsManager(
-            view=view,
-            settings=settings,
-            compiler_variant=self.compiler_variant,
-            search_scope=search_scope)
-        log.debug(" flags_manager loaded")
+        for source in settings.flags_sources:
+            if source == "cmake":
+                flag_source = CMakeFile(include_prefixes, prefix_paths)
+            elif source == "compilation_db":
+                flag_source = CompilationDb(include_prefixes)
+            elif source == "clang_complete_file":
+                flag_source = FlagsFile(include_prefixes)
+            # try to get flags
+            flags = flag_source.get_flags(view.file_name(), search_scope)
+            if flags:
+                # don't load anything more if we have flags
+                log.debug(" flags generated with '%s' source.", source)
+                return flags
+        return None
 
     def complete(self, completion_request):
         """Function to generate completions. See children for implementation.
@@ -163,3 +195,39 @@ class BaseCompleter:
         errors = self.compiler_variant.errors_from_output(output)
         self.error_vis.generate(view, errors)
         self.error_vis.show_regions(view)
+
+    def parse_flags(self, folder, lines, include_prefixes):
+        """Parse the flags from given lines.
+
+        Args:
+            folder (str): current folder
+            lines (str[]): lines to parse
+
+        Returns:
+            str[]: flags
+        """
+
+        def to_absolute_include_path(flag, include_prefixes):
+            """ Change path of include paths to absolute if needed.
+
+            Args:
+                flag (str): flag to check for relative path and fix if needed
+
+            Returns:
+                str: either original flag or modified to have absolute path
+            """
+            for prefix in include_prefixes:
+                if flag.startswith(prefix):
+                    include_path = flag[len(prefix):].strip()
+                    if not path.isabs(include_path):
+                        include_path = path.join(folder, include_path)
+                    return prefix + path.normpath(include_path)
+            return flag
+
+        flags = []
+        for line in lines:
+            line = line.strip()
+            if line.startswith("#"):
+                continue
+            flags.append(to_absolute_include_path(line, include_prefixes))
+        return flags

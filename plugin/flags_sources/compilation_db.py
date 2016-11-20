@@ -57,17 +57,15 @@ class CompilationDb(FlagsSource):
             given, return a list of all unique flags in this compilation
             database
         """
+        if not search_scope:
+            search_scope = SearchScope(from_folder=path.dirname(file_path))
         if file_path:
             file_path = path.splitext(file_path)[0]
         # initialize search scope if not initialized before
-        if not search_scope:
-            search_scope = SearchScope(from_folder=path.dirname(file_path))
         # check if we have a hashed version
         log.debug(" [db]:[get]: for file %s", file_path)
         cached_db_path = self.get_cached_from(file_path)
         log.debug(" [db]:[cached]: '%s'", cached_db_path)
-        if not search_scope:
-            search_scope = SearchScope(from_folder=path.dirname(file_path))
         current_db_path = self.find_current_in(search_scope)
         log.debug(" [db]:[current]: '%s'", current_db_path)
         db = None

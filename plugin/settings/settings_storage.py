@@ -1,4 +1,4 @@
-""" Holds a class that encapsulates plugin settings
+"""Holds a class that encapsulates plugin settings.
 
 Attributes:
     log (logging.Logger): logger for this module
@@ -15,7 +15,7 @@ log.debug(" reloading module %s", __name__)
 
 
 class Wildcards:
-    """ Enum class of supported wildcards
+    """Enum class of supported wildcards.
 
     Attributes:
         CLANG_VERSION (str): a wildcard to be replaced with a clang version
@@ -28,15 +28,15 @@ class Wildcards:
 
 
 class SettingsStorage:
-    """ A class that stores all loaded settings
+    """A class that stores all loaded settings.
 
     Attributes:
-        CMAKE_PRIORITIES (str[]): possible cmake properties
         max_tu_age (int): maximum TU age in seconds
+        FLAG_SOURCES (str[]): possible flag sources
         NAMES_ENUM (str[]): all supported settings names
         PREFIXES (str[]): setting prefixes supported by this plugin
     """
-    CMAKE_PRIORITIES = ["ask", "merge", "overwrite", "keep_old"]
+    FLAG_SOURCES = ["cmake", "compilation_db", "clang_complete_file"]
     PREFIXES = ["ecc_", "easy_clang_complete_"]
 
     _wildcard_values = {
@@ -50,32 +50,31 @@ class SettingsStorage:
         "autocomplete_all",
         "c_flags",
         "clang_binary",
-        "cmake_flags_priority",
         "cmake_prefix_paths",
         "common_flags",
         "cpp_flags",
         "errors_on_save",
-        "generate_flags_with_cmake",
+        "flags_sources",
         "hide_default_completions",
         "include_file_folder",
         "include_file_parent_folder",
         "max_tu_age",
-        "search_clang_complete_file",
         "triggers",
         "use_libclang",
         "verbose",
     ]
 
     def __init__(self, settings_handle):
-        """ Initialize settings storage with default settings handle
+        """Initialize settings storage with default settings handle.
 
         Args:
             settings_handle (sublime.Settings): handle to sublime settings
         """
-        self.__load_vars_from_settings(settings_handle, project_specific=False)
+        self.__load_vars_from_settings(settings_handle,
+                                       project_specific=False)
 
     def update_from_view(self, view):
-        """ Update from view using view-specific settings
+        """Update from view using view-specific settings.
 
         Args:
             view (sublime.View): current view
@@ -84,8 +83,9 @@ class SettingsStorage:
         self.__load_vars_from_settings(view.settings(), project_specific=True)
 
     def is_valid(self):
-        """ Check settings validity. If any of the settings is None the settings
-        are not valid.
+        """Check settings validity.
+
+        If any of the settings is None the settings are not valid.
 
         Returns:
             bool: validity of settings
@@ -96,14 +96,15 @@ class SettingsStorage:
             if value is None:
                 log.critical(" no setting '%s' found!", key)
                 return False
-        if self.cmake_flags_priority not in SettingsStorage.CMAKE_PRIORITIES:
-            log.critical(" priority: '%s' is not one of allowed ones!",
-                         self.cmake_flags_priority)
-            return False
+        for source in self.flags_sources:
+            if source not in SettingsStorage.FLAG_SOURCES:
+                log.critical(" flag source: '%s' is not one of '%s'!",
+                             source, SettingsStorage.FLAG_SOURCES)
+                return False
         return True
 
     def __load_vars_from_settings(self, settings, project_specific=False):
-        """ Load all settings and add them as attributes of self
+        """Load all settings and add them as attributes of self.
 
         Args:
             settings (dict): settings from sublime
@@ -139,7 +140,7 @@ class SettingsStorage:
             self.max_tu_age = Tools.seconds_from_string(self.max_tu_age)
 
     def __populate_common_flags(self, view):
-        """ Populate the variables inside common_flags with real values
+        """Populate the variables inside common_flags with real values.
 
         Args:
             view (sublime.View): current view
@@ -165,7 +166,7 @@ class SettingsStorage:
             self.common_flags.append("-I" + file_parent_folder)
 
     def __replace_wildcard_if_needed(self, flag):
-        """ Replace wildcards in a flag if they are present there
+        """Replace wildcards in a flag if they are present there.
 
         Args:
             flag (str): flag possibly with wildcards in it
@@ -183,7 +184,7 @@ class SettingsStorage:
         return res
 
     def __update_widcard_values(self, view):
-        """ Update values for wildcard variables """
+        """Update values for wildcard variables."""
         variables = view.window().extract_variables()
         if 'folder' in variables:
             project_folder = variables['folder'].replace('\\', '\\\\')

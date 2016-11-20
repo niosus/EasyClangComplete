@@ -8,14 +8,16 @@ import importlib
 import sublime
 import time
 import logging
+from os import path
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
-from .. import error_vis
 from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
+from ..tools import SearchScope
 from ..utils.stamped_tu import StampedTu
+
 
 from threading import Timer
 from threading import RLock
@@ -39,8 +41,7 @@ clang_utils_module_name = PKG_NAME + ".clang.utils"
 
 
 class Completer(BaseCompleter):
-
-    """Encapsulates completions based on libclang
+    """Encapsulates completions based on libclang.
 
     Attributes:
         rlock (threading.Rlock): recursive mutex
@@ -63,6 +64,7 @@ class Completer(BaseCompleter):
 
     def __init__(self, clang_binary):
         """Initialize the Completer from clang binary, reading its version.
+
         Picks an according cindex for the found version.
 
         Args:
@@ -122,7 +124,7 @@ class Completer(BaseCompleter):
             return view_id
 
     def exists_for_view(self, view_id):
-        """find if there is a completer for the view
+        """Find if there is a completer for the view.
 
         Args:
             view_id (int): current view id
@@ -157,8 +159,12 @@ class Completer(BaseCompleter):
         # initialize unsaved files
         files = [(file_name, file_body)]
 
-        # get flags from manager
-        clang_flags = self.flags_manager.get_flags()
+        # flags are loaded by base completer already
+        if self.clang_flags:
+            clang_flags = self.initial_flags + self.clang_flags
+        else:
+            # fallback mode
+            clang_flags = self.initial_flags
 
         log.debug(" clang flags are: %s", clang_flags)
         v_id = view.buffer_id()
@@ -191,9 +197,10 @@ class Completer(BaseCompleter):
             self.timer.start()
 
     def complete(self, completion_request):
-        """ This function is called asynchronously to create a list of
-        autocompletions. Using the current translation unit it queries libclang
-        for the possible completions.
+        """Called asynchronously to create a list of autocompletions.
+
+        Using the current translation unit it queries libclang for the
+        possible completions.
 
         """
         view = completion_request.get_view()
@@ -229,8 +236,10 @@ class Completer(BaseCompleter):
         return (completion_request, completions)
 
     def update(self, view, show_errors):
-        """Reparse the translation unit. This speeds up completions
-        significantly, so we perform this upon file save.
+        """Reparse the translation unit.
+
+        This speeds up completions significantly, so we perform this upon file
+        save.
 
         Args:
             view (sublime.View): current view
@@ -256,7 +265,7 @@ class Completer(BaseCompleter):
         return False
 
     def __remove_old_TUs(self):
-        """ Remove old translation units and restart timer """
+        """Remove old translation units and restart timer."""
         # first restart timer
         self.timer.cancel()
         self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
@@ -286,7 +295,7 @@ class Completer(BaseCompleter):
 
     @staticmethod
     def _cindex_for_version(version):
-        """ Get cindex module name from version string.
+        """Get cindex module name from version string.
 
         Args:
             version (str): version string, such as "3.8" or "3.8.0"
@@ -301,7 +310,7 @@ class Completer(BaseCompleter):
 
     @staticmethod
     def _parse_completions(complete_results):
-        """Create snippet-like structures from a list of completions
+        """Create snippet-like structures from a list of completions.
 
         Args:
             complete_results (list): raw completions list

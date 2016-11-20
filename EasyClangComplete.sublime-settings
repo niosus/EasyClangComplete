@@ -20,21 +20,14 @@
 		"-std=c++11"
 	],
 
-	// search for .clang_complete file up the tree. Use flags from it if found
-	"search_clang_complete_file": true,
-
-	// search for CMakeLists.txt with a "project" command in it. Run cmake on this
-	// file from temporary folder to generate compilation database. Update
-	// .clang_complete file with these generated flags.
-	"generate_flags_with_cmake": true,
-
-	// what to do if old flags were found in .clang_complete file?
-	// can be one of the following:
-	// 		- "ask": ask the user every time we need to overwite .clang_complete
-	// 		- "merge": merge all together, ignore dublicates
-	// 		- "overwrite": overwrite whatever is already in the file
-	// 		- "keep_old": ignore flags from cmake, keep old one instead
-	"cmake_flags_priority": "ask",
+	// Define how we search needed flags. Prioritized from left to right.
+	//  - "cmake": search for 'CMakeLists.txt' with 'project' annotation. Run
+	//    cmake to generate compilation database and parse it for flags.
+	//  - "compilation_db": search for 'compile_commands.json' file in project
+	//    folder and get flags from there on per view basis.
+	//  - "clang_complete_file": search for '.clang_complete' file in project
+	//    and parse it for flags.
+	"flags_sources": ["cmake", "compilation_db", "clang_complete_file"],
 
 	// add these to CMAKE_PREFIX_PATH. Needed if you have an esoteric build system
 	"cmake_prefix_paths": [

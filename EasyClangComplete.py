@@ -47,8 +47,9 @@ def plugin_loaded():
 
 
 class EasyClangComplete(sublime_plugin.EventListener):
+    """Base class for this plugin.
 
-    """Base class for this plugin. Most of the functionality is delegated
+    Most of the functionality is delegated.
 
     Attributes:
         settings (plugin_settings.Settings): class that encapsulates settings
@@ -67,7 +68,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
     current_completions = []
 
     def __init__(self):
-        """Initializes the object."""
+        """Initialize the object."""
         super().__init__()
         global handle_plugin_loaded_function
         handle_plugin_loaded_function = self.on_plugin_loaded
@@ -76,7 +77,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         logging.basicConfig(level=logging.DEBUG)
 
     def on_plugin_loaded(self):
-        """ Called upon plugin load event."""
+        """Called upon plugin load event."""
         self.settings_manager = SettingsManager()
         self.on_settings_changed()
         self.settings_manager.add_change_listener(self.on_settings_changed)
@@ -86,7 +87,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.on_activated_async(sublime.active_window().active_view())
 
     def on_settings_changed(self):
-        """ Called when any of the settings changes."""
+        """Called when any of the settings changes."""
         user_settings = self.settings_manager.user_settings()
         # If verbose flag is set then respect default DEBUG level.
         # Otherwise disable level DEBUG and allow INFO and higher levels.
@@ -107,7 +108,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             self.completer = bin_complete.Completer(user_settings.clang_binary)
 
     def on_activated_async(self, view):
-        """ Called upon activating a view. Execution in a worker thread.
+        """Called upon activating a view. Execution in a worker thread.
 
         Args:
             view (sublime.View): current view
@@ -117,14 +118,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if Tools.is_valid_view(view):
             if not self.completer:
                 return
-            if not self.completer.needs_init(view):
-                return
+            # TODO(igor): reintroduce check if we need a new completer here
             settings = self.settings_manager.settings_for_view(view)
             log.debug("init completer for view id: %s", view.buffer_id())
             self.completer.init_for_view(view, settings)
 
     def on_selection_modified(self, view):
-        """ Called when selection is modified. Executed in gui thread.
+        """Called when selection is modified. Executed in gui thread.
 
         Args:
             view (sublime.View): current view
@@ -136,7 +136,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             self.completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
-        """ Called in a worker thread when view is modified
+        """Called in a worker thread when view is modified.
 
         Args:
             view (sublime.View): current view
@@ -148,7 +148,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             self.completer.error_vis.clear(view)
 
     def on_post_save_async(self, view):
-        """ On save. Executed in a worker thread.
+        """Executed in a worker thread on save.
 
         Args:
             view (sublime.View): current view
@@ -180,8 +180,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     @staticmethod
     def completer_removed(future):
-        """ Callback called when completer has closed object for a view. The
-        corresponding view id is saved in future.result()
+        """Callback called when completer has closed object for a view.
+
+        The corresponding view id is saved in future.result()
 
         Args:
             future (concurrent.Future): future holding id of removed view
@@ -192,8 +193,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" could not remove completer -> cancelled")
 
     def completion_finished(self, future):
-        """ Callback called when completion async function has returned. Checks
-        if job id equals the one that is expected now and updates the
+        """Callback called when completion async function has returned.
+
+        Checks if job id equals the one that is expected now and updates the
         completion list that is going to be used in on_query_completions
 
         Args:
@@ -218,7 +220,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             SublBridge.show_auto_complete(active_view)
 
     def on_query_completions(self, view, prefix, locations):
-        """ Function that is called when user queries completions in the code
+        """Function that is called when user queries completions in the code.
 
         Args:
             view (sublime.View): current view

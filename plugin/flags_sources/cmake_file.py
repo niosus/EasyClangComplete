@@ -77,7 +77,8 @@ class CMakeFile(FlagsSource):
             if cached_cmake_path in self.cache:
                 db_file_path = self.cache[cached_cmake_path]
                 db = CompilationDb(self._include_prefixes)
-                db_search_scope = SearchScope(from_folder=db_file_path)
+                db_search_scope = SearchScope(
+                    from_folder=path.dirname(db_file_path))
                 return db.get_flags(file_path, db_search_scope)
 
         log.debug(" [cmake]:[generate new db]")
