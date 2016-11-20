@@ -79,8 +79,8 @@ class SettingsStorage:
         Args:
             view (sublime.View): current view
         """
-        self.__populate_common_flags(view)
         self.__load_vars_from_settings(view.settings(), project_specific=True)
+        self.__populate_common_flags(view)
 
     def is_valid(self):
         """Check settings validity.
