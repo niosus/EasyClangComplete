@@ -176,7 +176,7 @@ class base_test_complete(object):
         self.assertIn(expected, completions)
 
     def test_unsaved_views(self):
-        """ Test that we gracefully handle unsaved views. """
+        """Test that we gracefully handle unsaved views."""
         # Construct an unsaved scratch view.
         self.view = sublime.active_window().new_file()
         self.view.set_scratch(True)
@@ -210,49 +210,13 @@ class base_test_complete(object):
         self.view.run_command('auto_complete')
         self.assertTrue(self.view.is_auto_complete_visible())
 
-    def test_cmake_generate(self):
-        """We search for cmakelists and generate .clang_complete file."""
-        if platform.system() == "Windows":
-            print("windows is not fully supported for cmake")
-            return
-        test_file_path = path.join('cmake_tests', 'test_a.cpp')
-        self.setUpView(test_file_path)
-
-        file_name = path.join(path.dirname(__file__),
-                              'cmake_tests',
-                              'test_a.cpp')
-        self.assertEqual(self.view.file_name(), file_name)
-        completer = self.setUpCompleter()
-        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
-        expected_cmake_file = path.join('cmake_tests', 'CMakeLists.txt')
-        expected_clang_file = path.join('cmake_tests', '.clang_complete')
-        self.assertTrue(
-            completer.flags_manager._cmake_file.full_path().endswith(
-                expected_cmake_file))
-        self.assertTrue(
-            completer.flags_manager._clang_complete_file.full_path().endswith(
-                expected_clang_file))
-        flags_file = completer.flags_manager._clang_complete_file.full_path()
-        file = open(flags_file, 'r')
-        found = False
-        line = file.readline()
-        while line:
-            print(line)
-            real_line = line.strip()
-            if line.startswith('-I'):
-                if real_line.endswith('lib') or real_line.endswith('lib"'):
-                    found = True
-                    break
-            line = file.readline()
-        file.close()
-        self.assertTrue(found)
-
 
 class test_bin_complete(base_test_complete, TestCase):
-    """ Test class for the binary based completer. """
+    """Test class for the binary based completer."""
     Completer = CompleterBin
+
 
 if has_libclang():
     class test_lib_complete(base_test_complete, TestCase):
-        """ Test class for the library based completer. """
+        """Test class for the library based completer."""
         Completer = CompleterLib

@@ -1,29 +1,23 @@
-"""Tests for settings
-"""
+"""Tests for settings."""
 import sublime
-import sys
 import time
 from os import path
 from unittest import TestCase
 
-sys.path.append(path.dirname(path.dirname(__file__)))
-from plugin.settings.settings_manager import SettingsManager
+from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
 
 
 class test_settings(TestCase):
-    """Tests for settings
-    """
+    """Tests for settings."""
     def setUp(self):
-        """Set up testing environment
-        """
+        """Set up testing environment."""
         self.view = None
         # make sure we have a window to work with
         s = sublime.load_settings("Preferences.sublime-settings")
         s.set("close_windows_when_empty", False)
 
     def setUpView(self, filename):
-        """
-        Utility method to set up a view for a given file.
+        """Utility method to set up a view for a given file.
 
         Args:
             filename (str): The filename to open in a new view.
@@ -37,8 +31,7 @@ class test_settings(TestCase):
             time.sleep(0.1)
 
     def tearDown(self):
-        """ Cleanup method run after every test. """
-
+        """Cleanup method run after every test."""
         # If we have a view, close it.
         if self.view:
             self.view.set_scratch(True)
@@ -47,9 +40,7 @@ class test_settings(TestCase):
             self.view = None
 
     def test_init(self):
-        """Test that settings are correctly initialized
-
-        """
+        """Test that settings are correctly initialized."""
         manager = SettingsManager()
         settings = manager.user_settings()
         self.assertIsNotNone(settings.verbose)
@@ -58,20 +49,17 @@ class test_settings(TestCase):
         self.assertIsNotNone(settings.triggers)
         self.assertIsNotNone(settings.common_flags)
         self.assertIsNotNone(settings.clang_binary)
-        self.assertIsNotNone(settings.search_clang_complete_file)
+        self.assertIsNotNone(settings.flags_sources)
         self.assertIsNotNone(settings.errors_on_save)
 
     def test_valid(self):
-        """Test validity
-
-        """
+        """Test validity."""
         manager = SettingsManager()
         settings = manager.user_settings()
         self.assertTrue(settings.is_valid())
 
     def test_populate_flags(self):
-        """Testing include population
-        """
+        """Testing include population."""
         # open any existing file
         self.tearDown()
         self.setUpView(path.join('test_files', 'test_wrong_triggers.cpp'))

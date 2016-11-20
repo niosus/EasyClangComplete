@@ -45,7 +45,6 @@ class FlagsSource(object):
         Returns:
             str: Path to the current flag source path.
         """
-        print(" search flag file from:", search_scope.from_folder)
         return File.search(
             file_name=self._FILE_NAME,
             from_folder=search_scope.from_folder,

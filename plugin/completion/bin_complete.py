@@ -117,14 +117,13 @@ class Completer(BaseCompleter):
         return False
 
     def init_for_view(self, view, settings):
-        """Initialize the completer
+        """Initialize the completer.
 
         Args:
             view (sublime.View): current view
             settings (Settings): plugin settings
 
         """
-
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
             return
@@ -132,13 +131,21 @@ class Completer(BaseCompleter):
         # init procedure from super class
         super().init_for_view(view, settings)
 
-        self.flags_dict[view.buffer_id()] = self.flags_manager.get_flags()
+        # flags are loaded by base completer already
+        if self.clang_flags:
+            clang_flags = self.initial_flags + self.clang_flags
+        else:
+            # fallback mode
+            clang_flags = self.initial_flags
+
+        self.flags_dict[view.buffer_id()] = clang_flags
 
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
 
     def complete(self, completion_request):
-        """ This function is called asynchronously to create a list of
-        autocompletions. It builds up a clang command that is then executed
+        """Called asynchronously to create a list of autocompletions.
+
+        It builds up a clang command that is then executed
         as a subprocess. The output is parsed for completions """
         view = completion_request.get_view()
         if not view.buffer_id() in self.flags_dict:
