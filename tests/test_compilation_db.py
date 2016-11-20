@@ -50,20 +50,20 @@ class TestCompilationDb(TestCase):
         self.assertEqual(expected_main, db.get_flags(main_file_path, scope))
         lib_file_path = path.splitext(lib_file_path)[0]
         main_file_path = path.splitext(main_file_path)[0]
-        self.assertIn(lib_file_path, db.cache)
-        self.assertIn(main_file_path, db.cache)
+        self.assertIn(lib_file_path, db._cache)
+        self.assertIn(main_file_path, db._cache)
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
                                'linux', 'compile_commands.json')
         self.assertEqual(path_to_db,
-                         db.cache[lib_file_path])
+                         db._cache[lib_file_path])
         self.assertEqual(path_to_db,
-                         db.cache[main_file_path])
+                         db._cache[main_file_path])
 
         self.assertIn(expected_main[0],
-                      db.cache[path_to_db]['all'])
-        self.assertIn(expected_lib[0], db.cache[path_to_db]['all'])
-        self.assertIn(expected_lib[1], db.cache[path_to_db]['all'])
+                      db._cache[path_to_db]['all'])
+        self.assertIn(expected_lib[0], db._cache[path_to_db]['all'])
+        self.assertIn(expected_lib[1], db._cache[path_to_db]['all'])
 
     def test_no_db_in_folder(self):
         """Test if compilation db is found."""
@@ -91,8 +91,8 @@ class TestCompilationDb(TestCase):
         lib_file_path = path.splitext(lib_file_path)[0]
         main_file_path = path.splitext(main_file_path)[0]
         # check persistence
-        self.assertGreater(len(db.cache), 2)
+        self.assertGreater(len(db._cache), 2)
         self.assertEqual(path.join(path_to_db, "compile_commands.json"),
-                         db.cache[main_file_path])
+                         db._cache[main_file_path])
         self.assertEqual(path.join(path_to_db, "compile_commands.json"),
-                         db.cache[lib_file_path])
+                         db._cache[lib_file_path])

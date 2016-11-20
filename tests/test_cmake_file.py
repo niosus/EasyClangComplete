@@ -37,10 +37,10 @@ class TestCmakeFile(object):
         flags = cmake_file.get_flags(test_file_path)
         self.assertEqual(len(flags), 1)
         self.assertEqual(flags[0], '-I' + expected_lib)
-        self.assertIn(test_file_path, cmake_file.cache)
+        self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
             path_to_cmake_proj, CMakeFile._FILE_NAME)
-        found_cmake_file = cmake_file.cache[test_file_path]
+        found_cmake_file = cmake_file._cache[test_file_path]
         self.assertEqual(expected_cmake_file, found_cmake_file)
 
     def test_cmake_with_existing_header(self):
@@ -56,13 +56,13 @@ class TestCmakeFile(object):
         self.assertEqual(len(flags), 2)
         self.assertEqual(flags[0], '-Dliba_EXPORTS')
         self.assertEqual(flags[1], '-fPIC')
-        self.assertIn(test_file_path, cmake_file.cache)
+        self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
             path.dirname(path_to_file_folder), CMakeFile._FILE_NAME)
-        found_cmake_file = cmake_file.cache[test_file_path]
+        found_cmake_file = cmake_file._cache[test_file_path]
         self.assertEqual(expected_cmake_file, found_cmake_file)
-        used_db_path = cmake_file.cache[found_cmake_file]
-        used_db = db.cache[used_db_path]
+        used_db_path = cmake_file._cache[found_cmake_file]
+        used_db = db._cache[used_db_path]
         self.assertIn(expected_lib_include, used_db['all'])
 
     def test_cmake_fail(self):

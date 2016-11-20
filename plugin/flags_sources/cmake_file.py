@@ -44,7 +44,7 @@ class CMakeFile(FlagsSource):
                 CMAKE_PREFIX_PATH before invoking cmake.
         """
         super().__init__(include_prefixes)
-        self.cache = CMakeFileCache()
+        self._cache = CMakeFileCache()
         self.__cmake_prefix_paths = prefix_paths
 
     def get_flags(self, file_path=None, search_scope=None):
@@ -65,17 +65,17 @@ class CMakeFile(FlagsSource):
             search_scope = SearchScope(from_folder=path.dirname(file_path))
         # check if we have a hashed version
         log.debug(" [cmake]:[get]: for file %s", file_path)
-        cached_cmake_path = self.get_cached_from(file_path)
+        cached_cmake_path = self._get_cached_from(file_path)
         log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
-        current_cmake_path = self.find_current_in(search_scope, 'project')
+        current_cmake_path = self._find_current_in(search_scope, 'project')
         log.debug(" [cmake]:[current]: '%s'", current_cmake_path)
 
         cmake_path_unchanged = (current_cmake_path == cached_cmake_path)
         cmake_file_unchanged = File.is_unchanged(cached_cmake_path)
         if cmake_path_unchanged and cmake_file_unchanged:
             log.debug(" [cmake]:[unchanged]: use existing db.")
-            if cached_cmake_path in self.cache:
-                db_file_path = self.cache[cached_cmake_path]
+            if cached_cmake_path in self._cache:
+                db_file_path = self._cache[cached_cmake_path]
                 db = CompilationDb(self._include_prefixes)
                 db_search_scope = SearchScope(
                     from_folder=path.dirname(db_file_path))
@@ -89,8 +89,8 @@ class CMakeFile(FlagsSource):
             return None
         if file_path:
             # write the current cmake file to cache
-            self.cache[file_path] = current_cmake_path
-            self.cache[current_cmake_path] = db_file.full_path()
+            self._cache[file_path] = current_cmake_path
+            self._cache[current_cmake_path] = db_file.full_path()
         db = CompilationDb(self._include_prefixes)
         db_search_scope = SearchScope(from_folder=db_file.folder())
         flags = db.get_flags(file_path, db_search_scope)

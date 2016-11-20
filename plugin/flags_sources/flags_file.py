@@ -38,7 +38,7 @@ class FlagsFile(FlagsSource):
             include_prefixes (str[]): A List of valid include prefixes.
         """
         super().__init__(include_prefixes)
-        self.cache = FlagsFileCache()
+        self._cache = FlagsFileCache()
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -56,9 +56,9 @@ class FlagsFile(FlagsSource):
             search_scope = SearchScope(from_folder=path.dirname(file_path))
         # check if we have a hashed version
         log.debug(" [clang_complete_file]:[get]: for file %s", file_path)
-        cached_flags_path = self.get_cached_from(file_path)
+        cached_flags_path = self._get_cached_from(file_path)
         log.debug(" [clang_complete_file]:[cached]: '%s'", cached_flags_path)
-        flags_file_path = self.find_current_in(search_scope)
+        flags_file_path = self._find_current_in(search_scope)
         log.debug(" [clang_complete_file]:[current]: '%s'", flags_file_path)
         if not flags_file_path:
             return None
@@ -68,16 +68,16 @@ class FlagsFile(FlagsSource):
         flags_file_same = File.is_unchanged(cached_flags_path)
         if flags_file_path_same and flags_file_same:
             log.debug(" [clang_complete_file]:[unchanged]: load cached")
-            log.debug(" [clang_complete_file]: cache: %s", self.cache)
-            return self.cache[cached_flags_path]
+            log.debug(" [clang_complete_file]: cache: %s", self._cache)
+            return self._cache[cached_flags_path]
         log.debug(" [clang_complete_file]:[changed]: load new")
-        if cached_flags_path and cached_flags_path in self.cache:
-            del self.cache[cached_flags_path]
+        if cached_flags_path and cached_flags_path in self._cache:
+            del self._cache[cached_flags_path]
         flags = self.__flags_from_clang_file(File(flags_file_path))
         if flags:
-            self.cache[cached_flags_path] = flags
+            self._cache[cached_flags_path] = flags
         if file_path:
-            self.cache[file_path] = flags_file_path
+            self._cache[file_path] = flags_file_path
         # now we return whatever we have
         return flags
 
@@ -100,6 +100,7 @@ class FlagsFile(FlagsSource):
         flags = []
         with open(file.full_path()) as f:
             content = f.readlines()
-            flags = self._parse_flags(file.folder(), content)
+            flags = FlagsSource.parse_flags(
+                file.folder(), content, self._include_prefixes)
         log.debug(" .clang_complete contains flags: %s", flags)
         return flags

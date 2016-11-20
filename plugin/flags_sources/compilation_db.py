@@ -40,7 +40,7 @@ class CompilationDb(FlagsSource):
             include_prefixes (str[]): A List of valid include prefixes.
         """
         super().__init__(include_prefixes)
-        self.cache = ComplationDbCache()
+        self._cache = ComplationDbCache()
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -60,42 +60,40 @@ class CompilationDb(FlagsSource):
         if not search_scope:
             search_scope = SearchScope(from_folder=path.dirname(file_path))
         if file_path:
+            # strip the file path from extension.
             file_path = path.splitext(file_path)[0]
         # initialize search scope if not initialized before
         # check if we have a hashed version
         log.debug(" [db]:[get]: for file %s", file_path)
-        cached_db_path = self.get_cached_from(file_path)
+        cached_db_path = self._get_cached_from(file_path)
         log.debug(" [db]:[cached]: '%s'", cached_db_path)
-        current_db_path = self.find_current_in(search_scope)
+        current_db_path = self._find_current_in(search_scope)
         log.debug(" [db]:[current]: '%s'", current_db_path)
         db = None
         db_path_unchanged = (current_db_path == cached_db_path)
         db_is_unchanged = File.is_unchanged(cached_db_path)
         if db_path_unchanged and db_is_unchanged:
             log.debug(" [db]:[load cached]")
-            db = self.cache[cached_db_path]
+            db = self._cache[cached_db_path]
         else:
             log.debug(" [db]:[load new]")
             # clear old value, parse db and set new value
             if not current_db_path:
                 log.debug(" [db]:[no new]: return None")
                 return None
-            if cached_db_path and cached_db_path in self.cache:
-                del self.cache[cached_db_path]
+            if cached_db_path and cached_db_path in self._cache:
+                del self._cache[cached_db_path]
             db = self._parse_database(File(current_db_path))
             log.debug(" [db]: put into cache: '%s'", current_db_path)
-            self.cache[current_db_path] = db
+            self._cache[current_db_path] = db
         # return nothing if we failed to load the db
         if not db:
-            log.debug(" return nothing.")
+            log.debug(" [db]: not found, return None.")
             return None
-        # TODO(igor): probably strip file_path from extension.
         if file_path and file_path in db:
-            self.cache[file_path] = current_db_path
-            log.debug(" [db]: %s.", db)
-            log.debug(" cache: %s", self.cache)
+            self._cache[file_path] = current_db_path
             return db[file_path]
-        log.debug(" [db]: for all: %s.", db)
+        log.debug(" [db]: return entry for 'all'.")
         return db['all']
 
     def _parse_database(self, database_file):
@@ -119,7 +117,9 @@ class CompilationDb(FlagsSource):
         for entry in data:
             file_path = path.splitext(path.normpath(entry['file']))[0]
             command_as_list = CompilationDb.line_as_list(entry['command'])
-            flags = self._parse_flags(database_file.folder(), command_as_list)
+            flags = FlagsSource.parse_flags(database_file.folder(),
+                                            command_as_list,
+                                            self._include_prefixes)
             # set these flags for current file
             parsed_db[file_path] = flags
             # also maintain merged flags

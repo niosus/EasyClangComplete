@@ -16,6 +16,7 @@ from ..tools import SearchScope
 from ..flags_sources.cmake_file import CMakeFile
 from ..flags_sources.compilation_db import CompilationDb
 from ..flags_sources.flags_file import FlagsFile
+from ..flags_sources.flags_source import FlagsSource
 
 
 log = logging.getLogger(__name__)
@@ -119,9 +120,8 @@ class BaseCompleter:
 
         include_prefixes = self.compiler_variant.include_prefixes
         home_folder = path.expanduser('~')
-        initial_flags += BaseCompleter.parse_flags(home_folder,
-                                                   settings.common_flags,
-                                                   include_prefixes)
+        initial_flags += FlagsSource.parse_flags(
+            home_folder, settings.common_flags, include_prefixes)
         # get other flags from some flag source
         current_flags = BaseCompleter.get_flags_from_source(
             view, settings, include_prefixes)
@@ -197,40 +197,3 @@ class BaseCompleter:
         errors = self.compiler_variant.errors_from_output(output)
         self.error_vis.generate(view, errors)
         self.error_vis.show_regions(view)
-
-    @staticmethod
-    def parse_flags(folder, lines, include_prefixes):
-        """Parse the flags from given lines.
-
-        Args:
-            folder (str): current folder
-            lines (str[]): lines to parse
-
-        Returns:
-            str[]: flags
-        """
-
-        def to_absolute_include_path(flag, include_prefixes):
-            """Change path of include paths to absolute if needed.
-
-            Args:
-                flag (str): flag to check for relative path and fix if needed
-
-            Returns:
-                str: either original flag or modified to have absolute path
-            """
-            for prefix in include_prefixes:
-                if flag.startswith(prefix):
-                    include_path = flag[len(prefix):].strip()
-                    if not path.isabs(include_path):
-                        include_path = path.join(folder, include_path)
-                    return prefix + path.normpath(include_path)
-            return flag
-
-        flags = []
-        for line in lines:
-            line = line.strip()
-            if line.startswith("#"):
-                continue
-            flags.append(to_absolute_include_path(line, include_prefixes))
-        return flags
