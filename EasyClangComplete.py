@@ -18,11 +18,9 @@ from .plugin import error_vis
 from .plugin.settings import settings_manager
 from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
-from .plugin.completion import flags_manager
 
 # reload the modules
 imp.reload(tools)
-imp.reload(flags_manager)
 imp.reload(settings_manager)
 imp.reload(error_vis)
 imp.reload(lib_complete)

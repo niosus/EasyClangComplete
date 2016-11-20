@@ -1,22 +1,22 @@
 """Tests for autocompletion."""
 import sublime
-import sys
 import time
 import platform
 from os import path
 from unittest import TestCase
 
-sys.path.append(path.dirname(path.dirname(__file__)))
-from plugin.settings.settings_manager import SettingsManager
-from plugin.completion.bin_complete import Completer as CompleterBin
-from plugin.completion.lib_complete import Completer as CompleterLib
-from plugin.tools import CompletionRequest
-from plugin.tools import PKG_NAME
+from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
+from EasyClangComplete.plugin.completion import bin_complete
+from EasyClangComplete.plugin.completion import lib_complete
+from EasyClangComplete.plugin.tools import CompletionRequest
+from EasyClangComplete.plugin.tools import PKG_NAME
+
+CompleterBin = bin_complete.Completer
+CompleterLib = lib_complete.Completer
 
 
 def has_libclang():
-    """
-    Ensure libclang tests will run only on platforms that support this.
+    """Ensure libclang tests will run only on platforms that support this.
 
     Returns:
         str: row contents
@@ -30,16 +30,14 @@ def has_libclang():
 
 class base_test_complete(object):
     """
-    Base class for all tests that are independent of the Completer
-    implementation.
+    Base class for tests that are independent of the Completer implementation.
 
     Attributes:
         view (sublime.View): view
         Completer (type): Completer class to use
     """
     def setUp(self):
-        """ Setup method run before every test. """
-
+        """Setup method run before every test."""
         # Ensure we have a window to work with.
         s = sublime.load_settings("Preferences.sublime-settings")
         s.set("close_windows_when_empty", False)
@@ -50,8 +48,7 @@ class base_test_complete(object):
         self.view = None
 
     def tearDown(self):
-        """ Cleanup method run after every test. """
-
+        """Cleanup method run after every test."""
         # If we have a view, close it.
         if self.view:
             self.view.set_scratch(True)
@@ -60,13 +57,11 @@ class base_test_complete(object):
             self.view = None
 
     def setUpView(self, filename):
-        """
-        Utility method to set up a view for a given file.
+        """Utility method to set up a view for a given file.
 
         Args:
             filename (str): The filename to open in a new view.
         """
-
         # Open the view.
         file_path = path.join(path.dirname(__file__), filename)
         self.view = sublime.active_window().open_file(file_path)
@@ -76,13 +71,11 @@ class base_test_complete(object):
             time.sleep(0.1)
 
     def setUpCompleter(self):
-        """
-        Utility method to set up a completer for the current view.
+        """Utility method to set up a completer for the current view.
 
         Returns:
             BaseCompleter: completer for the current view.
         """
-
         manager = SettingsManager()
         settings = manager.settings_for_view(self.view)
 
@@ -92,8 +85,7 @@ class base_test_complete(object):
         return completer
 
     def getRow(self, row):
-        """
-        Get text of a particular row
+        """Get text of a particular row.
 
         Args:
             row (int): number of row
@@ -121,7 +113,7 @@ class base_test_complete(object):
         file.close()
 
     def test_init(self):
-        """ Test that the completer is properly initialized. """
+        """Test that the completer is properly initialized."""
         self.setUpView(path.join('test_files', 'test.cpp'))
         completer = self.setUpCompleter()
 
@@ -129,7 +121,7 @@ class base_test_complete(object):
         self.assertIsNotNone(completer.version_str)
 
     def test_complete(self):
-        """ Test autocompletion for user type. """
+        """Test autocompletion for user type."""
         self.setUpView(path.join('test_files', 'test.cpp'))
 
         completer = self.setUpCompleter()
@@ -151,7 +143,7 @@ class base_test_complete(object):
         self.assertIn(expected, completions)
 
     def test_complete_vector(self):
-        """ Test that we can complete vector members. """
+        """Test that we can complete vector members."""
         self.setUpView(path.join('test_files', 'test_vector.cpp'))
 
         completer = self.setUpCompleter()

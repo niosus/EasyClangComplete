@@ -1,4 +1,4 @@
-"""Contains base class for completers
+"""Contains base class for completers.
 
 Attributes:
     log (logging.Logger): logger for this module
@@ -11,7 +11,7 @@ from os import path
 from .. import error_vis
 from .. import tools
 
-from .flags_manager import SearchScope
+from ..tools import SearchScope
 
 from ..flags_sources.cmake_file import CMakeFile
 from ..flags_sources.compilation_db import CompilationDb
