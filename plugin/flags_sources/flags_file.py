@@ -60,23 +60,24 @@ class FlagsFile(FlagsSource):
         log.debug(" [clang_complete_file]:[cached]: '%s'", cached_flags_path)
         flags_file_path = self.find_current_in(search_scope)
         log.debug(" [clang_complete_file]:[current]: '%s'", flags_file_path)
+        if not flags_file_path:
+            return None
 
         flags = None
         flags_file_path_same = (flags_file_path == cached_flags_path)
         flags_file_same = File.is_unchanged(cached_flags_path)
         if flags_file_path_same and flags_file_same:
             log.debug(" [clang_complete_file]:[unchanged]: load cached")
-            flags = self.cache[cached_flags_path]
-        else:
-            log.debug(" [clang_complete_file]:[changed]: load new")
-            if cached_flags_path and cached_flags_path in self.cache:
-                del self.cache[cached_flags_path]
-            if not flags_file_path:
-                return None
-            flags = self.__flags_from_clang_file(File(flags_file_path))
+            log.debug(" [clang_complete_file]: cache: %s", self.cache)
+            return self.cache[cached_flags_path]
+        log.debug(" [clang_complete_file]:[changed]: load new")
+        if cached_flags_path and cached_flags_path in self.cache:
+            del self.cache[cached_flags_path]
+        flags = self.__flags_from_clang_file(File(flags_file_path))
+        if flags:
             self.cache[cached_flags_path] = flags
-            if file_path:
-                self.cache[file_path] = flags_file_path
+        if file_path:
+            self.cache[file_path] = flags_file_path
         # now we return whatever we have
         return flags
 

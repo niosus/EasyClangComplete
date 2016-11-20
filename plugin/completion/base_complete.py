@@ -119,14 +119,15 @@ class BaseCompleter:
 
         include_prefixes = self.compiler_variant.include_prefixes
         home_folder = path.expanduser('~')
-        self.initial_flags += self.parse_flags(home_folder,
-                                               settings.common_flags,
-                                               include_prefixes)
+        self.initial_flags += BaseCompleter.parse_flags(home_folder,
+                                                        settings.common_flags,
+                                                        include_prefixes)
         # get other flags from some flag source
-        self.clang_flags = self.get_flags_from_source(
+        self.clang_flags = BaseCompleter.get_flags_from_source(
             view, settings, include_prefixes)
 
-    def get_flags_from_source(self, view, settings, include_prefixes):
+    @staticmethod
+    def get_flags_from_source(view, settings, include_prefixes):
         """Get flags from a flag source picked in settings.
 
         Args:
@@ -196,7 +197,8 @@ class BaseCompleter:
         self.error_vis.generate(view, errors)
         self.error_vis.show_regions(view)
 
-    def parse_flags(self, folder, lines, include_prefixes):
+    @staticmethod
+    def parse_flags(folder, lines, include_prefixes):
         """Parse the flags from given lines.
 
         Args:
@@ -208,7 +210,7 @@ class BaseCompleter:
         """
 
         def to_absolute_include_path(flag, include_prefixes):
-            """ Change path of include paths to absolute if needed.
+            """Change path of include paths to absolute if needed.
 
             Args:
                 flag (str): flag to check for relative path and fix if needed

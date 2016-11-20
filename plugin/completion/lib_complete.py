@@ -8,14 +8,12 @@ import importlib
 import sublime
 import time
 import logging
-from os import path
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
 from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
-from ..tools import SearchScope
 from ..utils.stamped_tu import StampedTu
 
 
