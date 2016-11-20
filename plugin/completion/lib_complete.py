@@ -158,13 +158,7 @@ class Completer(BaseCompleter):
         files = [(file_name, file_body)]
 
         # flags are loaded by base completer already
-        if self.clang_flags:
-            clang_flags = self.initial_flags + self.clang_flags
-        else:
-            # fallback mode
-            clang_flags = self.initial_flags
-
-        log.debug(" clang flags are: %s", clang_flags)
+        log.debug(" clang flags are: %s", self.clang_flags)
         v_id = view.buffer_id()
         if v_id == 0:
             log.warning(" this is default id. View is closed. Abort!")
@@ -176,7 +170,7 @@ class Completer(BaseCompleter):
                 log.debug(" compilation started for view id: %s", v_id)
                 trans_unit = TU.from_source(
                     filename=file_name,
-                    args=clang_flags,
+                    args=self.clang_flags,
                     unsaved_files=files,
                     options=TU.PARSE_PRECOMPILED_PREAMBLE |
                     TU.PARSE_CACHE_COMPLETION_RESULTS)

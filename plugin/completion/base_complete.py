@@ -110,21 +110,22 @@ class BaseCompleter:
 
         """
         # initialize default flags (init_flags list needs to be copied).
-        self.initial_flags = list(self.compiler_variant.init_flags)
+        initial_flags = list(self.compiler_variant.init_flags)
         current_lang = Tools.get_view_syntax(view)
         if current_lang == 'C' or current_lang == 'C99':
-            self.initial_flags += settings.c_flags
+            initial_flags += settings.c_flags
         else:
-            self.initial_flags += settings.cpp_flags
+            initial_flags += settings.cpp_flags
 
         include_prefixes = self.compiler_variant.include_prefixes
         home_folder = path.expanduser('~')
-        self.initial_flags += BaseCompleter.parse_flags(home_folder,
-                                                        settings.common_flags,
-                                                        include_prefixes)
+        initial_flags += BaseCompleter.parse_flags(home_folder,
+                                                   settings.common_flags,
+                                                   include_prefixes)
         # get other flags from some flag source
-        self.clang_flags = BaseCompleter.get_flags_from_source(
+        current_flags = BaseCompleter.get_flags_from_source(
             view, settings, include_prefixes)
+        self.clang_flags = initial_flags + current_flags
 
     @staticmethod
     def get_flags_from_source(view, settings, include_prefixes):
@@ -158,7 +159,7 @@ class BaseCompleter:
                 # don't load anything more if we have flags
                 log.debug(" flags generated with '%s' source.", source)
                 return flags
-        return None
+        return []
 
     def complete(self, completion_request):
         """Function to generate completions. See children for implementation.

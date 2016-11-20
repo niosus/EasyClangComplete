@@ -132,13 +132,7 @@ class Completer(BaseCompleter):
         super().init_for_view(view, settings)
 
         # flags are loaded by base completer already
-        if self.clang_flags:
-            clang_flags = self.initial_flags + self.clang_flags
-        else:
-            # fallback mode
-            clang_flags = self.initial_flags
-
-        self.flags_dict[view.buffer_id()] = clang_flags
+        self.flags_dict[view.buffer_id()] = self.clang_flags
 
         log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
 
