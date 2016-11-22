@@ -9,7 +9,7 @@ env:
         # Your package name
         - PACKAGE="EasyClangComplete"
     matrix:
-        - SUBLIME_TEXT_VERSION="3" UNITTESTING_TAG="0.8.0"
+        - SUBLIME_TEXT_VERSION="3"
 
 before_install:
     - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh
