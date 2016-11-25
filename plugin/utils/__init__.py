@@ -1,7 +1,8 @@
 """Useful utils.
 
-  stamped_tu: A translation unit with time of creation.
-  unique_list: A list that guarantees element uniqueness, but saves order.
+stamped_tu: A translation unit with time of creation.
+unique_list: A list that guarantees element uniqueness, but saves order.
+flag: A class that encapsulates a flag that can contain two parts.
 
 """
-__all__ = ["stamped_tu", "unique_list"]
+__all__ = ["stamped_tu", "unique_list", "flag"]
