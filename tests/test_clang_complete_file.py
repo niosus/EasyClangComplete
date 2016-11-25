@@ -8,15 +8,19 @@ from os import path
 from unittest import TestCase
 
 from EasyClangComplete.plugin.flags_sources import flags_file
+from EasyClangComplete.plugin.utils import flag
 from EasyClangComplete.plugin import tools
 
 imp.reload(flags_file)
 imp.reload(tools)
+imp.reload(flag)
 
 SearchScope = tools.SearchScope
 PKG_NAME = tools.PKG_NAME
 
 FlagsFile = flags_file.FlagsFile
+
+Flag = flag.Flag
 
 
 class TestFlagsFile(TestCase):
@@ -37,7 +41,7 @@ class TestFlagsFile(TestCase):
 
         flags_file = FlagsFile(['-I', '-isystem'])
         flags = flags_file.get_flags(test_file_path)
-        self.assertIn('-std=c++11', flags)
+        self.assertIn(Flag('-std=c++11'), flags)
 
     def test_fail_to_find(self):
         """Test failing to find a .clang_complete file."""

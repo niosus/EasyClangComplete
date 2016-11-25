@@ -6,17 +6,21 @@ from unittest import TestCase
 
 from EasyClangComplete.plugin.flags_sources import cmake_file
 from EasyClangComplete.plugin.flags_sources import compilation_db
+from EasyClangComplete.plugin.utils import flag
 from EasyClangComplete.plugin import tools
 
 imp.reload(cmake_file)
 imp.reload(compilation_db)
 imp.reload(tools)
+imp.reload(flag)
 
 CMakeFile = cmake_file.CMakeFile
 CompilationDb = compilation_db.CompilationDb
 
 SearchScope = tools.SearchScope
 PKG_NAME = tools.PKG_NAME
+
+Flag = flag.Flag
 
 
 class TestCmakeFile(object):
@@ -36,7 +40,7 @@ class TestCmakeFile(object):
         expected_lib = path.join(path_to_cmake_proj, 'lib')
         flags = cmake_file.get_flags(test_file_path)
         self.assertEqual(len(flags), 1)
-        self.assertEqual(flags[0], '-I' + expected_lib)
+        self.assertEqual(flags[0], Flag('-I' + expected_lib))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
             path_to_cmake_proj, CMakeFile._FILE_NAME)
@@ -49,13 +53,13 @@ class TestCmakeFile(object):
             path.dirname(__file__), 'cmake_tests', 'lib', 'a.h')
 
         path_to_file_folder = path.dirname(test_file_path)
-        expected_lib_include = '-I' + path_to_file_folder
+        expected_lib_include = Flag('-I' + path_to_file_folder)
         cmake_file = CMakeFile(['-I', '-isystem'], [])
         flags = cmake_file.get_flags(test_file_path)
         db = CompilationDb(['-I', '-isystem'])
         self.assertEqual(len(flags), 2)
-        self.assertEqual(flags[0], '-Dliba_EXPORTS')
-        self.assertEqual(flags[1], '-fPIC')
+        self.assertEqual(flags[0], Flag('-Dliba_EXPORTS'))
+        self.assertEqual(flags[1], Flag('-fPIC'))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
             path.dirname(path_to_file_folder), CMakeFile._FILE_NAME)

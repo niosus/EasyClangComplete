@@ -7,6 +7,7 @@ from .flags_source import FlagsSource
 from ..tools import File
 from ..tools import SearchScope
 from ..tools import singleton
+from ..utils.flag import Flag
 
 from os import path
 
@@ -102,5 +103,5 @@ class FlagsFile(FlagsSource):
             content = f.readlines()
             flags = FlagsSource.parse_flags(
                 file.folder(), content, self._include_prefixes)
-        log.debug(" .clang_complete contains flags: %s", flags)
+            flags = Flag.tokenize_list(flags)
         return flags

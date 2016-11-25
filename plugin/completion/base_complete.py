@@ -8,20 +8,22 @@ import logging
 
 from os import path
 
+from .compiler_variant import CompilerVariant
+
 from .. import error_vis
-from .. import tools
 
 from ..tools import SearchScope
+from ..tools import Tools
 
 from ..flags_sources.cmake_file import CMakeFile
 from ..flags_sources.compilation_db import CompilationDb
 from ..flags_sources.flags_file import FlagsFile
 from ..flags_sources.flags_source import FlagsSource
+from ..utils.unique_list import UniqueList
+from ..utils.flag import Flag
 
 
 log = logging.getLogger(__name__)
-
-Tools = tools.Tools
 
 
 class BaseCompleter:
@@ -111,21 +113,28 @@ class BaseCompleter:
 
         """
         # initialize default flags (init_flags list needs to be copied).
-        initial_flags = list(self.compiler_variant.init_flags)
+        initial_flags = UniqueList(CompilerVariant.init_flags)
         current_lang = Tools.get_view_syntax(view)
         if current_lang == 'C' or current_lang == 'C99':
-            initial_flags += settings.c_flags
+            lang_flags = settings.c_flags
         else:
-            initial_flags += settings.cpp_flags
+            lang_flags = settings.cpp_flags
+
+        initial_flags += Flag.tokenize_list(lang_flags)
 
         include_prefixes = self.compiler_variant.include_prefixes
         home_folder = path.expanduser('~')
-        initial_flags += FlagsSource.parse_flags(
-            home_folder, settings.common_flags, include_prefixes)
+        initial_flags += Flag.tokenize_list(
+            FlagsSource.parse_flags(home_folder,
+                                    settings.common_flags,
+                                    include_prefixes))
         # get other flags from some flag source
         current_flags = BaseCompleter.get_flags_from_source(
             view, settings, include_prefixes)
-        self.clang_flags = initial_flags + current_flags
+        all_flags = initial_flags + current_flags
+        self.clang_flags = []
+        for flag in all_flags:
+            self.clang_flags += flag.as_list()
 
     @staticmethod
     def get_flags_from_source(view, settings, include_prefixes):

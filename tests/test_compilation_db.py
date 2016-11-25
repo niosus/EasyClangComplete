@@ -5,12 +5,15 @@ from unittest import TestCase
 
 from EasyClangComplete.plugin.flags_sources import compilation_db
 from EasyClangComplete.plugin import tools
+from EasyClangComplete.plugin.utils import flag
 
 imp.reload(compilation_db)
 imp.reload(tools)
+imp.reload(flag)
 
 CompilationDb = compilation_db.CompilationDb
 SearchScope = tools.SearchScope
+Flag = flag.Flag
 
 
 class TestCompilationDb(TestCase):
@@ -21,9 +24,9 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(include_prefixes)
 
-        expected = ['-I' + path.normpath('/lib_include_dir'),
-                    '-Dlib_EXPORTS',
-                    '-fPIC']
+        expected = [Flag('-I' + path.normpath('/lib_include_dir')),
+                    Flag('-Dlib_EXPORTS'),
+                    Flag('-fPIC')]
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
                                'linux')
@@ -35,8 +38,8 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(include_prefixes)
 
-        expected_lib = ['-Dlib_EXPORTS', '-fPIC']
-        expected_main = ['-I' + path.normpath('/lib_include_dir')]
+        expected_lib = [Flag('-Dlib_EXPORTS'), Flag('-fPIC')]
+        expected_main = [Flag('-I' + path.normpath('/lib_include_dir'))]
         lib_file_path = path.normpath('/home/user/dummy_lib.cpp')
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
         # also try to test a header
@@ -78,8 +81,8 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(include_prefixes)
 
-        expected_lib = ['-Dlib_EXPORTS', '-fPIC']
-        expected_main = ['-I' + path.normpath('/lib_include_dir')]
+        expected_lib = [Flag('-Dlib_EXPORTS'), Flag('-fPIC')]
+        expected_main = [Flag('-I' + path.normpath('/lib_include_dir'))]
         lib_file_path = path.normpath('/home/user/dummy_lib.cpp')
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
         path_to_db = path.join(path.dirname(__file__),

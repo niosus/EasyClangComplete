@@ -13,10 +13,12 @@
 	],
 	// C specific flags. Merged with common_flags for C files.
 	"c_flags" : [
+		"-x", "c",
 		"-std=c11"
 	],
 	// C++ specific flags. These are merged with common_flags for C++ files.
 	"cpp_flags" : [
+		"-x", "c++",
 		"-std=c++11"
 	],
 

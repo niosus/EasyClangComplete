@@ -51,8 +51,7 @@ class TestFlag(TestCase):
     def test_tokenize(self):
         """Test tokenizing a list of all split flags."""
         split_str = ["-I", "hello", "-Iblah", "-isystem", "world"]
-        prefixes = ["-I", "-isystem"]
-        list_of_flags = Flag.tokenize_list(split_str, prefixes)
+        list_of_flags = Flag.tokenize_list(split_str)
         self.assertTrue(len(list_of_flags), 3)
         self.assertIn(Flag("-I", "hello"), list_of_flags)
         self.assertIn(Flag("-Iblah"), list_of_flags)

@@ -1,4 +1,4 @@
-"""Module contains options for various compiler variants
+"""Module contains options for various compiler variants.
 
 Attributes:
     log (logging.Logger): logger for this module
@@ -6,14 +6,19 @@ Attributes:
 import re
 import logging
 
+from ..utils.flag import Flag
+
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
 
 
 class CompilerVariant(object):
+    """Encapsulation of a compiler specific options.
+
+    Attributes:
+        init_flags (list): flags that every command needs.
     """
-    Encapsulation of a compiler specific options
-    """
+    init_flags = [Flag("-c"), Flag("-fsyntax-only")]
 
     def errors_from_output(self, output):
         """
@@ -29,22 +34,18 @@ class CompilerVariant(object):
 
 
 class ClangCompilerVariant(CompilerVariant):
-    """
-    Encapsulation of clang/clang++ specific options
+    """Encapsulation of clang/clang++ specific options.
 
     Attributes:
-        init_flags (list): flags that every command needs
         error_regex (re): regex to find contents of an error
     """
-    init_flags = ["-c", "-fsyntax-only", "-x", "c++"]
     include_prefixes = ["-isystem", "-I", "-isysroot"]
     error_regex = re.compile("(?P<file>.*)" +
                              ":(?P<row>\d+):(?P<col>\d+)" +
                              ":\s*.*error: (?P<error>.*)")
 
     def errors_from_output(self, output):
-        """
-        Parse errors received from clang binary output
+        """Parse errors received from clang binary output.
 
         Args:
             view (sublime.View): current view
@@ -64,14 +65,11 @@ class ClangCompilerVariant(CompilerVariant):
 
 
 class ClangClCompilerVariant(ClangCompilerVariant):
-    """
-    Encapsulation of clang-cl specific options
+    """Encapsulation of clang-cl specific options.
 
     Attributes:
-        init_flags (list): flags that every command needs
         error_regex (re): regex to find contents of an error
     """
-    init_flags = ["-c", "-fsyntax-only"]
     include_prefixes = ["-I", "/I", "-msvc", "/msvc"]
     error_regex = re.compile("(?P<file>.*)" +
                              "\((?P<row>\d+),(?P<col>\d+)\)\s*" +
@@ -79,8 +77,7 @@ class ClangClCompilerVariant(ClangCompilerVariant):
 
 
 class LibClangCompilerVariant(ClangCompilerVariant):
-    """
-    Encapsulation of libclang specific options
+    """Encapsulation of libclang specific options.
 
     Attributes:
         pos_regex (re): regex to find position of an error
@@ -92,8 +89,9 @@ class LibClangCompilerVariant(ClangCompilerVariant):
     msg_regex = re.compile('[b\"|\"]*(?P<error>[^"]+)\"*')
 
     def errors_from_output(self, output):
-        """Parse errors received from diagnostics of a translation unit (used
-        with libclang)
+        """Parse errors received from diagnostics of a translation unit.
+
+        This is used with libclang.
 
         Args:
             output (diagnostics): diagnostics from a translation unit

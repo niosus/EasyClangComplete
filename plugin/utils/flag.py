@@ -49,16 +49,19 @@ class Flag:
         return self.__prefix == other.prefix() and self.__body == other.body()
 
     @staticmethod
-    def tokenize_list(all_split_line, separable_prefixes):
+    def tokenize_list(all_split_line):
         """Find flags, that need to be separated and separate them.
 
         Args:
             all_split_line (str[]): A list of all flags split.
-            separable_prefixes (str[]): A list of all prefixes that require
-                separation from the body.
 
         Returns (Flag[]): A list of flags containing two parts if needed.
         """
+        # FIXME(igor): probably need to get it from -help of clang
+        separable_prefixes = ["-I", "/I", "-isystem",
+                              "-cxx-isystem", "-F",
+                              "-isysroot", "-iprefix", "-x"]
+
         flags = []
         skip = False
         for i in range(len(all_split_line)):
