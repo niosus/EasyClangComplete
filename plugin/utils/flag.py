@@ -64,14 +64,14 @@ class Flag:
 
         flags = []
         skip = False
-        for i in range(len(all_split_line)):
+        for i, entry in enumerate(all_split_line):
             if skip:
                 skip = False
                 continue
-            if all_split_line[i] in separable_prefixes:
-                # add both parts to a flag
+            if entry in separable_prefixes:
+                # add both this and next part to a flag
                 flags.append(Flag(all_split_line[i], all_split_line[i + 1]))
                 skip = True
                 continue
-            flags.append(Flag(all_split_line[i]))
+            flags.append(Flag(entry))
         return flags
