@@ -8,7 +8,6 @@ from ..tools import File
 from ..tools import SearchScope
 from ..tools import singleton
 from ..utils.unique_list import UniqueList
-from ..utils.flag import Flag
 
 from os import path
 
@@ -119,10 +118,9 @@ class CompilationDb(FlagsSource):
         for entry in data:
             file_path = path.splitext(path.normpath(entry['file']))[0]
             command_as_list = CompilationDb.line_as_list(entry['command'])
-            flags_str_list = FlagsSource.parse_flags(database_file.folder(),
-                                                     command_as_list,
-                                                     self._include_prefixes)
-            flags = Flag.tokenize_list(flags_str_list)
+            flags = FlagsSource.parse_flags(database_file.folder(),
+                                            command_as_list,
+                                            self._include_prefixes)
             # set these flags for current file
             parsed_db[file_path] = flags
             # also maintain merged flags

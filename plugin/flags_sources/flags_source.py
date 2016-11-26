@@ -2,6 +2,7 @@
 from os import path
 
 from ..tools import File
+from ..utils.flag import Flag
 
 
 class FlagsSource(object):
@@ -24,42 +25,50 @@ class FlagsSource(object):
         raise NotImplementedError("calling abstract method")
 
     @staticmethod
-    def parse_flags(folder, lines, include_prefixes):
-        """Parse the flags from given lines.
+    def parse_flags(folder, chunks, include_prefixes):
+        """Parse the flags from given chunks produced by separating string.
 
         Args:
-            folder (str): current folder
-            lines (str[]): lines to parse
-            include_prefixes (str[]): allowed include prefixes
+            folder (str): Current folder
+            chunks (str[]): Chunks to parse. Can be lines of a file or parts
+                of flags produced with shlex.split.
+            include_prefixes (str[]): Allowed include prefixes.
 
         Returns:
-            str[]: flags
+            Flag[]: Flags with absolute include paths.
         """
         def to_absolute_include_path(flag, include_prefixes):
             """Change path of include paths to absolute if needed.
 
             Args:
-                flag (str): flag to check for relative path and fix if needed
+                flag (Flag): flag to check for relative path and fix if needed
                 include_prefixes (str[]): allowed include prefixes
 
             Returns:
-                str: either original flag or modified to have absolute path
+                Flag: either original flag or modified to have absolute path
             """
             for prefix in include_prefixes:
-                if flag.startswith(prefix):
-                    include_path = flag[len(prefix):].strip()
+                if flag.prefix() == prefix:
+                    include_path = flag.body()
                     if not path.isabs(include_path):
                         include_path = path.join(folder, include_path)
-                    return prefix + path.normpath(include_path)
+                    return Flag(prefix, include_path)
+                # this flag is not separable, check if we still need to update
+                # relative path to absolute one
+                if flag.body().startswith(prefix):
+                    include_path = flag.body()[len(prefix):]
+                    if not path.isabs(include_path):
+                        include_path = path.join(folder, include_path)
+                    return Flag(prefix + path.normpath(include_path))
+            # not an include flag
             return flag
 
-        flags = []
-        for line in lines:
-            line = line.strip()
-            if line.startswith("#"):
-                continue
-            flags.append(to_absolute_include_path(line, include_prefixes))
-        return flags
+        local_flags = Flag.tokenize_list(chunks)
+        absolute_flags = []
+        for flag in local_flags:
+            absolute_flags.append(
+                to_absolute_include_path(flag, include_prefixes))
+        return absolute_flags
 
     def _get_cached_from(self, file_path):
         """Get cached path for file path.

@@ -12,11 +12,11 @@ class Flag:
             part_2 (str, optional): Second part if present.
         """
         if part_2:
-            self.__prefix = part_1
-            self.__body = part_2
+            self.__prefix = part_1.strip()
+            self.__body = part_2.strip()
         else:
             self.__prefix = ""
-            self.__body = part_1
+            self.__body = part_1.strip()
 
     def prefix(self):
         """Prefix of the flag. Empty if not separable."""
@@ -57,7 +57,7 @@ class Flag:
 
         Returns (Flag[]): A list of flags containing two parts if needed.
         """
-        # FIXME(igor): probably need to get it from -help of clang
+        # FIXME(igor): probably need to get it from `clang -help`
         separable_prefixes = ["-I", "/I", "-isystem",
                               "-cxx-isystem", "-F",
                               "-isysroot", "-iprefix", "-x"]
@@ -65,6 +65,8 @@ class Flag:
         flags = []
         skip = False
         for i, entry in enumerate(all_split_line):
+            if entry.startswith("#"):
+                continue
             if skip:
                 skip = False
                 continue

@@ -124,10 +124,9 @@ class BaseCompleter:
 
         include_prefixes = self.compiler_variant.include_prefixes
         home_folder = path.expanduser('~')
-        initial_flags += Flag.tokenize_list(
-            FlagsSource.parse_flags(home_folder,
-                                    settings.common_flags,
-                                    include_prefixes))
+        initial_flags += FlagsSource.parse_flags(home_folder,
+                                                 settings.common_flags,
+                                                 include_prefixes)
         # get other flags from some flag source
         current_flags = BaseCompleter.get_flags_from_source(
             view, settings, include_prefixes)
