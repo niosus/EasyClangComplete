@@ -3,7 +3,6 @@ import imp
 from os import path
 from unittest import TestCase
 
-from EasyClangComplete.plugin.flags_sources import cmake_file
 from EasyClangComplete.plugin.flags_sources import flags_source
 from EasyClangComplete.plugin.utils import flag
 
