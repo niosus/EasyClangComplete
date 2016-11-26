@@ -38,6 +38,12 @@ class Flag:
             return self.__prefix + " " + self.__body
         return self.__body
 
+    def __repr__(self):
+        """Return flag as a printable string."""
+        if self.__prefix:
+            return '({}, {})'.format(self.__prefix, self.__body)
+        return '({})'.format(self.__body)
+
     def __hash__(self):
         """Compute a hash of a flag."""
         if self.__prefix:
