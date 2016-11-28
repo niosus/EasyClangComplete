@@ -1,0 +1,50 @@
+"""Tests for autocompletion."""
+from os import path
+from unittest import TestCase
+
+from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
+from EasyClangComplete.plugin.view_configuration import ViewConfig
+
+from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
+
+
+class TestViewConfig(GuiTestWrapper):
+
+    def test_setup_view(self):
+        """Test that setup view correctly sets up the view."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.check_view(file_name)
+
+    def test_init(self):
+        """Test that the completer is properly initialized."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
+        view_config = ViewConfig(self.view, settings)
+
+        self.assertIsNotNone(view_config.completer)
+
+    def test_flags(self):
+        """Test that the completer is properly initialized."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
+        view_config = ViewConfig(self.view, settings)
+
+        self.assertIsNotNone(view_config.completer)
+        completer = view_config.completer
+        self.assertEqual(len(completer.clang_flags), 12)
+        # test from the start
+        self.assertEqual(completer.clang_flags[0], '-x')
+        self.assertEqual(completer.clang_flags[1], 'c++')
+        self.assertEqual(completer.clang_flags[2], '-std=c++11')
+        # test last one
+        self.assertEqual(completer.clang_flags[11], '-I/usr/include/opencv')

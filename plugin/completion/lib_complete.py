@@ -1,4 +1,4 @@
-"""This module contains class for libclang based completions
+"""This module contains class for libclang based completions.
 
 Attributes:
     cindex_dict (dict): dict of cindex entries for each version of clang
@@ -47,14 +47,8 @@ class Completer(BaseCompleter):
         max_tu_age (int): maximum translation unit age in seconds
         timer_period (int): period of timer in seconds
         tu_module (cindex.TranslationUnit): module for proper cindex
-        TUs (dict(utils.StampedTu)): dictionary of timestamped translation
-            units for each view id
     """
     rlock = RLock()
-
-    tu_module = None
-
-    TUs = {}
 
     timer = None
     max_tu_age = None
@@ -70,6 +64,10 @@ class Completer(BaseCompleter):
 
         """
         super().__init__(clang_binary)
+
+        # init tu related variables
+        self.tu_module = None
+        self.stamped_tu = None
 
         # slightly more complicated name retrieving to allow for more complex
         # version strings, e.g. 3.8.0
@@ -93,7 +91,8 @@ class Completer(BaseCompleter):
                 if libclang_dir:
                     cindex.Config.set_library_path(libclang_dir)
 
-            Completer.tu_module = cindex.TranslationUnit
+            self.tu_module = cindex.TranslationUnit
+            self.stamped_tu = None
             # check if we can build an index. If not, set valid to false
             try:
                 cindex.Index.create()
@@ -105,51 +104,15 @@ class Completer(BaseCompleter):
         # Create compiler options of specific variant of the compiler.
         self.compiler_variant = LibClangCompilerVariant()
 
-    def remove(self, view_id):
-        """Remove tu for this view. Happens when we don't need it anymore.
-
-        Args:
-            view_id (int): view id
-
-        Returns: view id
-        """
-        with self.rlock:
-            if view_id not in self.TUs:
-                log.error(" no tu for view id: %s, so not removing", view_id)
-                return
-            log.debug(" removing translation unit for view id: %s", view_id)
-            del self.TUs[view_id]
-            return view_id
-
-    def exists_for_view(self, view_id):
-        """Find if there is a completer for the view.
-
-        Args:
-            view_id (int): current view id
-
-        Returns:
-            bool: has completer
-        """
-        with self.rlock:
-            if view_id in self.TUs:
-                self.TUs[view_id].touch()
-                return True
-            return False
-
-    def init_for_view(self, view, settings):
+    def parse_tu(self, view):
         """Initialize the completer. Builds the view.
 
         Args:
             view (sublime.View): current view
-            settings (Settings): plugin settings
-
         """
         # Return early if this is an invalid view.
         if not Tools.is_valid_view(view):
             return
-
-        # call initializer from the super class
-        super().init_for_view(view, settings)
 
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
@@ -163,9 +126,9 @@ class Completer(BaseCompleter):
         if v_id == 0:
             log.warning(" this is default id. View is closed. Abort!")
             return
-        with self.rlock:
+        with Completer.rlock:
             try:
-                TU = Completer.tu_module
+                TU = self.tu_module
                 start = time.time()
                 log.debug(" compilation started for view id: %s", v_id)
                 trans_unit = TU.from_source(
@@ -174,19 +137,20 @@ class Completer(BaseCompleter):
                     unsaved_files=files,
                     options=TU.PARSE_PRECOMPILED_PREAMBLE |
                     TU.PARSE_CACHE_COMPLETION_RESULTS)
-                self.TUs[v_id] = StampedTu(trans_unit)
+                self.stamped_tu = StampedTu(trans_unit)
                 end = time.time()
                 log.debug(" compilation done in %s seconds", end - start)
-                if settings.errors_on_save:
-                    self.show_errors(view, self.TUs[v_id].tu().diagnostics)
+                # if settings.errors_on_save:
+                #     self.show_errors(view, self.TUs[v_id].tu().diagnostics)
             except Exception as e:
                 log.error(" error while compiling: %s", e)
 
-        # start timer if it is not set yet
-        self.max_tu_age = settings.max_tu_age
-        if not self.timer:
-            self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
-            self.timer.start()
+        # TODO(igor): reintroduce a timer here. It needs to remove this tu.
+        # # start timer if it is not set yet
+        # self.max_tu_age = settings.max_tu_age
+        # if not self.timer:
+        #     self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
+        #     self.timer.start()
 
     def complete(self, completion_request):
         """Called asynchronously to create a list of autocompletions.
@@ -205,15 +169,11 @@ class Completer(BaseCompleter):
 
         v_id = view.buffer_id()
 
-        with self.rlock:
-            # do nothing if there in no translation_unit present
-            if v_id not in self.TUs:
-                log.error(" cannot complete. No TU for view %s", v_id)
-                return (None, None)
+        with Completer.rlock:
             # execute clang code completion
             start = time.time()
             log.debug(" started code complete for view %s", v_id)
-            complete_obj = self.TUs[v_id].tu().codeComplete(
+            complete_obj = self.stamped_tu.tu().codeComplete(
                 view.file_name(),
                 row, col,
                 unsaved_files=files)
@@ -243,47 +203,20 @@ class Completer(BaseCompleter):
         """
         v_id = view.buffer_id()
         log.debug(" view is %s", v_id)
-        if v_id in self.TUs:
-            with self.rlock:
-                log.debug(" reparsing translation_unit for view %s", v_id)
-                start = time.time()
-                self.TUs[v_id].tu().reparse()
-                end = time.time()
-                log.debug(" reparsed in %s seconds", end - start)
-                if show_errors:
-                    self.show_errors(view, self.TUs[v_id].tu().diagnostics)
-                return True
+        with Completer.rlock:
+            if not self.stamped_tu:
+                log.debug(" translation unit does not exist. Creating.")
+                self.parse_tu(view)
+            log.debug(" reparsing translation_unit for view %s", v_id)
+            start = time.time()
+            self.stamped_tu.tu().reparse()
+            end = time.time()
+            log.debug(" reparsed in %s seconds", end - start)
+            if show_errors:
+                self.show_errors(view, self.stamped_tu.tu().diagnostics)
+            return True
         log.error(" no translation unit for view id %s", v_id)
         return False
-
-    def __remove_old_TUs(self):
-        """Remove old translation units and restart timer."""
-        # first restart timer
-        self.timer.cancel()
-        self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
-        self.timer.start()
-
-        # now do some work if needed
-        if not self.max_tu_age:
-            return
-
-        log.debug(" removing TUs older than: %s secs.", self.max_tu_age)
-        with self.rlock:
-            old_TUs = []
-            for key, tu in self.TUs.items():
-                if tu.is_older_than(self.max_tu_age):
-                    old_TUs.append(key)
-            current_id = SublBridge.active_view_id()
-            if len(old_TUs) < 1:
-                log.debug(" no old TUs.")
-                return
-            for key in old_TUs:
-                if key == current_id:
-                    # don't delete the tu if this view is focused
-                    log.debug(" TU for view %s is old but active: [skip]", key)
-                    continue
-                log.debug(" TU for view %s is old [delete]", key)
-                del self.TUs[key]
 
     @staticmethod
     def _cindex_for_version(version):

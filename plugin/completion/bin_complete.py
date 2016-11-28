@@ -49,8 +49,6 @@ class Completer(BaseCompleter):
     """
     clang_binary = None
 
-    flags_dict = {}
-
     PARAM_TAG = "param"
     TYPE_TAG = "type"
     PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}!"
@@ -80,7 +78,7 @@ class Completer(BaseCompleter):
         """
         # init common completer interface
         super().__init__(clang_binary)
-        Completer.clang_binary = clang_binary
+        self.clang_binary = clang_binary
 
         # Create compiler options of specific variant of the compiler.
         filename = path.splitext(path.basename(clang_binary))[0]
@@ -89,60 +87,12 @@ class Completer(BaseCompleter):
         else:
             self.compiler_variant = ClangCompilerVariant()
 
-    def remove(self, view_id):
-        """Remove compile flags for view.
-
-        Args:
-            view_id (int): current view id
-        """
-        if view_id in self.flags_dict:
-            self.flags_dict[view_id] = []
-
-    def exists_for_view(self, view_id):
-        """Check if compile flags exist for view id.
-
-        Args:
-            view_id (int): current view id
-
-        Returns:
-            bool: compile flags exist for this view
-        """
-        if self.flags_dict.get(view_id) is None:
-            log.debug(" no build flags for view: %s", view_id)
-            return False
-        if len(self.flags_dict[view_id]) > 0:
-            return True
-        return False
-
-    def init_for_view(self, view, settings):
-        """Initialize the completer.
-
-        Args:
-            view (sublime.View): current view
-            settings (Settings): plugin settings
-
-        """
-        # Return early if this is an invalid view.
-        if not Tools.is_valid_view(view):
-            return
-
-        # init procedure from super class
-        super().init_for_view(view, settings)
-
-        # flags are loaded by base completer already
-        self.flags_dict[view.buffer_id()] = self.clang_flags
-
-        log.debug(" clang flags are: %s", self.flags_dict[view.buffer_id()])
-
     def complete(self, completion_request):
         """Called asynchronously to create a list of autocompletions.
 
         It builds up a clang command that is then executed
         as a subprocess. The output is parsed for completions """
         view = completion_request.get_view()
-        if not view.buffer_id() in self.flags_dict:
-            log.error(" cannot complete view: %s", view.buffer_id())
-            return (None, None)
         start = time.time()
         output_text = self.run_clang_command(
             view, "complete", completion_request.get_trigger_position())
@@ -163,11 +113,6 @@ class Completer(BaseCompleter):
                 dummy function as we gain nothing from building it with binary.
 
         """
-        if view.buffer_id() not in self.flags_dict:
-            log.error(
-                " Cannot update view %s. No build flags.", view.buffer_id())
-            return False
-
         if not show_errors:
             # in this class there is no need to rebuild the file. It brings no
             # benefits. We only want to do it if we need to show errors.
@@ -199,17 +144,17 @@ class Completer(BaseCompleter):
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
 
-        flags = self.flags_dict[view.buffer_id()]
+        flags = self.clang_flags
         if task_type == "update":
             # we construct command for update task
-            complete_cmd = [Completer.clang_binary] + flags + [temp_file_name]
+            complete_cmd = [self.clang_binary] + flags + [temp_file_name]
         elif task_type == "complete":
             # we construct command for complete task
             (row, col) = SublBridge.cursor_pos(view, cursor_pos)
             complete_at_str = Completer.compl_str_mask.format(
                 complete_flag="-code-completion-at",
                 file=temp_file_name, row=row, col=col)
-            complete_cmd = [Completer.clang_binary] + flags + ["-Xclang"] \
+            complete_cmd = [self.clang_binary] + flags + ["-Xclang"] \
                 + [complete_at_str] + [temp_file_name]
         else:
             log.critical(" unknown type of cmd command wanted.")

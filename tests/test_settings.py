@@ -1,43 +1,18 @@
 """Tests for settings."""
-import sublime
-import time
 from os import path
-from unittest import TestCase
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
+from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
 
-class test_settings(TestCase):
-    """Tests for settings."""
-    def setUp(self):
-        """Set up testing environment."""
-        self.view = None
-        # make sure we have a window to work with
-        s = sublime.load_settings("Preferences.sublime-settings")
-        s.set("close_windows_when_empty", False)
-
-    def setUpView(self, filename):
-        """Utility method to set up a view for a given file.
-
-        Args:
-            filename (str): The filename to open in a new view.
-        """
-        # Open the view.
-        file_path = path.join(path.dirname(__file__), filename)
-        self.view = sublime.active_window().open_file(file_path)
-
-        # Ensure it's loaded.
-        while self.view.is_loading():
-            time.sleep(0.1)
-
-    def tearDown(self):
-        """Cleanup method run after every test."""
-        # If we have a view, close it.
-        if self.view:
-            self.view.set_scratch(True)
-            self.view.window().focus_view(self.view)
-            self.view.window().run_command("close_file")
-            self.view = None
+class test_settings(GuiTestWrapper):
+    """Test settings."""
+    def test_setup_view(self):
+        """Test that setup view correctly sets up the view."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.check_view(file_name)
 
     def test_init(self):
         """Test that settings are correctly initialized."""
@@ -61,8 +36,7 @@ class test_settings(TestCase):
     def test_populate_flags(self):
         """Testing include population."""
         # open any existing file
-        self.tearDown()
-        self.setUpView(path.join('test_files', 'test_wrong_triggers.cpp'))
+        self.set_up_view(path.join('test_files', 'test_wrong_triggers.cpp'))
         # now test the things
         manager = SettingsManager()
         settings = manager.user_settings()
