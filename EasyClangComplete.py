@@ -15,7 +15,7 @@ from concurrent import futures
 
 from .plugin import tools
 from .plugin import error_vis
-from .plugin import view_configuration
+from .plugin import view_config
 from .plugin.settings import settings_manager
 from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
@@ -26,11 +26,11 @@ imp.reload(settings_manager)
 imp.reload(error_vis)
 imp.reload(lib_complete)
 imp.reload(bin_complete)
-imp.reload(view_configuration)
+imp.reload(view_config)
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager
-ViewConfigManager = view_configuration.ViewConfigManager
+ViewConfigManager = view_config.ViewConfigManager
 SublBridge = tools.SublBridge
 Tools = tools.Tools
 PosStatus = tools.PosStatus

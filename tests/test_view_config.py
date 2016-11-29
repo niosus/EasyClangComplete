@@ -2,7 +2,7 @@
 from os import path
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
-from EasyClangComplete.plugin.view_configuration import ViewConfig
+from EasyClangComplete.plugin.view_config import ViewConfig
 
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
@@ -19,7 +19,7 @@ class TestViewConfig(GuiTestWrapper):
         self.tear_down()
 
     def test_init(self):
-        """Test that the completer is properly initialized."""
+        """Test initializing a view configuration."""
         file_name = path.join(path.dirname(__file__),
                               'test_files',
                               'test.cpp')
@@ -32,7 +32,7 @@ class TestViewConfig(GuiTestWrapper):
         self.tear_down()
 
     def test_flags(self):
-        """Test that the completer is properly initialized."""
+        """Test that flags are properly defined for a completer."""
         file_name = path.join(path.dirname(__file__),
                               'test_files',
                               'test.cpp')

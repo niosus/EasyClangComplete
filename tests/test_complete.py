@@ -5,7 +5,7 @@ from os import path
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
 from EasyClangComplete.plugin.tools import CompletionRequest
-from EasyClangComplete.plugin.view_configuration import ViewConfigManager
+from EasyClangComplete.plugin.view_config import ViewConfigManager
 
 
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper

@@ -1,3 +1,8 @@
+"""A module that stores classes related ot view configuration.
+
+Attributes:
+    log (logging.Logger): Logger for this module.
+"""
 import logging
 from os import path
 
@@ -20,15 +25,23 @@ from .flags_sources.compilation_db import CompilationDb
 log = logging.getLogger(__name__)
 
 
-@singleton
-class ViewConfigCache(dict):
-    """Singleton for view configurations cache."""
-    pass
-
-
 class ViewConfig(object):
+    """A bundle representing a view configuration.
+
+    Stores everything needed to perform completion tasks on a given view with
+    given settings.
+
+    Attributes:
+        completer (Completer): A completer for each view configuration.
+    """
 
     def __init__(self, view, settings):
+        """Initialize a view configuration.
+
+        Args:
+            view (View): Current view.
+            settings (SettingsStorage): Current settings.
+        """
         self.__view_id = view.buffer_id()
         lang_flags = ViewConfig.__get_lang_flags(view, settings)
         self.completer = ViewConfig.__init_completer(settings)
@@ -47,10 +60,29 @@ class ViewConfig(object):
         self.completer.update(view, settings.errors_on_save)
 
     def has_changed(self, view, settings):
+        """Check if the view config has changed.
+
+        Args:
+            view (View): Current view.
+            settings (SettingsStorage): Current settings.
+
+        Returns:
+            bool: True if changed, False otherwise.
+        """
         pass
 
     @staticmethod
     def __generate_source_flags(view, settings, include_prefixes):
+        """Generate flags from source.
+
+        Args:
+            view (View): Current view.
+            settings (SettingsStorage): Current settings.
+            include_prefixes (str[]): Valid include prefixes.
+
+        Returns: (FlagsSource, Flag[]): A tuple with the picked flags source
+            along with the flags generated from it.
+        """
         prefix_paths = settings.cmake_prefix_paths
         if prefix_paths is None:
             prefix_paths = []
@@ -75,6 +107,17 @@ class ViewConfig(object):
 
     @staticmethod
     def __get_common_flags(include_prefixes, settings):
+        """Get common flags as list of flags.
+
+        Additionally expands local paths into global ones based on folder.
+
+        Args:
+            include_prefixes (str[]): List of valid include prefixes.
+            settings (SettingsStorage): Current settings.
+
+        Returns:
+            Flag[]: Common flags.
+        """
         home_folder = path.expanduser('~')
         return FlagsSource.parse_flags(home_folder,
                                        settings.common_flags,
@@ -82,6 +125,14 @@ class ViewConfig(object):
 
     @staticmethod
     def __init_completer(settings):
+        """Initialize completer.
+
+        Args:
+            settings (SettingsStorage): Current settings.
+
+        Returns:
+            Completer: A completer. Can be lib completer or bin completer.
+        """
         completer = None
         if settings.use_libclang:
             log.info(" init completer based on libclang")
@@ -97,6 +148,15 @@ class ViewConfig(object):
 
     @staticmethod
     def __get_lang_flags(view, settings):
+        """Get language flags.
+
+        Args:
+            view (View): Current view.
+            settings (SettingsStorage): Current settings.
+
+        Returns:
+            Flag[]: A list of language-specific flags.
+        """
         current_lang = Tools.get_view_syntax(view)
         if current_lang == 'C' or current_lang == 'C99':
             lang_flags = settings.c_flags
@@ -105,18 +165,45 @@ class ViewConfig(object):
         return Flag.tokenize_list(lang_flags)
 
 
+@singleton
+class ViewConfigCache(dict):
+    """Singleton for view configurations cache."""
+    pass
+
+
 class ViewConfigManager(object):
+    """A utility class that stores a cache of all view configurations."""
 
     def __init__(self):
+        """Initialize view config manager."""
         self._cache = ViewConfigCache()
 
     def get_config_for_view(self, view, settings):
+        """Get stored config for a view or generate a new one.
+
+        Args:
+            view (View): Current view.
+            settings (SettingsStorage): Current settings.
+
+        Returns:
+            ViewConfig: Config for current view and settings.
+        """
         view_id = view.buffer_id()
         if view_id in self._cache:
+            # TODO(igor): check if this is still valid. Generate new if not.
             return self._cache[view_id]
         return self.generate_new_config(view, settings)
 
     def generate_new_config(self, view, settings):
+        """Generate a configuration.
+
+        Args:
+            view (View): Current view.
+            settings (SettingsStorage): Current settings.
+
+        Returns:
+            ViewConfig: Config for current view and settings.
+        """
         config = ViewConfig(view, settings)
         self._cache[view.buffer_id()] = config
         return config
