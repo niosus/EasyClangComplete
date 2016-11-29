@@ -485,6 +485,7 @@ class Tools:
             str: raw command output
         """
         try:
+            stdin = None
             startupinfo = None
             if isinstance(command, list):
                 command = subprocess.list2cmdline(command)
@@ -494,7 +495,9 @@ class Tools:
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 startupinfo.wShowWindow = subprocess.SW_HIDE
+                stdin = subprocess.PIPE
             output = subprocess.check_output(command,
+                                             stdin=stdin,
                                              stderr=subprocess.STDOUT,
                                              shell=shell,
                                              startupinfo=startupinfo)
