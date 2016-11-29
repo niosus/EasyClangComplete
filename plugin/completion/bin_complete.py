@@ -92,6 +92,7 @@ class Completer(BaseCompleter):
 
         It builds up a clang command that is then executed
         as a subprocess. The output is parsed for completions """
+        log.debug(" completing with cmd command")
         view = completion_request.get_view()
         start = time.time()
         output_text = self.run_clang_command(
@@ -154,8 +155,9 @@ class Completer(BaseCompleter):
             complete_at_str = Completer.compl_str_mask.format(
                 complete_flag="-code-completion-at",
                 file=temp_file_name, row=row, col=col)
-            complete_cmd = [self.clang_binary] + flags + ["-Xclang"] \
-                + [complete_at_str] + [temp_file_name]
+            prefix = ["-c", "-fsyntax-only", "-Xclang"] + [complete_at_str]
+            complete_cmd = [self.clang_binary] + \
+                prefix + flags + [temp_file_name]
         else:
             log.critical(" unknown type of cmd command wanted.")
             return None

@@ -4,16 +4,11 @@ import platform
 from os import path
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
-from EasyClangComplete.plugin.completion import bin_complete
-from EasyClangComplete.plugin.completion import lib_complete
 from EasyClangComplete.plugin.tools import CompletionRequest
 from EasyClangComplete.plugin.view_configuration import ViewConfigManager
 
 
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
-
-CompleterBin = bin_complete.Completer
-CompleterLib = lib_complete.Completer
 
 
 def has_libclang():
@@ -35,8 +30,9 @@ class BaseTestCompleter(object):
 
     Attributes:
         view (sublime.View): view
-        Completer (type): Completer class to use
+        use_libclang (bool): decides if we use libclang in tests
     """
+    use_libclang = None
 
     def set_up_completer(self):
         """Utility method to set up a completer for the current view.
@@ -46,6 +42,7 @@ class BaseTestCompleter(object):
         """
         manager = SettingsManager()
         settings = manager.settings_for_view(self.view)
+        settings.use_libclang = self.use_libclang
 
         view_config_manager = ViewConfigManager()
         view_config = view_config_manager.get_config_for_view(
@@ -120,6 +117,7 @@ class BaseTestCompleter(object):
         self.assertIsNotNone(completions)
         if platform.system() == "Windows":
             # disable the windows tests for now until AppVeyor fixes things
+            self.tear_down()
             return
         expected = ['begin\titerator begin()', 'begin()']
         self.assertIn(expected, completions)
@@ -169,10 +167,10 @@ class BaseTestCompleter(object):
 
 class TestBinCompleter(BaseTestCompleter, GuiTestWrapper):
     """Test class for the binary based completer."""
-    Completer = CompleterBin
+    use_libclang = False
 
 
 if has_libclang():
     class TestLibCompleter(BaseTestCompleter, GuiTestWrapper):
         """Test class for the library based completer."""
-        Completer = CompleterLib
+        use_libclang = True

@@ -82,6 +82,7 @@ class ViewConfig(object):
 
     @staticmethod
     def __init_completer(settings):
+        completer = None
         if settings.use_libclang:
             log.info(" init completer based on libclang")
             completer = lib_complete.Completer(settings.clang_binary)
