@@ -140,7 +140,10 @@ class base_test_complete(object):
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
         expected = ['a\tint a', 'a']
-        self.assertIn(expected, completions)
+        if type(completer) != CompleterLib:
+            self.assertIn(expected, completions)
+        else:
+            self.assertNotIn(expected, completions)
 
     def test_complete_vector(self):
         """Test that we can complete vector members."""
