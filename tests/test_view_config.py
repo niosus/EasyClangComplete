@@ -47,4 +47,6 @@ class TestViewConfig(GuiTestWrapper):
         self.assertEqual(completer.clang_flags[1], 'c++')
         self.assertEqual(completer.clang_flags[2], '-std=c++11')
         # test last one
-        self.assertEqual(completer.clang_flags[11], '-I/usr/include/opencv')
+        expected = path.join(path.dirname(
+            path.dirname(__file__)), 'local_folder')
+        self.assertEqual(completer.clang_flags[11], '-I' + expected)
