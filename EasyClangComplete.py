@@ -112,6 +112,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
+        # disable on_activated_async when running tests
+        if view.settings().get("disable_easy_clang_complete"):
+            return
         log.debug(" on_activated_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
             if not self.completer:
