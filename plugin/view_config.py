@@ -47,25 +47,19 @@ class ViewConfig(object):
         self.completer = None
         if not Tools.is_valid_view(view):
             return
-        # set up a proper object
-        self.__view_id = view.buffer_id()
-        lang_flags = ViewConfig.__get_lang_flags(view, settings)
-        self.completer = ViewConfig.__init_completer(settings)
-        include_prefixes = self.completer.compiler_variant.include_prefixes
-        common_flags = self.__get_common_flags(
-            include_prefixes, settings)
-        self.flag_source, source_flags = \
-            ViewConfig.__generate_source_flags(
-                view, settings, include_prefixes)
-        all_flags = UniqueList() + lang_flags + common_flags + source_flags
 
-        # initialize flags
-        self.completer.clang_flags = []
-        for flag in all_flags:
-            self.completer.clang_flags += flag.as_list()
+        # set up a proper object
+        completer, flags = ViewConfig.__generate_essentials(view, settings)
+        if not completer:
+            log.warning(" could not generate completer for view %s",
+                        view.buffer_id())
+            return
+
+        self.completer = completer
+        self.completer.clang_flags = flags
         self.completer.update(view, settings.errors_on_save)
 
-    def has_changed(self, view, settings):
+    def update_if_needed(self, view, settings):
         """Check if the view config has changed.
 
         Args:
@@ -73,12 +67,63 @@ class ViewConfig(object):
             settings (SettingsStorage): Current settings.
 
         Returns:
-            bool: True if changed, False otherwise.
+            ViewConfig: Current view config, updated if needed.
         """
-        pass
+        completer, flags = ViewConfig.__generate_essentials(view, settings)
+        if self.needs_update(completer, flags):
+            log.debug(" updating existing config.")
+            self.completer = completer
+            self.completer.clang_flags = flags
+            self.completer.update(view, settings.errors_on_save)
+        return self
+
+    def needs_update(self, completer, flags):
+        """Check if view config needs update.
+
+        Args:
+            completer (Completer): A new completer.
+            flags (str[]): Flags as string list.
+
+        Returns:
+            bool: True if update is needed, false otherwise.
+        """
+        if not self.completer:
+            return True
+        if completer.name != self.completer.name:
+            return True
+        if flags != self.completer.clang_flags:
+            return True
+        return False
 
     @staticmethod
-    def __generate_source_flags(view, settings, include_prefixes):
+    def __generate_essentials(view, settings):
+        """Generate essentials. Flags and empty Completer. This is fast.
+
+        Args:
+            view (View): Current view.
+            settings (SettingStorage): Current settings.
+
+        Returns:
+            (Completer, str[]): A completer bundled with flags as str list.
+        """
+        if not Tools.is_valid_view(view):
+            log.warning(" no flags for an invalid view %s.", view)
+            return (None, [])
+        completer = ViewConfig.__init_completer(settings)
+        prefixes = completer.compiler_variant.include_prefixes
+
+        flags = UniqueList()
+        flags += ViewConfig.__get_lang_flags(view, settings)
+        flags += ViewConfig.__get_common_flags(prefixes, settings)
+        flags += ViewConfig.__load_source_flags(view, settings, prefixes)
+
+        flags_as_str_list = []
+        for flag in flags:
+            flags_as_str_list += flag.as_list()
+        return (completer, flags_as_str_list)
+
+    @staticmethod
+    def __load_source_flags(view, settings, include_prefixes):
         """Generate flags from source.
 
         Args:
@@ -86,8 +131,8 @@ class ViewConfig(object):
             settings (SettingsStorage): Current settings.
             include_prefixes (str[]): Valid include prefixes.
 
-        Returns: (FlagsSource, Flag[]): A tuple with the picked flags source
-            along with the flags generated from it.
+        Returns:
+            Flag[]: flags generated from a flags source.
         """
         prefix_paths = settings.cmake_prefix_paths
         if prefix_paths is None:
@@ -108,8 +153,8 @@ class ViewConfig(object):
             if flags:
                 # don't load anything more if we have flags
                 log.debug(" flags generated with '%s' source.", source)
-                return (source, flags)
-        return (None, [])
+                return flags
+        return []
 
     @staticmethod
     def __get_common_flags(include_prefixes, settings):
@@ -194,22 +239,15 @@ class ViewConfigManager(object):
         Returns:
             ViewConfig: Config for current view and settings.
         """
-        view_id = view.buffer_id()
-        if view_id in self._cache:
-            # TODO(igor): check if this is still valid. Generate new if not.
-            return self._cache[view_id]
-        return self.generate_new_config(view, settings)
-
-    def generate_new_config(self, view, settings):
-        """Generate a configuration.
-
-        Args:
-            view (View): Current view.
-            settings (SettingsStorage): Current settings.
-
-        Returns:
-            ViewConfig: Config for current view and settings.
-        """
+        if not Tools.is_valid_view(view):
+            log.warning(" view %s is not valid. Cannot get config.", view)
+            return None
+        file_path = view.file_name()
+        if file_path in self._cache:
+            log.debug(" config exists for path: %s", file_path)
+            return self._cache[file_path].update_if_needed(view, settings)
+        # generate new config
+        log.debug(" generate new config for path: %s", file_path)
         config = ViewConfig(view, settings)
-        self._cache[view.buffer_id()] = config
+        self._cache[file_path] = config
         return config

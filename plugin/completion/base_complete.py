@@ -22,6 +22,7 @@ class BaseCompleter:
         valid (bool): is completer valid
         version_str (str): version string of format "3.4" for clang v. 3.4
     """
+    name = "base"
     version_str = None
     error_vis = None
     compiler_variant = None

@@ -47,6 +47,7 @@ class Completer(BaseCompleter):
         TYPE_TAG (str): type name tag for convenience
 
     """
+    name = "bin"
     clang_binary = None
 
     PARAM_TAG = "param"

@@ -135,8 +135,7 @@ class BaseTestCompleter(object):
         view_config_manager = ViewConfigManager()
         view_config = view_config_manager.get_config_for_view(
             self.view, settings)
-        completer = view_config.completer
-        self.assertIsNone(completer)
+        self.assertIsNone(view_config)
         self.tear_down()
 
     def test_cooperation_with_default_completions(self):

@@ -48,6 +48,7 @@ class Completer(BaseCompleter):
         timer_period (int): period of timer in seconds
         tu_module (cindex.TranslationUnit): module for proper cindex
     """
+    name = "lib"
     rlock = RLock()
 
     timer = None
