@@ -65,20 +65,27 @@ class Completer(BaseCompleter):
         """
         super().__init__(clang_binary)
 
+        # Create compiler options of specific variant of the compiler.
+        self.compiler_variant = LibClangCompilerVariant()
+
         # init tu related variables
-        self.tu_module = None
-        self.stamped_tu = None
+        with Completer.rlock:
+            self.tu_module = None
+            self.stamped_tu = None
 
-        # slightly more complicated name retrieving to allow for more complex
-        # version strings, e.g. 3.8.0
-        cindex_module_name = Completer._cindex_for_version(self.version_str)
+            # slightly more complicated name retrieving to allow for more complex
+            # version strings, e.g. 3.8.0
+            cindex_module_name = Completer._cindex_for_version(self.version_str)
 
-        if cindex_module_name:
+            if not cindex_module_name:
+                log.critical(" No cindex module for clang version: %s",
+                             self.version_str)
+                return
+
             # import cindex bundled with this plugin. We cannot use the default
             # one because sublime uses python 3, but there are no python
             # bindings for python 3
-            log.debug(
-                " using bundled cindex: %s", cindex_module_name)
+            log.debug(" using bundled cindex: %s", cindex_module_name)
             cindex = importlib.import_module(cindex_module_name)
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
@@ -100,9 +107,6 @@ class Completer(BaseCompleter):
             except Exception as e:
                 log.error(" error: %s", e)
                 self.valid = False
-
-        # Create compiler options of specific variant of the compiler.
-        self.compiler_variant = LibClangCompilerVariant()
 
     def parse_tu(self, view):
         """Initialize the completer. Builds the view.
