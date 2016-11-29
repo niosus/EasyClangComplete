@@ -1,6 +1,5 @@
-"""Tests for autocompletion."""
+"""Tests for setting up an using view configuration."""
 from os import path
-from unittest import TestCase
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
 from EasyClangComplete.plugin.view_configuration import ViewConfig
@@ -9,6 +8,7 @@ from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
 
 class TestViewConfig(GuiTestWrapper):
+    """Test view configuration."""
 
     def test_setup_view(self):
         """Test that setup view correctly sets up the view."""
@@ -16,6 +16,7 @@ class TestViewConfig(GuiTestWrapper):
                               'test_files',
                               'test.cpp')
         self.check_view(file_name)
+        self.tear_down()
 
     def test_init(self):
         """Test that the completer is properly initialized."""
@@ -28,6 +29,7 @@ class TestViewConfig(GuiTestWrapper):
         view_config = ViewConfig(self.view, settings)
 
         self.assertIsNotNone(view_config.completer)
+        self.tear_down()
 
     def test_flags(self):
         """Test that the completer is properly initialized."""
@@ -50,3 +52,4 @@ class TestViewConfig(GuiTestWrapper):
         expected = path.join(path.dirname(
             path.dirname(__file__)), 'local_folder')
         self.assertEqual(completer.clang_flags[11], '-I' + expected)
+        self.tear_down()

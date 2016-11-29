@@ -59,6 +59,7 @@ class BaseTestCompleter(object):
                               'test_files',
                               'test.cpp')
         self.check_view(file_name)
+        self.tear_down()
 
     def test_init(self):
         """Test that the completer is properly initialized."""
@@ -69,6 +70,7 @@ class BaseTestCompleter(object):
         completer = self.set_up_completer()
 
         self.assertIsNotNone(completer.version_str)
+        self.tear_down()
 
     def test_complete(self):
         """Test autocompletion for user type."""
@@ -93,6 +95,7 @@ class BaseTestCompleter(object):
         self.assertIsNotNone(completions)
         expected = ['a\tint a', 'a']
         self.assertIn(expected, completions)
+        self.tear_down()
 
     def test_complete_vector(self):
         """Test that we can complete vector members."""
@@ -120,6 +123,7 @@ class BaseTestCompleter(object):
             return
         expected = ['begin\titerator begin()', 'begin()']
         self.assertIn(expected, completions)
+        self.tear_down()
 
     # TODO(igor): does this need to be adapted?
     # def test_unsaved_views(self):
@@ -160,6 +164,7 @@ class BaseTestCompleter(object):
         # Trigger default completions popup.
         self.view.run_command('auto_complete')
         self.assertTrue(self.view.is_auto_complete_visible())
+        self.tear_down()
 
 
 class TestBinCompleter(BaseTestCompleter, GuiTestWrapper):

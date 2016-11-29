@@ -13,6 +13,7 @@ class test_settings(GuiTestWrapper):
                               'test_files',
                               'test.cpp')
         self.check_view(file_name)
+        self.tear_down()
 
     def test_init(self):
         """Test that settings are correctly initialized."""
@@ -36,7 +37,10 @@ class test_settings(GuiTestWrapper):
     def test_populate_flags(self):
         """Testing include population."""
         # open any existing file
-        self.set_up_view(path.join('test_files', 'test_wrong_triggers.cpp'))
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_wrong_triggers.cpp')
+        self.set_up_view(file_name)
         # now test the things
         manager = SettingsManager()
         settings = manager.user_settings()
@@ -53,3 +57,4 @@ class test_settings(GuiTestWrapper):
         self.assertFalse(initial_common_flags[1] in dirs)
         self.assertTrue(("-I" + current_folder) in dirs)
         self.assertTrue(("-I" + parent_folder) in dirs)
+        self.tear_down()
