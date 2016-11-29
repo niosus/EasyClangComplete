@@ -145,22 +145,24 @@ class Completer(BaseCompleter):
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
 
+        prefix = ["-c", "-fsyntax-only"]
         flags = self.clang_flags
         if task_type == "update":
-            # we construct command for update task
-            complete_cmd = [self.clang_binary] + flags + [temp_file_name]
+            # we construct command for update task. No alternations needed, so
+            # just pass here.
+            pass
         elif task_type == "complete":
             # we construct command for complete task
             (row, col) = SublBridge.cursor_pos(view, cursor_pos)
             complete_at_str = Completer.compl_str_mask.format(
                 complete_flag="-code-completion-at",
                 file=temp_file_name, row=row, col=col)
-            prefix = ["-c", "-fsyntax-only", "-Xclang"] + [complete_at_str]
-            complete_cmd = [self.clang_binary] + \
-                prefix + flags + [temp_file_name]
+            prefix += ["-Xclang"] + [complete_at_str]
         else:
             log.critical(" unknown type of cmd command wanted.")
             return None
+        # construct cmd from building parts
+        complete_cmd = [self.clang_binary] + prefix + flags + [temp_file_name]
         # now run this command
         log.debug(" clang command: \n%s", complete_cmd)
 
