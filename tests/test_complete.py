@@ -140,7 +140,7 @@ class base_test_complete(object):
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
         expected = ['a\tint a', 'a']
-        if type(completer) != CompleterLib:
+        if isinstance(completer, CompleterBin):
             self.assertIn(expected, completions)
         else:
             self.assertNotIn(expected, completions)
