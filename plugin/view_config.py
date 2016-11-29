@@ -33,6 +33,7 @@ class ViewConfig(object):
 
     Attributes:
         completer (Completer): A completer for each view configuration.
+        flag_source (FlagsSource): FlagsSource that was used to generate flags.
     """
 
     def __init__(self, view, settings):
@@ -42,13 +43,18 @@ class ViewConfig(object):
             view (View): Current view.
             settings (SettingsStorage): Current settings.
         """
+        # initialize with nothing
+        self.completer = None
+        if not Tools.is_valid_view(view):
+            return
+        # set up a proper object
         self.__view_id = view.buffer_id()
         lang_flags = ViewConfig.__get_lang_flags(view, settings)
         self.completer = ViewConfig.__init_completer(settings)
         include_prefixes = self.completer.compiler_variant.include_prefixes
         common_flags = self.__get_common_flags(
             include_prefixes, settings)
-        flag_source, source_flags = \
+        self.flag_source, source_flags = \
             ViewConfig.__generate_source_flags(
                 view, settings, include_prefixes)
         all_flags = UniqueList() + lang_flags + common_flags + source_flags

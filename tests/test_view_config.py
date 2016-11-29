@@ -1,4 +1,5 @@
 """Tests for setting up an using view configuration."""
+import sublime
 from os import path
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
@@ -52,4 +53,18 @@ class TestViewConfig(GuiTestWrapper):
         expected = path.join(path.dirname(
             path.dirname(__file__)), 'local_folder')
         self.assertEqual(completer.clang_flags[11], '-I' + expected)
+        self.tear_down()
+
+    def test_unsaved_views(self):
+        """Test that we gracefully handle unsaved views."""
+        # Construct an unsaved scratch view.
+        self.view = sublime.active_window().new_file()
+        self.view.set_scratch(True)
+
+        # Manually set up a completer.
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
+        view_config = ViewConfig(self.view, settings)
+        completer = view_config.completer
+        self.assertIsNone(completer)
         self.tear_down()

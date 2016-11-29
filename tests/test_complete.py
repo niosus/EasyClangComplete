@@ -123,26 +123,21 @@ class BaseTestCompleter(object):
         self.assertIn(expected, completions)
         self.tear_down()
 
-    # TODO(igor): does this need to be adapted?
-    # def test_unsaved_views(self):
-    #     """Test that we gracefully handle unsaved views."""
-    #     # Construct an unsaved scratch view.
-    #     self.view = sublime.active_window().new_file()
-    #     self.view.set_scratch(True)
+    def test_unsaved_views(self):
+        """Test that we gracefully handle unsaved views."""
+        # Construct an unsaved scratch view.
+        self.view = sublime.active_window().new_file()
+        self.view.set_scratch(True)
 
-    #     # Manually set up a completer.
-    #     manager = SettingsManager()
-    #     settings = manager.settings_for_view(self.view)
-    #     view_config_manager = ViewConfigManager()
-    #     view_config = view_config_manager.get_config_for_view(
-    #         self.view, settings)
-    #     completer = view_config.completer
-    #     completer.init_for_view(
-    #         view=self.view,
-    #         settings=settings)
-
-    #     # Verify that the completer ignores the scratch view.
-    #     self.assertFalse(completer.exists_for_view(self.view.buffer_id()))
+        # Manually set up a completer.
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
+        view_config_manager = ViewConfigManager()
+        view_config = view_config_manager.get_config_for_view(
+            self.view, settings)
+        completer = view_config.completer
+        self.assertIsNone(completer)
+        self.tear_down()
 
     def test_cooperation_with_default_completions(self):
         """Empty clang completions should not hide default completions."""
