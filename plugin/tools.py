@@ -225,14 +225,14 @@ class File:
         return True
 
     @staticmethod
-    def update_mod_time(file):
+    def update_mod_time(full_path):
         """Update modification time.
 
         Args:
-            file (File): current file.
+            full_path (str): current full path to file.
         """
-        mod_time = path.getmtime(file.full_path())
-        File.__modification_cache[file.full_path()] = mod_time
+        mod_time = path.getmtime(full_path)
+        File.__modification_cache[full_path] = mod_time
 
     @staticmethod
     def search(file_name, from_folder, to_folder, search_content=None):

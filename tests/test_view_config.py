@@ -5,17 +5,20 @@ from os import path
 
 from EasyClangComplete.plugin.settings import settings_manager
 from EasyClangComplete.plugin import view_config
+from EasyClangComplete.plugin import tools
 
 from EasyClangComplete.tests import gui_test_wrapper
 
+imp.reload(gui_test_wrapper)
 imp.reload(settings_manager)
 imp.reload(view_config)
-imp.reload(gui_test_wrapper)
+imp.reload(tools)
 
 SettingsManager = settings_manager.SettingsManager
 ViewConfig = view_config.ViewConfig
 ViewConfigManager = view_config.ViewConfigManager
 GuiTestWrapper = gui_test_wrapper.GuiTestWrapper
+File = tools.File
 
 
 class TestViewConfig(GuiTestWrapper):
@@ -80,7 +83,7 @@ class TestViewConfig(GuiTestWrapper):
         self.tear_down()
 
     def test_needs_update(self):
-        """Test initializing a view configuration."""
+        """Test view config changing when needed."""
         file_name = path.join(path.dirname(__file__),
                               'test_files',
                               'test.cpp')
@@ -88,13 +91,29 @@ class TestViewConfig(GuiTestWrapper):
         manager = SettingsManager()
         settings = manager.settings_for_view(self.view)
         view_config = ViewConfig(self.view, settings)
-        needs_update = view_config.needs_update(
-            view_config.completer, view_config.completer.clang_flags)
-        self.assertFalse(needs_update)
+        flags = view_config.completer.clang_flags
+        is_update_needed = view_config.needs_update(view_config.completer,
+                                                    flags)
+        self.assertFalse(is_update_needed)
         flags = []
-        needs_update = view_config.needs_update(
+        is_update_needed = view_config.needs_update(
             view_config.completer, flags)
-        self.assertTrue(needs_update)
+        self.assertTrue(is_update_needed)
+        self.tear_down()
+
+    def test_needs_update_on_file_change(self):
+        """Test view config changing when file changed."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_changes.cpp')
+        self.set_up_view(file_name)
+        File.update_mod_time(file_name)
+        is_update_needed = ViewConfig.needs_reparse(self.view)
+        self.assertFalse(is_update_needed)
+        self.view.window().focus_view(self.view)
+        self.view.window().run_command("save")
+        is_reparse_needed = ViewConfig.needs_reparse(self.view)
+        self.assertTrue(is_reparse_needed)
         self.tear_down()
 
 
@@ -118,10 +137,10 @@ class TestViewConfigManager(GuiTestWrapper):
         manager = SettingsManager()
         config_manager = ViewConfigManager()
         settings = manager.settings_for_view(self.view)
-        view_config = config_manager.get_config_for_view(self.view, settings)
+        view_config = config_manager.load_for_view(self.view, settings)
         self.assertEqual(view_config.completer.name, "lib")
         settings.use_libclang = False
-        view_config = config_manager.get_config_for_view(self.view, settings)
+        view_config = config_manager.load_for_view(self.view, settings)
         self.assertEqual(view_config.completer.name, "bin")
         self.tear_down()
 
@@ -134,9 +153,9 @@ class TestViewConfigManager(GuiTestWrapper):
         manager = SettingsManager()
         config_manager = ViewConfigManager()
         settings = manager.settings_for_view(self.view)
-        config_1 = config_manager.get_config_for_view(self.view, settings)
+        config_1 = config_manager.load_for_view(self.view, settings)
         self.tear_down()
         self.set_up_view(file_name)
-        config_2 = config_manager.get_config_for_view(self.view, settings)
+        config_2 = config_manager.load_for_view(self.view, settings)
         self.assertIs(config_1, config_2)
         self.tear_down()

@@ -7,6 +7,7 @@ import logging
 from os import path
 
 
+from .tools import File
 from .tools import Tools
 from .tools import singleton
 from .tools import SearchScope
@@ -71,9 +72,14 @@ class ViewConfig(object):
         """
         completer, flags = ViewConfig.__generate_essentials(view, settings)
         if self.needs_update(completer, flags):
-            log.debug(" updating existing config.")
+            log.debug(" config needs new completer.")
             self.completer = completer
             self.completer.clang_flags = flags
+            self.completer.update(view, settings.errors_on_save)
+            File.update_mod_time(view.file_name())
+            return self
+        if ViewConfig.needs_reparse(view):
+            log.debug(" config updates existing completer.")
             self.completer.update(view, settings.errors_on_save)
         return self
 
@@ -85,7 +91,7 @@ class ViewConfig(object):
             flags (str[]): Flags as string list.
 
         Returns:
-            bool: True if update is needed, false otherwise.
+            bool: True if update is needed, False otherwise.
         """
         if not self.completer:
             return True
@@ -93,6 +99,22 @@ class ViewConfig(object):
             return True
         if flags != self.completer.clang_flags:
             return True
+        log.debug(" view config needs no update.")
+        return False
+
+    @staticmethod
+    def needs_reparse(view):
+        """Check if view config needs update.
+
+        Args:
+            view (View): Current view.
+
+        Returns:
+            bool: True if reparse is needed, False otherwise.
+        """
+        if not File.is_unchanged(view.file_name()):
+            return True
+        log.debug(" view config needs no reparse.")
         return False
 
     @staticmethod
@@ -229,7 +251,18 @@ class ViewConfigManager(object):
         """Initialize view config manager."""
         self._cache = ViewConfigCache()
 
-    def get_config_for_view(self, view, settings):
+    def get_from_cache(self, view):
+        """Get config from cache with no modifications."""
+        if not Tools.is_valid_view(view):
+            log.error(" view %s is not valid. Cannot get config.", view)
+            return None
+        file_path = view.file_name()
+        if file_path in self._cache:
+            log.debug(" config exists for path: %s", file_path)
+            return self._cache[file_path]
+        return None
+
+    def load_for_view(self, view, settings):
         """Get stored config for a view or generate a new one.
 
         Args:
@@ -240,7 +273,7 @@ class ViewConfigManager(object):
             ViewConfig: Config for current view and settings.
         """
         if not Tools.is_valid_view(view):
-            log.warning(" view %s is not valid. Cannot get config.", view)
+            log.error(" view %s is not valid. Cannot get config.", view)
             return None
         file_path = view.file_name()
         if file_path in self._cache:

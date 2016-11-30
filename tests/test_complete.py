@@ -45,8 +45,7 @@ class BaseTestCompleter(object):
         settings.use_libclang = self.use_libclang
 
         view_config_manager = ViewConfigManager()
-        view_config = view_config_manager.get_config_for_view(
-            self.view, settings)
+        view_config = view_config_manager.load_for_view(self.view, settings)
         completer = view_config.completer
         return completer
 
@@ -133,8 +132,7 @@ class BaseTestCompleter(object):
         manager = SettingsManager()
         settings = manager.settings_for_view(self.view)
         view_config_manager = ViewConfigManager()
-        view_config = view_config_manager.get_config_for_view(
-            self.view, settings)
+        view_config = view_config_manager.load_for_view(self.view, settings)
         self.assertIsNone(view_config)
         self.tear_down()
 

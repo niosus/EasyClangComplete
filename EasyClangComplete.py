@@ -53,19 +53,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
     """Base class for this plugin.
 
     Most of the functionality is delegated.
-
-    Attributes:
-        settings (plugin_settings.Settings): class that encapsulates settings
-        completer (plugin.completion.base_completion.BaseCompleter):
-            This object handles auto completion.
-            It can be one of the following:
-            - bin_complete.Completer
-            - lib_complete.Completer
     """
-    settings = None
-    completer = None
-
-    pool_read = futures.ThreadPoolExecutor(max_workers=4)
+    thread_pool = futures.ThreadPoolExecutor(max_workers=4)
 
     current_job_id = None
     current_completions = []
@@ -74,6 +63,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """Initialize the object."""
         super().__init__()
         global handle_plugin_loaded_function
+        print(self)
         handle_plugin_loaded_function = self.on_plugin_loaded
         # By default be verbose and limit on settings change if verbose flag is
         # not set.
@@ -82,6 +72,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
     def on_plugin_loaded(self):
         """Called upon plugin load event."""
         # init settings manager
+        print(self)
         self.settings_manager = SettingsManager()
         self.on_settings_changed()
         self.settings_manager.add_change_listener(self.on_settings_changed)
@@ -110,12 +101,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug(" on_activated_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
             settings = self.settings_manager.settings_for_view(view)
-            view_config = self.view_config_manager.get_config_for_view(
-                view, settings)
-            if not view_config.completer:
-                log.warning(" no completer for view id %s", view.buffer_id())
-                return
-            # TODO(igor): reintroduce check if we need a new completer here
+            # All is taken care of. The view is built if needed.
+            self.view_config_manager.load_for_view(view, settings)
 
     def on_selection_modified(self, view):
         """Called when selection is modified. Executed in gui thread.
@@ -125,9 +112,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if Tools.is_valid_view(view):
             (row, _) = SublBridge.cursor_pos(view)
-            settings = self.settings_manager.settings_for_view(view)
-            view_config = self.view_config_manager.get_config_for_view(
-                view, settings)
+            view_config = self.view_config_manager.get_from_cache(view)
+            if not view_config:
+                return
             if not view_config.completer:
                 return
             view_config.completer.error_vis.show_popup_if_needed(view, row)
@@ -140,9 +127,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if Tools.is_valid_view(view):
             log.debug(" on_modified_async view id %s", view.buffer_id())
-            settings = self.settings_manager.settings_for_view(view)
-            view_config = self.view_config_manager.get_config_for_view(
-                view, settings)
+            view_config = self.view_config_manager.get_from_cache(view)
+            if not view_config:
+                return
             if not view_config.completer:
                 return
             view_config.completer.error_vis.clear(view)
@@ -157,12 +144,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if Tools.is_valid_view(view):
             log.debug(" saving view: %s", view.buffer_id())
             settings = self.settings_manager.settings_for_view(view)
-            view_config = self.view_config_manager.get_config_for_view(
-                view, settings)
-            if not view_config.completer:
-                return
-            view_config.completer.error_vis.erase_regions(view)
-            view_config.completer.update(view, settings.errors_on_save)
+            self.view_config_manager.load_for_view(view, settings)
 
     def on_close(self, view):
         """Called on closing the view.
@@ -174,10 +156,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if Tools.is_valid_view(view):
             log.debug(" closing view %s", view.buffer_id())
             self.settings_manager.clear_for_view(view)
-            if not self.completer:
-                return
-            # TODO(igor): manage deletion of completers (now view configs)
-            # future = EasyClangComplete.pool_read.submit(
+            # TODO(igor): manage deletion of completers
+            # future = EasyClangComplete.thread_pool.submit(
             #     self.completer.remove, view.buffer_id())
             # future.add_done_callback(EasyClangComplete.completer_removed)
 
@@ -247,10 +227,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # get settings for this view
         settings = self.settings_manager.settings_for_view(view)
         # get view config
-        view_config = self.view_config_manager.get_config_for_view(
-                view, settings)
-        if not view_config.completer:
-            log.debug(" no completer")
+        view_config = self.view_config_manager.load_for_view(view, settings)
+        if not view_config:
+            log.debug(" no view config")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
         if self.current_completions and current_pos_id == self.current_job_id:
@@ -278,7 +257,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.current_job_id = current_pos_id
         log.debug(" starting async auto_complete with id: %s",
                   self.current_job_id)
-        future = EasyClangComplete.pool_read.submit(
+        future = EasyClangComplete.thread_pool.submit(
             view_config.completer.complete, completion_request)
         future.add_done_callback(self.completion_finished)
 
