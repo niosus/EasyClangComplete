@@ -343,9 +343,9 @@ class Completer(BaseCompleter):
         """
         completions = []
         if trigger != "::":
-            excluded = Completer.ignore_list[:-1]
-        else:
             excluded = Completer.ignore_list
+        else:
+            excluded = Completer.ignore_list[:-1]
 
         sorted_results = sorted(complete_results.results,
                                 key=lambda x: x.string.priority)
