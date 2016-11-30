@@ -59,6 +59,14 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
+    def remove(self):
+        """Free memory used by completer.
+
+        Raises:
+            NotImplementedError: Guarantees we do not call this abstract method
+        """
+        raise NotImplementedError("calling abstract method")
+
     def update(self, view, show_errors):
         """Update the completer for this view.
 

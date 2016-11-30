@@ -74,8 +74,8 @@ class Completer(BaseCompleter):
             self.tu_module = None
             self.stamped_tu = None
 
-            # slightly more complicated name retrieving to allow for more complex
-            # version strings, e.g. 3.8.0
+            # slightly more complicated name retrieving to allow for more
+            # complex version strings, e.g. 3.8.0
             cindex_module_name = Completer._cindex_for_version(self.version_str)
 
             if not cindex_module_name:

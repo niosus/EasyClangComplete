@@ -157,14 +157,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if Tools.is_valid_view(view):
             log.debug(" closing view %s", view.buffer_id())
             self.settings_manager.clear_for_view(view)
-            # TODO(igor): manage deletion of completers
-            # future = EasyClangComplete.thread_pool.submit(
-            #     self.completer.remove, view.buffer_id())
-            # future.add_done_callback(EasyClangComplete.completer_removed)
+            file_path = view.file_name()
+            future = EasyClangComplete.thread_pool.submit(
+                self.view_config_manager.clear_for_view, file_path)
+            future.add_done_callback(EasyClangComplete.config_removed)
 
     @staticmethod
-    def completer_removed(future):
-        """Callback called when completer has closed object for a view.
+    def config_removed(future):
+        """Callback called when config has been removed for a view.
 
         The corresponding view id is saved in future.result()
 
@@ -172,9 +172,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             future (concurrent.Future): future holding id of removed view
         """
         if future.done():
-            log.debug(" removed completer for id: %s", future.result())
+            log.debug(" removed config for path: %s", future.result())
         elif future.cancelled():
-            log.debug(" could not remove completer -> cancelled")
+            log.debug(" could not remove config -> cancelled")
 
     def completion_finished(self, future):
         """Callback called when completion async function has returned.
@@ -228,7 +228,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # get settings for this view
         settings = self.settings_manager.settings_for_view(view)
         # get view config
-        view_config = self.view_config_manager.load_for_view(view, settings)
+        view_config = self.view_config_manager.get_from_cache(view)
         if not view_config:
             log.debug(" no view config")
             return Tools.SHOW_DEFAULT_COMPLETIONS

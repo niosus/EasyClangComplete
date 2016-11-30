@@ -1,4 +1,4 @@
-""" This module holds a class that manages access to plugin settings
+"""This module holds a class that manages access to plugin settings.
 
 Attributes:
     log (logging.Logger): logger for current module
@@ -16,10 +16,10 @@ log.debug(" reloading module %s", __name__)
 
 
 class SettingsManager:
-    """
-    A class that manages the plugin settings. It has default settings
-    initialized from generic user settings and stores a dictionary of
-    view-specific settings. It also manages access to those.
+    """A class that manages the plugin settings.
+
+    It has default settings initialized from generic user settings and stores
+    a dictionary of view-specific settings. It also manages access to those.
 
     Args:
         __default_settings (settings.SettingsStorage): default user settings
@@ -33,12 +33,11 @@ class SettingsManager:
     __change_listeners = []
 
     def __init__(self):
-        """ Initialize the class by loading the default user settings.
-        """
+        """Initialize the class by loading the default user settings."""
         self.__init_default_settings()
 
     def settings_for_view(self, view):
-        """ Get settings stored for a view
+        """Get settings stored for a view.
 
         Args:
             view (sublime.View): current view
@@ -53,7 +52,7 @@ class SettingsManager:
         return self.__settings_dict[view_id]
 
     def clear_for_view(self, view):
-        """ Clear settings stored for view
+        """Clear settings stored for view.
 
         Args:
             view (sublime.View): current view
@@ -64,7 +63,7 @@ class SettingsManager:
             del self.__settings_dict[view_id]
 
     def user_settings(self):
-        """ Get default user settings (not influenced by a current view)
+        """Get default user settings (not influenced by a current view).
 
         Returns:
             settings.SettingsStorage: default user settings
@@ -72,7 +71,7 @@ class SettingsManager:
         return self.__default_settings
 
     def add_change_listener(self, listener):
-        """ Registers given listener to be notified whenever settings change.
+        """Register given listener to be notified whenever settings change.
 
         Args:
             listener (function): function to call on settings change
@@ -82,8 +81,10 @@ class SettingsManager:
         self.__change_listeners.append(listener)
 
     def __init_for_view(self, view):
-        """ Generate new SettingsStorage for a view. Builds upon default
-        settings, updating the values from the current view project.
+        """Generate new SettingsStorage for a view.
+
+        Builds upon default settings, updating the values from the current
+        view project.
 
         Args:
             view (sublime.View): current View
@@ -94,8 +95,7 @@ class SettingsManager:
         log.debug(" settings initialized for view: %s", view_id)
 
     def __on_settings_changed(self):
-        """ When user changes settings, trigger this.
-        """
+        """When user changes settings, trigger this."""
         self.__init_default_settings()
 
         # clear all saved view-specific settings.
@@ -107,7 +107,7 @@ class SettingsManager:
         log.info(" settings changed and reloaded")
 
     def __init_default_settings(self):
-        """ Initialize default user settings
+        """Initialize default user settings.
 
         Raises:
             RuntimeError: If settings are not loaded, throw an error

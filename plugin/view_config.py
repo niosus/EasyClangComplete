@@ -5,6 +5,7 @@ Attributes:
 """
 import logging
 from os import path
+from threading import RLock
 
 
 from .tools import File
@@ -247,9 +248,12 @@ class ViewConfigCache(dict):
 class ViewConfigManager(object):
     """A utility class that stores a cache of all view configurations."""
 
+    _rlock = RLock()
+
     def __init__(self):
         """Initialize view config manager."""
-        self._cache = ViewConfigCache()
+        with ViewConfigManager._rlock:
+            self._cache = ViewConfigCache()
 
     def get_from_cache(self, view):
         """Get config from cache with no modifications."""
@@ -275,12 +279,22 @@ class ViewConfigManager(object):
         if not Tools.is_valid_view(view):
             log.error(" view %s is not valid. Cannot get config.", view)
             return None
+        # we need to protect it with mutex to avoid race condition between
+        # creating and removing a config.
         file_path = view.file_name()
-        if file_path in self._cache:
-            log.debug(" config exists for path: %s", file_path)
-            return self._cache[file_path].update_if_needed(view, settings)
-        # generate new config
-        log.debug(" generate new config for path: %s", file_path)
-        config = ViewConfig(view, settings)
-        self._cache[file_path] = config
-        return config
+        with ViewConfigManager._rlock:
+            if file_path in self._cache:
+                log.debug(" config exists for path: %s", file_path)
+                return self._cache[file_path].update_if_needed(view, settings)
+            # generate new config
+            log.debug(" generate new config for path: %s", file_path)
+            config = ViewConfig(view, settings)
+            self._cache[file_path] = config
+            return config
+
+    def clear_for_view(self, file_path):
+        """Clear config for path."""
+        log.debug(" trying to clear config for view: %s", file_path)
+        with ViewConfigManager._rlock:
+            del self._cache[file_path]
+        return file_path
