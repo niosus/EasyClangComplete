@@ -14,12 +14,8 @@ from .compiler_variant import LibClangCompilerVariant
 from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
-from ..utils.stamped_tu import StampedTu
 
-
-from threading import Timer
 from threading import RLock
-
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -43,17 +39,11 @@ class Completer(BaseCompleter):
 
     Attributes:
         rlock (threading.Rlock): recursive mutex
-        timer (threading.Timer): timer object to schedule tu removal
-        max_tu_age (int): maximum translation unit age in seconds
-        timer_period (int): period of timer in seconds
         tu_module (cindex.TranslationUnit): module for proper cindex
+        tu (cindex.TranslationUnit): current translation unit
     """
     name = "lib"
     rlock = RLock()
-
-    timer = None
-    max_tu_age = None
-    timer_period = 60  # seconds
 
     def __init__(self, clang_binary):
         """Initialize the Completer from clang binary, reading its version.
@@ -72,7 +62,7 @@ class Completer(BaseCompleter):
         # init tu related variables
         with Completer.rlock:
             self.tu_module = None
-            self.stamped_tu = None
+            self.tu = None
 
             # slightly more complicated name retrieving to allow for more
             # complex version strings, e.g. 3.8.0
@@ -100,7 +90,7 @@ class Completer(BaseCompleter):
                     cindex.Config.set_library_path(libclang_dir)
 
             self.tu_module = cindex.TranslationUnit
-            self.stamped_tu = None
+            self.tu = None
             # check if we can build an index. If not, set valid to false
             try:
                 cindex.Index.create()
@@ -142,20 +132,11 @@ class Completer(BaseCompleter):
                     unsaved_files=files,
                     options=TU.PARSE_PRECOMPILED_PREAMBLE |
                     TU.PARSE_CACHE_COMPLETION_RESULTS)
-                self.stamped_tu = StampedTu(trans_unit)
+                self.tu = trans_unit
                 end = time.time()
                 log.debug(" compilation done in %s seconds", end - start)
-                # if settings.errors_on_save:
-                #     self.show_errors(view, self.TUs[v_id].tu().diagnostics)
             except Exception as e:
                 log.error(" error while compiling: %s", e)
-
-        # TODO(igor): reintroduce a timer here. It needs to remove this tu.
-        # # start timer if it is not set yet
-        # self.max_tu_age = settings.max_tu_age
-        # if not self.timer:
-        #     self.timer = Timer(Completer.timer_period, self.__remove_old_TUs)
-        #     self.timer.start()
 
     def complete(self, completion_request):
         """Called asynchronously to create a list of autocompletions.
@@ -178,7 +159,7 @@ class Completer(BaseCompleter):
             # execute clang code completion
             start = time.time()
             log.debug(" started code complete for view %s", v_id)
-            complete_obj = self.stamped_tu.tu().codeComplete(
+            complete_obj = self.tu.codeComplete(
                 view.file_name(),
                 row, col,
                 unsaved_files=files)
@@ -209,16 +190,16 @@ class Completer(BaseCompleter):
         v_id = view.buffer_id()
         log.debug(" view is %s", v_id)
         with Completer.rlock:
-            if not self.stamped_tu:
+            if not self.tu:
                 log.debug(" translation unit does not exist. Creating.")
                 self.parse_tu(view)
             log.debug(" reparsing translation_unit for view %s", v_id)
             start = time.time()
-            self.stamped_tu.tu().reparse()
+            self.tu.reparse()
             end = time.time()
             log.debug(" reparsed in %s seconds", end - start)
             if show_errors:
-                self.show_errors(view, self.stamped_tu.tu().diagnostics)
+                self.show_errors(view, self.tu.diagnostics)
             return True
         log.error(" no translation unit for view id %s", v_id)
         return False

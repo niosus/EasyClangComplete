@@ -143,19 +143,3 @@ class TestViewConfigManager(GuiTestWrapper):
         view_config = config_manager.load_for_view(self.view, settings)
         self.assertEqual(view_config.completer.name, "bin")
         self.tear_down()
-
-    def test_cache(self):
-        """Test that configuration survives view reopening."""
-        file_name = path.join(path.dirname(__file__),
-                              'test_files',
-                              'test.cpp')
-        self.set_up_view(file_name)
-        manager = SettingsManager()
-        config_manager = ViewConfigManager()
-        settings = manager.settings_for_view(self.view)
-        config_1 = config_manager.load_for_view(self.view, settings)
-        self.tear_down()
-        self.set_up_view(file_name)
-        config_2 = config_manager.load_for_view(self.view, settings)
-        self.assertIs(config_1, config_2)
-        self.tear_down()

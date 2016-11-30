@@ -157,7 +157,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if Tools.is_valid_view(view):
             log.debug(" closing view %s", view.buffer_id())
             self.settings_manager.clear_for_view(view)
-            file_path = view.file_name()
+            file_path = view.buffer_id()
             future = EasyClangComplete.thread_pool.submit(
                 self.view_config_manager.clear_for_view, file_path)
             future.add_done_callback(EasyClangComplete.config_removed)
@@ -172,7 +172,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             future (concurrent.Future): future holding id of removed view
         """
         if future.done():
-            log.debug(" removed config for path: %s", future.result())
+            log.debug(" removed config for id: %s", future.result())
         elif future.cancelled():
             log.debug(" could not remove config -> cancelled")
 
