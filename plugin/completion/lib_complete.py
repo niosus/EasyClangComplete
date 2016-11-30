@@ -59,7 +59,7 @@ class Completer(BaseCompleter):
     timer = None
     max_tu_age = None
     timer_period = 60  # seconds
-    cindex = None
+    ignore_list = []
 
     def __init__(self, clang_binary):
         """Initialize the Completer from clang binary, reading its version.
@@ -82,22 +82,27 @@ class Completer(BaseCompleter):
             # bindings for python 3
             log.debug(
                 " using bundled cindex: %s", cindex_module_name)
-            Completer.cindex = importlib.import_module(cindex_module_name)
+            cindex = importlib.import_module(cindex_module_name)
+
+            Completer.ignore_list.append(cindex.CursorKind.DESTRUCTOR)
+            Completer.ignore_list.append(cindex.CursorKind.CLASS_DECL)
+            Completer.ignore_list.append(cindex.CursorKind.ENUM_CONSTANT_DECL)
+
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
             ClangUtils = clang_utils.ClangUtils
             # If we haven't already initialized the clang Python bindings, try
             # to figure out the path libclang.
-            if not Completer.cindex.Config.loaded:
+            if not cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
                 libclang_dir = ClangUtils.find_libclang_dir(clang_binary)
                 if libclang_dir:
-                    Completer.cindex.Config.set_library_path(libclang_dir)
+                    cindex.Config.set_library_path(libclang_dir)
 
-            Completer.tu_module = Completer.cindex.TranslationUnit
+            Completer.tu_module = cindex.TranslationUnit
             # check if we can build an index. If not, set valid to false
             try:
-                Completer.cindex.Index.create()
+                cindex.Index.create()
                 self.valid = True
             except Exception as e:
                 log.error(" error: %s", e)
@@ -305,11 +310,14 @@ class Completer(BaseCompleter):
 
     @staticmethod
     def _is_valid_result(completion_result, excluded_kinds):
-        """Check if completion is valid. Remove excluded types and unaccessible members
+        """Check if completion is valid.
+
+           Remove excluded types and unaccessible members.
 
         Args:
             completion_result (): completion result from libclang
-            excluded_kinds (list): list of CursorKind types that shouldn't be added to completion list
+            excluded_kinds (list): list of CursorKind types that shouldn't be
+                                   added to completion list
 
         Returns:
             boolean: True if completion should be added to completion list
@@ -319,7 +327,7 @@ class Completer(BaseCompleter):
         try:
             if completion_result.kind in excluded_kinds:
                 return False
-        except Exception as e:
+        except ValueError as e:
             log.error(" error: %s", e)
         return True
 
@@ -334,11 +342,15 @@ class Completer(BaseCompleter):
             list: updated completions
         """
         completions = []
-        excluded = [Completer.cindex.CursorKind.DESTRUCTOR, Completer.cindex.CursorKind.CLASS_DECL]
         if trigger != "::":
-            excluded.append(Completer.cindex.CursorKind.ENUM_CONSTANT_DECL)
+            excluded = Completer.ignore_list[:-1]
+        else:
+            excluded = Completer.ignore_list
 
-        for c in complete_results.results:
+        sorted_results = sorted(complete_results.results,
+                                key=lambda x: x.string.priority)
+
+        for c in sorted_results:
             if not Completer._is_valid_result(c, excluded):
                 continue
 

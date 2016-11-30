@@ -128,8 +128,8 @@ class base_test_complete(object):
         self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
 
         # Check the current cursor position is completable.
-        self.assertEqual(self.getRow(5), "  a.")
-        pos = self.view.text_point(5, 4)
+        self.assertEqual(self.getRow(8), "  a.")
+        pos = self.view.text_point(8, 4)
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, ".\n")
 
@@ -144,6 +144,56 @@ class base_test_complete(object):
             self.assertIn(expected, completions)
         else:
             self.assertNotIn(expected, completions)
+
+    def test_excluded_private(self):
+        """Test autocompletion for user type."""
+        self.setUpView(path.join('test_files', 'test.cpp'))
+
+        completer = self.setUpCompleter()
+        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.getRow(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        # Load the completions.
+        request = CompletionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
+        unexpected = ['foo\tvoid foo(int a)', 'foo(${1:int a})']
+        if isinstance(completer, CompleterLib):
+            self.assertIn(expected, completions)
+            self.assertNotIn(unexpected, completions)
+
+    def test_excluded_destructor(self):
+        """Test autocompletion for user type."""
+        self.setUpView(path.join('test_files', 'test.cpp'))
+
+        completer = self.setUpCompleter()
+        self.assertTrue(completer.exists_for_view(self.view.buffer_id()))
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.getRow(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        # Load the completions.
+        request = CompletionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        destructor = ['~A\tvoid ~A()', '~A()']
+        if isinstance(completer, CompleterLib):
+            self.assertNotIn(destructor, completions)
+        else:
+            self.assertIn(destructor, completions)
 
     def test_complete_vector(self):
         """Test that we can complete vector members."""
