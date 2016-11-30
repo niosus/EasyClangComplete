@@ -32,6 +32,7 @@ class BaseTestCompleter(object):
         view (sublime.View): view
         use_libclang (bool): decides if we use libclang in tests
     """
+
     use_libclang = None
 
     def set_up_completer(self):
@@ -159,10 +160,12 @@ class BaseTestCompleter(object):
 
 class TestBinCompleter(BaseTestCompleter, GuiTestWrapper):
     """Test class for the binary based completer."""
+
     use_libclang = False
 
 
 if has_libclang():
     class TestLibCompleter(BaseTestCompleter, GuiTestWrapper):
         """Test class for the library based completer."""
+
         use_libclang = True

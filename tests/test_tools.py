@@ -37,6 +37,7 @@ class test_tools_command(TestCase):
         # Open the view.
         file_path = path.join(path.dirname(__file__), filename)
         self.view = sublime.active_window().open_file(file_path)
+        self.view.settings().set("disable_easy_clang_complete", True)
 
         # Ensure it's loaded.
         while self.view.is_loading():

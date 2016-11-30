@@ -12,6 +12,7 @@ class GuiTestWrapper(TestCase):
     Attributes:
         view (sublime.View): Current view.
     """
+
     def set_up(self):
         """Setup method run before every test."""
         # Ensure we have a window to work with.
@@ -40,6 +41,7 @@ class GuiTestWrapper(TestCase):
         """
         # Open the view.
         self.view = sublime.active_window().open_file(file_path)
+        self.view.settings().set("disable_easy_clang_complete", True)
 
         # Ensure it's loaded.
         while self.view.is_loading():

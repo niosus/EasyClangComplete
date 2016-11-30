@@ -72,6 +72,8 @@ class ClangUtils:
         Returns:
             str: folder with libclang
         """
+        stdin = None
+        stderr = None
         log.debug(" platform: %s", platform.architecture())
         log.debug(" python version: %s", platform.python_version())
         for suffix in ClangUtils.get_suffixes():
@@ -90,10 +92,14 @@ class ClangUtils:
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 startupinfo.wShowWindow = subprocess.SW_HIDE
+                stdin = subprocess.PIPE
+                stderr = subprocess.PIPE
             else:
                 get_library_path_cmd = [clang_binary, "-print-file-name={}".format(file)]
             output = subprocess.check_output(
                 get_library_path_cmd,
+                stdin=stdin,
+                stderr=stderr,
                 startupinfo=startupinfo).decode('utf8').strip()
             log.info(" libclang search output = '%s'", output)
             if output:

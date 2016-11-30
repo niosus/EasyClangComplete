@@ -7,6 +7,7 @@ from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
 class test_settings(GuiTestWrapper):
     """Test settings."""
+
     def test_setup_view(self):
         """Test that setup view correctly sets up the view."""
         file_name = path.join(path.dirname(__file__),
