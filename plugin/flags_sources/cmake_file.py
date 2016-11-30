@@ -63,16 +63,24 @@ class CMakeFile(FlagsSource):
         # initialize search scope if not initialized before
         if not search_scope:
             search_scope = SearchScope(from_folder=path.dirname(file_path))
-        # check if we have a hashed version
+        # check if we have a hashed version TODO(igor): probably can be
+        # simplified. Why do we need to load chached? should we just test if
+        # currently found one is in cache?
         log.debug(" [cmake]:[get]: for file %s", file_path)
         cached_cmake_path = self._get_cached_from(file_path)
         log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
         current_cmake_path = self._find_current_in(search_scope, 'project')
         log.debug(" [cmake]:[current]: '%s'", current_cmake_path)
 
-        cmake_path_unchanged = (current_cmake_path == cached_cmake_path)
-        cmake_file_unchanged = File.is_unchanged(cached_cmake_path)
-        if cmake_path_unchanged and cmake_file_unchanged:
+        parsed_before = current_cmake_path in self._cache
+        if parsed_before:
+            log.debug(" [cmake]: found cached CMakeLists.txt.")
+            cached_cmake_path = current_cmake_path
+            # remember that for this file we have found this cmakelists
+            self._cache[file_path] = current_cmake_path
+        path_unchanged = (current_cmake_path == cached_cmake_path)
+        file_unchanged = File.is_unchanged(cached_cmake_path)
+        if path_unchanged and file_unchanged:
             log.debug(" [cmake]:[unchanged]: use existing db.")
             if cached_cmake_path in self._cache:
                 db_file_path = self._cache[cached_cmake_path]
@@ -91,6 +99,7 @@ class CMakeFile(FlagsSource):
             # write the current cmake file to cache
             self._cache[file_path] = current_cmake_path
             self._cache[current_cmake_path] = db_file.full_path()
+            File.update_mod_time(current_cmake_path)
         db = CompilationDb(self._include_prefixes)
         db_search_scope = SearchScope(from_folder=db_file.folder())
         flags = db.get_flags(file_path, db_search_scope)

@@ -64,6 +64,10 @@ class FlagsFile(FlagsSource):
             return None
 
         flags = None
+        parsed_before = flags_file_path in self._cache
+        if parsed_before:
+            log.debug(" [clang_complete_file]: found cached .clang_complete")
+            cached_flags_path = flags_file_path
         flags_file_path_same = (flags_file_path == cached_flags_path)
         flags_file_same = File.is_unchanged(cached_flags_path)
         if flags_file_path_same and flags_file_same:

@@ -231,6 +231,7 @@ class File:
         Args:
             full_path (str): current full path to file.
         """
+        log.debug(" updating modification time for file '%s'", full_path)
         mod_time = path.getmtime(full_path)
         File.__modification_cache[full_path] = mod_time
 

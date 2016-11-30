@@ -63,7 +63,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """Initialize the object."""
         super().__init__()
         global handle_plugin_loaded_function
-        print(self)
         handle_plugin_loaded_function = self.on_plugin_loaded
         # By default be verbose and limit on settings change if verbose flag is
         # not set.
@@ -72,7 +71,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
     def on_plugin_loaded(self):
         """Called upon plugin load event."""
         # init settings manager
-        print(self)
         self.settings_manager = SettingsManager()
         self.on_settings_changed()
         self.settings_manager.add_change_listener(self.on_settings_changed)

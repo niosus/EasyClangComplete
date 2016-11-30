@@ -19,17 +19,16 @@ log = logging.getLogger(__name__)
 @singleton
 class ComplationDbCache(dict):
     """Singleton for compilation database cache."""
-    pass
+    def __init__(self):
+        log.debug(" initializing compilation db cache")
 
 
 class CompilationDb(FlagsSource):
     """Manages flags parsing from a compilation database.
 
     Attributes:
-        cache (dict): Cache of all parsed databases to date. Stored by full
+        _cache (dict): Cache of all parsed databases to date. Stored by full
             database path. Needed to avoid reparsing same database.
-        path_for_file (dict): A path to a database for every source file path.
-            Needed for finding a corresponding database path for a view.
     """
     _FILE_NAME = "compile_commands.json"
 
@@ -70,6 +69,10 @@ class CompilationDb(FlagsSource):
         current_db_path = self._find_current_in(search_scope)
         log.debug(" [db]:[current]: '%s'", current_db_path)
         db = None
+        parsed_before = current_db_path in self._cache
+        if parsed_before:
+            log.debug(" [db]: found cached compile_commands.json")
+            cached_db_path = current_db_path
         db_path_unchanged = (current_db_path == cached_db_path)
         db_is_unchanged = File.is_unchanged(cached_db_path)
         if db_path_unchanged and db_is_unchanged:
@@ -92,6 +95,7 @@ class CompilationDb(FlagsSource):
             return None
         if file_path and file_path in db:
             self._cache[file_path] = current_db_path
+            File.update_mod_time(current_db_path)
             return db[file_path]
         log.debug(" [db]: return entry for 'all'.")
         return db['all']
