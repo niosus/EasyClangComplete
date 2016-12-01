@@ -347,23 +347,23 @@ class ViewConfigManager(object):
     @staticmethod
     def __start_timer(callback, v_id, max_age):
         """Start timer for file path and callback."""
-        log.debug(" starting timer for view: %s", v_id)
+        log.debug(" [timer]: start for view: %s", v_id)
         ViewConfigManager.__timers[v_id] = Timer(
             ViewConfigManager.__timer_period,
             callback, [v_id, max_age])
         ViewConfigManager.__timers[v_id].start()
-        log.debug(" currently running timers: %s",
-                  len(ViewConfigManager.__timers))
+        log.debug(" [timer]: active for views: %s",
+                  ViewConfigManager.__timers.keys())
 
     @staticmethod
     def __cancel_timer(v_id):
         """Stop timer for file path."""
         if v_id in ViewConfigManager.__timers:
-            log.debug(" stopping timer for view: %s", v_id)
+            log.debug(" [timer]: stop for view: %s", v_id)
             ViewConfigManager.__timers[v_id].cancel()
             del ViewConfigManager.__timers[v_id]
-            log.debug(" currently running timers: %s",
-                      len(ViewConfigManager.__timers))
+            log.debug(" [timer]: active for views: %s",
+                  ViewConfigManager.__timers.keys())
 
     def __remove_old_config(self, v_id, max_config_age):
         """Remove old config if it is older than max age.
@@ -382,8 +382,6 @@ class ViewConfigManager(object):
                           self._cache[v_id].get_age(),
                           max_config_age,
                           v_id)
-                log.debug(" restart timer.")
+                log.debug(" [timer]: restart.")
                 ViewConfigManager.__start_timer(
                     self.__remove_old_config, v_id, max_config_age)
-                log.debug(" current timer count: %s",
-                          len(ViewConfigManager.__timers))
