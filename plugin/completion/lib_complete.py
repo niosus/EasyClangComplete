@@ -83,10 +83,9 @@ class Completer(BaseCompleter):
             log.debug(
                 " using bundled cindex: %s", cindex_module_name)
             cindex = importlib.import_module(cindex_module_name)
-
-            Completer.ignore_list.append(cindex.CursorKind.DESTRUCTOR)
-            Completer.ignore_list.append(cindex.CursorKind.CLASS_DECL)
-            Completer.ignore_list.append(cindex.CursorKind.ENUM_CONSTANT_DECL)
+            Completer.ignore_list = [cindex.CursorKind.DESTRUCTOR,
+                                     cindex.CursorKind.CLASS_DECL,
+                                     cindex.CursorKind.ENUM_CONSTANT_DECL]
 
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
