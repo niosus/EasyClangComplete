@@ -40,10 +40,14 @@ Follow all the following steps to ensure the plugin works as expected!
 ## Configure your includes ##
 
 ### Are you using CMake? ###
-Plugin automatically generates `.clang_complete` and uses it for building our
-code.
+Plugin will run cmake on a proper `CMakeLists.txt` in your project folder and
+will use information from it to complete your code out of the box.
 
-### Not using CMake? ###
+### Have a compilation database? ###
+Plugin will search for a compilation database `compile_commands.json` in the
+project folder and will load it to complete your code.
+
+### None of the above? ###
 You will need a little bit of manual setup for now. `Clang` will automatically
 search for headers in the folder that contains the file you are working on and
 its parent. If you have a more sophisticated project you will need to help
@@ -140,15 +144,8 @@ Some functionality is there only because of the help of the following users (in 
 @Ventero, @riazanovskiy, @rchl, @Mischa-Alff, @jdumas.
 
 ## Tests ##
-I have tried to cover most crucial functionality with unit tests using
+Most crucial functionality is covered with unit tests using
 [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
-Currently tests cover autocompletion of user struct and stl vector. To check
-out the current status click on relevant badge below:
-
-[![Travis Build][img-travis]][travis]
-[![Windows Build][img-appveyor]][appveyor]
-[![Codacy Badge][img-codacy]][codacy]
-[![Coverage Badge][img-coverage]][coverage]
 
 # Support it! #
 [![Bountysource][img-bountysource]][bountysource-link]
