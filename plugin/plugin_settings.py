@@ -53,6 +53,7 @@ class Settings:
         "triggers",
         "use_libclang",
         "verbose",
+        "copy_to_clipboard"
     ]
 
     __change_listeners = []

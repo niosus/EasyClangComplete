@@ -8,6 +8,7 @@ import importlib
 import sublime
 import time
 import logging
+import copy
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
@@ -20,6 +21,7 @@ from ..utils.stamped_tu import StampedTu
 from threading import Timer
 from threading import RLock
 
+from ..plugin_settings import Settings
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -226,6 +228,36 @@ class Completer(BaseCompleter):
         else:
             completions = Completer._parse_completions(complete_obj)
         log.debug(' completions: %s' % completions)
+
+        # Copy content to clipboard or new window
+        settings = Settings()
+        if settings.copy_to_clipboard:
+            res = copy.deepcopy(completions)
+            res = [row[0] for row in completions]
+            res = '\n'.join(sorted([row[row.rindex("\t") + 1:] for row in res]))
+
+            # Clipboard
+            # sublime.set_clipboard(res)
+
+            # New window
+            win = sublime.active_window()
+            v = None
+
+            if hasattr(self, "id_view"):
+                for vv in win.views():
+                    if vv.id() == self.id_view:
+                        v = vv
+
+            if v is None:
+                v = win.new_file()
+                v.set_name("EasyClangAutocompletions")
+                v.set_scratch(True)
+                self.id_view = v.id()
+
+            v.run_command('select_all')
+            v.run_command('right_delete')
+            v.run_command('append', {'characters': res})
+
         return (completion_request, completions)
 
     def update(self, view, show_errors):
