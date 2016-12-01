@@ -372,12 +372,11 @@ class ViewConfigManager(object):
             v_id (str): Path to a file
             max_config_age (int): Max config age in seconds.
         """
-        self.__cancel_timer(v_id)
+        ViewConfigManager.__cancel_timer(v_id)
         with ViewConfigManager.__rlock:
             if self._cache[v_id].is_older_than(max_config_age):
                 log.debug(" [delete] old config: %s", v_id)
                 del self._cache[v_id]
-                del ViewConfigManager.__timers[v_id]
             else:
                 log.debug(" [skip] young config: Age %s < %s. View: %s.",
                           self._cache[v_id].get_age(),

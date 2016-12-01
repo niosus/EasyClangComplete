@@ -116,6 +116,25 @@ class TestViewConfig(GuiTestWrapper):
         self.assertTrue(is_reparse_needed)
         self.tear_down()
 
+    def test_age(self):
+        """Test view config age."""
+        import time
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
+        view_config = ViewConfig(self.view, settings)
+        self.assertTrue(view_config.get_age() < 2)
+        time.sleep(2)
+        self.assertTrue(view_config.get_age() > 2)
+        view_config.touch()
+        self.assertTrue(view_config.get_age() < 2)
+        time.sleep(2)
+        self.assertTrue(view_config.is_older_than(2))
+        self.tear_down()
+
 
 class TestViewConfigManager(GuiTestWrapper):
     """Test view configuration manager."""
@@ -142,4 +161,39 @@ class TestViewConfigManager(GuiTestWrapper):
         settings.use_libclang = False
         view_config = config_manager.load_for_view(self.view, settings)
         self.assertEqual(view_config.completer.name, "bin")
+        self.tear_down()
+
+    def test_remove(self):
+        """Test that config is removed."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+        manager = SettingsManager()
+        config_manager = ViewConfigManager()
+        settings = manager.settings_for_view(self.view)
+        view_config = config_manager.load_for_view(self.view, settings)
+        self.assertIsNotNone(view_config)
+        config_manager.clear_for_view(self.view.buffer_id())
+        view_config = config_manager.get_from_cache(self.view)
+        self.assertIsNone(view_config)
+        self.tear_down()
+
+    def test_timer(self):
+        """Test that config is removed on timer."""
+        import time
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+        manager = SettingsManager()
+        config_manager = ViewConfigManager()
+        settings = manager.settings_for_view(self.view)
+        settings.max_tu_age = 3  # seconds
+        ViewConfigManager._ViewConfigManager__timer_period = 1
+        view_config = config_manager.load_for_view(self.view, settings)
+        self.assertIsNotNone(view_config)
+        time.sleep(4)
+        view_config = config_manager.get_from_cache(self.view)
+        self.assertIsNone(view_config)
         self.tear_down()
