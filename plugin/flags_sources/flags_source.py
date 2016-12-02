@@ -2,6 +2,7 @@
 from os import path
 
 from ..tools import File
+from ..tools import SearchScope
 from ..utils.flag import Flag
 
 
@@ -9,11 +10,7 @@ class FlagsSource(object):
     """An abstract class defining a Flags Source."""
 
     def __init__(self, include_prefixes):
-        """Initialize default flags storage.
-
-        Args:
-            include_prefixes (str[]): valid include prefixes.
-        """
+        """Initialize default flags storage."""
         self._include_prefixes = include_prefixes
 
     def get_flags(self, file_path=None, search_scope=None):
@@ -69,6 +66,13 @@ class FlagsSource(object):
             absolute_flags.append(
                 to_absolute_include_path(flag, include_prefixes))
         return absolute_flags
+
+    def _update_search_scope(self, search_scope, file_path):
+        if search_scope:
+            # we already know what we are doing. Leave search scope unchanged.
+            return search_scope
+        # search database from current file up the tree
+        return SearchScope(from_folder=path.dirname(file_path))
 
     def _get_cached_from(self, file_path):
         """Get cached path for file path.

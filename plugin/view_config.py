@@ -185,21 +185,32 @@ class ViewConfig(object):
         Returns:
             Flag[]: flags generated from a flags source.
         """
-        prefix_paths = settings.cmake_prefix_paths
-        if prefix_paths is None:
-            prefix_paths = []
         current_dir = path.dirname(view.file_name())
         search_scope = SearchScope(
             from_folder=current_dir,
             to_folder=settings.project_folder)
-        for source in settings.flags_sources:
+        for source_dict in settings.flags_sources:
+            if "type" not in source_dict:
+                log.critical(" flag source %s has not 'type'", source_dict)
+                continue
+            source = source_dict["type"]
+            search_folder = None
+            if "search_in" in source_dict:
+                # the user knows where to search for the flags source
+                search_folder = source_dict["search_in"]
+                if search_folder:
+                    search_scope = SearchScope(
+                        from_folder=path.normpath(search_folder))
             if source == "cmake":
+                prefix_paths = None
+                if "prefix_paths" in source_dict:
+                    prefix_paths = source_dict["prefix_paths"]
                 flag_source = CMakeFile(include_prefixes, prefix_paths)
             elif source == "compilation_db":
                 flag_source = CompilationDb(include_prefixes)
             elif source == "clang_complete_file":
                 flag_source = FlagsFile(include_prefixes)
-            # try to get flags
+            # try to get flags (uses cache when needed)
             flags = flag_source.get_flags(view.file_name(), search_scope)
             if flags:
                 # don't load anything more if we have flags
@@ -325,13 +336,13 @@ class ViewConfigManager(object):
                 self._cache[v_id] = config
                 res = config
 
-        # start timer if it is not set yet
-        log.debug(" starting timer to remove old configs.")
-        if v_id in ViewConfigManager.__timers:
-            log.debug(" cancel old timer.")
-            ViewConfigManager.__cancel_timer(v_id)
-        ViewConfigManager.__start_timer(
-            self.__remove_old_config, v_id, settings.max_tu_age)
+            # start timer if it is not set yet
+            log.debug(" starting timer to remove old configs.")
+            if v_id in ViewConfigManager.__timers:
+                log.debug(" cancel old timer.")
+                ViewConfigManager.__cancel_timer(v_id)
+            ViewConfigManager.__start_timer(
+                self.__remove_old_config, v_id, settings.max_tu_age)
 
         # now return the needed config
         return res
@@ -340,8 +351,8 @@ class ViewConfigManager(object):
         """Clear config for path."""
         log.debug(" trying to clear config for view: %s", v_id)
         with ViewConfigManager.__rlock:
-            ViewConfigManager.__cancel_timer(v_id)
             del self._cache[v_id]
+            ViewConfigManager.__cancel_timer(v_id)
         return v_id
 
     @staticmethod
@@ -358,12 +369,13 @@ class ViewConfigManager(object):
     @staticmethod
     def __cancel_timer(v_id):
         """Stop timer for file path."""
-        if v_id in ViewConfigManager.__timers:
-            log.debug(" [timer]: stop for view: %s", v_id)
-            ViewConfigManager.__timers[v_id].cancel()
-            del ViewConfigManager.__timers[v_id]
-            log.debug(" [timer]: active for views: %s",
-                  ViewConfigManager.__timers.keys())
+        with ViewConfigManager.__rlock:
+            if v_id in ViewConfigManager.__timers:
+                log.debug(" [timer]: stop for view: %s", v_id)
+                ViewConfigManager.__timers[v_id].cancel()
+                del ViewConfigManager.__timers[v_id]
+                log.debug(" [timer]: active for views: %s",
+                          ViewConfigManager.__timers.keys())
 
     def __remove_old_config(self, v_id, max_config_age):
         """Remove old config if it is older than max age.
@@ -372,8 +384,8 @@ class ViewConfigManager(object):
             v_id (str): Path to a file
             max_config_age (int): Max config age in seconds.
         """
-        ViewConfigManager.__cancel_timer(v_id)
         with ViewConfigManager.__rlock:
+            ViewConfigManager.__cancel_timer(v_id)
             if self._cache[v_id].is_older_than(max_config_age):
                 log.debug(" [delete] old config: %s", v_id)
                 del self._cache[v_id]

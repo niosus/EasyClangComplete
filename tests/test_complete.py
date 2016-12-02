@@ -50,6 +50,15 @@ class BaseTestCompleter(object):
         completer = view_config.completer
         return completer
 
+    def tear_down_completer(self):
+        """Utility method to set up a completer for the current view.
+
+        Returns:
+            BaseCompleter: completer for the current view.
+        """
+        view_config_manager = ViewConfigManager()
+        view_config_manager.clear_for_view(self.view.buffer_id())
+
     def test_setup_view(self):
         """Test that setup view correctly sets up the view."""
         file_name = path.join(path.dirname(__file__),
@@ -67,6 +76,7 @@ class BaseTestCompleter(object):
         completer = self.set_up_completer()
 
         self.assertIsNotNone(completer.version_str)
+        self.tear_down_completer()
         self.tear_down()
 
     def test_complete(self):
@@ -93,6 +103,7 @@ class BaseTestCompleter(object):
         expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
 
         self.assertIn(expected, completions)
+        self.tear_down_completer()
         self.tear_down()
 
     def test_excluded_private(self):
@@ -121,6 +132,7 @@ class BaseTestCompleter(object):
         if self.use_libclang:
             self.assertIn(expected, completions)
             self.assertNotIn(unexpected, completions)
+        self.tear_down_completer()
         self.tear_down()
 
     def test_excluded_destructor(self):
@@ -149,6 +161,7 @@ class BaseTestCompleter(object):
             self.assertNotIn(destructor, completions)
         else:
             self.assertIn(destructor, completions)
+        self.tear_down_completer()
         self.tear_down()
 
     def test_complete_vector(self):
@@ -178,6 +191,7 @@ class BaseTestCompleter(object):
             return
         expected = ['begin\titerator begin()', 'begin()']
         self.assertIn(expected, completions)
+        self.tear_down_completer()
         self.tear_down()
 
     def test_unsaved_views(self):
@@ -212,6 +226,7 @@ class BaseTestCompleter(object):
         # Trigger default completions popup.
         self.view.run_command('auto_complete')
         self.assertTrue(self.view.is_auto_complete_visible())
+        self.tear_down_completer()
         self.tear_down()
 
 

@@ -5,7 +5,6 @@ Attributes:
 """
 from .flags_source import FlagsSource
 from ..tools import File
-from ..tools import SearchScope
 from ..tools import singleton
 from ..utils.unique_list import UniqueList
 
@@ -19,8 +18,7 @@ log = logging.getLogger(__name__)
 @singleton
 class ComplationDbCache(dict):
     """Singleton for compilation database cache."""
-    def __init__(self):
-        log.debug(" initializing compilation db cache")
+    pass
 
 
 class CompilationDb(FlagsSource):
@@ -49,15 +47,14 @@ class CompilationDb(FlagsSource):
                 returns a list of flags for this specific file.
             search_scope (SearchScope, optional): Where to search for a
                 compile_commands.json file.
-            db_path(str): if the caller knows where the database is, there is
-                no need to search for it.
 
         Returns: str[]: Return a list of flags for a file. If no file is
             given, return a list of all unique flags in this compilation
             database
         """
-        if not search_scope:
-            search_scope = SearchScope(from_folder=path.dirname(file_path))
+        # prepare search scope
+        search_scope = self._update_search_scope(search_scope, file_path)
+        # remove extension from a file
         if file_path:
             # strip the file path from extension.
             file_path = path.splitext(file_path)[0]

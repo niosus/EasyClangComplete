@@ -50,7 +50,6 @@ class SettingsStorage:
         "autocomplete_all",
         "c_flags",
         "clang_binary",
-        "cmake_prefix_paths",
         "common_flags",
         "cpp_flags",
         "errors_on_save",
@@ -96,10 +95,13 @@ class SettingsStorage:
             if value is None:
                 log.critical(" no setting '%s' found!", key)
                 return False
-        for source in self.flags_sources:
-            if source not in SettingsStorage.FLAG_SOURCES:
+        for source_dict in self.flags_sources:
+            if "type" not in source_dict:
+                log.critical(" no 'type' in a flags source: %s", source_dict)
+                return False
+            if source_dict["type"] not in SettingsStorage.FLAG_SOURCES:
                 log.critical(" flag source: '%s' is not one of '%s'!",
-                             source, SettingsStorage.FLAG_SOURCES)
+                             source_dict["type"], SettingsStorage.FLAG_SOURCES)
                 return False
         return True
 

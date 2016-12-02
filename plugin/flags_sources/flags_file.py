@@ -5,7 +5,6 @@ Attributes:
 """
 from .flags_source import FlagsSource
 from ..tools import File
-from ..tools import SearchScope
 from ..tools import singleton
 
 from os import path
@@ -51,9 +50,8 @@ class FlagsFile(FlagsSource):
         Returns:
             str[]: Return a list of flags in this .clang_complete file
         """
-        # initialize search scope if not initialized before
-        if not search_scope:
-            search_scope = SearchScope(from_folder=path.dirname(file_path))
+        # prepare search scope
+        search_scope = self._update_search_scope(search_scope, file_path)
         # check if we have a hashed version
         log.debug(" [clang_complete_file]:[get]: for file %s", file_path)
         cached_flags_path = self._get_cached_from(file_path)

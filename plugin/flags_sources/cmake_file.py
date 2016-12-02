@@ -60,11 +60,10 @@ class CMakeFile(FlagsSource):
             str[]: List of flags for this view, or all flags merged if this
                 view path is not found in the generated compilation db.
         """
-        # initialize search scope if not initialized before
-        if not search_scope:
-            search_scope = SearchScope(from_folder=path.dirname(file_path))
+        # prepare search scope
+        search_scope = self._update_search_scope(search_scope, file_path)
         # check if we have a hashed version TODO(igor): probably can be
-        # simplified. Why do we need to load chached? should we just test if
+        # simplified. Why do we need to load cached? should we just test if
         # currently found one is in cache?
         log.debug(" [cmake]:[get]: for file %s", file_path)
         cached_cmake_path = self._get_cached_from(file_path)
@@ -124,6 +123,8 @@ class CMakeFile(FlagsSource):
 
         import os
         import shutil
+        if not prefix_paths:
+            prefix_paths = []
         cmake_cmd = CMakeFile._CMAKE_MASK.format(path=cmake_file.folder())
         unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
         tempdir = path.join(
