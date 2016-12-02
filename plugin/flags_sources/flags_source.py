@@ -67,7 +67,8 @@ class FlagsSource(object):
                 to_absolute_include_path(flag, include_prefixes))
         return absolute_flags
 
-    def _update_search_scope(self, search_scope, file_path):
+    @staticmethod
+    def _update_search_scope(search_scope, file_path):
         if search_scope:
             # we already know what we are doing. Leave search scope unchanged.
             return search_scope
