@@ -79,8 +79,8 @@ class BaseTestCompleter(object):
         completer = self.set_up_completer()
 
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(5), "  a.")
-        pos = self.view.text_point(5, 4)
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
         current_word = self.view.substr(self.view.word(pos))
         self.assertEqual(current_word, ".\n")
 
@@ -90,8 +90,65 @@ class BaseTestCompleter(object):
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
-        expected = ['a\tint a', 'a']
+        expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
+
         self.assertIn(expected, completions)
+        self.tear_down()
+
+    def test_excluded_private(self):
+        """Test autocompletion for user type."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        # Load the completions.
+        request = CompletionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
+        unexpected = ['foo\tvoid foo(int a)', 'foo(${1:int a})']
+        if self.use_libclang:
+            self.assertIn(expected, completions)
+            self.assertNotIn(unexpected, completions)
+        self.tear_down()
+
+    def test_excluded_destructor(self):
+        """Test autocompletion for user type."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
+
+        # Load the completions.
+        request = CompletionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
+
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        destructor = ['~A\tvoid ~A()', '~A()']
+        if self.use_libclang:
+            self.assertNotIn(destructor, completions)
+        else:
+            self.assertIn(destructor, completions)
         self.tear_down()
 
     def test_complete_vector(self):

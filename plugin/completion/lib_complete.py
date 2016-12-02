@@ -66,7 +66,8 @@ class Completer(BaseCompleter):
 
             # slightly more complicated name retrieving to allow for more
             # complex version strings, e.g. 3.8.0
-            cindex_module_name = Completer._cindex_for_version(self.version_str)
+            cindex_module_name = Completer._cindex_for_version(
+                self.version_str)
 
             if not cindex_module_name:
                 log.critical(" No cindex module for clang version: %s",
@@ -78,6 +79,12 @@ class Completer(BaseCompleter):
             # bindings for python 3
             log.debug(" using bundled cindex: %s", cindex_module_name)
             cindex = importlib.import_module(cindex_module_name)
+
+            # initialize ignore list to account for private methods etc.
+            self.ignore_list = [cindex.CursorKind.DESTRUCTOR,
+                                cindex.CursorKind.CLASS_DECL,
+                                cindex.CursorKind.ENUM_CONSTANT_DECL]
+
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
             ClangUtils = clang_utils.ClangUtils
@@ -169,7 +176,13 @@ class Completer(BaseCompleter):
         if complete_obj is None or len(complete_obj.results) == 0:
             completions = []
         else:
-            completions = Completer._parse_completions(complete_obj)
+            point = completion_request.get_trigger_position()
+            trigger = view.substr(point - 2) + view.substr(point - 1)
+            if trigger != "::":
+                excluded = self.ignore_list
+            else:
+                excluded = self.ignore_list[:-1]
+            completions = Completer._parse_completions(complete_obj, excluded)
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 
@@ -220,17 +233,48 @@ class Completer(BaseCompleter):
         return None
 
     @staticmethod
-    def _parse_completions(complete_results):
+    def _is_valid_result(completion_result, excluded_kinds):
+        """Check if completion is valid.
+
+           Remove excluded types and unaccessible members.
+
+        Args:
+            completion_result (): completion result from libclang
+            excluded_kinds (list): list of CursorKind types that shouldn't be
+                                   added to completion list
+
+        Returns:
+            boolean: True if completion should be added to completion list
+        """
+        if str(completion_result.string.availability) != "Available":
+            return False
+        try:
+            if completion_result.kind in excluded_kinds:
+                return False
+        except ValueError as e:
+            log.error(" error: %s", e)
+        return True
+
+    @staticmethod
+    def _parse_completions(complete_results, excluded):
         """Create snippet-like structures from a list of completions.
 
         Args:
             complete_results (list): raw completions list
+            excluded (list): list of excluded classes of completions
 
         Returns:
             list: updated completions
         """
         completions = []
-        for c in complete_results.results:
+
+        # sort results according to their clang based priority
+        sorted_results = sorted(complete_results.results,
+                                key=lambda x: x.string.priority)
+
+        for c in sorted_results:
+            if not Completer._is_valid_result(c, excluded):
+                continue
             hint = ''
             contents = ''
             place_holders = 1
