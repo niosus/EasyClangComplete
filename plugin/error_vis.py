@@ -152,10 +152,14 @@ class CompileErrors:
         """
         errors_html = ""
         for entry in errors_dict:
-            errors_html += "<p><tt>" + entry['error'] + "</tt></p>"
+            processed_error = entry['error']
+            processed_error = processed_error.replace(' ', '&nbsp;')
+            processed_error = processed_error.replace('<', '&lt;')
+            processed_error = processed_error.replace('>', '&gt;')
+            errors_html += "<p><tt>" + processed_error + "</tt></p>"
         # Add non-breaking space to prevent popup from getting a newline
         # after every word
-        return errors_html.replace(' ', '&nbsp;')
+        return errors_html
 
     @staticmethod
     def _as_region_list(err_regions_dict):
