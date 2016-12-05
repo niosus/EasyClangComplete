@@ -2,9 +2,6 @@
 
 Attributes:
     log (logging.Logger): logger for this module
-
-Deleted Attributes:
-    cindex_dict (dict): dict of cindex entries for each version of clang
 """
 import re
 import sublime
@@ -70,15 +67,16 @@ class Completer(BaseCompleter):
 
     opts_regex = re.compile("{#|#}")
 
-    def __init__(self, clang_binary):
+    def __init__(self, clang_binary, version_str):
         """Initialize the Completer.
 
         Args:
-            clang_binary (str): string for clang binary e.g. 'clang-3.6++'
+            clang_binary (str): string for clang binary e.g. 'clang-3.8++'
+            version_str (str): string for clang version e.g. '3.8.0'
 
         """
         # init common completer interface
-        super().__init__(clang_binary)
+        super().__init__(clang_binary, version_str)
         self.clang_binary = clang_binary
 
         # Create compiler options of specific variant of the compiler.

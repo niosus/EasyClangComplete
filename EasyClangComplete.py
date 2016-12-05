@@ -99,8 +99,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
-        log.debug(" on_activated_async view id %s", view.buffer_id())
         if Tools.is_valid_view(view):
+            log.debug(" on_activated_async view id %s", view.buffer_id())
             settings = self.settings_manager.settings_for_view(view)
             # All is taken care of. The view is built if needed.
             self.view_config_manager.load_for_view(view, settings)

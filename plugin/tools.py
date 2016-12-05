@@ -465,6 +465,8 @@ class Tools:
             return False
         if view.is_scratch():
             return False
+        if view.buffer_id() == 0:
+            return False
         return True
 
     @staticmethod

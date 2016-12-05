@@ -1,9 +1,9 @@
 Sublime Text 3 plugin that offers clang-based auto-completion for C++
 
 # Let't get started! #
-Follow the following steps to make sure everything runs smoothly!
+You're just two simple steps away from having code completions!
 
-## Install clang ##
+## 1. Install clang ##
 - **Ubuntu**: `sudo apt-get install clang`
 - **Windows**: install the latest release from `clang`
   [website](http://llvm.org/releases/download.html) (v >= 3.9)
@@ -11,43 +11,52 @@ Follow the following steps to make sure everything runs smoothly!
 - **Other Systems**: use your bundled package manager or install from `clang`
   [website](http://llvm.org/releases/download.html)
 
-## Configure your includes ##
+## 2. Configure your includes ##
 
-### Are you using CMake? ###
-Plugin automatically generates `.clang_complete` and uses it for building our
-code.
+### Using CMake? ###
+Plugin will run cmake on a proper `CMakeLists.txt` in your project folder and
+will use information from it to complete your code out of the box.
 
-### Not using CMake? ###
+### Have a compilation database? ###
+Plugin will search for a compilation database `compile_commands.json` in the
+project folder and will load it to complete your code. If you want to specify a custom path to a comilation database you can do it in settings:
+```json
+"flags_sources": [
+    {"file": "compile_commands.json", "search_in": "<YOUR_PATH>"},
+  ],
+```
+
+### None of the above? ###
 You will need a little bit of manual setup for now. `Clang` will automatically
 search for headers in the folder that contains the file you are working on and
 its parent. If you have a more sophisticated project you will need to help
-`clang` just a little bit. There are three ways to do it. Pick any of the
-following:
+`clang` just a little bit. There are three ways to do it.
 
-- Set `include_dirs` setting in `User Settings`:
-  + see default [settings](EasyClangComplete.sublime-settings) to get started.
-    These includes will be included in every project you run.
+Pick *ANY* of the following:
+
+- Set include dirs in `"common_flags"` setting in `User Settings`:
+  + See default [settings](EasyClangComplete.sublime-settings) to get started.
+    These flags will be included in every project you run.
 - Add `.clang_complete` file to the root of your project folder.
-  + this file should contain all includes and macroses you want to use.
+  + This file should contain all includes and macroses you want to use.
   + Example:
   ```
   -Isrc
   -I/usr/include
-  -I/opt/ros/indigo/include
   ```
-- Override flags setting in your project file! Just define the same setting in
-  project specific settings with either one of two prefixes: `"ecc_"` or
-  `"easy_clang_complete"`. See the project file in this repo for a working
-  example. Minimal example for clarity:
+- Override `"common_flags"` setting in your project file! Just define the same
+  setting in project specific settings with either one of two prefixes:
+  `"ecc_"` or `"easy_clang_complete_"`. See the project file in this repo for a
+  working example. Minimal example for clarity:
+
   ```json
-      {
-        "settings":
-        {
-          "ecc_include_dirs":
-          ["-Isrc", "-I/usr/include"],
-          "easy_clang_complete_verbose": true
-        }
-      }
+  {
+    "settings":
+    {
+      "ecc_common_flags": ["-Isrc", "-I/usr/include"],
+      "easy_clang_complete_verbose": true
+    }
+  }
   ```
 
 ## That's it! You're ready to use the plugin! ##

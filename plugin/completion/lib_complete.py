@@ -45,16 +45,17 @@ class Completer(BaseCompleter):
     name = "lib"
     rlock = RLock()
 
-    def __init__(self, clang_binary):
+    def __init__(self, clang_binary, version_str):
         """Initialize the Completer from clang binary, reading its version.
 
         Picks an according cindex for the found version.
 
         Args:
             clang_binary (str): string for clang binary e.g. 'clang++-3.8'
+            version_str (str): string for clang version e.g. '3.8.0'
 
         """
-        super().__init__(clang_binary)
+        super().__init__(clang_binary, version_str)
 
         # Create compiler options of specific variant of the compiler.
         self.compiler_variant = LibClangCompilerVariant()

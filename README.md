@@ -39,43 +39,48 @@ Follow all the following steps to ensure the plugin works as expected!
 
 ## Configure your includes ##
 
-### Are you using CMake? ###
+### Using CMake? ###
 Plugin will run cmake on a proper `CMakeLists.txt` in your project folder and
 will use information from it to complete your code out of the box.
 
 ### Have a compilation database? ###
 Plugin will search for a compilation database `compile_commands.json` in the
-project folder and will load it to complete your code.
+project folder and will load it to complete your code. If you want to specify a custom path to a comilation database you can do it in settings:
+```json
+"flags_sources": [
+    {"file": "compile_commands.json", "search_in": "<YOUR_PATH>"},
+  ],
+```
 
 ### None of the above? ###
 You will need a little bit of manual setup for now. `Clang` will automatically
 search for headers in the folder that contains the file you are working on and
 its parent. If you have a more sophisticated project you will need to help
-`clang` just a little bit. There are three ways to do it. Pick any of the
-following:
+`clang` just a little bit. There are three ways to do it.
 
-- Set include dirs in `common_flags` setting in `User Settings`:
-  + see default [settings](EasyClangComplete.sublime-settings) to get started.
+Pick *ANY* of the following:
+
+- Set include dirs in `"common_flags"` setting in `User Settings`:
+  + See default [settings](EasyClangComplete.sublime-settings) to get started.
     These flags will be included in every project you run.
 - Add `.clang_complete` file to the root of your project folder.
-  + this file should contain all includes and macroses you want to use.
+  + This file should contain all includes and macroses you want to use.
   + Example:
   ```
   -Isrc
   -I/usr/include
   -I/opt/ros/indigo/include
   ```
-- Override flags setting in your project file! Just define the same setting in
-  project specific settings with either one of two prefixes: `"ecc_"` or
-  `"easy_clang_complete_"`. See the project file in this repo for a working
-  example. Minimal example for clarity:
+- Override `"common_flags"` setting in your project file! Just define the same
+  setting in project specific settings with either one of two prefixes:
+  `"ecc_"` or `"easy_clang_complete_"`. See the project file in this repo for a
+  working example. Minimal example for clarity:
 
   ```json
   {
     "settings":
     {
-      "ecc_common_flags":
-      ["-Isrc", "-I/usr/include"],
+      "ecc_common_flags": ["-Isrc", "-I/usr/include"],
       "easy_clang_complete_verbose": true
     }
   }
@@ -90,20 +95,18 @@ are still interested in more details - please read on.
 ## General info ##
 The plugin has two modes:
 
-- one that uses `libclang` with its python bindings. This is the better method
-  as it fully utilizes saving compilation database which makes your completions
-  blazingly fast. It is a default method. It is also unit tested to complete
-  STL functions on Linux and OSX platforms. It will also work for Windows as
-  soon as clang 4.0 is released. See [issue][libclang-issue]
-- one that parses the output from `clang -Xclang -code-completion-at` run from
-  the command line. This is a fallback method if something is wrong with the
-  first one.
+- [DEFAULT]: uses `libclang` with its python bindings. This is the better
+  method as it fully utilizes saving compilation database which makes your
+  completions blazingly fast. It is a default method. It is also unit tested to
+  complete STL functions on Linux and OSX platforms. It will also fully work
+  for Windows as soon as clang 4.0 is released. See [issue][libclang-issue]
+- [FALLBACK]: one that parses the output from
+  `clang -Xclang -code-completion-at` run from the command line. This is a fallback method if something is wrong with the first one.
 
 This plugin is intended to be easy to use. It should autocomplete STL out of
-the box and you should just add the folders your project uses as includes to
-the flags in the settings to make it autocomplete code all your project. If you
-experience problems - create an issue. I will try to respond as soon as
-possible.
+the box and is capable of working with multiple flag storages, such as a
+compilation database or a `.clang_complete` file. If you experience problems -
+create an issue. I will try to respond as soon as possible.
 
 ## Commands ##
 Here are some highlights for the commands. You can see all commands in command
@@ -116,7 +119,7 @@ All the commands of this plugin start with `EasyClangComplete:` and should be
 self explanatory. Open an issue if they are not.
 
 
-## Settings highlights ##
+## Settings ##
 
 Please see the default settings [file](EasyClangComplete.sublime-settings)
 shipped with the plugin for explanations and sane default values.
@@ -141,11 +144,25 @@ always willing to learn.
 
 Some functionality is there only because of the help of the following users (in no particualr order):
 
-@Ventero, @riazanovskiy, @rchl, @Mischa-Alff, @jdumas.
+@Ventero, @riazanovskiy, @rchl, @Mischa-Alff, @jdumas, @simia, @tastytea,
+@brupelo, @randy3k.
 
 ## Tests ##
 Most crucial functionality is covered with unit tests using
 [UnitTesting](https://github.com/randy3k/UnitTesting) Sublime Text plugin.
+
+## Contributing ##
+Contributions are welcome! Look at the issue list. If there is something you
+think you can tackle, write about it in that issue and submit a PR.
+
+Code style:
+- Line width is `80` characters
+- Every public function should be documented.
+- The code passes linters:
+  + `pep8`
+  + `pep257`: ignoring `["D209", "D203", "D204"]`
+
+Please ensure, that your code conforms to this.
 
 # Support it! #
 [![Bountysource][img-bountysource]][bountysource-link]

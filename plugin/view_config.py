@@ -190,10 +190,10 @@ class ViewConfig(object):
             from_folder=current_dir,
             to_folder=settings.project_folder)
         for source_dict in settings.flags_sources:
-            if "type" not in source_dict:
-                log.critical(" flag source %s has not 'type'", source_dict)
+            if "file" not in source_dict:
+                log.critical(" flag source %s has not 'file'", source_dict)
                 continue
-            source = source_dict["type"]
+            file_name = source_dict["file"]
             search_folder = None
             if "search_in" in source_dict:
                 # the user knows where to search for the flags source
@@ -201,20 +201,20 @@ class ViewConfig(object):
                 if search_folder:
                     search_scope = SearchScope(
                         from_folder=path.normpath(search_folder))
-            if source == "cmake":
+            if file_name == "CMakeLists.txt":
                 prefix_paths = None
                 if "prefix_paths" in source_dict:
                     prefix_paths = source_dict["prefix_paths"]
                 flag_source = CMakeFile(include_prefixes, prefix_paths)
-            elif source == "compilation_db":
+            elif file_name == "compile_commands.json":
                 flag_source = CompilationDb(include_prefixes)
-            elif source == "clang_complete_file":
+            elif file_name == ".clang_complete":
                 flag_source = FlagsFile(include_prefixes)
             # try to get flags (uses cache when needed)
             flags = flag_source.get_flags(view.file_name(), search_scope)
             if flags:
                 # don't load anything more if we have flags
-                log.debug(" flags generated with '%s' source.", source)
+                log.debug(" flags generated from '%s'.", file_name)
                 return flags
         return []
 
@@ -249,14 +249,16 @@ class ViewConfig(object):
         completer = None
         if settings.use_libclang:
             log.info(" init completer based on libclang")
-            completer = lib_complete.Completer(settings.clang_binary)
+            completer = lib_complete.Completer(settings.clang_binary,
+                                               settings.clang_version)
             if not completer.valid:
                 log.error(" cannot initialize completer with libclang.")
                 log.info(" falling back to using clang in a subprocess.")
                 completer = None
         if not completer:
             log.info(" init completer based on clang from cmd")
-            completer = bin_complete.Completer(settings.clang_binary)
+            completer = bin_complete.Completer(settings.clang_binary,
+                                               settings.clang_version)
         return completer
 
     @staticmethod
@@ -342,7 +344,7 @@ class ViewConfigManager(object):
                 log.debug(" cancel old timer.")
                 ViewConfigManager.__cancel_timer(v_id)
             ViewConfigManager.__start_timer(
-                self.__remove_old_config, v_id, settings.max_tu_age)
+                self.__remove_old_config, v_id, settings.max_cache_age)
 
         # now return the needed config
         return res

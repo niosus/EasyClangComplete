@@ -24,11 +24,19 @@ Follow the following 3 simple steps to ensure the plugin works as expected!
 
 ### Using CMake? ###
 Plugin will run cmake on a proper `CMakeLists.txt` in your project folder and
-will use information from it to complete your code out of the box.
+will use information from it to complete your code out of the box. You're all
+set!
 
 ### Have a compilation database? ###
 Plugin will search for a compilation database `compile_commands.json` in the
 project folder and will load it to complete your code.
+
+If you want to specify a custom path to a comilation database you can do it in settings:
+```json
+"flags_sources": [
+    {"file": "compile_commands.json", "search_in": "<YOUR_PATH>"},
+  ],
+```
 
 ### None of the above? ###
 You will need a little bit of manual setup for now. Please see the following
@@ -37,5 +45,5 @@ You will need a little bit of manual setup for now. Please see the following
 # You're all set! #
 For more information please refer to the [GitHub][github_page] page.
 
-[no_cmake]: https://github.com/niosus/EasyClangComplete#not-using-cmake
+[no_cmake]: https://github.com/niosus/EasyClangComplete#none-of-the-above
 [github_page]: https://github.com/niosus/EasyClangComplete

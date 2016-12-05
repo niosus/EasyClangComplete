@@ -190,11 +190,13 @@ class TestViewConfigManager(GuiTestWrapper):
         manager = SettingsManager()
         config_manager = ViewConfigManager()
         settings = manager.settings_for_view(self.view)
-        settings.max_tu_age = 3  # seconds
+        settings.max_cache_age = 3  # seconds
+        initial_period = ViewConfigManager._ViewConfigManager__timer_period
         ViewConfigManager._ViewConfigManager__timer_period = 1
         view_config = config_manager.load_for_view(self.view, settings)
         self.assertIsNotNone(view_config)
         time.sleep(4)
         view_config = config_manager.get_from_cache(self.view)
         self.assertIsNone(view_config)
+        ViewConfigManager._ViewConfigManager__timer_period = initial_period
         self.tear_down()

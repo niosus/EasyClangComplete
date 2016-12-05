@@ -31,19 +31,16 @@ class SettingsStorage:
     """A class that stores all loaded settings.
 
     Attributes:
-        max_tu_age (int): maximum TU age in seconds
+        max_cache_age (int): maximum cache age in seconds
         FLAG_SOURCES (str[]): possible flag sources
         NAMES_ENUM (str[]): all supported settings names
         PREFIXES (str[]): setting prefixes supported by this plugin
     """
-    FLAG_SOURCES = ["cmake", "compilation_db", "clang_complete_file"]
+    FLAG_SOURCES = ["CMakeLists.txt",
+                    "compile_commands.json",
+                    ".clang_complete"]
+    FLAG_SOURCES_ENTRIES_WITH_PATHS = ["search_in", "prefix_paths"]
     PREFIXES = ["ecc_", "easy_clang_complete_"]
-
-    _wildcard_values = {
-        Wildcards.PROJECT_PATH: "",
-        Wildcards.PROJECT_NAME: "",
-        Wildcards.CLANG_VERSION: ""
-    }
 
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
@@ -57,7 +54,7 @@ class SettingsStorage:
         "hide_default_completions",
         "include_file_folder",
         "include_file_parent_folder",
-        "max_tu_age",
+        "max_cache_age",
         "triggers",
         "use_libclang",
         "verbose",
@@ -69,6 +66,11 @@ class SettingsStorage:
         Args:
             settings_handle (sublime.Settings): handle to sublime settings
         """
+        self._wildcard_values = {
+            Wildcards.PROJECT_PATH: "",
+            Wildcards.PROJECT_NAME: "",
+            Wildcards.CLANG_VERSION: ""
+        }
         self.__load_vars_from_settings(settings_handle,
                                        project_specific=False)
 
@@ -78,8 +80,16 @@ class SettingsStorage:
         Args:
             view (sublime.View): current view
         """
+        # init current and parrent folders:
+        if not Tools.is_valid_view(view):
+            log.error(" no view to populate common flags from")
+            return
         self.__load_vars_from_settings(view.settings(), project_specific=True)
+        # initialize wildcard values with view
+        self.__update_widcard_values(view)
+        # replace wildcards
         self.__populate_common_flags(view)
+        self.__populate_flags_source_paths(view)
 
     def is_valid(self):
         """Check settings validity.
@@ -96,12 +106,12 @@ class SettingsStorage:
                 log.critical(" no setting '%s' found!", key)
                 return False
         for source_dict in self.flags_sources:
-            if "type" not in source_dict:
-                log.critical(" no 'type' in a flags source: %s", source_dict)
+            if "file" not in source_dict:
+                log.critical(" no 'file' in a flags source: %s", source_dict)
                 return False
-            if source_dict["type"] not in SettingsStorage.FLAG_SOURCES:
+            if source_dict["file"] not in SettingsStorage.FLAG_SOURCES:
                 log.critical(" flag source: '%s' is not one of '%s'!",
-                             source_dict["type"], SettingsStorage.FLAG_SOURCES)
+                             source_dict["file"], SettingsStorage.FLAG_SOURCES)
                 return False
         return True
 
@@ -135,11 +145,29 @@ class SettingsStorage:
                 log.debug("  %-26s <-- '%s'", setting_name, val)
         log.debug(" Settings sucessfully read...")
 
-        # initialize max_tu_age if is it not yet, default to 30 minutes
-        self.max_tu_age = getattr(self, "max_tu_age", "00:30:00")
+        # initialize max_cache_age if is it not yet, default to 30 minutes
+        self.max_cache_age = getattr(self, "max_cache_age", "00:30:00")
         # get seconds from string if needed
-        if isinstance(self.max_tu_age, str):
-            self.max_tu_age = Tools.seconds_from_string(self.max_tu_age)
+        if isinstance(self.max_cache_age, str):
+            self.max_cache_age = Tools.seconds_from_string(self.max_cache_age)
+
+    def __populate_flags_source_paths(self, view):
+        """Populate variables inside flags sources.
+
+        Args:
+            view (View): Current view.
+        """
+        if not self.flags_sources:
+            log.critical(" Cannot update paths of flag sources.")
+            return
+        for idx, source_dict in enumerate(self.flags_sources):
+            for option in SettingsStorage.FLAG_SOURCES_ENTRIES_WITH_PATHS:
+                if option not in source_dict:
+                    continue
+                if not source_dict[option]:
+                    continue
+                self.flags_sources[idx][option] =\
+                    self.__replace_wildcard_if_needed(source_dict[option])
 
     def __populate_common_flags(self, view):
         """Populate the variables inside common_flags with real values.
@@ -147,14 +175,6 @@ class SettingsStorage:
         Args:
             view (sublime.View): current view
         """
-        # init current and parrent folders:
-        if not view.file_name():
-            log.error(" no view to populate common flags from")
-            return
-
-        # init wildcard variables
-        self.__update_widcard_values(view)
-
         # populate variables to real values
         log.debug(" populating common_flags with current variables.")
         for idx, flag in enumerate(self.common_flags):
@@ -167,22 +187,22 @@ class SettingsStorage:
         if self.include_file_parent_folder:
             self.common_flags.append("-I" + file_parent_folder)
 
-    def __replace_wildcard_if_needed(self, flag):
-        """Replace wildcards in a flag if they are present there.
+    def __replace_wildcard_if_needed(self, line):
+        """Replace wildcards in a line if they are present there.
 
         Args:
-            flag (str): flag possibly with wildcards in it
+            line (str): line possibly with wildcards in it
 
         Returns:
-            str: flag with replaced wildcards
+            str: line with replaced wildcards
         """
-        # create a copy of a flag
-        res = str(flag)
-        # replace all wildcards in the flag
+        # create a copy of a line
+        res = str(line)
+        # replace all wildcards in the line
         for wildcard, value in self._wildcard_values.items():
             res = re.sub(re.escape(wildcard), value, res)
-        if res != flag:
-            log.debug(" populated '%s' to '%s'", flag, res)
+        if res != line:
+            log.debug(" populated '%s' to '%s'", line, res)
         return res
 
     def __update_widcard_values(self, view):
@@ -202,3 +222,4 @@ class SettingsStorage:
         # get clang version string
         self._wildcard_values[Wildcards.CLANG_VERSION] =\
             Tools.get_clang_version_str(self.clang_binary)
+        self.clang_version = self._wildcard_values[Wildcards.CLANG_VERSION]

@@ -7,7 +7,6 @@ Attributes:
 import logging
 
 from .. import error_vis
-from ..tools import Tools
 
 log = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ class BaseCompleter:
 
     valid = False
 
-    def __init__(self, clang_binary):
+    def __init__(self, clang_binary, version_str):
         """Initialize the BaseCompleter.
 
         Args:
@@ -43,8 +42,7 @@ class BaseCompleter:
         if not clang_binary:
             raise RuntimeError("clang binary not defined")
 
-        # run the cmd to get the proper version of the installed clang
-        self.version_str = Tools.get_clang_version_str(clang_binary)
+        self.version_str = version_str
         # initialize error visualization
         self.error_vis = error_vis.CompileErrors()
 
