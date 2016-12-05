@@ -164,7 +164,9 @@ class ViewConfig(object):
         prefixes = completer.compiler_variant.include_prefixes
 
         flags = UniqueList()
-        flags += ViewConfig.__get_lang_flags(view, settings)
+        flags += completer.compiler_variant.init_flags
+        flags += ViewConfig.__get_lang_flags(
+            view, settings, completer.compiler_variant.need_lang_flags)
         flags += ViewConfig.__get_common_flags(prefixes, settings)
         flags += ViewConfig.__load_source_flags(view, settings, prefixes)
 
@@ -262,7 +264,7 @@ class ViewConfig(object):
         return completer
 
     @staticmethod
-    def __get_lang_flags(view, settings):
+    def __get_lang_flags(view, settings, need_lang_flags):
         """Get language flags.
 
         Args:
@@ -272,11 +274,16 @@ class ViewConfig(object):
         Returns:
             Flag[]: A list of language-specific flags.
         """
-        current_lang = Tools.get_view_syntax(view)
-        if current_lang == 'C' or current_lang == 'C99':
-            lang_flags = settings.c_flags
+        current_lang = Tools.get_view_lang(view)
+        lang_flags = []
+        if current_lang == 'C':
+            if need_lang_flags:
+                lang_flags += ["-x"] + ["c"]
+            lang_flags += settings.c_flags
         else:
-            lang_flags = settings.cpp_flags
+            if need_lang_flags:
+                lang_flags += ["-x"] + ["c++"]
+            lang_flags += settings.cpp_flags
         return Flag.tokenize_list(lang_flags)
 
 

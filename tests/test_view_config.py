@@ -57,15 +57,17 @@ class TestViewConfig(GuiTestWrapper):
 
         self.assertIsNotNone(view_config.completer)
         completer = view_config.completer
-        self.assertEqual(len(completer.clang_flags), 11)
+        self.assertEqual(len(completer.clang_flags), 13)
         # test from the start
-        self.assertEqual(completer.clang_flags[0], '-x')
-        self.assertEqual(completer.clang_flags[1], 'c++')
-        self.assertEqual(completer.clang_flags[2], '-std=c++11')
+        self.assertEqual(completer.clang_flags[0], '-c')
+        self.assertEqual(completer.clang_flags[1], '-fsyntax-only')
+        self.assertEqual(completer.clang_flags[2], '-x')
+        self.assertEqual(completer.clang_flags[3], 'c++')
+        self.assertEqual(completer.clang_flags[4], '-std=c++11')
         # test last one
         expected = path.join(path.dirname(
             path.dirname(__file__)), 'local_folder')
-        self.assertEqual(completer.clang_flags[10], '-I' + expected)
+        self.assertEqual(completer.clang_flags[12], '-I' + expected)
         self.tear_down()
 
     def test_unsaved_views(self):

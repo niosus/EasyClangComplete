@@ -395,7 +395,10 @@ class Tools:
     syntax_regex = re.compile("\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx"]
-    valid_syntax = ["C", "C Improved", "C99", "C++", "C++11"]
+
+    C_SYNTAX = ["C", "C Improved", "C99"]
+    CPP_SYNTAX = ["C++", "C++11"]
+    valid_syntax = C_SYNTAX + CPP_SYNTAX
 
     SHOW_DEFAULT_COMPLETIONS = None
     HIDE_DEFAULT_COMPLETIONS = ([], sublime.INHIBIT_WORD_COMPLETIONS |
@@ -408,6 +411,23 @@ class Tools:
         if not path.exists(tempdir):
             makedirs(tempdir)
         return tempdir
+
+    @staticmethod
+    def get_view_lang(view):
+        """Get language from view description.
+
+        Args:
+            view (sublime.View): Current view
+
+        Returns:
+            str: language, "C" or "C++"
+        """
+        syntax = Tools.get_view_syntax(view)
+        if syntax in Tools.C_SYNTAX:
+            return "C"
+        if syntax in Tools.CPP_SYNTAX:
+            return "C++"
+        return None
 
     @staticmethod
     def get_view_syntax(view):
@@ -630,6 +650,6 @@ class Tools:
         Returns: index of found flag or None if not found
         """
         for idx, flag in enumerate(flags):
-            if flag.startswith("-std"):
+            if flag.startswith(prefix):
                 return idx
         return None

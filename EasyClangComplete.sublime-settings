@@ -17,12 +17,10 @@
   ],
   // C specific flags. Prepend common_flags for C files.
   "c_flags" : [
-    "-x", "c",
     "-std=c11"
   ],
   // C++ specific flags. Prepend common_flags for C++ files.
   "cpp_flags" : [
-    "-x", "c++",
     "-std=c++11"
   ],
 

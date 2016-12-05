@@ -13,11 +13,9 @@ log.debug(" reloading module")
 
 
 class CompilerVariant(object):
-    """Encapsulation of a compiler specific options.
+    """Encapsulation of a compiler specific options."""
 
-    Attributes:
-        init_flags (list): flags that every command needs.
-    """
+    need_lang_flags = True
     init_flags = [Flag("-c"), Flag("-fsyntax-only")]
 
     def errors_from_output(self, output):
@@ -70,6 +68,7 @@ class ClangClCompilerVariant(ClangCompilerVariant):
     Attributes:
         error_regex (re): regex to find contents of an error
     """
+    need_lang_flags = False
     include_prefixes = ["-I", "/I", "-msvc", "/msvc"]
     error_regex = re.compile("(?P<file>.*)" +
                              "\((?P<row>\d+),(?P<col>\d+)\)\s*" +
