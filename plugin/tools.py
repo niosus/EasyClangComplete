@@ -225,6 +225,23 @@ class File:
         return True
 
     @staticmethod
+    def canonical_path(input_path, folder=''):
+        """Return a canonical path of the file.
+
+        Args:
+            input_path (str): path to convert.
+            folder (str, optional): parent folder.
+
+        Returns:
+            str: canonical path
+        """
+        if not input_path:
+            return None
+        if not path.isabs(input_path):
+            input_path = path.join(folder, input_path)
+        return path.normcase(path.normpath(input_path))
+
+    @staticmethod
     def update_mod_time(full_path):
         """Update modification time.
 

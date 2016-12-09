@@ -6,6 +6,7 @@ Attributes:
 """
 import sublime
 import time
+import platform
 from os import path
 from unittest import TestCase
 
@@ -198,3 +199,33 @@ class test_file(TestCase):
         expected = path.join(parent_folder, 'README.md')
         self.assertTrue(file.loaded())
         self.assertEqual(file.full_path(), expected)
+
+    def test_canonical_path(self):
+        """Test creating canonical path."""
+        if platform.system() == "Windows":
+            original_path = "../hello/world.txt"
+            folder = "D:\\folder"
+            res = File.canonical_path(original_path, folder)
+            self.assertEqual(res, "d:\\hello\\world.txt")
+        else:
+            original_path = "../hello/world.txt"
+            folder = "/folder"
+            res = File.canonical_path(original_path, folder)
+            self.assertEqual(res, "/hello/world.txt")
+
+    def test_canonical_path_absolute(self):
+        """Test creating canonical path."""
+        if platform.system() == "Windows":
+            original_path = "D:\\hello\\world.txt"
+            res = File.canonical_path(original_path)
+            self.assertEqual(res, "d:\\hello\\world.txt")
+        else:
+            original_path = "/hello/world.txt"
+            res = File.canonical_path(original_path)
+            self.assertEqual(res, "/hello/world.txt")
+
+    def test_canonical_path_empty(self):
+        """Test failing for canonical path."""
+        original_path = None
+        res = File.canonical_path(original_path)
+        self.assertIsNone(res)

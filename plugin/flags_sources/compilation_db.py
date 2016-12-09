@@ -54,6 +54,8 @@ class CompilationDb(FlagsSource):
         """
         # prepare search scope
         search_scope = self._update_search_scope(search_scope, file_path)
+        # make sure the file name conforms to standard
+        file_path = File.canonical_path(file_path)
         # remove extension from a file
         if file_path:
             # strip the file path from extension.
@@ -117,7 +119,9 @@ class CompilationDb(FlagsSource):
         parsed_db = {}
         unique_list_of_flags = UniqueList()
         for entry in data:
-            file_path = path.splitext(path.normpath(entry['file']))[0]
+            file_path = File.canonical_path(entry['file'],
+                                            database_file.folder())
+            file_path = path.splitext(file_path)[0]
             command_as_list = CompilationDb.line_as_list(entry['command'])
             flags = FlagsSource.parse_flags(database_file.folder(),
                                             command_as_list,
