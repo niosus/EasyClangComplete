@@ -36,6 +36,7 @@ class CMakeFile(FlagsSource):
     """
     _FILE_NAME = 'CMakeLists.txt'
     _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
+    _DEP_REGEX = re.compile('\"(.+\..+)\"')
 
     def __init__(self, include_prefixes, prefix_paths):
         """Initialize a cmake-based flag storage.
@@ -64,10 +65,8 @@ class CMakeFile(FlagsSource):
         """
         # prepare search scope
         search_scope = self._update_search_scope(search_scope, file_path)
-        # check if we have a hashed version
-        # TODO(igor): probably can be
-        # simplified. Why do we need to load cached? should we just test if
-        # currently found one is in cache?
+        # TODO(igor): probably can be simplified. Why do we need to load
+        # cached? should we just test if currently found one is in cache?
         log.debug(" [cmake]:[get]: for file %s", file_path)
         cached_cmake_path = self._get_cached_from(file_path)
         log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
@@ -113,6 +112,21 @@ class CMakeFile(FlagsSource):
         return flags
 
     @staticmethod
+    def unique_folder_name(cmake_path):
+        """Get unique build folder name.
+
+        Args:
+            cmake_path (str): Path to CMakeLists of this project.
+
+        Returns:
+            str: Path to a unique temp folder.
+        """
+        unique_proj_str = Tools.get_unique_str(cmake_path)
+        tempdir = path.join(
+            Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
+        return tempdir
+
+    @staticmethod
     def __compile_cmake(cmake_file, prefix_paths):
         """Compile cmake given a CMakeLists.txt file.
 
@@ -132,9 +146,7 @@ class CMakeFile(FlagsSource):
         if not prefix_paths:
             prefix_paths = []
         cmake_cmd = CMakeFile._CMAKE_MASK.format(path=cmake_file.folder())
-        unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
-        tempdir = path.join(
-            Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
+        tempdir = CMakeFile.unique_folder_name(cmake_file.full_path())
         try:
             os.makedirs(tempdir)
         except OSError:
@@ -184,12 +196,11 @@ class CMakeFile(FlagsSource):
         Returns:
             str[]: List of full paths to dependency files.
         """
-        dep_regex = re.compile('\"(.+\..+)\"')
         folder = path.dirname(path.dirname(deps_file))
         deps = []
         with open(deps_file, 'r') as f:
             content = f.read()
-            found = dep_regex.findall(content)
+            found = CMakeFile._DEP_REGEX.findall(content)
             for dep in found:
                 if not path.isabs(dep):
                     dep = path.join(folder, dep)
@@ -198,9 +209,7 @@ class CMakeFile(FlagsSource):
 
     @staticmethod
     def __need_cmake_rerun(cmake_path):
-        unique_proj_str = Tools.get_unique_str(cmake_path)
-        tempdir = path.join(
-            Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
+        tempdir = CMakeFile.unique_folder_name(cmake_path)
         if not path.exists(tempdir):
             # temp folder not there. We need to run cmake to generate one.
             return True

@@ -2,11 +2,19 @@
     {
         "caption": "EasyClangComplete: Settings",
         "command": "edit_settings",
-        "args": {"base_file": "${packages}/EasyClangComplete/EasyClangComplete.sublime-settings"}
+        "args": {
+            "base_file": "${packages}/EasyClangComplete/EasyClangComplete.sublime-settings"
+        }
     },
     {
         "caption": "EasyClangComplete: Open completion triggers location",
         "command": "edit_settings",
-        "args": {"base_file": "${packages}/EasyClangComplete/Preferences.sublime-settings"}
+        "args": {
+            "base_file": "${packages}/EasyClangComplete/Preferences.sublime-settings"
+        }
+    },
+    {
+        "caption": "EasyClangComplete: Clean current CMake cache",
+        "command": "clean_cmake"
     },
 ]

@@ -8,14 +8,17 @@ Attributes:
 
 import sublime
 import sublime_plugin
-import imp
 import logging
+import shutil
+import imp
 
+from os import path
 from concurrent import futures
 
 from .plugin import tools
 from .plugin import error_vis
 from .plugin import view_config
+from .plugin import flags_sources
 from .plugin.settings import settings_manager
 from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
@@ -27,6 +30,7 @@ imp.reload(error_vis)
 imp.reload(lib_complete)
 imp.reload(bin_complete)
 imp.reload(view_config)
+imp.reload(flags_sources)
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager
@@ -34,6 +38,8 @@ ViewConfigManager = view_config.ViewConfigManager
 SublBridge = tools.SublBridge
 Tools = tools.Tools
 PosStatus = tools.PosStatus
+CMakeFile = flags_sources.cmake_file.CMakeFile
+CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +53,31 @@ def plugin_loaded():
     functionality. We can only properly init them after sublime api is
     available."""
     handle_plugin_loaded_function()
+
+
+class CleanCmakeCommand(sublime_plugin.TextCommand):
+    """Command that cleans cmake build directory."""
+    def run(self, edit):
+        """Run clean command.
+
+        Detects if there is a CMakeLists.txt associated to current view and
+        cleans all related information in case there is one.
+        """
+        if not Tools.is_valid_view(self.view):
+            return
+        file_path = self.view.file_name()
+        cmake_cache = CMakeFileCache()
+        try:
+            cmake_file_path = cmake_cache[file_path]
+            log.debug(" Cleaning file: '%s'", cmake_file_path)
+            del cmake_cache[file_path]
+            del cmake_cache[cmake_file_path]
+            temp_proj_dir = CMakeFile.unique_folder_name(cmake_file_path)
+            if path.exists(temp_proj_dir):
+                log.debug(" Cleaning build directory: '%s'", temp_proj_dir)
+                shutil.rmtree(temp_proj_dir, ignore_errors=True)
+        except KeyError:
+            log.debug(" Nothing to clean")
 
 
 class EasyClangComplete(sublime_plugin.EventListener):
