@@ -84,7 +84,7 @@ class TestCmakeFile(object):
         """Test parsing cmake dependency file."""
         test_file_path = path.join(
             path.dirname(__file__), 'test_files', 'Makefile.cmake')
-        parent_folder = path.dirname(test_file_path)
+        parent_folder = path.dirname(path.dirname(test_file_path))
         res = CMakeFile._CMakeFile__get_cmake_deps(test_file_path)
         self.assertTrue(len(res) == 8)
         self.assertEqual(res[0], path.join(parent_folder, 'CMakeCache.txt'))

@@ -64,7 +64,8 @@ class CMakeFile(FlagsSource):
         """
         # prepare search scope
         search_scope = self._update_search_scope(search_scope, file_path)
-        # check if we have a hashed version TODO(igor): probably can be
+        # check if we have a hashed version
+        # TODO(igor): probably can be
         # simplified. Why do we need to load cached? should we just test if
         # currently found one is in cache?
         log.debug(" [cmake]:[get]: for file %s", file_path)
@@ -82,8 +83,13 @@ class CMakeFile(FlagsSource):
         path_unchanged = (current_cmake_path == cached_cmake_path)
         file_unchanged = File.is_unchanged(cached_cmake_path)
         if path_unchanged and file_unchanged:
-            log.debug(" [cmake]:[unchanged]: use existing db.")
-            if cached_cmake_path in self._cache:
+            use_cached = True
+            if CMakeFile.__need_cmake_rerun(cached_cmake_path):
+                use_cached = False
+            if cached_cmake_path not in self._cache:
+                use_cached = False
+            if use_cached:
+                log.debug(" [cmake]:[unchanged]: use existing db.")
                 db_file_path = self._cache[cached_cmake_path]
                 db = CompilationDb(self._include_prefixes)
                 db_search_scope = SearchScope(
@@ -129,7 +135,10 @@ class CMakeFile(FlagsSource):
         unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
         tempdir = path.join(
             Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
-        os.makedirs(tempdir)
+        try:
+            os.makedirs(tempdir)
+        except OSError:
+            log.debug(" Folder %s exists.", tempdir)
         try:
             # sometimes there are variables missing to carry out the build. We
             # can set them here from the settings.
@@ -158,6 +167,11 @@ class CMakeFile(FlagsSource):
         if not path.exists(database_path):
             log.error(" cmake has finished, but no compilation database.")
             return None
+        # update the dependency modification time
+        dep_file_path = path.join(tempdir, 'CMakeFiles', 'Makefile.cmake')
+        if path.exists(dep_file_path):
+            for dep_path in CMakeFile.__get_cmake_deps(dep_file_path):
+                File.update_mod_time(dep_path)
         return File(database_path)
 
     @staticmethod
@@ -171,7 +185,7 @@ class CMakeFile(FlagsSource):
             str[]: List of full paths to dependency files.
         """
         dep_regex = re.compile('\"(.+\..+)\"')
-        folder = path.dirname(deps_file)
+        folder = path.dirname(path.dirname(deps_file))
         deps = []
         with open(deps_file, 'r') as f:
             content = f.read()
@@ -181,3 +195,24 @@ class CMakeFile(FlagsSource):
                     dep = path.join(folder, dep)
                 deps.append(dep)
         return deps
+
+    @staticmethod
+    def __need_cmake_rerun(cmake_path):
+        unique_proj_str = Tools.get_unique_str(cmake_path)
+        tempdir = path.join(
+            Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
+        if not path.exists(tempdir):
+            # temp folder not there. We need to run cmake to generate one.
+            return True
+        dep_file_path = path.join(tempdir, 'CMakeFiles', 'Makefile.cmake')
+        if not path.exists(dep_file_path):
+            # no file that manages dependencies, we need to run cmake.
+            return True
+
+        # now check if the deps actually changed since we last saw them
+        for dep_file in CMakeFile.__get_cmake_deps(dep_file_path):
+            if not path.exists(dep_file):
+                return True
+            if not File.is_unchanged(dep_file):
+                return True
+        return False
