@@ -30,25 +30,27 @@ class CMakeFile(FlagsSource):
     """Manages generating a compilation database with cmake.
 
     Attributes:
-        cache (dict): Cache of database filenames for each analyzed
+        _cache (dict): Cache of database filenames for each analyzed
             CMakeLists.txt file and of CMakeLists.txt file paths for each
             analyzed view path.
     """
     _FILE_NAME = 'CMakeLists.txt'
-    _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON "{path}"'
+    _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {flags} "{path}"'
     _DEP_REGEX = re.compile('\"(.+\..+)\"')
 
-    def __init__(self, include_prefixes, prefix_paths):
+    def __init__(self, include_prefixes, prefix_paths, flags):
         """Initialize a cmake-based flag storage.
 
         Args:
             include_prefixes (str[]): A List of valid include prefixes.
             prefix_paths (str[]): A list of paths to append to
                 CMAKE_PREFIX_PATH before invoking cmake.
+            flags (str[]): flags to pass to CMake
         """
         super().__init__(include_prefixes)
         self._cache = CMakeFileCache()
         self.__cmake_prefix_paths = prefix_paths
+        self.__cmake_flags = flags
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -98,7 +100,8 @@ class CMakeFile(FlagsSource):
         log.debug(" [cmake]:[generate new db]")
         db_file = CMakeFile.__compile_cmake(
             cmake_file=File(current_cmake_path),
-            prefix_paths=self.__cmake_prefix_paths)
+            prefix_paths=self.__cmake_prefix_paths,
+            flags=self.__cmake_flags)
         if not db_file:
             return None
         if file_path:
@@ -127,7 +130,7 @@ class CMakeFile(FlagsSource):
         return tempdir
 
     @staticmethod
-    def __compile_cmake(cmake_file, prefix_paths):
+    def __compile_cmake(cmake_file, prefix_paths, flags):
         """Compile cmake given a CMakeLists.txt file.
 
         This returns  a new compilation database path to further parse the
@@ -138,14 +141,19 @@ class CMakeFile(FlagsSource):
         Args:
             cmake_file (tools.file): file object for CMakeLists.txt file
             prefix_paths (str[]): paths to add to CMAKE_PREFIX_PATH before
-            running `cmake`
+                                  running `cmake`
+            flags (str[]): flags to pass to cmake
         """
         if not cmake_file or not cmake_file.loaded():
             return None
 
         if not prefix_paths:
             prefix_paths = []
-        cmake_cmd = CMakeFile._CMAKE_MASK.format(path=cmake_file.folder())
+        if not flags:
+            flags = []
+        cmake_cmd = CMakeFile._CMAKE_MASK.format(
+            flags=" ".join(flags),
+            path=cmake_file.folder())
         tempdir = CMakeFile.unique_folder_name(cmake_file.full_path())
         try:
             os.makedirs(tempdir)

@@ -30,9 +30,12 @@
   //  - "CMakeLists.txt"
   //  - "compile_commands.json"
   //  - ".clang_complete"
+  //
   // Every entry has an option:
   //  - "search_in": <path>  <-- a path to the folder containing the file.
-  // "cmake" entry has additional option:
+  //
+  // "cmake" entry has additional options:
+  //  - "flags": [<flags>]        <-- Additional flags to pass to cmake.
   //  - "prefix_paths": [<paths>] <-- array of folders that should be
   //                                  appended to CMAKE_PREFIX_PATHS before
   //                                  cmake is run.

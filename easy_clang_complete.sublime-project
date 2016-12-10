@@ -25,7 +25,8 @@
 	      	"/opt/ros/indigo",
 	      	"~/Code/catkin_ws/devel",
 	      	"$project_base_path/catkin_ws/devel"
-	      ]
+	      ],
+	      "flags": ["-DCMAKE_BUILD_TYPE=Release", "-D XXXX=ON"]
 	    },
 	    {"file": ".clang_complete"}
 	  ],

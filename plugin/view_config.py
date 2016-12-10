@@ -204,10 +204,10 @@ class ViewConfig(object):
                     search_scope = SearchScope(
                         from_folder=path.normpath(search_folder))
             if file_name == "CMakeLists.txt":
-                prefix_paths = None
-                if "prefix_paths" in source_dict:
-                    prefix_paths = source_dict["prefix_paths"]
-                flag_source = CMakeFile(include_prefixes, prefix_paths)
+                prefix_paths = source_dict.get("prefix_paths", None)
+                cmake_flags = source_dict.get("flags", None)
+                flag_source = CMakeFile(
+                    include_prefixes, prefix_paths, cmake_flags)
             elif file_name == "compile_commands.json":
                 flag_source = CompilationDb(include_prefixes)
             elif file_name == ".clang_complete":
