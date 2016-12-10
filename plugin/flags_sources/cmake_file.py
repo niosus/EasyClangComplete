@@ -14,6 +14,8 @@ from os import path
 
 import subprocess
 import logging
+import re
+import os
 
 log = logging.getLogger(__name__)
 
@@ -121,16 +123,12 @@ class CMakeFile(FlagsSource):
         if not cmake_file or not cmake_file.loaded():
             return None
 
-        import os
-        import shutil
         if not prefix_paths:
             prefix_paths = []
         cmake_cmd = CMakeFile._CMAKE_MASK.format(path=cmake_file.folder())
         unique_proj_str = Tools.get_unique_str(cmake_file.full_path())
         tempdir = path.join(
             Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
-        # ensure a clean build
-        shutil.rmtree(tempdir, ignore_errors=True)
         os.makedirs(tempdir)
         try:
             # sometimes there are variables missing to carry out the build. We
@@ -161,3 +159,17 @@ class CMakeFile(FlagsSource):
             log.error(" cmake has finished, but no compilation database.")
             return None
         return File(database_path)
+
+    @staticmethod
+    def __get_cmake_deps(deps_file):
+        dep_regex = re.compile('\"(.+\..+)\"')
+        folder = path.dirname(deps_file)
+        deps = []
+        with open(deps_file, 'r') as f:
+            content = f.read()
+            found = dep_regex.findall(content)
+            for dep in found:
+                if not path.isabs(dep):
+                    dep = path.join(folder, dep)
+                deps.append(dep)
+        return deps

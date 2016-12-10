@@ -80,6 +80,20 @@ class TestCmakeFile(object):
         flags = cmake_file.get_flags(test_file_path, wrong_scope)
         self.assertTrue(flags is None)
 
+    def test_cmake_get_deps(self):
+        """Test parsing cmake dependency file."""
+        test_file_path = path.join(
+            path.dirname(__file__), 'test_files', 'Makefile.cmake')
+        parent_folder = path.dirname(test_file_path)
+        res = CMakeFile._CMakeFile__get_cmake_deps(test_file_path)
+        self.assertTrue(len(res) == 8)
+        self.assertEqual(res[0], path.join(parent_folder, 'CMakeCache.txt'))
+        self.assertEqual(
+            res[1], '/usr/share/cmake-3.5/Modules/CMakeCCompiler.cmake.in')
+        self.assertEqual(
+            res[-1], path.join(parent_folder,
+                               'lib/CMakeFiles/liba.dir/DependInfo.cmake'))
+
 
 if platform.system() != "Windows":
     class CMakeTestRunner(TestCmakeFile, TestCase):
