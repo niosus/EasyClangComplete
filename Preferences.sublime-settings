@@ -5,8 +5,12 @@
   "auto_complete_triggers":
   [
     {
+      "selector": "source.c++ - string - comment - constant.numeric",
       "characters": ".>:",
-      "selector": "source.c++, source.c - string - comment - constant.numeric"
+    },
+    {
+      "selector": "source.c - string - comment - constant.numeric",
+      "characters": ".>:",
     }
   ],
 }
