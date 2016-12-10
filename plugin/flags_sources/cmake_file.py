@@ -162,6 +162,14 @@ class CMakeFile(FlagsSource):
 
     @staticmethod
     def __get_cmake_deps(deps_file):
+        """Parse dependencies from Makefile.cmake.
+
+        Args:
+            deps_file (str): Full path to Makefile.cmake file.
+
+        Returns:
+            str[]: List of full paths to dependency files.
+        """
         dep_regex = re.compile('\"(.+\..+)\"')
         folder = path.dirname(deps_file)
         deps = []
