@@ -36,10 +36,9 @@ class TestCmakeFile(object):
             path.dirname(__file__), 'cmake_tests', 'test_a.cpp')
 
         path_to_cmake_proj = path.dirname(test_file_path)
-        cmake_file = CMakeFile(['-I', '-isystem'], [])
+        cmake_file = CMakeFile(['-I', '-isystem'], None, None)
         expected_lib = path.join(path_to_cmake_proj, 'lib')
         flags = cmake_file.get_flags(test_file_path)
-        self.assertEqual(len(flags), 1)
         self.assertEqual(flags[0], Flag('-I' + expected_lib))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
@@ -54,12 +53,10 @@ class TestCmakeFile(object):
 
         path_to_file_folder = path.dirname(test_file_path)
         expected_lib_include = Flag('-I' + path_to_file_folder)
-        cmake_file = CMakeFile(['-I', '-isystem'], [])
+        cmake_file = CMakeFile(['-I', '-isystem'], None, None)
         flags = cmake_file.get_flags(test_file_path)
         db = CompilationDb(['-I', '-isystem'])
-        self.assertEqual(len(flags), 2)
         self.assertEqual(flags[0], Flag('-Dliba_EXPORTS'))
-        self.assertEqual(flags[1], Flag('-fPIC'))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
             path.dirname(path_to_file_folder), CMakeFile._FILE_NAME)
@@ -75,7 +72,7 @@ class TestCmakeFile(object):
             path.dirname(__file__), 'cmake_tests', 'test_a.cpp')
 
         folder_with_no_cmake = path.dirname(__file__)
-        cmake_file = CMakeFile(['-I', '-isystem'], [])
+        cmake_file = CMakeFile(['-I', '-isystem'], None, None)
         wrong_scope = SearchScope(from_folder=folder_with_no_cmake)
         flags = cmake_file.get_flags(test_file_path, wrong_scope)
         self.assertTrue(flags is None)
