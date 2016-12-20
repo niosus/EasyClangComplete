@@ -140,7 +140,8 @@ class Completer(BaseCompleter):
                     args=self.clang_flags,
                     unsaved_files=files,
                     options=TU.PARSE_PRECOMPILED_PREAMBLE |
-                    TU.PARSE_CACHE_COMPLETION_RESULTS)
+                    TU.PARSE_CACHE_COMPLETION_RESULTS |
+                    TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
                 self.tu = trans_unit
                 end = time.time()
                 log.debug(" compilation done in %s seconds", end - start)
@@ -187,6 +188,44 @@ class Completer(BaseCompleter):
             completions = Completer._parse_completions(complete_obj, excluded)
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
+
+    def info(self, completion_request):
+        print ("info")
+        view = completion_request.get_view()
+        (row, col) = SublBridge.cursor_pos(
+            view, completion_request.get_trigger_position())
+
+        cur = self.tu.cursor.from_location(self.tu, self.tu.get_location(view.file_name(), (row, col)))
+        result = ""
+        if cur and cur.kind.is_declaration() == False and cur.referenced and cur.referenced.kind.is_declaration():
+            cur = cur.referenced
+            if cur.result_type.spelling:
+                result += cur.result_type.spelling + ' '
+            else:
+                result += cur.type.spelling + ' '
+            result += cur.spelling
+
+            args = []
+            for arg in cur.get_arguments():
+                args.append(arg.type.spelling + ' ' + arg.spelling)
+
+            if len(args):
+                result += '('
+                result += ','.join(args)
+                result += ')'
+
+            if cur.is_static_method():
+                result += " static"
+            if cur.is_const_method():
+                result += " const"
+
+            if cur.brief_comment:
+                result += "<br><br><b>"
+                result += cur.brief_comment + "</b>"
+                # print(cur.brief_comment)
+                # result = cur.brief_comment.replace('\n', "xxx<br>") + "<br><br>" + result
+
+        return (completion_request, result)
 
     def update(self, view, show_errors):
         """Reparse the translation unit.
@@ -279,6 +318,7 @@ class Completer(BaseCompleter):
                 continue
             hint = ''
             contents = ''
+            trigger = ''
             place_holders = 1
             for chunk in c.string:
                 if not chunk:

@@ -210,6 +210,26 @@ class EasyClangComplete(sublime_plugin.EventListener):
         elif future.cancelled():
             log.debug(" could not remove config -> cancelled")
 
+    def info_finished(self, future):
+        if not future.done():
+            return
+        (completion_request, result) = future.result()
+        if result == "":
+            return
+        if not completion_request:
+            return
+        if completion_request.get_identifier() != self.current_job_id:
+            return
+        active_view = sublime.active_window().active_view()
+        print("show popup")
+        # if active_view.is_popup_visible():
+        #     active_view.update_popup("BLE")
+        # else:
+        active_view.show_popup(result,
+                           location = completion_request.get_trigger_position(),
+                           flags = sublime.HIDE_ON_MOUSE_MOVE_AWAY)
+
+
     def completion_finished(self, future):
         """Callback called when completion async function has returned.
 
@@ -236,6 +256,17 @@ class EasyClangComplete(sublime_plugin.EventListener):
             # we only want to trigger the autocompletion popup if there
             # are new completions to show there. Otherwise let it be.
             SublBridge.show_auto_complete(active_view)
+
+    def on_hover(self, view, point, hover_zone):
+        if hover_zone != sublime.HOVER_TEXT:
+            return
+        completion_request = tools.CompletionRequest(view, point)
+        view_config = self.view_config_manager.get_from_cache(view)
+        self.current_job_id = completion_request.get_identifier()
+        future = EasyClangComplete.thread_pool.submit(
+            view_config.completer.info, completion_request)
+        future.add_done_callback(self.info_finished)
+
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code.
