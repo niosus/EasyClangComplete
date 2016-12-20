@@ -4,6 +4,7 @@ Attributes:
     log (logging): this module logger
 """
 import logging
+import sublime
 from os import path
 
 log = logging.getLogger(__name__)
@@ -20,6 +21,7 @@ class CompileErrors:
     _MAX_POPUP_WIDTH = 1800
 
     err_regions = {}
+    phantom_sets = {}
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
@@ -42,7 +44,6 @@ class CompileErrors:
             del self.err_regions[view_id]
         # create an empty region dict for view id
         self.err_regions[view_id] = {}
-
         # If the view is closed while this is running, there will be
         # errors. We want to handle them gracefully.
         try:
@@ -84,6 +85,24 @@ class CompileErrors:
         regions = CompileErrors._as_region_list(current_error_dict)
         log.debug(" showing error regions: %s", regions)
         view.add_regions(CompileErrors._TAG, regions, "string")
+        if view.buffer_id() not in self.phantom_sets:
+            phantom_set = sublime.PhantomSet(view, "exec")
+            self.phantom_sets[view.buffer_id()] = phantom_set
+        else:
+            phantom_set = self.phantom_sets[view.buffer_id()]
+        phantoms = []
+        for err in current_error_dict:
+            errors_dict = current_error_dict[err]
+            for e in errors_dict:
+                print(e)
+            errors_html = CompileErrors._as_html(errors_dict)
+            pt = view.text_point(err -1, 1)
+            phantoms.append(sublime.Phantom(
+                        sublime.Region(pt, view.line(pt).b),
+                        errors_html,
+                        sublime.LAYOUT_BELOW))
+        phantom_set.update(phantoms)
+
 
     def erase_regions(self, view):
         """Erase error regions for view.
