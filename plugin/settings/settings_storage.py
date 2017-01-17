@@ -59,6 +59,7 @@ class SettingsStorage:
         "triggers",
         "use_libclang",
         "verbose",
+        "show_type_info",
     ]
 
     def __init__(self, settings_handle):

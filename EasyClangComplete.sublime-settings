@@ -83,4 +83,6 @@
   // Remove cache data older than specified time.
   // Format: <hours>:<minutes>:<seconds>: "HH:MM:SS".
   "max_cache_age": "00:30:00",
+
+  "show_type_info": false
 }

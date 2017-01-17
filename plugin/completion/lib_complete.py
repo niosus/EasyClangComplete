@@ -88,6 +88,9 @@ class Completer(BaseCompleter):
                 [cindex.CursorKind.CLASS_DECL,
                  cindex.CursorKind.ENUM_CONSTANT_DECL]
 
+            self.function_kinds_list = [cindex.CursorKind.FUNCTION_DECL,
+                                        cindex.CursorKind.CXX_METHOD]
+
             # load clang helper class
             clang_utils = importlib.import_module(clang_utils_module_name)
             ClangUtils = clang_utils.ClangUtils
@@ -200,18 +203,27 @@ class Completer(BaseCompleter):
         return (completion_request, completions)
 
     def info(self, completion_request):
-        print ("info")
+        """Provide information about object in given location.
+
+        Using the current translation unit it queries libclang for available
+        information about cursor.
+
+        """
         view = completion_request.get_view()
         (row, col) = SublBridge.cursor_pos(
             view, completion_request.get_trigger_position())
 
-        cur = self.tu.cursor.from_location(self.tu, self.tu.get_location(view.file_name(), (row, col)))
+        cur = self.tu.cursor.from_location(self.tu, self.tu.get_location(
+            view.file_name(), (row, col)))
         result = ""
-        if cur and cur.kind.is_declaration() == False and cur.referenced and cur.referenced.kind.is_declaration():
+
+        if (cur and cur.kind.is_declaration() == False and
+            cur.referenced and cur.referenced.kind.is_declaration()):
+
             cur = cur.referenced
             if cur.result_type.spelling:
                 result += cur.result_type.spelling + ' '
-            else:
+            elif cur.type.spelling:
                 result += cur.type.spelling + ' '
             result += cur.spelling
 
@@ -219,21 +231,24 @@ class Completer(BaseCompleter):
             for arg in cur.get_arguments():
                 args.append(arg.type.spelling + ' ' + arg.spelling)
 
-            if len(args):
+            if cur.kind in self.function_kinds_list:
                 result += '('
-                result += ','.join(args)
+                if len(args):
+                    result += ','.join(args)
                 result += ')'
 
             if cur.is_static_method():
-                result += " static"
+                result = "static " + result
             if cur.is_const_method():
                 result += " const"
+
+            result = result.replace("&", "&amp;")
+            result = result.replace("<", "&lt;")
+            result = result.replace(">", "&gt;")
 
             if cur.brief_comment:
                 result += "<br><br><b>"
                 result += cur.brief_comment + "</b>"
-                # print(cur.brief_comment)
-                # result = cur.brief_comment.replace('\n', "xxx<br>") + "<br><br>" + result
 
         return (completion_request, result)
 

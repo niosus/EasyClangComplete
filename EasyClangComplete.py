@@ -211,6 +211,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" could not remove config -> cancelled")
 
     def info_finished(self, future):
+        """Callback called when additional information for tag is available.
+
+        Creates popup containing information about text under the cursor
+
+        """
         if not future.done():
             return
         (completion_request, result) = future.result()
@@ -221,14 +226,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if completion_request.get_identifier() != self.current_job_id:
             return
         active_view = sublime.active_window().active_view()
-        print("show popup")
-        # if active_view.is_popup_visible():
-        #     active_view.update_popup("BLE")
-        # else:
         active_view.show_popup(result,
                            location = completion_request.get_trigger_position(),
-                           flags = sublime.HIDE_ON_MOUSE_MOVE_AWAY)
-
+                           flags = sublime.HIDE_ON_MOUSE_MOVE_AWAY,
+                           max_width = 600)
 
     def completion_finished(self, future):
         """Callback called when completion async function has returned.
@@ -258,10 +259,21 @@ class EasyClangComplete(sublime_plugin.EventListener):
             SublBridge.show_auto_complete(active_view)
 
     def on_hover(self, view, point, hover_zone):
+        """Function that is called when mouse pointer hovers over text.
+
+        Triggers showing popup with additional information about element under
+        cursor.
+
+        """
+        settings = self.settings_manager.settings_for_view(view)
+        if settings.show_type_info == False:
+            return
         if hover_zone != sublime.HOVER_TEXT:
             return
         completion_request = tools.CompletionRequest(view, point)
         view_config = self.view_config_manager.get_from_cache(view)
+        if not view_config:
+            return
         self.current_job_id = completion_request.get_identifier()
         future = EasyClangComplete.thread_pool.submit(
             view_config.completer.info, completion_request)
