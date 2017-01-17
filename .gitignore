@@ -15,3 +15,5 @@
 /tests/cmake_tests/.clang_complete
 
 /plugin/utils/__pycache__/
+
+*__pycache__/

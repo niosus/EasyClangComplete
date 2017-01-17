@@ -331,36 +331,40 @@ class ViewConfigManager(object):
         if not Tools.is_valid_view(view):
             log.error(" view %s is not valid. Cannot get config.", view)
             return None
-        v_id = view.buffer_id()
-        res = None
-        # we need to protect this with mutex to avoid race condition between
-        # creating and removing a config.
-        with ViewConfigManager.__rlock:
-            if v_id in self._cache:
-                log.debug(" config exists for path: %s", v_id)
-                res = self._cache[v_id].update_if_needed(view, settings)
-            else:
-                log.debug(" generate new config for path: %s", v_id)
-                config = ViewConfig(view, settings)
-                self._cache[v_id] = config
-                res = config
+        try:
+            v_id = view.buffer_id()
+            res = None
+            # we need to protect this with mutex to avoid race condition
+            # between creating and removing a config.
+            with ViewConfigManager.__rlock:
+                if v_id in self._cache:
+                    log.debug(" config exists for path: %s", v_id)
+                    res = self._cache[v_id].update_if_needed(view, settings)
+                else:
+                    log.debug(" generate new config for path: %s", v_id)
+                    config = ViewConfig(view, settings)
+                    self._cache[v_id] = config
+                    res = config
 
-            # start timer if it is not set yet
-            log.debug(" starting timer to remove old configs.")
-            if v_id in ViewConfigManager.__timers:
-                log.debug(" cancel old timer.")
-                ViewConfigManager.__cancel_timer(v_id)
-            ViewConfigManager.__start_timer(
-                self.__remove_old_config, v_id, settings.max_cache_age)
-
-        # now return the needed config
-        return res
+                # start timer if it is not set yet
+                log.debug(" starting timer to remove old configs.")
+                if v_id in ViewConfigManager.__timers:
+                    log.debug(" cancel old timer.")
+                    ViewConfigManager.__cancel_timer(v_id)
+                ViewConfigManager.__start_timer(
+                    self.__remove_old_config, v_id, settings.max_cache_age)
+            # now return the needed config
+            return res
+        except AttributeError:
+            log.error(" view became invalid in process of loading config.")
+            return None
 
     def clear_for_view(self, v_id):
         """Clear config for path."""
         log.debug(" trying to clear config for view: %s", v_id)
         with ViewConfigManager.__rlock:
-            del self._cache[v_id]
+            if v_id in self._cache:
+                del self._cache[v_id]
             ViewConfigManager.__cancel_timer(v_id)
         return v_id
 

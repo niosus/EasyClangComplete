@@ -82,16 +82,21 @@ class SettingsStorage:
         Args:
             view (sublime.View): current view
         """
-        # init current and parrent folders:
-        if not Tools.is_valid_view(view):
-            log.error(" no view to populate common flags from")
-            return
-        self.__load_vars_from_settings(view.settings(), project_specific=True)
-        # initialize wildcard values with view
-        self.__update_widcard_values(view)
-        # replace wildcards
-        self.__populate_common_flags(view)
-        self.__populate_flags_source_paths(view)
+        try:
+            # init current and parrent folders:
+            if not Tools.is_valid_view(view):
+                log.error(" no view to populate common flags from")
+                return
+            self.__load_vars_from_settings(view.settings(),
+                                           project_specific=True)
+            # initialize wildcard values with view
+            self.__update_widcard_values(view)
+            # replace wildcards
+            self.__populate_common_flags(view)
+            self.__populate_flags_source_paths(view)
+        except AttributeError as e:
+            log.error(" view became None. Do not continue.")
+            log.error(" original error: %s", e)
 
     def is_valid(self):
         """Check settings validity.
@@ -207,6 +212,7 @@ class SettingsStorage:
         # replace all wildcards in the line
         for wildcard, value in self._wildcard_values.items():
             res = re.sub(re.escape(wildcard), value, res)
+            res = path.expandvars(res)
         if res != line:
             log.debug(" populated '%s' to '%s'", line, res)
         return res

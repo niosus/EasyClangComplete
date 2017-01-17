@@ -16,6 +16,7 @@ from ..tools import SublBridge
 from ..tools import PKG_NAME
 
 from threading import RLock
+from os import path
 
 log = logging.getLogger(__name__)
 log.debug(" reloading module")
@@ -131,10 +132,12 @@ class Completer(BaseCompleter):
             log.warning(" this is default id. View is closed. Abort!")
             return
         with Completer.rlock:
+            start = time.time()
             try:
                 TU = self.tu_module
-                start = time.time()
                 log.debug(" compilation started for view id: %s", v_id)
+                if not file_name or not path.exists(file_name):
+                    raise ValueError("file name does not exist anymore")
                 trans_unit = TU.from_source(
                     filename=file_name,
                     args=self.clang_flags,
@@ -143,10 +146,10 @@ class Completer(BaseCompleter):
                     TU.PARSE_CACHE_COMPLETION_RESULTS |
                     TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
                 self.tu = trans_unit
-                end = time.time()
-                log.debug(" compilation done in %s seconds", end - start)
             except Exception as e:
                 log.error(" error while compiling: %s", e)
+            end = time.time()
+            log.debug(" compilation done in %s seconds", end - start)
 
     def complete(self, completion_request):
         """Called asynchronously to create a list of autocompletions.
@@ -156,12 +159,13 @@ class Completer(BaseCompleter):
 
         """
         view = completion_request.get_view()
+        file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
         (row, col) = SublBridge.cursor_pos(
             view, completion_request.get_trigger_position())
 
         # unsaved files
-        files = [(view.file_name(), file_body)]
+        files = [(file_name, file_body)]
 
         v_id = view.buffer_id()
 
@@ -169,10 +173,16 @@ class Completer(BaseCompleter):
             # execute clang code completion
             start = time.time()
             log.debug(" started code complete for view %s", v_id)
-            complete_obj = self.tu.codeComplete(
-                view.file_name(),
-                row, col,
-                unsaved_files=files)
+            try:
+                if not file_name or not path.exists(file_name):
+                    raise ValueError("file name does not exist anymore")
+                complete_obj = self.tu.codeComplete(
+                    file_name,
+                    row, col,
+                    unsaved_files=files)
+            except Exception as e:
+                log.error(" error while completing view %s: %s", file_name, e)
+                complete_obj = None
             end = time.time()
             log.debug(" code complete done in %s seconds", end - start)
 
@@ -244,10 +254,14 @@ class Completer(BaseCompleter):
         v_id = view.buffer_id()
         log.debug(" view is %s", v_id)
         with Completer.rlock:
-            if not self.tu:
+            # fix issue #191 - avoid crashing when renaming file
+            if not self.tu or not self.tu.cursor.location.file:
                 log.debug(" translation unit does not exist. Creating.")
                 self.parse_tu(view)
             log.debug(" reparsing translation_unit for view %s", v_id)
+            if not self.tu:
+                log.error(" translation unit is not available. Not reparsing.")
+                return False
             start = time.time()
             self.tu.reparse()
             end = time.time()

@@ -7,6 +7,10 @@
   //  - "$project_name"       <-- replaced by the name of the current project.
   //  - "$clang_version"      <-- replaced by the numeric version of used clang.
   //  - "~"                   <-- replaced by the path to user home directory.
+  //
+  //  In addition to these, you can use your environment variables:
+  //  - OSX and Linux:  $variable_name or ${variable_name}
+  //  - Windows:        $variable_name or ${variable_name} or %variable_name%
 
   // Specify common flags that will be passed to clang for EVERY build.
   "common_flags" : [

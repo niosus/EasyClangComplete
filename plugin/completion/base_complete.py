@@ -7,6 +7,7 @@ Attributes:
 import logging
 
 from .. import error_vis
+from ..tools import Tools
 
 log = logging.getLogger(__name__)
 
@@ -80,5 +81,8 @@ class BaseCompleter:
             output (object): opaque output to be parsed by compiler variant
         """
         errors = self.compiler_variant.errors_from_output(output)
+        if not Tools.is_valid_view(view):
+            log.error(" cannot show errors. View became invalid!")
+            return
         self.error_vis.generate(view, errors)
         self.error_vis.show_regions(view)

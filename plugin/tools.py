@@ -504,6 +504,8 @@ class Tools:
             return False
         if view.buffer_id() == 0:
             return False
+        if not path.exists(view.file_name()):
+            return False
         return True
 
     @staticmethod

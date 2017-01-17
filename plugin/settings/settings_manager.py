@@ -49,7 +49,10 @@ class SettingsManager:
         if view_id not in self.__settings_dict:
             log.debug(" no settings for view %s. Reinitializing.", view_id)
             self.__init_for_view(view)
-        return self.__settings_dict[view_id]
+        if view_id in self.__settings_dict:
+            # when the view is closed quickly there can be an error here
+            return self.__settings_dict[view_id]
+        return None
 
     def clear_for_view(self, view):
         """Clear settings stored for view.
