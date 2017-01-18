@@ -209,6 +209,8 @@ class Completer(BaseCompleter):
         information about cursor.
 
         """
+        if not self.tu:
+            return (completion_request, "")
         view = completion_request.get_view()
         (row, col) = SublBridge.cursor_pos(
             view, completion_request.get_trigger_position())
@@ -216,7 +218,6 @@ class Completer(BaseCompleter):
         cur = self.tu.cursor.from_location(self.tu, self.tu.get_location(
             view.file_name(), (row, col)))
         result = ""
-
         if (cur and cur.kind.is_declaration() == False and
             cur.referenced and cur.referenced.kind.is_declaration()):
 
@@ -229,7 +230,10 @@ class Completer(BaseCompleter):
 
             args = []
             for arg in cur.get_arguments():
-                args.append(arg.type.spelling + ' ' + arg.spelling)
+                if arg.spelling:
+                    args.append(arg.type.spelling + ' ' + arg.spelling)
+                else:
+                    args.append(arg.type.spelling + ' ')
 
             if cur.kind in self.function_kinds_list:
                 result += '('
@@ -249,7 +253,6 @@ class Completer(BaseCompleter):
             if cur.brief_comment:
                 result += "<br><br><b>"
                 result += cur.brief_comment + "</b>"
-
         return (completion_request, result)
 
     def update(self, view, show_errors):
