@@ -203,25 +203,26 @@ class Completer(BaseCompleter):
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 
-    def location_from_type(self, type):
+    @staticmethod
+    def location_from_type(clangType):
         """ Return location from type
 
             Return proper location from type.
             Remove all inderactions like pointers etc.
 
         """
-        cursor = type.get_declaration()
+        cursor = clangType.get_declaration()
         if cursor and cursor.location and cursor.location.file:
             return cursor.location
 
-        cursor = type.get_pointee().get_declaration()
+        cursor = clangType.get_pointee().get_declaration()
         if cursor and cursor.location and cursor.location.file:
             return cursor.location
 
         return None
 
-
-    def link_from_location(self, location, text):
+    @staticmethod
+    def link_from_location(location, text):
         """Provide link to given cursor
 
             Transforms SourceLocation object into html string

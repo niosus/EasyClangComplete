@@ -214,7 +214,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         elif future.cancelled():
             log.debug(" could not remove config -> cancelled")
 
-    def on_open_declaration(self, location):
+    @staticmethod
+    def on_open_declaration(location):
         """Callback called when link to type is clicked in info popup
 
         Opens location with type declaration
