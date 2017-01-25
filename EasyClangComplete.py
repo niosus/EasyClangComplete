@@ -112,6 +112,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # re-activated. Force active view initialization in that case.
         self.on_activated_async(sublime.active_window().active_view())
 
+        self.saving = False
+
     def on_settings_changed(self):
         """Called when any of the settings changes."""
         user_settings = self.settings_manager.user_settings()
@@ -174,12 +176,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         # disable on_activated_async when running tests
+        self.saving = True
         if view.settings().get("disable_easy_clang_complete"):
             return
         if Tools.is_valid_view(view):
             log.debug(" saving view: %s", view.buffer_id())
             settings = self.settings_manager.settings_for_view(view)
             self.view_config_manager.load_for_view(view, settings)
+        self.saving = False
 
     def on_close(self, view):
         """Called on closing the view.
@@ -210,6 +214,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
         elif future.cancelled():
             log.debug(" could not remove config -> cancelled")
 
+    def on_open_declaration(self, location):
+        """Callback called when link to type is clicked in info popup
+
+        Opens location with type declaration
+
+        """
+        sublime.active_window().open_file(location, sublime.ENCODED_POSITION)
+
     def info_finished(self, future):
         """Callback called when additional information for tag is available.
 
@@ -229,7 +241,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         active_view.show_popup(result,
                            location = completion_request.get_trigger_position(),
                            flags = sublime.HIDE_ON_MOUSE_MOVE_AWAY,
-                           max_width = 600)
+                           max_width = 1000,
+                           on_navigate = self.on_open_declaration)
 
     def completion_finished(self, future):
         """Callback called when completion async function has returned.
@@ -265,6 +278,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
         cursor.
 
         """
+        if self.saving:
+            return
+        if not Tools.is_valid_view(view):
+            return
+
         settings = self.settings_manager.settings_for_view(view)
         if settings.show_type_info == False:
             return

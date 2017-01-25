@@ -8,6 +8,7 @@ import importlib
 import sublime
 import time
 import logging
+import html
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
@@ -202,6 +203,91 @@ class Completer(BaseCompleter):
         log.debug(' completions: %s' % completions)
         return (completion_request, completions)
 
+    def location_from_type(self, type):
+        """ Return location from type
+
+            Return proper location from type.
+            Remove all inderactions like pointers etc.
+
+        """
+        cursor = type.get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        cursor = type.get_pointee().get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        return None
+
+
+    def link_from_location(self, location, text):
+        """Provide link to given cursor
+
+            Transforms SourceLocation object into html string
+
+        """
+        result = ""
+        if location and location.file and location.file.name:
+            result += "<a href=\""
+            result += location.file.name
+            result += ":"
+            result += str(location.line)
+            result += ":"
+            result += str(location.column)
+            result += "\">" + text + "</a>"
+        else:
+            result += text
+        return result
+
+    def build_info_details(self, cursor):
+        """Provide information about given cursor
+
+        Builds detailed information about cursor.
+
+        """
+        result = ""
+        if cursor.result_type.spelling:
+            result += self.link_from_location(
+                        self.location_from_type(cursor.result_type),
+                        html.escape(cursor.result_type.spelling))
+        elif cursor.type.spelling:
+            result += self.link_from_location(
+                        self.location_from_type(cursor.type),
+                        html.escape(cursor.type.spelling))
+
+        result += ' '
+
+        if cursor.location:
+            result += self.link_from_location(cursor.location,
+                                              html.escape(cursor.spelling))
+        else:
+            result += html.escape(cursor.spelling)
+
+        args = []
+        for arg in cursor.get_arguments():
+            if arg.spelling:
+                args.append(arg.type.spelling + ' ' + arg.spelling)
+            else:
+                args.append(arg.type.spelling + ' ')
+
+        if cursor.kind in self.function_kinds_list:
+            result += '('
+            if len(args):
+                result += html.escape(', '.join(args))
+            result += ')'
+
+        if cursor.is_static_method():
+            result = "static " + result
+        if cursor.is_const_method():
+            result += " const"
+
+        if cursor.brief_comment:
+            result += "<br><br><b>"
+            result += cursor.brief_comment + "</b>"
+
+        return result
+
     def info(self, completion_request):
         """Provide information about object in given location.
 
@@ -221,38 +307,8 @@ class Completer(BaseCompleter):
         if (cur and cur.kind.is_declaration() == False and
             cur.referenced and cur.referenced.kind.is_declaration()):
 
-            cur = cur.referenced
-            if cur.result_type.spelling:
-                result += cur.result_type.spelling + ' '
-            elif cur.type.spelling:
-                result += cur.type.spelling + ' '
-            result += cur.spelling
+            result = self.build_info_details(cur.referenced)
 
-            args = []
-            for arg in cur.get_arguments():
-                if arg.spelling:
-                    args.append(arg.type.spelling + ' ' + arg.spelling)
-                else:
-                    args.append(arg.type.spelling + ' ')
-
-            if cur.kind in self.function_kinds_list:
-                result += '('
-                if len(args):
-                    result += ','.join(args)
-                result += ')'
-
-            if cur.is_static_method():
-                result = "static " + result
-            if cur.is_const_method():
-                result += " const"
-
-            result = result.replace("&", "&amp;")
-            result = result.replace("<", "&lt;")
-            result = result.replace(">", "&gt;")
-
-            if cur.brief_comment:
-                result += "<br><br><b>"
-                result += cur.brief_comment + "</b>"
         return (completion_request, result)
 
     def update(self, view, show_errors):
