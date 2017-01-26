@@ -112,8 +112,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # re-activated. Force active view initialization in that case.
         self.on_activated_async(sublime.active_window().active_view())
 
-        self.saving = False
-
     def on_settings_changed(self):
         """Called when any of the settings changes."""
         user_settings = self.settings_manager.user_settings()
@@ -176,14 +174,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         # disable on_activated_async when running tests
-        self.saving = True
         if view.settings().get("disable_easy_clang_complete"):
             return
         if Tools.is_valid_view(view):
             log.debug(" saving view: %s", view.buffer_id())
             settings = self.settings_manager.settings_for_view(view)
             self.view_config_manager.load_for_view(view, settings)
-        self.saving = False
 
     def on_close(self, view):
         """Called on closing the view.
@@ -231,16 +227,16 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """
         if not future.done():
             return
-        (completion_request, result) = future.result()
+        (tooltip_request, result) = future.result()
         if result == "":
             return
-        if not completion_request:
+        if not tooltip_request:
             return
-        if completion_request.get_identifier() != self.current_job_id:
+        if tooltip_request.get_identifier() != self.current_job_id:
             return
-        active_view = sublime.active_window().active_view()
-        active_view.show_popup(result,
-                           location = completion_request.get_trigger_position(),
+        view = tooltip_request.get_view()
+        view.show_popup(result,
+                           location = tooltip_request.get_trigger_position(),
                            flags = sublime.HIDE_ON_MOUSE_MOVE_AWAY,
                            max_width = 1000,
                            on_navigate = self.on_open_declaration)
@@ -279,8 +275,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         cursor.
 
         """
-        if self.saving:
-            return
         if not Tools.is_valid_view(view):
             return
 
@@ -289,13 +283,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return
         if hover_zone != sublime.HOVER_TEXT:
             return
-        completion_request = tools.CompletionRequest(view, point)
+        tooltip_request = tools.CompletionRequest(view, point)
         view_config = self.view_config_manager.get_from_cache(view)
         if not view_config:
             return
-        self.current_job_id = completion_request.get_identifier()
+        self.current_job_id = tooltip_request.get_identifier()
         future = EasyClangComplete.thread_pool.submit(
-            view_config.completer.info, completion_request)
+            view_config.completer.info, tooltip_request)
         future.add_done_callback(self.info_finished)
 
 

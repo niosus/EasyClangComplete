@@ -205,7 +205,7 @@ class Completer(BaseCompleter):
 
     @staticmethod
     def location_from_type(clangType):
-        """ Return location from type
+        """ Return location from type.
 
             Return proper location from type.
             Remove all inderactions like pointers etc.
@@ -223,7 +223,7 @@ class Completer(BaseCompleter):
 
     @staticmethod
     def link_from_location(location, text):
-        """Provide link to given cursor
+        """Provide link to given cursor.
 
             Transforms SourceLocation object into html string
 
@@ -242,7 +242,7 @@ class Completer(BaseCompleter):
         return result
 
     def build_info_details(self, cursor):
-        """Provide information about given cursor
+        """Provide information about given cursor.
 
         Builds detailed information about cursor.
 
@@ -289,28 +289,28 @@ class Completer(BaseCompleter):
 
         return result
 
-    def info(self, completion_request):
+    def info(self, tooltip_request):
         """Provide information about object in given location.
 
         Using the current translation unit it queries libclang for available
         information about cursor.
 
         """
-        if not self.tu:
-            return (completion_request, "")
-        view = completion_request.get_view()
-        (row, col) = SublBridge.cursor_pos(
-            view, completion_request.get_trigger_position())
+        with Completer.rlock:
+            if not self.tu:
+                return (tooltip_request, "")
+            view = tooltip_request.get_view()
+            (row, col) = SublBridge.cursor_pos(
+                view, tooltip_request.get_trigger_position())
 
-        cur = self.tu.cursor.from_location(self.tu, self.tu.get_location(
-            view.file_name(), (row, col)))
-        result = ""
-        if (cur and cur.kind.is_declaration() == False and
-            cur.referenced and cur.referenced.kind.is_declaration()):
+            cur = self.tu.cursor.from_location(self.tu, self.tu.get_location(
+                view.file_name(), (row, col)))
+            result = ""
+            if (cur and cur.kind.is_declaration() == False and
+                cur.referenced and cur.referenced.kind.is_declaration()):
+                result = self.build_info_details(cur.referenced)
 
-            result = self.build_info_details(cur.referenced)
-
-        return (completion_request, result)
+        return (tooltip_request, result)
 
     def update(self, view, show_errors):
         """Reparse the translation unit.
