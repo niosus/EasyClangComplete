@@ -78,6 +78,7 @@ class ThreadPool:
                 log.debug("submitting job: %s", job)
                 future = self.__thread_pool.submit(job.function, *job.args)
                 future.add_done_callback(job.callback)
+            ThreadPool.__jobs_to_run.clear()
 
     def new_job(self, job):
         """Add a new job to be submitted.

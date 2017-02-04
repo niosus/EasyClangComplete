@@ -192,7 +192,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if Tools.is_valid_view(view):
             log.debug(" saving view: %s", view.buffer_id())
             settings = self.settings_manager.settings_for_view(view)
-            self.view_config_manager.load_for_view(view, settings)
+            job = ThreadJob(name=EasyClangComplete.UPDATE_JOB_TAG,
+                            callback=EasyClangComplete.config_updated,
+                            function=self.view_config_manager.load_for_view,
+                            args=[view, settings])
+            EasyClangComplete.thread_pool.new_job(job)
 
     def on_close(self, view):
         """Called on closing the view.
