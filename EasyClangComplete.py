@@ -13,12 +13,12 @@ import shutil
 import imp
 
 from os import path
-from concurrent import futures
 
 from .plugin import tools
 from .plugin import error_vis
 from .plugin import view_config
 from .plugin import flags_sources
+from .plugin.utils import thread_pool
 from .plugin.settings import settings_manager
 from .plugin.completion import lib_complete
 from .plugin.completion import bin_complete
@@ -30,6 +30,7 @@ imp.reload(error_vis)
 imp.reload(lib_complete)
 imp.reload(bin_complete)
 imp.reload(view_config)
+imp.reload(thread_pool)
 imp.reload(flags_sources)
 
 # some aliases
@@ -40,6 +41,8 @@ Tools = tools.Tools
 PosStatus = tools.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
+ThreadPool = thread_pool.ThreadPool
+ThreadJob = thread_pool.ThreadJob
 
 log = logging.getLogger(__name__)
 
@@ -86,10 +89,15 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     Most of the functionality is delegated.
     """
-    thread_pool = futures.ThreadPoolExecutor(max_workers=4)
+    thread_pool = ThreadPool(max_workers=4)
 
     current_job_id = None
     current_completions = []
+
+    CLEAR_JOB_TAG = "clear"
+    COMPLETE_JOB_TAG = "complete"
+    UPDATE_JOB_TAG = "update"
+    INFO_JOB_TAG = "info"
 
     def __init__(self):
         """Initialize the object."""
@@ -135,7 +143,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" on_activated_async view id %s", view.buffer_id())
             settings = self.settings_manager.settings_for_view(view)
             # All is taken care of. The view is built if needed.
-            self.view_config_manager.load_for_view(view, settings)
+            job = ThreadJob(name=EasyClangComplete.UPDATE_JOB_TAG,
+                            callback=EasyClangComplete.config_updated,
+                            function=self.view_config_manager.load_for_view,
+                            args=[view, settings])
+            EasyClangComplete.thread_pool.new_job(job)
 
     def on_selection_modified(self, view):
         """Called when selection is modified. Executed in gui thread.
@@ -193,9 +205,11 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" closing view %s", view.buffer_id())
             self.settings_manager.clear_for_view(view)
             file_path = view.buffer_id()
-            future = EasyClangComplete.thread_pool.submit(
-                self.view_config_manager.clear_for_view, file_path)
-            future.add_done_callback(EasyClangComplete.config_removed)
+            job = ThreadJob(name=EasyClangComplete.CLEAR_JOB_TAG,
+                            callback=EasyClangComplete.config_removed,
+                            function=self.view_config_manager.clear_for_view,
+                            args=[file_path])
+            EasyClangComplete.thread_pool.new_job(job)
 
     @staticmethod
     def config_removed(future):
@@ -210,6 +224,18 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug(" removed config for id: %s", future.result())
         elif future.cancelled():
             log.debug(" could not remove config -> cancelled")
+
+    @staticmethod
+    def config_updated(future):
+        """Callback called when config has been updated for a view.
+
+        Args:
+            future (concurrent.Future): future holding config of updated view
+        """
+        if future.done():
+            log.debug(" updated config: %s", future.result())
+        elif future.cancelled():
+            log.debug(" could not update config -> cancelled")
 
     @staticmethod
     def on_open_declaration(location):
@@ -289,9 +315,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if not view_config:
             return
         self.current_job_id = tooltip_request.get_identifier()
-        future = EasyClangComplete.thread_pool.submit(
-            view_config.completer.info, tooltip_request)
-        future.add_done_callback(self.info_finished)
+
+        job = ThreadJob(name=EasyClangComplete.INFO_JOB_TAG,
+                        callback=self.info_finished,
+                        function=view_config.completer.info,
+                        args=[tooltip_request])
+        EasyClangComplete.thread_pool.new_job(job)
 
     def on_query_completions(self, view, prefix, locations):
         """Function that is called when user queries completions in the code.
@@ -348,9 +377,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.current_job_id = current_pos_id
         log.debug(" starting async auto_complete with id: %s",
                   self.current_job_id)
-        future = EasyClangComplete.thread_pool.submit(
-            view_config.completer.complete, completion_request)
-        future.add_done_callback(self.completion_finished)
+
+        # submit async completion job
+        job = ThreadJob(name=EasyClangComplete.COMPLETE_JOB_TAG,
+                        callback=self.completion_finished,
+                        function=view_config.completer.complete,
+                        args=[completion_request])
+        EasyClangComplete.thread_pool.new_job(job)
 
         # show default completions for now if allowed
         if settings.hide_default_completions:

@@ -1,6 +1,9 @@
+import logging
 from concurrent import futures
 from threading import Timer
 from threading import RLock
+
+log = logging.getLogger(__name__)
 
 
 class ThreadJob:
@@ -38,7 +41,8 @@ class ThreadPool:
     def submit_jobs(self):
         with ThreadPool.__lock:
             for job in ThreadPool.__jobs_to_run.values():
-                future = self.__thread_pool.submit(job.function, job.args)
+                log.debug("submitting job: %s", job)
+                future = self.__thread_pool.submit(job.function, *job.args)
                 future.add_done_callback(job.callback)
 
     def new_job(self, job):
