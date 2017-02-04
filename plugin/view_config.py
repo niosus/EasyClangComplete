@@ -102,10 +102,13 @@ class ViewConfig(object):
             bool: True if update is needed, False otherwise.
         """
         if not self.completer:
+            log.debug("no completer. Need to update.")
             return True
         if completer.name != self.completer.name:
+            log.debug("different completer class. Need to update.")
             return True
         if flags != self.completer.clang_flags:
+            log.debug("different completer flags. Need to update.")
             return True
         log.debug(" view config needs no update.")
         return False
