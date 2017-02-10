@@ -9,6 +9,7 @@ import subprocess
 import html
 
 from os import path
+from ..settings import settings_storage
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ class ClangUtils:
     # MSYS2 has `clang.dll` instead of `libclang.dll`
     possible_filenames = {
         'Windows': ['libclang', 'clang'],
-        'Linux': ['libclang'],
+        'Linux': ['libclang-$version', 'libclang'],
         'Darwin': ['libclang']
     }
 
@@ -80,6 +81,9 @@ class ClangUtils:
         log.debug(" python version: %s", platform.python_version())
         current_system = platform.system()
         log.debug(" we are on '%s'", platform.system())
+        # Get version string for help finding the proper libclang library on Linux
+        if (current_system == "Linux"):
+            version_str = settings_storage.SettingsStorage.CLANG_VERSION[:-2]
         for suffix in ClangUtils.suffixes[current_system]:
             # pick a name for a file
             for name in ClangUtils.possible_filenames[current_system]:
@@ -98,7 +102,8 @@ class ClangUtils:
                     startupinfo.wShowWindow = subprocess.SW_HIDE
                     stdin = subprocess.PIPE
                     stderr = subprocess.PIPE
-                else:
+                elif platform.system() == "Linux":
+                    file = file.replace("$version", version_str)
                     get_library_path_cmd = [
                         clang_binary, "-print-file-name={}".format(file)]
                 output = subprocess.check_output(

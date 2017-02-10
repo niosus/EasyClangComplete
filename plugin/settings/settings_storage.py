@@ -62,6 +62,8 @@ class SettingsStorage:
         "show_type_info",
     ]
 
+    CLANG_VERSION = None
+
     def __init__(self, settings_handle):
         """Initialize settings storage with default settings handle.
 
@@ -235,6 +237,7 @@ class SettingsStorage:
         self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
 
         # get clang version string
-        self._wildcard_values[Wildcards.CLANG_VERSION] =\
-            Tools.get_clang_version_str(self.clang_binary)
+        version_str = Tools.get_clang_version_str(self.clang_binary)
+        self._wildcard_values[Wildcards.CLANG_VERSION] = version_str
+        SettingsStorage.CLANG_VERSION = version_str
         self.clang_version = self._wildcard_values[Wildcards.CLANG_VERSION]
