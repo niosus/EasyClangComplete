@@ -82,7 +82,7 @@ class ClangUtils:
         current_system = platform.system()
         log.debug(" we are on '%s'", platform.system())
         # Get version string for help finding the proper libclang library on Linux
-        if (current_system == "Linux"):
+        if current_system == "Linux":
             version_str = settings_storage.SettingsStorage.CLANG_VERSION[:-2]
         for suffix in ClangUtils.suffixes[current_system]:
             # pick a name for a file
