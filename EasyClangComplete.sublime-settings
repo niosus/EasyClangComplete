@@ -100,5 +100,4 @@
   // Disable libclang caching 
   // This can have impact on performance but resolves issues with libclang caching
   "disable_cache": false
-
 }
