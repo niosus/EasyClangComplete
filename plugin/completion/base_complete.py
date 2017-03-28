@@ -73,7 +73,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def update(self, view, show_errors):
+    def update(self, view, settings):
         """Update the completer for this view.
 
         This can increase consequent completion speeds or is needed to just
@@ -81,7 +81,7 @@ class BaseCompleter:
 
         Args:
             view (sublime.View): this view
-            show_errors (bool): controls if we show errors
+            settings: all plugin settings
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method

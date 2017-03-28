@@ -86,5 +86,9 @@
 
   // Show additional information on hover over function call/variable etc.
   // This replaces default sublime on hover behaviour
-  "show_type_info": true
+  "show_type_info": true,
+
+  // Disable libclang caching 
+  // This can have impact on performance but resolves issues with libclang caching
+  "disable_cache": false
 }

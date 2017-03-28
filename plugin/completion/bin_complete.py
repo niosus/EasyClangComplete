@@ -131,7 +131,7 @@ class Completer(BaseCompleter):
         """
         sublime.error_message(msg)
 
-    def update(self, view, show_errors):
+    def update(self, view, settings):
         """Update build for current view.
 
         Args:
@@ -140,6 +140,7 @@ class Completer(BaseCompleter):
                 dummy function as we gain nothing from building it with binary.
 
         """
+        show_errors = settings.errors_on_save
         if not show_errors:
             # in this class there is no need to rebuild the file. It brings no
             # benefits. We only want to do it if we need to show errors.
