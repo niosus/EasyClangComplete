@@ -63,7 +63,7 @@ class ViewConfig(object):
 
         self.completer = completer
         self.completer.clang_flags = flags
-        self.completer.update(view, settings.errors_on_save)
+        self.completer.update(view, settings)
 
     def update_if_needed(self, view, settings):
         """Check if the view config has changed.
@@ -83,12 +83,12 @@ class ViewConfig(object):
             log.debug(" config needs new completer.")
             self.completer = completer
             self.completer.clang_flags = flags
-            self.completer.update(view, settings.errors_on_save)
+            self.completer.update(view, settings)
             File.update_mod_time(view.file_name())
             return self
         if ViewConfig.needs_reparse(view):
             log.debug(" config updates existing completer.")
-            self.completer.update(view, settings.errors_on_save)
+            self.completer.update(view, settings)
         return self
 
     def needs_update(self, completer, flags):

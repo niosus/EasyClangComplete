@@ -119,7 +119,7 @@ class Completer(BaseCompleter):
                 log.error(" error: %s", e)
                 self.valid = False
 
-    def parse_tu(self, view):
+    def parse_tu(self, view, settings):
         """Initialize the completer. Builds the view.
 
         Args:
@@ -151,13 +151,17 @@ class Completer(BaseCompleter):
                 log.debug(" compilation started for view id: %s", v_id)
                 if not file_name or not path.exists(file_name):
                     raise ValueError("file name does not exist anymore")
+
+                parse_options = (TU.PARSE_PRECOMPILED_PREAMBLE |
+                    TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
+                if not settings.disable_cache:
+                    parse_options |= TU.PARSE_CACHE_COMPLETION_RESULTS
+
                 trans_unit = TU.from_source(
                     filename=file_name,
                     args=self.clang_flags,
                     unsaved_files=files,
-                    options=TU.PARSE_PRECOMPILED_PREAMBLE |
-                    TU.PARSE_CACHE_COMPLETION_RESULTS |
-                    TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
+                    options=parse_options)
                 self.tu = trans_unit
             except Exception as e:
                 log.error(" error while compiling: %s", e)
@@ -199,7 +203,8 @@ class Completer(BaseCompleter):
                 complete_obj = self.tu.codeComplete(
                     file_name,
                     row, col,
-                    unsaved_files=files)
+                    unsaved_files=files,
+                    include_macros=True)
             except Exception as e:
                 log.error(" error while completing view %s: %s", file_name, e)
                 complete_obj = None
@@ -252,7 +257,7 @@ class Completer(BaseCompleter):
                 return (tooltip_request, info_details)
             return empty_info
 
-    def update(self, view, show_errors):
+    def update(self, view, settings):
         """Reparse the translation unit.
 
         This speeds up completions significantly, so we perform this upon file
@@ -260,7 +265,7 @@ class Completer(BaseCompleter):
 
         Args:
             view (sublime.View): current view
-            show_errors (bool): if true - highlight compile errors
+            settings: ECC settings
 
         Returns:
             bool: reparsed successfully
@@ -271,7 +276,7 @@ class Completer(BaseCompleter):
         with Completer.rlock:
             if not self.tu:
                 log.debug(" translation unit does not exist. Creating.")
-                self.parse_tu(view)
+                self.parse_tu(view, settings)
             if self.tu.cursor.displayname != view.file_name():
                 # In case the file was renamed, the translation unit still has
                 # the old name in it and crashes the plugin host. We need to
@@ -282,7 +287,7 @@ class Completer(BaseCompleter):
                           self.tu.cursor.displayname,
                           view.file_name())
                 log.debug(" recreate translation unit completely")
-                self.parse_tu(view)
+                self.parse_tu(view, settings)
             log.debug(" reparsing translation_unit for view %s", v_id)
             if not self.tu:
                 log.error(" translation unit is not available. Not reparsing.")
@@ -291,7 +296,7 @@ class Completer(BaseCompleter):
             self.tu.reparse()
             end = time.time()
             log.debug(" reparsed in %s seconds", end - start)
-            if show_errors:
+            if settings.errors_on_save:
                 self.show_errors(view, self.tu.diagnostics)
             return True
         log.error(" no translation unit for view id %s", v_id)
