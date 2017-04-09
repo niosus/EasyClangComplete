@@ -201,11 +201,17 @@ class Completer(BaseCompleter):
             try:
                 if not file_name or not path.exists(file_name):
                     raise ValueError("file name does not exist anymore")
+                # It is important to set this option for clang 4.0 as there is
+                # an assert in ASTUnit.cpp that checks if this flag
+                # corresponds to the one that was used for building the
+                # translation unit. As we use it to create the unit, we need
+                # it here too. See issue #230.
                 complete_obj = self.tu.codeComplete(
                     file_name,
                     row, col,
                     unsaved_files=files,
-                    include_macros=True)
+                    include_macros=True,
+                    include_brief_comments=True)
             except Exception as e:
                 log.error(" error while completing view %s: %s", file_name, e)
                 complete_obj = None

@@ -17,9 +17,6 @@ def has_libclang():
     Returns:
         str: row contents
     """
-    # HACK: Disable libclang for windows until #230 is fixed
-    if platform.system() == "Windows":
-        return False
     # Older version of Sublime Text x64 have ctypes crash bug.
     if platform.system() == "Windows" and sublime.arch() == "x64" and \
             int(sublime.version()) < 3123:
