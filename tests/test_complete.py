@@ -185,10 +185,6 @@ class BaseTestCompleter(object):
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
-        if platform.system() == "Windows":
-            # disable the windows tests for now until AppVeyor fixes things
-            self.tear_down()
-            return
         expected = ['begin\titerator begin()', 'begin()']
         self.assertIn(expected, completions)
         self.tear_down_completer()
