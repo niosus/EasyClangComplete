@@ -104,5 +104,6 @@ class PhantomErrorVis(PopupErrorVis):
         # add error to html template
         html_file_path = path.join(
             PopupErrorVis._PATH_TO_HTML_FOLDER, html_file_name)
-        errors_html_mask = Template(open(html_file_path).read())
+        errors_html_mask = Template(
+            open(html_file_path, encoding='utf8').read())
         return errors_html_mask.substitute(content=errors_html)
