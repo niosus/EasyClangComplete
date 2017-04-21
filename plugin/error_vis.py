@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 
 class CompileErrors:
-    """Comple errors is a class that encapsulates compile error visualization.
+    """Compile errors is a class for compile error visualization.
 
     Attributes:
         err_regions (dict): dictionary of error regions for view ids
@@ -26,14 +26,7 @@ class CompileErrors:
     err_regions = {}
     phantom_sets = {}
 
-    HTML_STYLE_MASK = """
-<style>
-html {{
-  background-color: {background_color};
-  color: {text_color};
-}}
-</style>
-"""
+    HTML_ERROR_MASK = '<div class="error">{}</div><br>'
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
@@ -197,26 +190,27 @@ html {{
         Args:
             errors_dict (dict): Current error
         """
+        import cgi
+        from string import Template
+        html_file_template = "{}_popup.html"
+        popup_style = "warning"
         errors_html = ""
         for entry in errors_dict:
-            processed_error = entry['error']
+            processed_error = cgi.escape(entry['error'])
+            # Add non-breaking space to prevent popup from getting a newline
+            # after every word
             processed_error = processed_error.replace(' ', '&nbsp;')
-            processed_error = processed_error.replace('<', '&lt;')
-            processed_error = processed_error.replace('>', '&gt;')
             if LibClangCompilerVariant.SEVERITY_TAG in entry:
                 severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
                 if severity > 2:
-                    errors_html = CompileErrors.HTML_STYLE_MASK.format(
-                        background_color="#BB2222", text_color="#EEEEEE")
-                    errors_html += "<b>Error:</b><br>"
-                elif severity == 2:
-                    errors_html = CompileErrors.HTML_STYLE_MASK.format(
-                        background_color="#CC5500", text_color="#EEEEEE")
-                    errors_html += "<b>Warning:</b><br>"
+                    popup_style = "error"
             errors_html += "<div>" + processed_error + "</div>"
-        # Add non-breaking space to prevent popup from getting a newline
-        # after every word
-        return errors_html
+        # add error to html template
+        html_file_name = html_file_template.format(popup_style)
+        html_file_path = path.join(
+            path.dirname(__file__), 'html', html_file_name)
+        errors_html_mask = Template(open(html_file_path).read())
+        return errors_html_mask.substitute(content=errors_html)
 
     @staticmethod
     def _as_phantom_html(errors_dict):
@@ -225,55 +219,23 @@ html {{
         Args:
             errors_dict (dict): Current error
         """
-        stylesheet = '''
-            <style>
-                div.error {
-                    padding: 0.4rem 0 0.4rem 0.7rem;
-                    margin: 0.2rem 0;
-                    border-radius: 2px;
-                }
-
-                div.error span.message {
-                    padding-right: 0.7rem;
-                }
-
-                div.error a {
-                    text-decoration: inherit;
-                    padding: 0.35rem 0.7rem 0.45rem 0.8rem;
-                    position: relative;
-                    bottom: 0.05rem;
-                    border-radius: 0 2px 2px 0;
-                    font-weight: bold;
-                }
-                html.dark div.error a {
-                    background-color: #00000018;
-                }
-                html.light div.error a {
-                    background-color: #ffffff18;
-                }
-            </style>
-        '''
-
-        errors_html = '<body id=inline-error>'
-        errors_html += stylesheet
-        errors_html += '<div class="error">'
-        errors_html += '<span class="message">'
-        first = True
+        import cgi
+        from string import Template
+        html_file_name = "error_phantom.html"
+        errors_html = ""
+        first_error_processed = False
         for entry in errors_dict:
-            processed_error = entry['error']
+            processed_error = cgi.escape(entry['error'])
             processed_error = processed_error.replace(' ', '&nbsp;')
-            processed_error = processed_error.replace('<', '&lt;')
-            processed_error = processed_error.replace('>', '&gt;')
-            if not first:
+            if first_error_processed:
                 processed_error = '<br>' + processed_error
-            first = False
             errors_html += processed_error
-        errors_html += '</span>'
-        errors_html += '<a href=hide>' + chr(0x00D7) + '</a></div>'
-        errors_html += '</body>'
-        # Add non-breaking space to prevent popup from getting a newline
-        # after every word
-        return errors_html
+            first_error_processed = True
+        # add error to html template
+        html_file_path = path.join(
+            path.dirname(__file__), 'html', html_file_name)
+        errors_html_mask = Template(open(html_file_path).read())
+        return errors_html_mask.substitute(content=errors_html)
 
     @staticmethod
     def _as_region_list(err_regions_dict):
