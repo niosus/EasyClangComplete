@@ -38,10 +38,7 @@ class TestErrorVis:
         settings = manager.settings_for_view(self.view)
         settings.use_libclang = self.use_libclang
 
-        if error_style == PHANTOMS:
-            settings.show_phantoms_for_errors = True
-        else:
-            settings.show_phantoms_for_errors = False
+        settings.show_phantoms_for_errors = bool(error_style == PHANTOMS)
 
         view_config_manager = ViewConfigManager()
         view_config = view_config_manager.load_for_view(self.view, settings)
