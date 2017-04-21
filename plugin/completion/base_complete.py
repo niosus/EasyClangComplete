@@ -6,7 +6,6 @@ Attributes:
 """
 import logging
 
-from .. import error_vis
 from ..tools import Tools
 
 log = logging.getLogger(__name__)
@@ -16,24 +15,22 @@ class BaseCompleter:
     """A base class for clang based completions.
 
     Attributes:
-        completions (list): current list of completions
-        error_vis (plugin.CompileErrors): object of compile errors class
         compiler_variant (CompilerVariant): compiler specific options
         valid (bool): is completer valid
         version_str (str): version string of format "3.4.0"
+        error_vis (obj): an object of error visualizer
     """
     name = "base"
-    version_str = None
-    error_vis = None
-    compiler_variant = None
 
     valid = False
 
-    def __init__(self, clang_binary, version_str):
+    def __init__(self, clang_binary, version_str, error_vis):
         """Initialize the BaseCompleter.
 
         Args:
-            clang_binary (str): string for clang binary e.g. 'clang-3.6++'
+            clang_binary (str): string for clang binary e.g. 'clang-3.8++'
+            version_str (str): string for clang version e.g. '3.8.0'
+            error_vis (obj): an object of error visualizer
 
         Raises:
             RuntimeError: if clang not defined we throw an error
@@ -43,9 +40,10 @@ class BaseCompleter:
         if not clang_binary:
             raise RuntimeError("clang binary not defined")
 
+        self.compiler_variant = None
         self.version_str = version_str
         # initialize error visualization
-        self.error_vis = error_vis.CompileErrors()
+        self.error_vis = error_vis
 
     def complete(self, completion_request):
         """Function to generate completions. See children for implementation.
@@ -88,7 +86,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def show_errors(self, view, output, show_phantoms):
+    def show_errors(self, view, output):
         """Show current complie errors.
 
         Args:
@@ -100,4 +98,4 @@ class BaseCompleter:
             log.error(" cannot show errors. View became invalid!")
             return
         self.error_vis.generate(view, errors)
-        self.error_vis.show_regions(view, show_phantoms)
+        self.error_vis.show_errors(view)

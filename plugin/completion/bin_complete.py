@@ -67,16 +67,17 @@ class Completer(BaseCompleter):
 
     opts_regex = re.compile("{#|#}")
 
-    def __init__(self, clang_binary, version_str):
+    def __init__(self, clang_binary, version_str, error_vis):
         """Initialize the Completer.
 
         Args:
             clang_binary (str): string for clang binary e.g. 'clang-3.8++'
             version_str (str): string for clang version e.g. '3.8.0'
+            error_vis (obj): an object of error visualizer
 
         """
         # init common completer interface
-        super().__init__(clang_binary, version_str)
+        super().__init__(clang_binary, version_str, error_vis)
         self.clang_binary = clang_binary
 
         # Create compiler options of specific variant of the compiler.
@@ -152,8 +153,7 @@ class Completer(BaseCompleter):
         log.debug(" rebuilding done in %s seconds", end - start)
 
         if show_errors:
-            self.show_errors(view, output_text,
-                             settings.show_phantoms_for_errors)
+            self.show_errors(view, output_text)
 
     def run_clang_command(self, view, task_type, cursor_pos=0):
         """Construct and run clang command based on task.

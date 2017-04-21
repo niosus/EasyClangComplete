@@ -4,29 +4,25 @@ Attributes:
     log (logging): this module logger
 """
 import logging
-import sublime
 from os import path
 
-from .completion.compiler_variant import LibClangCompilerVariant
-from .tools import SublBridge
+from ..completion.compiler_variant import LibClangCompilerVariant
 
 log = logging.getLogger(__name__)
 
 
-class CompileErrors:
-    """Compile errors is a class for compile error visualization.
+class PopupErrorVis:
+    """A class for compile error visualization with popups.
 
     Attributes:
         err_regions (dict): dictionary of error regions for view ids
-        phantom_sets (dict): dictionary of pahtom sets for view ids
     """
     _TAG = "easy_clang_complete_errors"
     _MAX_POPUP_WIDTH = 1800
+    _PATH_TO_HTML_FOLDER = path.join(
+        path.dirname(path.dirname(__file__)), 'html')
 
     err_regions = {}
-    phantom_sets = {}
-
-    HTML_ERROR_MASK = '<div class="error">{}</div><br>'
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
@@ -79,32 +75,7 @@ class CompileErrors:
             else:
                 self.err_regions[view.buffer_id()][row] = [error_dict]
 
-    def show_phantoms(self, view):
-        """Show phantoms for compilation errors.
-
-        Args:
-            view (sublime.View): current view
-        """
-        view.erase_phantoms(CompileErrors._TAG)
-        if view.buffer_id() not in self.phantom_sets:
-            phantom_set = sublime.PhantomSet(view, CompileErrors._TAG)
-            self.phantom_sets[view.buffer_id()] = phantom_set
-        else:
-            phantom_set = self.phantom_sets[view.buffer_id()]
-        phantoms = []
-        current_error_dict = self.err_regions[view.buffer_id()]
-        for err in current_error_dict:
-            errors_dict = current_error_dict[err]
-            errors_html = CompileErrors._as_phantom_html(errors_dict)
-            pt = view.text_point(err - 1, 1)
-            phantoms.append(sublime.Phantom(
-                sublime.Region(pt, view.line(pt).b),
-                errors_html,
-                sublime.LAYOUT_BELOW,
-                on_navigate=self._on_phantom_navigate))
-        phantom_set.update(phantoms)
-
-    def show_regions(self, view, show_phantoms):
+    def show_errors(self, view):
         """Show current error regions.
 
         Args:
@@ -114,11 +85,9 @@ class CompileErrors:
             # view has no errors for it
             return
         current_error_dict = self.err_regions[view.buffer_id()]
-        regions = CompileErrors._as_region_list(current_error_dict)
+        regions = PopupErrorVis._as_region_list(current_error_dict)
         log.debug(" showing error regions: %s", regions)
-        view.add_regions(CompileErrors._TAG, regions, "code")
-        if show_phantoms:
-            self.show_phantoms(view)
+        view.add_regions(PopupErrorVis._TAG, regions, "code")
 
     def erase_regions(self, view):
         """Erase error regions for view.
@@ -130,7 +99,7 @@ class CompileErrors:
             # view has no errors for it
             return
         log.debug(" erasing error regions for view %s", view.buffer_id())
-        view.erase_regions(CompileErrors._TAG)
+        view.erase_regions(PopupErrorVis._TAG)
 
     def show_popup_if_needed(self, view, row):
         """Show a popup if it is needed in this row.
@@ -144,7 +113,7 @@ class CompileErrors:
         current_err_region_dict = self.err_regions[view.buffer_id()]
         if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
-            errors_html = CompileErrors._as_html(errors_dict)
+            errors_html = PopupErrorVis._as_html(errors_dict)
             view.show_popup(errors_html, max_width=self._MAX_POPUP_WIDTH)
         else:
             log.debug(" no error regions for row: %s", row)
@@ -161,27 +130,6 @@ class CompileErrors:
         view.hide_popup()
         self.erase_regions(view)
         self.err_regions[view.buffer_id()].clear()
-
-    def remove_region(self, view_id, row):
-        """Remove a region for view_id in row.
-
-        Args:
-            view_id (int): view id
-            row (int): row number
-        """
-        if view_id not in self.err_regions:
-            # no errors for this view
-            return
-        current_error_dict = self.err_regions[view_id]
-        if row not in current_error_dict:
-            # no errors for this row
-            return
-        del current_error_dict[row]
-
-    @staticmethod
-    def _on_phantom_navigate(self):
-        """Close all phantoms in active view."""
-        SublBridge.erase_phantoms(CompileErrors._TAG)
 
     @staticmethod
     def _as_html(errors_dict):
@@ -208,32 +156,7 @@ class CompileErrors:
         # add error to html template
         html_file_name = html_file_template.format(popup_style)
         html_file_path = path.join(
-            path.dirname(__file__), 'html', html_file_name)
-        errors_html_mask = Template(open(html_file_path).read())
-        return errors_html_mask.substitute(content=errors_html)
-
-    @staticmethod
-    def _as_phantom_html(errors_dict):
-        """Get error as html for phantom.
-
-        Args:
-            errors_dict (dict): Current error
-        """
-        import cgi
-        from string import Template
-        html_file_name = "error_phantom.html"
-        errors_html = ""
-        first_error_processed = False
-        for entry in errors_dict:
-            processed_error = cgi.escape(entry['error'])
-            processed_error = processed_error.replace(' ', '&nbsp;')
-            if first_error_processed:
-                processed_error = '<br>' + processed_error
-            errors_html += processed_error
-            first_error_processed = True
-        # add error to html template
-        html_file_path = path.join(
-            path.dirname(__file__), 'html', html_file_name)
+            PopupErrorVis._PATH_TO_HTML_FOLDER, html_file_name)
         errors_html_mask = Template(open(html_file_path).read())
         return errors_html_mask.substitute(content=errors_html)
 

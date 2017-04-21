@@ -53,7 +53,7 @@ class Completer(BaseCompleter):
     name = "lib"
     rlock = RLock()
 
-    def __init__(self, clang_binary, version_str, libclang_path):
+    def __init__(self, clang_binary, version_str, error_vis, libclang_path):
         """Initialize the Completer from clang binary, reading its version.
 
         Picks an according cindex for the found version.
@@ -61,11 +61,12 @@ class Completer(BaseCompleter):
         Args:
             clang_binary (str): string for clang binary e.g. 'clang++-3.8'
             version_str (str): string for clang version e.g. '3.8.0'
+            error_vis (obj): an object of error visualizer
             libclang_path (str): in case a user knows the path to libclang
                 he can provide it here. Does not have to be valid.
 
         """
-        super().__init__(clang_binary, version_str)
+        super().__init__(clang_binary, version_str, error_vis)
 
         # Create compiler options of specific variant of the compiler.
         self.compiler_variant = LibClangCompilerVariant()
@@ -314,8 +315,7 @@ class Completer(BaseCompleter):
             end = time.time()
             log.debug(" reparsed in %s seconds", end - start)
             if settings.errors_on_save:
-                self.show_errors(view, self.tu.diagnostics,
-                                 settings.show_phantoms_for_errors)
+                self.show_errors(view, self.tu.diagnostics)
             return True
         log.error(" no translation unit for view id %s", v_id)
         return False
