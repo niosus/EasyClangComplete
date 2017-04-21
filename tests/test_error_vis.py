@@ -97,7 +97,7 @@ class TestErrorVis:
             self.assertEqual(err_dict[v_id][10][0]['row'], '10')
             self.assertEqual(err_dict[v_id][10][0]['col'], '3')
             expected_error = "expected unqualified-id"
-            self.assertEqual(err_dict[v_id][10][0]['error'], expected_error)
+            self.assertTrue(expected_error in err_dict[v_id][10][0]['error'])
 
             self.tear_down_completer()
             self.tear_down()
