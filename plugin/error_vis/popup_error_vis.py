@@ -5,10 +5,17 @@ Attributes:
 """
 import logging
 from os import path
+from string import Template
 
 from ..completion.compiler_variant import LibClangCompilerVariant
 
 log = logging.getLogger(__name__)
+
+PATH_TO_HTML_FOLDER = path.join(
+    path.dirname(path.dirname(__file__)), 'html')
+
+POPUP_ERROR_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "error_popup.html")
+POPUP_WARNING_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "warning_popup.html")
 
 
 class PopupErrorVis:
@@ -19,10 +26,15 @@ class PopupErrorVis:
     """
     _TAG = "easy_clang_complete_errors"
     _MAX_POPUP_WIDTH = 1800
-    _PATH_TO_HTML_FOLDER = path.join(
-        path.dirname(path.dirname(__file__)), 'html')
 
-    err_regions = {}
+    ERROR_HTML_TEMPLATE = Template(
+        open(POPUP_ERROR_HTML_FILE, encoding='utf8').read())
+    WARNING_HTML_TEMPLATE = Template(
+        open(POPUP_WARNING_HTML_FILE, encoding='utf8').read())
+
+    def __init__(self):
+        """Initialize error visualization."""
+        self.err_regions = {}
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
@@ -139,9 +151,7 @@ class PopupErrorVis:
             errors_dict (dict): Current error
         """
         import cgi
-        from string import Template
-        html_file_template = "{}_popup.html"
-        popup_style = "warning"
+        errors_html_mask = PopupErrorVis.WARNING_HTML_TEMPLATE
         errors_html = ""
         for entry in errors_dict:
             processed_error = cgi.escape(entry['error'])
@@ -151,13 +161,9 @@ class PopupErrorVis:
             if LibClangCompilerVariant.SEVERITY_TAG in entry:
                 severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
                 if severity > 2:
-                    popup_style = "error"
+                    errors_html_mask = PopupErrorVis.ERROR_HTML_TEMPLATE
             errors_html += "<div>" + processed_error + "</div>"
         # add error to html template
-        html_file_name = html_file_template.format(popup_style)
-        html_file_path = path.join(
-            PopupErrorVis._PATH_TO_HTML_FOLDER, html_file_name)
-        errors_html_mask = Template(open(html_file_path).read())
         return errors_html_mask.substitute(content=errors_html)
 
     @staticmethod

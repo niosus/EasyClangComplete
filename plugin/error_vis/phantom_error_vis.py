@@ -6,11 +6,15 @@ Attributes:
 import logging
 import sublime
 from os import path
+from string import Template
 
 from ..tools import SublBridge
 from .popup_error_vis import PopupErrorVis
+from .popup_error_vis import PATH_TO_HTML_FOLDER
 
 log = logging.getLogger(__name__)
+
+HTML_FILE_PATH = path.join(PATH_TO_HTML_FOLDER, "error_phantom.html")
 
 
 class PhantomErrorVis(PopupErrorVis):
@@ -21,6 +25,8 @@ class PhantomErrorVis(PopupErrorVis):
     """
 
     phantom_sets = {}
+
+    HTML_TEMPLATE = Template(open(HTML_FILE_PATH, encoding='utf8').read())
 
     def show_phantoms(self, view):
         """Show phantoms for compilation errors.
@@ -90,8 +96,6 @@ class PhantomErrorVis(PopupErrorVis):
             errors_dict (dict): Current error
         """
         import cgi
-        from string import Template
-        html_file_name = "error_phantom.html"
         errors_html = ""
         first_error_processed = False
         for entry in errors_dict:
@@ -102,8 +106,4 @@ class PhantomErrorVis(PopupErrorVis):
             errors_html += processed_error
             first_error_processed = True
         # add error to html template
-        html_file_path = path.join(
-            PopupErrorVis._PATH_TO_HTML_FOLDER, html_file_name)
-        errors_html_mask = Template(
-            open(html_file_path, encoding='utf8').read())
-        return errors_html_mask.substitute(content=errors_html)
+        return PhantomErrorVis.HTML_TEMPLATE.substitute(content=errors_html)
