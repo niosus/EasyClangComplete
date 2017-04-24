@@ -149,6 +149,7 @@ class Completer(BaseCompleter):
 
                 parse_options = \
                     (TU.PARSE_PRECOMPILED_PREAMBLE |
+                     TU.PARSE_DETAILED_PROCESSING_RECORD |
                      TU.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION)
                 if settings.use_libclang_caching:
                     parse_options |= TU.PARSE_CACHE_COMPLETION_RESULTS
@@ -268,7 +269,7 @@ class Completer(BaseCompleter):
                 info_details = ClangUtils.build_objc_message_info_details(
                     cursor)
                 return (tooltip_request, info_details)
-            if cursor.referenced and cursor.referenced.kind.is_declaration():
+            if cursor.referenced:
                 info_details = ClangUtils.build_info_details(
                     cursor.referenced, self.cindex)
                 return (tooltip_request, info_details)

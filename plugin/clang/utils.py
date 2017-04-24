@@ -14,6 +14,71 @@ from ..settings import settings_storage
 log = logging.getLogger(__name__)
 
 
+class MacroParser(object):
+    """ Parses info from macros
+
+    Clang doesn't provide much information for MACRO_DEFINITION cursors,
+    so we have to parse this info ourselves.
+    """
+    def __init__(self, name, location):
+        """Parses the macro with the given name from its location
+
+        Args:
+            name (str): Macro's name.
+            location (cindex.SourceLocation): Macro definition's location.
+                Can be None for unittests that parse with text content
+                directly instead of loading from file.
+
+        Future improvement: if there are line continuation characters
+            in a macro with parenthesis, continue parsing into the next line
+            to find it and create a proper args string.
+        """
+        self._args_string = ''
+        self._name = name
+        if location and location.file and location.file.name:
+            with open(location.file.name, 'r') as f:
+                macro_file_lines = f.readlines()
+                self._parse_macro_file_lines(macro_file_lines, location.line)
+
+    def _parse_macro_file_lines(self, macro_file_lines, macro_line_number):
+        """ Parse a macro from lines of text containing the macro
+
+        Args:
+            macro_file_lines (list[str]): lines of text containing the macro
+            macro_line_number (int): line number (1-based) of the macro
+               in macro_file_lines.
+        """
+        macro_line = macro_file_lines[macro_line_number - 1].strip()
+        # strip leading '#<whitespace>define<whitespace><macro name>'
+        macro_line = macro_line.lstrip('#').lstrip().lstrip('define')
+        macro_line = macro_line.lstrip().lstrip(self._name)
+        # macro that looks like a function, possibly with args
+        if macro_line.startswith('('):
+            end_args_index = macro_line.find(')')
+            # There should always be a closing parenthesis, but check
+            # just in case a) the code is malformed or b) the macro
+            # definition is continued on the next line so we can't
+            # find it on this line.
+            if end_args_index != -1:
+                # If extra spaces, e.g. "#define MACRO( x ,  y  , z )",
+                # then flatten down to just "(x, y, z)"
+                args_str = macro_line[1:end_args_index]
+                args_str = ''.join(args_str.split())
+                args_str = args_str.replace(',', ', ')
+                self._args_string = '(' + args_str + ')'
+
+    @property
+    def args_string(self):
+        """ Get arguments string
+
+        Examples:
+            '#define MACRO()' would return '()'
+            '#define MACRO(x, y)' would return '(x, y)'
+            '#define MACRO' would return ''
+        """
+        return self._args_string
+
+
 class ClangUtils:
     """Utils to help handling libclang, e.g. searching for it.
 
@@ -208,24 +273,37 @@ class ClangUtils:
 
         """
         result = ""
-        if cursor.result_type.spelling:
-            cursor_type = cursor.result_type
-        elif cursor.type.spelling:
-            cursor_type = cursor.type
-        else:
-            log.warning("No spelling for type provided in info.")
-            return ""
+
         result += '<b>Declaration:</b><br>'
-        if cursor.is_static_method():
-            result += "static "
 
-        if cursor.spelling != cursor.type.spelling:
-            # Don't show duplicates if the user focuses type, not variable
-            result += ClangUtils.link_from_location(
-                ClangUtils.location_from_type(cursor_type),
-                html.escape(cursor_type.spelling))
-            result += ' '
+        # Show the return type of the function/method if applicable,
+        # macros just show that they are a macro.
+        macro_parser = None
+        is_macro = cursor.kind == cindex.CursorKind.MACRO_DEFINITION
+        if is_macro:
+            macro_parser = MacroParser(cursor.spelling, cursor.location)
+            result += '#define '
+        else:
+            if cursor.result_type.spelling:
+                result_type = cursor.result_type
+            elif cursor.type.spelling:
+                result_type = cursor.type
+            else:
+                result_type = None
+                log.warning("No spelling for type provided in info.")
+                return ""
 
+            if cursor.is_static_method():
+                result += "static "
+
+            if cursor.spelling != cursor.type.spelling:
+                # Don't show duplicates if the user focuses type, not variable
+                result += ClangUtils.link_from_location(
+                    ClangUtils.location_from_type(result_type),
+                    html.escape(result_type.spelling))
+                result += ' '
+
+        # Link to declaration of item under cursor
         if cursor.location:
             result += ClangUtils.link_from_location(
                 cursor.location,
@@ -233,23 +311,33 @@ class ClangUtils:
         else:
             result += html.escape(cursor.spelling)
 
-        args = []
-        for arg in cursor.get_arguments():
-            if arg.spelling:
-                args.append(arg.type.spelling + ' ' + arg.spelling)
-            else:
-                args.append(arg.type.spelling + ' ')
+        # Macro/function/method arguments
+        args_string = None
+        if is_macro:
+            # cursor.get_arguments() doesn't give us anything for macros,
+            # so we have to parse those ourselves
+            args_string = macro_parser.args_string
+        else:
+            args = []
+            for arg in cursor.get_arguments():
+                if arg.spelling:
+                    args.append(arg.type.spelling + ' ' + arg.spelling)
+                else:
+                    args.append(arg.type.spelling + ' ')
+            if cursor.kind in [cindex.CursorKind.FUNCTION_DECL,
+                               cindex.CursorKind.CXX_METHOD]:
+                args_string = '('
+                if len(args):
+                    args_string += html.escape(', '.join(args))
+                args_string += ')'
+        if args_string:
+            result += args_string
 
-        if cursor.kind in [cindex.CursorKind.FUNCTION_DECL,
-                           cindex.CursorKind.CXX_METHOD]:
-            result += '('
-            if len(args):
-                result += html.escape(', '.join(args))
-            result += ')'
-
+        # Method modifiers
         if cursor.is_const_method():
             result += " const"
 
+        # Doxygen comments
         if cursor.brief_comment:
             result += "<br><br><b>Brief documentation:</b><br>"
             result += "<div>" + cursor.brief_comment + "</div>"
