@@ -1,0 +1,5 @@
+[
+    {
+        "command": "apply_fixit", "keys": ["alt+enter"]
+    },
+]

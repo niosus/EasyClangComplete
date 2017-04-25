@@ -78,6 +78,21 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
             log.debug(" Nothing to clean")
 
 
+class ApplyFixitCommand(sublime_plugin.TextCommand):
+    """Command to apply fixit at cursor position."""
+
+    def run(self, edit):
+        """All the actual processing is done in on_text_command."""
+
+
+class ReplaceCharactersCommand(sublime_plugin.TextCommand):
+    """Command to actually replace region with fixit value."""
+
+    def run(self, edit, region, value):
+        """Replace given region with given string."""
+        self.view.replace(edit, sublime.Region(*region), value)
+
+
 class EasyClangComplete(sublime_plugin.EventListener):
     """Base class for this plugin.
 
@@ -409,3 +424,48 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return Tools.HIDE_DEFAULT_COMPLETIONS
         log.debug(" showing default completions")
         return Tools.SHOW_DEFAULT_COMPLETIONS
+
+    def on_text_command(self, view, command_name, args):
+        """Called when a text command is issued.
+
+        Currently it is only used to process apply_fixit
+        """
+        if command_name != 'apply_fixit' or not Tools.is_valid_view(view):
+            return None
+
+        (row, _) = SublBridge.cursor_pos(view)
+        view_config = self.view_config_manager.get_from_cache(view)
+        if not view_config:
+            return
+        if not view_config.completer:
+            return
+
+        fixits = view_config.completer.error_vis.get_fixits_for_location(view,
+                                                                         row)
+        if not fixits:
+            return
+
+        fixits_points = [(view.text_point(fixit['start']['row'] - 1,
+                                          fixit['start']['col'] - 1),
+                          view.text_point(fixit['end']['row'] - 1,
+                                          fixit['end']['col'] - 1),
+                          fixit['value']) for fixit in fixits]
+
+        def process_fixit(index):
+            if index < 0:
+                return
+            args = {'region': fixits_points[index][:2],
+                    'value': fixits_points[index][2]}
+            view.run_command('replace_characters', args)
+
+        menu_items = []
+        for fixit in fixits_points:
+            to_replace = view.substr(sublime.Region(fixit[0], fixit[1]))
+            if fixit[0] == fixit[1]:
+                menu_items.append('Add ' + fixit[2])
+            elif fixit[2] == '':
+                menu_items.append('Remove ' + to_replace)
+            else:
+                menu_items.append('Replace {} with {}'.format(to_replace,
+                                                              fixit[2]))
+        view.show_popup_menu(menu_items, process_fixit)
