@@ -414,9 +414,7 @@ class Diagnostic(object):
             def __getitem__(self, key):
                 range = SourceRange()
                 value = conf.lib.clang_getDiagnosticFixIt(self.diag, key,
-                        byref(range))
-                if len(value) == 0:
-                    raise IndexError
+                                                          byref(range))
 
                 return FixIt(range, value)
 
