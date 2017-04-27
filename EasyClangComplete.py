@@ -431,7 +431,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Currently it is only used to process apply_fixit
         """
         if command_name != 'apply_fixit' or not Tools.is_valid_view(view):
-            return None
+            return
 
         (row, _) = SublBridge.cursor_pos(view)
         view_config = self.view_config_manager.get_from_cache(view)
@@ -445,28 +445,21 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if not fixits:
             return
 
-        fixits_points = [(view.text_point(fixit['start']['row'] - 1,
-                                          fixit['start']['col'] - 1),
-                          view.text_point(fixit['end']['row'] - 1,
-                                          fixit['end']['col'] - 1),
-                          fixit['value']) for fixit in fixits]
-
         def process_fixit(index):
             """Process fixit when an item in the intention menu is selected."""
             if index < 0:
                 return
-            args = {'region': fixits_points[index][:2],
-                    'value': fixits_points[index][2]}
-            view.run_command('replace_characters', args)
+            view.run_command('replace_characters', fixits[index])
 
         menu_items = []
-        for fixit in fixits_points:
-            to_replace = view.substr(sublime.Region(fixit[0], fixit[1]))
-            if fixit[0] == fixit[1]:
-                menu_items.append('Add ' + fixit[2])
-            elif fixit[2] == '':
+        for fixit in fixits:
+            region = sublime.Region(*fixit['region'])
+            to_replace = view.substr(region)
+            if region.empty():
+                menu_items.append('Add ' + fixit['value'])
+            elif fixit['value'] == '':
                 menu_items.append('Remove ' + to_replace)
             else:
                 menu_items.append('Replace {} with {}'.format(to_replace,
-                                                              fixit[2]))
+                                                              fixit['value']))
         view.show_popup_menu(menu_items, process_fixit)

@@ -7,6 +7,8 @@ import logging
 from os import path
 from string import Template
 
+from sublime import Region
+
 from ..completion.compiler_variant import LibClangCompilerVariant
 
 log = logging.getLogger(__name__)
@@ -151,9 +153,27 @@ class PopupErrorVis:
         if view.buffer_id() not in self.err_regions:
             return
         current_err_region_dict = self.err_regions[view.buffer_id()]
+
         if row in current_err_region_dict:
-            errors_dict = current_err_region_dict[row]
-            fixits = [i for e in errors_dict for i in e.get('fixits', [])]
+            fixits = []
+            for error in current_err_region_dict[row]:
+                if 'fixits' not in error:
+                    continue
+                points = []
+                for fixit in error['fixits']:
+                    points.append(((view.text_point(fixit['start']['row'] - 1,
+                                                    fixit['start']['col'] - 1),
+                                    view.text_point(fixit['end']['row'] - 1,
+                                                    fixit['end']['col'] - 1)),
+                                   fixit['value']))
+                regions, values = zip(*sorted(points))
+                replacement = [values[0]]
+                for i in range(1, len(points)):
+                    replacement.append(view.substr(Region(regions[i - 1][1],
+                                                          regions[i][0])))
+                    replacement.append(values[i])
+                fixits.append({'region': (regions[0][0], regions[-1][1]),
+                               'value': ''.join(replacement)})
             if fixits:
                 return fixits
             else:
