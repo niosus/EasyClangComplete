@@ -452,6 +452,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                           fixit['value']) for fixit in fixits]
 
         def process_fixit(index):
+            """Process fixit when an item in the intention menu is selected."""
             if index < 0:
                 return
             args = {'region': fixits_points[index][:2],

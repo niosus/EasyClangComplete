@@ -138,11 +138,15 @@ class PopupErrorVis:
             log.debug(" no error regions for row: %s", row)
 
     def get_fixits_for_location(self, view, row):
-        """Show a popup if it is needed in this row.
+        """Get list of FixIts for all errors in given row.
 
         Args:
             view (sublime.View): current view
             row (int): number of row
+        Returns:
+            List[Dict[...]] List of FixIt dicts
+            Format {'region': tuple of two text points,
+                    'value': fixit replacement value}
         """
         if view.buffer_id() not in self.err_regions:
             return
