@@ -45,10 +45,9 @@ class Completer(BaseCompleter):
         bigger_ignore_list (str[]): extended list of cursor kinds to ignore.
             This list is used when completion is triggered with `::`.
         compiler_variant: Compiler variant currently in use.
-        function_kinds_list (str[]): Defines what we think is a function.
+        cindex (module): clang cindex.py module for the correct version
         rlock (threading.Rlock): recursive mutex
         tu (cindex.TranslationUnit): current translation unit
-        tu_module (cindex.TranslationUnit): module for proper cindex
         valid (bool): Will be False if we fail to build proper clang index.
     """
     name = "lib"
@@ -74,8 +73,8 @@ class Completer(BaseCompleter):
 
         # init tu related variables
         with Completer.rlock:
-            self.tu_module = None
             self.tu = None
+            self.cindex = None
 
             # slightly more complicated name retrieving to allow for more
             # complex version strings, e.g. 3.8.0
@@ -91,35 +90,26 @@ class Completer(BaseCompleter):
             # one because sublime uses python 3, but there are no python
             # bindings for python 3
             log.debug(" using bundled cindex: %s", cindex_module_name)
-            cindex = importlib.import_module(cindex_module_name)
+            self.cindex = importlib.import_module(cindex_module_name)
 
             # initialize ignore list to account for private methods etc.
-            self.default_ignore_list = [cindex.CursorKind.DESTRUCTOR]
+            self.default_ignore_list = [self.cindex.CursorKind.DESTRUCTOR]
             self.bigger_ignore_list = self.default_ignore_list +\
-                [cindex.CursorKind.CLASS_DECL,
-                 cindex.CursorKind.ENUM_CONSTANT_DECL]
-
-            self.function_kinds_list = [cindex.CursorKind.FUNCTION_DECL,
-                                        cindex.CursorKind.CXX_METHOD]
-
-            self.objc_message_kinds_list = [
-                cindex.CursorKind.OBJC_MESSAGE_EXPR,
-            ]
+                [self.cindex.CursorKind.CLASS_DECL,
+                 self.cindex.CursorKind.ENUM_CONSTANT_DECL]
 
             # If we haven't already initialized the clang Python bindings, try
             # to figure out the path libclang.
-            if not cindex.Config.loaded:
+            if not self.cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
                 libclang_dir = ClangUtils.find_libclang_dir(
                     clang_binary, libclang_path)
                 if libclang_dir:
-                    cindex.Config.set_library_path(libclang_dir)
+                    self.cindex.Config.set_library_path(libclang_dir)
 
-            self.tu_module = cindex.TranslationUnit
-            self.tu = None
             # check if we can build an index. If not, set valid to false
             try:
-                cindex.Index.create()
+                self.cindex.Index.create()
                 self.valid = True
             except Exception as e:
                 log.error(" error: %s", e)
@@ -152,7 +142,7 @@ class Completer(BaseCompleter):
         with Completer.rlock:
             start = time.time()
             try:
-                TU = self.tu_module
+                TU = self.cindex.TranslationUnit
                 log.debug(" compilation started for view id: %s", v_id)
                 if not file_name or not path.exists(file_name):
                     raise ValueError("file name does not exist anymore")
@@ -274,13 +264,13 @@ class Completer(BaseCompleter):
                 self.tu, self.tu.get_location(view.file_name(), (row, col)))
             if not cursor:
                 return empty_info
-            if cursor.kind in self.objc_message_kinds_list:
+            if cursor.kind == self.cindex.CursorKind.OBJC_MESSAGE_EXPR:
                 info_details = ClangUtils.build_objc_message_info_details(
                     cursor)
                 return (tooltip_request, info_details)
             if cursor.referenced and cursor.referenced.kind.is_declaration():
                 info_details = ClangUtils.build_info_details(
-                    cursor.referenced, self.function_kinds_list)
+                    cursor.referenced, self.cindex)
                 return (tooltip_request, info_details)
             return empty_info
 

@@ -197,13 +197,14 @@ class ClangUtils:
         return result
 
     @staticmethod
-    def build_info_details(cursor, function_kinds_list):
+    def build_info_details(cursor, cindex):
         """Provide information about given cursor.
 
         Builds detailed information about cursor.
 
         Args:
             cursor (Cursor): Current cursor.
+            cindex (module): clang cindex.py module for the correct version
 
         """
         result = ""
@@ -239,7 +240,8 @@ class ClangUtils:
             else:
                 args.append(arg.type.spelling + ' ')
 
-        if cursor.kind in function_kinds_list:
+        if cursor.kind in [cindex.CursorKind.FUNCTION_DECL,
+                           cindex.CursorKind.CXX_METHOD]:
             result += '('
             if len(args):
                 result += html.escape(', '.join(args))
