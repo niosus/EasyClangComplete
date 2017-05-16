@@ -449,6 +449,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             """Process fixit when an item in the intention menu is selected."""
             if index < 0:
                 return
+            # It is only allowed to pass json-serializable arguments
+            # to run_command. Otherwise it will fail silently.
             view.run_command('replace_characters', fixits[index])
 
         menu_items = []
