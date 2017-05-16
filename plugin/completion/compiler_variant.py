@@ -125,7 +125,7 @@ class LibClangCompilerVariant(ClangCompilerVariant):
             error_dict.update(msg_search.groupdict())
             error_dict[LibClangCompilerVariant.SEVERITY_TAG] = severity
 
-            if len(diag.fixits):
+            if diag.fixits:
                 error_dict['fixits'] = []
                 for _, fixit in zip(range(len(diag.fixits)), diag.fixits):
                     fixit_dict = {'start': {'row': fixit.range.start.line,
