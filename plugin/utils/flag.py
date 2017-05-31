@@ -78,9 +78,11 @@ class Flag:
                 continue
             if entry in Flag.SEPARABLE_PREFIXES:
                 # add both this and next part to a flag
-                flags.append(Flag(all_split_line[i], all_split_line[i + 1]))
-                skip = True
-                continue
+                if (i + 1) < len(all_split_line):
+                    flags.append(
+                        Flag(all_split_line[i], all_split_line[i + 1]))
+                    skip = True
+                    continue
             flags.append(Flag(entry))
         return flags
 
