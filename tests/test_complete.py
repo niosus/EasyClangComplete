@@ -382,17 +382,10 @@ class BaseTestCompleter(object):
 
 class TestBinCompleter(BaseTestCompleter, GuiTestWrapper):
     """Test class for the binary based completer."""
-    def __init__(self):
-        """Init not usinglibclang."""
-        super().__init__(self)
-        self.use_libclang = False
+    use_libclang = False
 
 
 if has_libclang():
     class TestLibCompleter(BaseTestCompleter, GuiTestWrapper):
         """Test class for the library based completer."""
-
-        def __init__(self):
-            """Init using libclang."""
-            super().__init__(self)
-            self.use_libclang = True
+        use_libclang = True
