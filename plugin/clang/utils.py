@@ -144,14 +144,14 @@ class ClangUtils:
             return path.dirname(libclang_path)
 
     @staticmethod
-    def find_libclang_dir(clang_binary, libclang_path):
+    def find_libclang_dir(clang_binary, libclang_path, version_str):
         """Find directory with libclang.
 
         Args:
             clang_binary (str): clang binary to call
             libclang_path (str): libclang path provided by user.
                 Does not have to be valid.
-
+            version_str(str): version of libclang to be used in format 3.8.0
         Returns:
             str: folder with libclang
         """
@@ -174,7 +174,8 @@ class ClangUtils:
                 return libclang_dir
         # If the user hint did not work, we look for it normally
         if current_system == "Linux":
-            version_str = settings_storage.SettingsStorage.CLANG_VERSION[:-2]
+            # we only care about first two digits
+            version_str = version_str[0:3]
         for suffix in ClangUtils.suffixes[current_system]:
             # pick a name for a file
             for name in ClangUtils.possible_filenames[current_system]:

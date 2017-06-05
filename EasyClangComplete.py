@@ -102,6 +102,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # init instance variables to reasonable defaults
         self.current_completions = None
         self.current_job_id = None
+        self.settings_manager = None
+        self.view_config_manager = None
 
     def on_plugin_loaded(self):
         """Called upon plugin load event."""

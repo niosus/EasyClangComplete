@@ -19,6 +19,11 @@ def run_me(succeed):
 class test_thread_pool(TestCase):
     """Test thread pool."""
 
+    def __init__(self):
+        """Init used variables to None."""
+        self.last_result = None
+        self.override_result = None
+
     def callback_func(self, future):
         """Simple callback function to store result."""
         self.last_result = future.result()

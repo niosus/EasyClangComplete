@@ -78,14 +78,17 @@ class SettingsStorage:
         "progress_style",
     ]
 
-    CLANG_VERSION = None
-
     def __init__(self, settings_handle):
         """Initialize settings storage with default settings handle.
 
         Args:
             settings_handle (sublime.Settings): handle to sublime settings
         """
+        self.clang_version = ''
+        self.libclang_path = ''
+        self.clang_binary = ''
+        self.project_folder = ''
+        self.project_name = ''
         self._wildcard_values = {
             Wildcards.PROJECT_PATH: "",
             Wildcards.PROJECT_NAME: "",
@@ -266,5 +269,4 @@ class SettingsStorage:
         # get clang version string
         version_str = Tools.get_clang_version_str(self.clang_binary)
         self._wildcard_values[Wildcards.CLANG_VERSION] = version_str
-        SettingsStorage.CLANG_VERSION = version_str
         self.clang_version = self._wildcard_values[Wildcards.CLANG_VERSION]

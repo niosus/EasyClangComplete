@@ -12,6 +12,9 @@ class GuiTestWrapper(TestCase):
     Attributes:
         view (sublime.View): Current view.
     """
+    def __init__(self):
+        """Initialize wrapper."""
+        self.view = None
 
     def set_up(self):
         """Setup method run before every test."""

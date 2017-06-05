@@ -25,7 +25,7 @@ def has_libclang():
 
 
 def should_run_objc_tests():
-    """Decides if Objective C tests should be run
+    """Decide if Objective C tests should be run.
 
     For now, run only on Mac OS due to difficulties getting the GNUstep
     environment setup with GNUstep and clang to run properly in
@@ -43,8 +43,6 @@ class BaseTestCompleter(object):
         view (sublime.View): view
         use_libclang (bool): decides if we use libclang in tests
     """
-
-    use_libclang = None
 
     def set_up_completer(self):
         """Utility method to set up a completer for the current view.
@@ -384,12 +382,17 @@ class BaseTestCompleter(object):
 
 class TestBinCompleter(BaseTestCompleter, GuiTestWrapper):
     """Test class for the binary based completer."""
-
-    use_libclang = False
+    def __init__(self):
+        """Init not usinglibclang."""
+        super().__init__(self)
+        self.use_libclang = False
 
 
 if has_libclang():
     class TestLibCompleter(BaseTestCompleter, GuiTestWrapper):
         """Test class for the library based completer."""
 
-        use_libclang = True
+        def __init__(self):
+            """Init using libclang."""
+            super().__init__(self)
+            self.use_libclang = True

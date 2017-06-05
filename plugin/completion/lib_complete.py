@@ -103,7 +103,7 @@ class Completer(BaseCompleter):
             if not self.cindex.Config.loaded:
                 # This will return something like /.../lib/clang/3.x.0
                 libclang_dir = ClangUtils.find_libclang_dir(
-                    clang_binary, libclang_path)
+                    clang_binary, libclang_path, version_str)
                 if libclang_dir:
                     self.cindex.Config.set_library_path(libclang_dir)
 
