@@ -297,15 +297,22 @@ class Completer(BaseCompleter):
             if not self.tu:
                 log.critical(" cannot create translation unit. Abort.")
                 return False
-            if self.tu.cursor.displayname != view.file_name():
+            if isinstance(self.tu.cursor.displayname, bytes):
+                # it is bytes, convert!
+                log.debug(" converting bytes '%s' into str",
+                          self.tu.cursor.displayname)
+                displayname = self.tu.cursor.displayname.decode('utf-8')
+            else:
+                # it is a normal string, no conversion needed
+                displayname = self.tu.cursor.displayname
+            if displayname != view.file_name():
                 # In case the file was renamed, the translation unit still has
                 # the old name in it and crashes the plugin host. We need to
                 # completely recreate a translation unit if the filename has
                 # changed. Addressed in issue #191.
                 log.debug(" translation unit file does not match view one")
                 log.debug(" names: '%s' vs '%s'",
-                          self.tu.cursor.displayname,
-                          view.file_name())
+                          displayname, view.file_name())
                 log.debug(" recreate translation unit completely")
                 self.parse_tu(view, settings)
             log.debug(" reparsing translation_unit for view %s", v_id)
