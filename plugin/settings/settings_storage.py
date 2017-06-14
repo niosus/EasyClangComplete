@@ -11,7 +11,6 @@ from os import path
 from ..tools import Tools
 
 log = logging.getLogger(__name__)
-log.debug(" reloading module %s", __name__)
 
 
 class Wildcards:
@@ -84,6 +83,7 @@ class SettingsStorage:
         Args:
             settings_handle (sublime.Settings): handle to sublime settings
         """
+        log.debug(" creating new settings storage object")
         self.clang_version = ''
         self.libclang_path = ''
         self.clang_binary = ''
@@ -124,6 +124,25 @@ class SettingsStorage:
             log.error(" view became None. Do not continue.")
             log.error(" original error: %s", e)
 
+    def need_reparse(self):
+        """A very hacky check that there was an incomplete load.
+
+        This is needed because of something I believe is a bug in sublime text
+        plugin handling. When we enable the plugin and load its settings with
+        on_plugin_loaded() function not all settings are active.
+        'progress_style' is one of the missing settings. The settings will
+        just need to be loaded at a later time then.
+
+        Returns:
+            bool: True if needs reparsing, False otherwise
+
+        """
+        if 'progress_style' in self.__dict__:
+            log.debug(' settings complete')
+            return False
+        log.warning(' settings incomplete')
+        return True
+
     def is_valid(self):
         """Check settings validity.
 
@@ -139,6 +158,7 @@ class SettingsStorage:
             if value is None:
                 error_msg = "No value for setting '{}' found!".format(key)
                 return False, error_msg
+
         if self.progress_style not in SettingsStorage.PROGRESS_STYLES:
             error_msg = "Progress style '{}' is not one of {}".format(
                 self.progress_style, SettingsStorage.PROGRESS_STYLES)

@@ -9,7 +9,6 @@ import logging
 from ..utils.flag import Flag
 
 log = logging.getLogger(__name__)
-log.debug(" reloading module")
 
 
 class CompilerVariant(object):

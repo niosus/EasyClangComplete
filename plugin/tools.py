@@ -69,8 +69,11 @@ class Reloader:
         """Reload all loaded modules."""
         prefix = PKG_NAME + '.plugin.'
         # reload all twice to make sure all dependencies are satisfied
+        log.debug(" reload all modules first time")
         Reloader.reload_once(prefix)
+        log.debug(" reload all modules second time")
         Reloader.reload_once(prefix)
+        log.debug(" all modules reloaded")
 
     @staticmethod
     def reload_once(prefix):

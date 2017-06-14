@@ -22,7 +22,6 @@ from threading import RLock
 from os import path
 
 log = logging.getLogger(__name__)
-log.debug(" reloading module")
 
 cindex_dict = {
     '3.2': PKG_NAME + ".plugin.clang.cindex32",

@@ -18,7 +18,6 @@ from .compiler_variant import ClangClCompilerVariant
 from ..settings.settings_storage import SettingsStorage
 
 log = logging.getLogger(__name__)
-log.debug(" reloading module")
 
 
 class Completer(BaseCompleter):

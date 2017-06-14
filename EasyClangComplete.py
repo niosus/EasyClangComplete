@@ -22,7 +22,6 @@ from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
 # reload the modules
-tools.Reloader.reload_all()
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager
@@ -41,6 +40,7 @@ ThreadJob = thread_pool.ThreadJob
 log = logging.getLogger(__name__)
 
 handle_plugin_loaded_function = None
+handle_plugin_unloaded_function = None
 
 
 def plugin_loaded():
@@ -49,7 +49,13 @@ def plugin_loaded():
     We need it to initialize all the different classes that encapsulate
     functionality. We can only properly init them after sublime api is
     available."""
+    tools.Reloader.reload_all()
     handle_plugin_loaded_function()
+
+
+def plugin_unloaded():
+    """Called right before the package was unloaded."""
+    handle_plugin_unloaded_function()
 
 
 class CleanCmakeCommand(sublime_plugin.TextCommand):
@@ -94,7 +100,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         """Initialize the object."""
         super().__init__()
         global handle_plugin_loaded_function
+        global handle_plugin_unloaded_function
         handle_plugin_loaded_function = self.on_plugin_loaded
+        handle_plugin_unloaded_function = self.on_plugin_unloaded
         # By default be verbose and limit on settings change if verbose flag is
         # not set.
         logging.basicConfig(level=logging.DEBUG)
@@ -104,13 +112,22 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.current_job_id = None
         self.settings_manager = None
         self.view_config_manager = None
+        self.loaded = False
+
+    def on_plugin_unloaded(self):
+        """Manage what we do when the plugin is unloaded."""
+        log.debug(" plugin unloaded")
+        self.loaded = False
 
     def on_plugin_loaded(self):
         """Called upon plugin load event."""
         # init settings manager
+        self.loaded = True
+        log.debug(" handle plugin loaded")
         self.settings_manager = SettingsManager()
-        self.on_settings_changed()
+        # self.on_settings_changed()
         self.settings_manager.add_change_listener(self.on_settings_changed)
+        self.on_settings_changed()
         # init view config manager
         self.view_config_manager = ViewConfigManager()
         # As the plugin has just loaded, we might have missed an activation
@@ -120,11 +137,22 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def on_settings_changed(self):
         """Called when any of the settings changes."""
+        log.debug(" on settings changed handle")
+        if not self.loaded:
+            log.warning(
+                " cannot process settings change as plugin is not loaded")
+            return
+        if not self.settings_manager:
+            self.settings_manager = SettingsManager()
         user_settings = self.settings_manager.user_settings()
         # If verbose flag is set then respect default DEBUG level.
         # Otherwise disable level DEBUG and allow INFO and higher levels.
         off_level = logging.NOTSET if user_settings.verbose else logging.DEBUG
         logging.disable(level=off_level)
+
+        if user_settings.need_reparse():
+            # stop processing this if the settings are still invalid
+            return
 
         # set progress status
         progress_style_tag = user_settings.progress_style

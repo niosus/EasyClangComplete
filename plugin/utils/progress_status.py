@@ -56,7 +56,7 @@ class MoonProgressStatus(BaseProgressStatus):
 
     def __init__(self):
         """Init moon progress status."""
-        super(MoonProgressStatus, self).__init__()
+        super().__init__()
         self.idx = 0
         self.msg_chars = MSG_CHARS_MOON
         self.msg_ready = MSG_READY_MOON
@@ -77,7 +77,7 @@ class ColorSublimeProgressStatus(BaseProgressStatus):
 
     def __init__(self):
         """Init color sublime like progress status."""
-        super(ColorSublimeProgressStatus, self).__init__()
+        super().__init__()
         self.msg_chars = MSG_CHARS_COLOR_SUBLIME
         self.msg_ready = MSG_READY_COLOR_SUBLIME
 

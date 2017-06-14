@@ -12,7 +12,6 @@ from ..tools import PKG_NAME
 from .settings_storage import SettingsStorage
 
 log = logging.getLogger(__name__)
-log.debug(" reloading module %s", __name__)
 
 
 class SettingsManager:
@@ -27,14 +26,12 @@ class SettingsManager:
         __change_listeners (function[]): list of change listeners
 
     """
-    __default_settings = None
-    __settings_dict = {}
-
-    __change_listeners = []
 
     def __init__(self):
         """Initialize the class by loading the default user settings."""
-        self.__init_default_settings()
+        self.__default_settings = None
+        self.__settings_dict = {}
+        self.__change_listeners = []
 
     def settings_for_view(self, view):
         """Get settings stored for a view.
@@ -45,6 +42,8 @@ class SettingsManager:
         Returns:
             settings.SettingsStorage: settings for view
         """
+        if not self.__default_settings:
+            self.__init_default_settings()
         view_id = view.buffer_id()
         if view_id not in self.__settings_dict:
             log.debug(" no settings for view %s. Reinitializing.", view_id)
@@ -71,6 +70,8 @@ class SettingsManager:
         Returns:
             settings.SettingsStorage: default user settings
         """
+        if not self.__default_settings:
+            self.__init_default_settings()
         return self.__default_settings
 
     def add_change_listener(self, listener):
@@ -115,6 +116,8 @@ class SettingsManager:
         Raises:
             RuntimeError: If settings are not loaded, throw an error
         """
+        settings_file_name = PKG_NAME + ".sublime-settings"
+        log.debug(" loading settings: '%s'", settings_file_name)
         self.__subl_settings = sublime.load_settings(
             PKG_NAME + ".sublime-settings")
         self.__subl_settings.clear_on_change(PKG_NAME)
@@ -123,7 +126,10 @@ class SettingsManager:
 
         # initialize default settings
         self.__default_settings = SettingsStorage(self.__subl_settings)
-
+        if self.__default_settings.need_reparse():
+            # HACK: this is a hacky solution to settings loading problems.
+            # Load these settings at a later point in time.
+            return
         # check validity
         valid, error_msg = self.__default_settings.is_valid()
         if not valid:
