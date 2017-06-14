@@ -140,7 +140,7 @@ class SettingsStorage:
         if 'progress_style' in self.__dict__:
             log.debug(' settings complete')
             return False
-        log.warning(' settings incomplete')
+        log.debug(' settings incomplete and will be reloaded a bit later')
         return True
 
     def is_valid(self):
