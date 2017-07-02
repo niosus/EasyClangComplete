@@ -371,8 +371,9 @@ class Diagnostic(object):
                 range = SourceRange()
                 value = conf.lib.clang_getDiagnosticFixIt(self.diag, key,
                         byref(range))
-                if len(value) == 0:
-                    raise IndexError
+
+                if not value:
+                    value = ''
 
                 return FixIt(range, value)
 

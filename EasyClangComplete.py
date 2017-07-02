@@ -85,6 +85,21 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
             log.debug(" Nothing to clean")
 
 
+class ApplyFixitCommand(sublime_plugin.TextCommand):
+    """Command to apply fixit at cursor position."""
+
+    def run(self, edit):
+        """All the actual processing is done in on_text_command."""
+
+
+class ReplaceCharactersCommand(sublime_plugin.TextCommand):
+    """Command to actually replace region with fixit value."""
+
+    def run(self, edit, region, value):
+        """Replace given region with given string."""
+        self.view.replace(edit, sublime.Region(*region), value)
+
+
 class EasyClangComplete(sublime_plugin.EventListener):
     """Base class for this plugin.
 
@@ -448,3 +463,44 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return Tools.HIDE_DEFAULT_COMPLETIONS
         log.debug(" showing default completions")
         return Tools.SHOW_DEFAULT_COMPLETIONS
+
+    def on_text_command(self, view, command_name, args):
+        """Called when a text command is issued.
+
+        Currently it is only used to process apply_fixit
+        """
+        if command_name != 'apply_fixit' or not Tools.is_valid_view(view):
+            return
+
+        (row, _) = SublBridge.cursor_pos(view)
+        view_config = self.view_config_manager.get_from_cache(view)
+        if not view_config:
+            return
+        if not view_config.completer:
+            return
+
+        fixits = view_config.completer.error_vis.get_fixits_for_location(view,
+                                                                         row)
+        if not fixits:
+            return
+
+        def process_fixit(index):
+            """Process fixit when an item in the intention menu is selected."""
+            if index < 0:
+                return
+            # It is only allowed to pass json-serializable arguments
+            # to run_command. Otherwise it will fail silently.
+            view.run_command('replace_characters', fixits[index])
+
+        menu_items = []
+        for fixit in fixits:
+            region = sublime.Region(*fixit['region'])
+            to_replace = view.substr(region)
+            if region.empty():
+                menu_items.append('Add ' + fixit['value'])
+            elif fixit['value'] == '':
+                menu_items.append('Remove ' + to_replace)
+            else:
+                menu_items.append('Replace {} with {}'.format(to_replace,
+                                                              fixit['value']))
+        view.show_popup_menu(menu_items, process_fixit)

@@ -22,6 +22,14 @@
                                     "base_file": "${packages}/EasyClangComplete/EasyClangComplete.sublime-settings"
                                 },
                                 "caption": "Settings"
+                            },
+                            {
+                                "command": "edit_settings",
+                                "args":
+                                {
+                                    "base_file": "${packages}/EasyClangComplete/Default.sublime-keymap"
+                                },
+                                "caption": "Key bindings"
                             }
                         ]
                     }

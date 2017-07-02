@@ -7,6 +7,8 @@ import logging
 from os import path
 from string import Template
 
+from sublime import Region
+
 from ..completion.compiler_variant import LibClangCompilerVariant
 
 log = logging.getLogger(__name__)
@@ -25,6 +27,7 @@ class PopupErrorVis:
         err_regions (dict): dictionary of error regions for view ids
     """
     _TAG = "easy_clang_complete_errors"
+    _TAG_FIXIT = "easy_clang_complete_fixits"
     _MAX_POPUP_WIDTH = 1800
 
     ERROR_HTML_TEMPLATE = Template(
@@ -97,9 +100,14 @@ class PopupErrorVis:
             # view has no errors for it
             return
         current_error_dict = self.err_regions[view.buffer_id()]
-        regions = PopupErrorVis._as_region_list(current_error_dict)
-        log.debug(" showing error regions: %s", regions)
-        view.add_regions(PopupErrorVis._TAG, regions, "code")
+        errors, fixits = PopupErrorVis._as_region_lists(current_error_dict)
+        log.debug(" showing error regions: %s", errors)
+        log.debug(" showing fixit regions: %s", fixits)
+        view.add_regions(PopupErrorVis._TAG, errors, "code")
+        view.add_regions(PopupErrorVis._TAG_FIXIT,
+                         fixits,
+                         "code",
+                         'Packages/EasyClangComplete/icons/intentionBulb.png')
 
     def erase_regions(self, view):
         """Erase error regions for view.
@@ -112,6 +120,7 @@ class PopupErrorVis:
             return
         log.debug(" erasing error regions for view %s", view.buffer_id())
         view.erase_regions(PopupErrorVis._TAG)
+        view.erase_regions(PopupErrorVis._TAG_FIXIT)
 
     def show_popup_if_needed(self, view, row):
         """Show a popup if it is needed in this row.
@@ -127,6 +136,48 @@ class PopupErrorVis:
             errors_dict = current_err_region_dict[row]
             errors_html = PopupErrorVis._as_html(errors_dict)
             view.show_popup(errors_html, max_width=self._MAX_POPUP_WIDTH)
+        else:
+            log.debug(" no error regions for row: %s", row)
+
+    def get_fixits_for_location(self, view, row):
+        """Get list of FixIts for all errors in given row.
+
+        Args:
+            view (sublime.View): current view
+            row (int): number of row
+        Returns:
+            List[Dict[...]] List of FixIt dicts
+            Format {'region': tuple of two text points,
+                    'value': fixit replacement value}
+        """
+        if view.buffer_id() not in self.err_regions:
+            return
+        current_err_region_dict = self.err_regions[view.buffer_id()]
+
+        if row in current_err_region_dict:
+            fixits = []
+            for error in current_err_region_dict[row]:
+                if 'fixits' not in error:
+                    continue
+                points = []
+                for fixit in error['fixits']:
+                    points.append(((view.text_point(fixit['start']['row'] - 1,
+                                                    fixit['start']['col'] - 1),
+                                    view.text_point(fixit['end']['row'] - 1,
+                                                    fixit['end']['col'] - 1)),
+                                   fixit['value']))
+                regions, values = zip(*sorted(points))
+                replacement = [values[0]]
+                for i in range(1, len(points)):
+                    replacement.append(view.substr(Region(regions[i - 1][1],
+                                                          regions[i][0])))
+                    replacement.append(values[i])
+                fixits.append({'region': (regions[0][0], regions[-1][1]),
+                               'value': ''.join(replacement)})
+            if fixits:
+                return fixits
+            else:
+                log.debug(" no fixits for row: %s", row)
         else:
             log.debug(" no error regions for row: %s", row)
 
@@ -167,17 +218,22 @@ class PopupErrorVis:
         return errors_html_mask.substitute(content=errors_html)
 
     @staticmethod
-    def _as_region_list(err_regions_dict):
-        """Make a list from error region dict.
+    def _as_region_lists(err_regions_dict):
+        """Make lists of errors and fixits regions from error region dict.
 
         Args:
             err_regions_dict (dict): dict of error regions for current view
 
         Returns:
-            list(Region): list of regions to show on sublime view
+            (list(Region),
+             list(Region)): two lists of regions to show on sublime view
         """
         region_list = []
+        fixit_list = []
         for errors_list in err_regions_dict.values():
             for error in errors_list:
-                region_list.append(error['region'])
-        return region_list
+                if 'fixits' in error:
+                    fixit_list.append(error['region'])
+                else:
+                    region_list.append(error['region'])
+        return region_list, fixit_list
