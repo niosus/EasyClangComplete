@@ -9,7 +9,7 @@ from string import Template
 
 from ..completion.compiler_variant import LibClangCompilerVariant
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 PATH_TO_HTML_FOLDER = path.join(
     path.dirname(path.dirname(__file__)), 'html')
@@ -48,12 +48,12 @@ class PopupErrorVis:
         """
         view_id = view.buffer_id()
         if view_id == 0:
-            log.error(" trying to show error on invalid view. Abort.")
+            log.error("trying to show error on invalid view. Abort.")
             return
-        log.debug(" generating error regions for view %s", view_id)
+        log.debug("generating error regions for view %s", view_id)
         # first clear old regions
         if view_id in self.err_regions:
-            log.debug(" removing old error regions")
+            log.debug("removing old error regions")
             del self.err_regions[view_id]
         # create an empty region dict for view id
         self.err_regions[view_id] = {}
@@ -63,10 +63,10 @@ class PopupErrorVis:
         try:
             for error in errors:
                 self.add_error(view, error)
-            log.debug(" %s error regions ready", len(self.err_regions))
+            log.debug("%s error regions ready", len(self.err_regions))
         except (AttributeError, KeyError, TypeError) as e:
-            log.error(" view was closed -> cannot generate error vis in it")
-            log.info(" original exception: '%s'", repr(e))
+            log.error("view was closed -> cannot generate error vis in it")
+            log.info("original exception: '%s'", repr(e))
 
     def add_error(self, view, error_dict):
         """Put new compile error in the dictionary of errors.
@@ -98,7 +98,7 @@ class PopupErrorVis:
             return
         current_error_dict = self.err_regions[view.buffer_id()]
         regions = PopupErrorVis._as_region_list(current_error_dict)
-        log.debug(" showing error regions: %s", regions)
+        log.debug("showing error regions: %s", regions)
         view.add_regions(PopupErrorVis._TAG, regions, "code")
 
     def erase_regions(self, view):
@@ -110,7 +110,7 @@ class PopupErrorVis:
         if view.buffer_id() not in self.err_regions:
             # view has no errors for it
             return
-        log.debug(" erasing error regions for view %s", view.buffer_id())
+        log.debug("erasing error regions for view %s", view.buffer_id())
         view.erase_regions(PopupErrorVis._TAG)
 
     def show_popup_if_needed(self, view, row):
@@ -128,7 +128,7 @@ class PopupErrorVis:
             errors_html = PopupErrorVis._as_html(errors_dict)
             view.show_popup(errors_html, max_width=self._MAX_POPUP_WIDTH)
         else:
-            log.debug(" no error regions for row: %s", row)
+            log.debug("no error regions for row: %s", row)
 
     def clear(self, view):
         """Clear errors from dict for view.

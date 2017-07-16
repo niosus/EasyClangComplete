@@ -8,7 +8,7 @@ import logging
 
 from ..utils.flag import Flag
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class CompilerVariant(object):
@@ -106,7 +106,7 @@ class LibClangCompilerVariant(ClangCompilerVariant):
             # [HACK]: have found no other way as there seems to be no option to
             # pass to libclang to avoid producing this error
             if "#pragma once" in spelling:
-                log.debug(" explicitly omit warning about pragma once.")
+                log.debug("explicitly omit warning about pragma once.")
                 continue
             pos_search = self.pos_regex.search(location)
             msg_search = self.msg_regex.search(spelling)

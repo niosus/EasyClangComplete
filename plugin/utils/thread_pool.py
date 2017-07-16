@@ -10,7 +10,7 @@ from threading import Timer
 from threading import RLock
 from threading import Thread
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class ThreadJob:
@@ -117,7 +117,7 @@ class ThreadPool:
                 future.add_done_callback(self.__stop_progress_animation)
                 self.__running_jobs_count += 1
             ThreadPool.__jobs_to_run.clear()
-            log.debug(" running %s jobs", self.__running_jobs_count)
+            log.debug("running %s jobs", self.__running_jobs_count)
             if self.__running_jobs_count > 0:
                 self.__progress_status.showing = True
                 self.__show_animation = True
@@ -126,9 +126,9 @@ class ThreadPool:
         """Stop progress animation thread if there are no running jobs."""
         with ThreadPool.__lock:
             self.__running_jobs_count -= 1
-            log.debug(" Jobs still running: %s", self.__running_jobs_count)
+            log.debug("Jobs still running: %s", self.__running_jobs_count)
             if self.__running_jobs_count < 1:
-                log.debug(" Stopping progress animation.")
+                log.debug("Stopping progress animation.")
                 self.__show_animation = False
 
     def __animate_progress(self):

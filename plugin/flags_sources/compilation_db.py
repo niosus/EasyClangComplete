@@ -12,7 +12,7 @@ from os import path
 
 import logging
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 @singleton
@@ -62,41 +62,41 @@ class CompilationDb(FlagsSource):
             file_path = path.splitext(file_path)[0]
         # initialize search scope if not initialized before
         # check if we have a hashed version
-        log.debug(" [db]:[get]: for file %s", file_path)
+        log.debug("[db]:[get]: for file %s", file_path)
         cached_db_path = self._get_cached_from(file_path)
-        log.debug(" [db]:[cached]: '%s'", cached_db_path)
+        log.debug("[db]:[cached]: '%s'", cached_db_path)
         current_db_path = self._find_current_in(search_scope)
-        log.debug(" [db]:[current]: '%s'", current_db_path)
+        log.debug("[db]:[current]: '%s'", current_db_path)
         db = None
         parsed_before = current_db_path in self._cache
         if parsed_before:
-            log.debug(" [db]: found cached compile_commands.json")
+            log.debug("[db]: found cached compile_commands.json")
             cached_db_path = current_db_path
         db_path_unchanged = (current_db_path == cached_db_path)
         db_is_unchanged = File.is_unchanged(cached_db_path)
         if db_path_unchanged and db_is_unchanged:
-            log.debug(" [db]:[load cached]")
+            log.debug("[db]:[load cached]")
             db = self._cache[cached_db_path]
         else:
-            log.debug(" [db]:[load new]")
+            log.debug("[db]:[load new]")
             # clear old value, parse db and set new value
             if not current_db_path:
-                log.debug(" [db]:[no new]: return None")
+                log.debug("[db]:[no new]: return None")
                 return None
             if cached_db_path and cached_db_path in self._cache:
                 del self._cache[cached_db_path]
             db = self._parse_database(File(current_db_path))
-            log.debug(" [db]: put into cache: '%s'", current_db_path)
+            log.debug("[db]: put into cache: '%s'", current_db_path)
             self._cache[current_db_path] = db
         # return nothing if we failed to load the db
         if not db:
-            log.debug(" [db]: not found, return None.")
+            log.debug("[db]: not found, return None.")
             return None
         if file_path and file_path in db:
             self._cache[file_path] = current_db_path
             File.update_mod_time(current_db_path)
             return db[file_path]
-        log.debug(" [db]: return entry for 'all'.")
+        log.debug("[db]: return entry for 'all'.")
         return db['all']
 
     def _parse_database(self, database_file):

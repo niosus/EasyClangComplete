@@ -11,7 +11,7 @@ from os import path
 
 import logging
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 @singleton
@@ -53,25 +53,25 @@ class FlagsFile(FlagsSource):
         # prepare search scope
         search_scope = self._update_search_scope(search_scope, file_path)
         # check if we have a hashed version
-        log.debug(" [clang_complete_file]:[get]: for file %s", file_path)
+        log.debug("[clang_complete_file]:[get]: for file %s", file_path)
         cached_flags_path = self._get_cached_from(file_path)
-        log.debug(" [clang_complete_file]:[cached]: '%s'", cached_flags_path)
+        log.debug("[clang_complete_file]:[cached]: '%s'", cached_flags_path)
         flags_file_path = self._find_current_in(search_scope)
-        log.debug(" [clang_complete_file]:[current]: '%s'", flags_file_path)
+        log.debug("[clang_complete_file]:[current]: '%s'", flags_file_path)
         if not flags_file_path:
             return None
 
         flags = None
         parsed_before = flags_file_path in self._cache
         if parsed_before:
-            log.debug(" [clang_complete_file]: found cached .clang_complete")
+            log.debug("[clang_complete_file]: found cached .clang_complete")
             cached_flags_path = flags_file_path
         flags_file_path_same = (flags_file_path == cached_flags_path)
         flags_file_same = File.is_unchanged(cached_flags_path)
         if flags_file_path_same and flags_file_same:
-            log.debug(" [clang_complete_file]:[unchanged]: load cached")
+            log.debug("[clang_complete_file]:[unchanged]: load cached")
             return self._cache[cached_flags_path]
-        log.debug(" [clang_complete_file]:[changed]: load new")
+        log.debug("[clang_complete_file]:[changed]: load new")
         if cached_flags_path and cached_flags_path in self._cache:
             del self._cache[cached_flags_path]
         flags = self.__flags_from_clang_file(File(flags_file_path))
@@ -92,10 +92,10 @@ class FlagsFile(FlagsSource):
             str[]: List of flags from file.
         """
         if not path.exists(file.full_path()):
-            log.debug(" .clang_complete does not exist yet. No flags present.")
+            log.debug(".clang_complete does not exist yet. No flags present.")
             return []
         if not file.loaded():
-            log.error(" cannot get flags from clang_complete_file. No file.")
+            log.error("cannot get flags from clang_complete_file. No file.")
             return []
 
         flags = []
