@@ -208,7 +208,7 @@ plugin! The more people use it - the merrier.
 [img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?style=flat-square&label=linux%20|%20osx
 [img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
 [img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
-[img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg
+[img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?style=flat-square
 [img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600&style=flat-square
 [img-downloads-month]: https://img.shields.io/packagecontrol/dm/EasyClangComplete.svg?maxAge=2592000&style=flat-square
 [img-subl]: https://img.shields.io/badge/Sublime%20Text-3-green.svg?style=flat-square

@@ -1,0 +1,13 @@
+Version 4.0.5
+=============
+
+Fixes and improvements:
+-------------
+- a change to any ``*.sublime-ptoject`` file now leads to a reload of settings
+- this allows quick editing of settings without reloading the plugin
+
+Support it
+----------
+Main sponsor of this project is currently my sleep.
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it

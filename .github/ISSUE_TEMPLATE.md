@@ -1,6 +1,6 @@
 # Please do this before submitting: #
-- [] check for already solved issues
-- [] try restarting Sublime Text
+- [ ] check for already solved issues
+- [ ] try restarting Sublime Text
 
 # Please state the following: #
 - Sublime Text version: `<here>`
