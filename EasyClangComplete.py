@@ -41,11 +41,14 @@ ThreadJob = thread_pool.ThreadJob
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
 log.propagate = False
-formatter = logging.Formatter(
-    '[%(name)s: %(levelname)6s]:[%(filename)-20s]:[%(funcName)-20s]: %(message)s')
+formatter_default = logging.Formatter(
+    '[%(name)s:%(levelname)-7s]: %(message)s')
+formatter_verbose = logging.Formatter(
+    '[%(name)s:%(levelname)-7s]:[%(filename)s]:[%(funcName)s]:'
+    '[%(threadName)s]: %(message)s')
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
-ch.setFormatter(formatter)
+ch.setFormatter(formatter_default)
 if not log.hasHandlers():
     log.addHandler(ch)
 
@@ -153,10 +156,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if not self.settings_manager:
             self.settings_manager = SettingsManager()
         user_settings = self.settings_manager.user_settings()
-        # If verbose flag is set then respect default DEBUG level.
-        # Otherwise disable level DEBUG and allow INFO and higher levels.
-        level = logging.NOTSET if user_settings.verbose else logging.DEBUG
-        ch.setLevel(level)
+        if user_settings.verbose:
+            ch.setFormatter(formatter_verbose)
+            ch.setLevel(logging.DEBUG)
+        else:
+            ch.setFormatter(formatter_default)
+            ch.setLevel(logging.INFO)
 
         if user_settings.need_reparse():
             # stop processing this if the settings are still invalid
