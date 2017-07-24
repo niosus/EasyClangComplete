@@ -684,8 +684,8 @@ class Tools:
             log.debug("clang process output: \n%s", output_text)
         return output_text
 
-    @staticmethod
-    def get_clang_version_str(clang_binary):
+    @classmethod
+    def get_clang_version_str(cls, clang_binary):
         """Get Clang version string from subprocess run of "clang_binary -v".
 
         Args:
@@ -702,14 +702,33 @@ class Tools:
         log.info("Getting version from command: `%s`", check_version_cmd)
         output_text = Tools.run_command(check_version_cmd, shell=True)
 
-        # now we have the output, and can extract version from it
+        if sublime.platform() == "osx":
+            return cls.get_clang_version_str_osx(output_text)
+        elif sublime.platform() == "linux":
+            return cls.get_clang_version_str_linux(output_text)
+        elif sublime.platform() == "windows":
+            return cls.get_clang_version_windows(output_text)
+        else:
+            log.error("Unknown platform: %s" % sublime.platform())
+            return None
+
+    @classmethod
+    def get_clang_version_str_osx(cls, output_text):
+        # There can be two flavours on osx: the apple flavour or the trunk/brew
+        # flavour.
+        if "Apple" in output_text:
+            return cls.get_apple_clang_version_str(output_text)
+        else:
+            # Same as on linux
+            return cls.get_clang_version_str_linux(output_text)
+
+    @classmethod
+    def get_apple_clang_version_str(cls, output_text):
         version_regex = re.compile("\d\.\d\.*\d*")
         match = version_regex.search(output_text)
         if match:
             version_str = match.group()
-            # TODO: we may need to revisit this and detect, say, word apple in
-            # the output of clang --version
-            if version_str >= "4.2" and platform.system() == "Darwin":
+            if version_str >= "4.2":
                 # info from this table: https://gist.github.com/yamaya/2924292
                 osx_version = version_str[:3]
                 try:
@@ -726,6 +745,30 @@ class Tools:
                     " OSX version %s reported. Reducing it to %s. Info: %s",
                     osx_version, version_str, info)
             log.info("Found clang version: %s", version_str)
+            return version_str
+        else:
+            raise RuntimeError(
+                " Couldn't find clang version in clang version output.")
+    
+    @classmethod
+    def get_clang_version_str_linux(cls, output_text):
+        # now we have the output, and can extract version from it
+        version_regex = re.compile("\d\.\d\.*\d*")
+        match = version_regex.search(output_text)
+        if match:
+            version_str = match.group()
+            return version_str
+        else:
+            raise RuntimeError(
+                " Couldn't find clang version in clang version output.")
+
+    @classmethod
+    def get_clang_version_str_windows(cls, output_text):
+        # now we have the output, and can extract version from it
+        version_regex = re.compile("\d\.\d\.*\d*")
+        match = version_regex.search(output_text)
+        if match:
+            version_str = match.group()
             return version_str
         else:
             raise RuntimeError(

@@ -33,7 +33,7 @@ cindex_dict = {
     '3.8': PKG_NAME + ".plugin.clang.cindex38",
     '3.9': PKG_NAME + ".plugin.clang.cindex39",
     '4.0': PKG_NAME + ".plugin.clang.cindex40",
-    '5.0': PKG_NAME + ".plugin.clang.cindex40"
+    '5.0': PKG_NAME + ".plugin.clang.cindex50"
 }
 
 
