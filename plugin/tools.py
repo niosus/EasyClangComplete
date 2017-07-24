@@ -714,6 +714,19 @@ class Tools:
 
     @classmethod
     def get_clang_version_str_osx(cls, output_text):
+        """Get Clang version string from output of "clang_binary -v".
+        This is the OSX-specific variant.
+
+        Args:
+            output_text (str): output of "clang_binary -v"
+
+        Returns:
+            str: clang version number
+
+        Raises: RuntimeError: There is an error while getting version. This is
+            too important to continue. If this fails the plugin will not work
+            at all.
+        """
         # There can be two flavours on osx: the apple flavour or the trunk/brew
         # flavour.
         if "Apple" in output_text:
@@ -724,6 +737,19 @@ class Tools:
 
     @classmethod
     def get_apple_clang_version_str(cls, output_text):
+        """Get Clang version string from output of "clang_binary -v".
+        This is the AppleClang-specific variant.
+
+        Args:
+            output_text (str): output of "clang_binary -v"
+
+        Returns:
+            str: clang version number
+
+        Raises: RuntimeError: There is an error while getting version. This is
+            too important to continue. If this fails the plugin will not work
+            at all.
+        """
         version_regex = re.compile("\d\.\d\.*\d*")
         match = version_regex.search(output_text)
         if match:
@@ -749,9 +775,22 @@ class Tools:
         else:
             raise RuntimeError(
                 " Couldn't find clang version in clang version output.")
-    
+
     @classmethod
     def get_clang_version_str_linux(cls, output_text):
+        """Get Clang version string from output of "clang_binary -v".
+        This is the linux-specific variant.
+
+        Args:
+            output_text (str): output of "clang_binary -v"
+
+        Returns:
+            str: clang version number
+
+        Raises: RuntimeError: There is an error while getting version. This is
+            too important to continue. If this fails the plugin will not work
+            at all.
+        """
         # now we have the output, and can extract version from it
         version_regex = re.compile("\d\.\d\.*\d*")
         match = version_regex.search(output_text)
@@ -764,6 +803,19 @@ class Tools:
 
     @classmethod
     def get_clang_version_str_windows(cls, output_text):
+        """Get Clang version string from output of "clang_binary -v".
+        This is the windows-specific variant.
+
+        Args:
+            output_text (str): output of "clang_binary -v"
+
+        Returns:
+            str: clang version number
+
+        Raises: RuntimeError: There is an error while getting version. This is
+            too important to continue. If this fails the plugin will not work
+            at all.
+        """
         # now we have the output, and can extract version from it
         version_regex = re.compile("\d\.\d\.*\d*")
         match = version_regex.search(output_text)
