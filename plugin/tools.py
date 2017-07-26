@@ -715,6 +715,7 @@ class Tools:
     @classmethod
     def get_clang_version_str_osx(cls, output_text):
         """Get Clang version string from output of "clang_binary -v".
+
         This is the OSX-specific variant.
 
         Args:
@@ -738,6 +739,7 @@ class Tools:
     @classmethod
     def get_apple_clang_version_str(cls, output_text):
         """Get Clang version string from output of "clang_binary -v".
+
         This is the AppleClang-specific variant.
 
         Args:
@@ -779,6 +781,7 @@ class Tools:
     @classmethod
     def get_clang_version_str_linux(cls, output_text):
         """Get Clang version string from output of "clang_binary -v".
+
         This is the linux-specific variant.
 
         Args:
@@ -804,6 +807,7 @@ class Tools:
     @classmethod
     def get_clang_version_str_windows(cls, output_text):
         """Get Clang version string from output of "clang_binary -v".
+
         This is the windows-specific variant.
 
         Args:
