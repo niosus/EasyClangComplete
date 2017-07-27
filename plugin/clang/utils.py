@@ -7,6 +7,8 @@ import platform
 import logging
 import subprocess
 import html
+import string
+import itertools
 
 from os import path
 
@@ -343,7 +345,8 @@ class ClangUtils:
             result += "<div>" + cursor.brief_comment + "</div>"
 
         if cursor.raw_comment:
-            html_raw_comment = ClangUtils.cleanup_comment(cursor.raw_comment)
+            html_raw_comment = ClangUtils.cleanup_comment(
+                cursor.raw_comment, cursor.brief_comment)
             if len(html_raw_comment) > 0:
                 result += "<br><b>Full Doxygen comment:</b>"
                 result += "<br><div>" + html_raw_comment + "</div>"
@@ -420,34 +423,39 @@ class ClangUtils:
         return result
 
     @staticmethod
-    def cleanup_comment(raw_comment):
+    def cleanup_comment(raw_comment, brief_comment_to_remove):
         """Cleanup raw doxygen comment."""
-        lines = raw_comment.split('\n')
-        clean_lines = []
-        prev_line = ''
-        is_brief_comment = False
-        non_brief_found = False
-        for line in lines:
-            clean = line.strip()
-            if clean.startswith('/'):
-                clean = clean[3:]
-            elif clean.startswith('*'):
-                clean = clean[2:]
-            prev_line = clean
-            if clean[1:].startswith('brief'):
-                is_brief_comment = True
-                continue
-            if clean == '':
-                is_brief_comment = False
-            if clean == '' and prev_line == '':
-                # We want to ignore trailing empty lines.
-                continue
-            if is_brief_comment:
-                continue
-            if not non_brief_found:
-                non_brief_found = True
-                is_brief_comment = True
-                continue
-            non_brief_found = True
-            clean_lines.append(clean)
+        def find_brief_comment(comment_lines, brief_comment_to_remove):
+            for idx, line in enumerate(comment_lines):
+                if line.endswith(brief_comment_to_remove):
+                    return idx
+            raise ValueError("comment_lines does contain a brief comment")
+
+        # Split comment to lines
+        lines = raw_comment.splitlines()
+
+        # Remove comment prefixes from all lines
+        chars_to_strip = '/' + '*' + string.whitespace
+        clean_lines = [line.lstrip(chars_to_strip) for line in lines]
+
+        # Remove leading and trailing empty lines
+        while not clean_lines[0]:
+            del clean_lines[0]
+        while not clean_lines[-1]:
+            del clean_lines[-1]
+
+        # Exclude the brief comment from full comment if exists
+        if brief_comment_to_remove:
+            brief_comment_index = find_brief_comment(
+                clean_lines, brief_comment_to_remove)
+
+            # Remove the brief comment
+            del clean_lines[brief_comment_index]
+
+            # Remove any trailing empty lines
+            clean_lines = (
+                clean_lines[:brief_comment_index] + list(itertools.dropwhile(
+                    lambda line: not line, clean_lines[brief_comment_index:])))
+
+        # Combine all comment lines to valid HTML representation
         return '<br>'.join(clean_lines)
