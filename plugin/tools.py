@@ -703,55 +703,27 @@ class Tools:
         output_text = Tools.run_command(check_version_cmd, shell=True)
 
         if sublime.platform() == "osx":
-            return cls.get_clang_version_str_osx(output_text)
+            return cls._get_clang_version_str_osx(output_text)
         elif sublime.platform() == "linux":
-            return cls.get_clang_version_str_linux(output_text)
+            return cls._get_clang_version_str_linux(output_text)
         elif sublime.platform() == "windows":
-            return cls.get_clang_version_windows(output_text)
+            return cls._get_clang_version_windows(output_text)
         else:
             log.error("Unknown platform: %s" % sublime.platform())
             return None
 
     @classmethod
-    def get_clang_version_str_osx(cls, output_text):
-        """Get Clang version string from output of "clang_binary -v".
-
-        This is the OSX-specific variant.
-
-        Args:
-            output_text (str): output of "clang_binary -v"
-
-        Returns:
-            str: clang version number
-
-        Raises: RuntimeError: There is an error while getting version. This is
-            too important to continue. If this fails the plugin will not work
-            at all.
-        """
+    def _get_clang_version_str_osx(cls, output_text):
         # There can be two flavours on osx: the apple flavour or the trunk/brew
         # flavour.
         if "Apple" in output_text:
-            return cls.get_apple_clang_version_str(output_text)
+            return cls._get_apple_clang_version_str(output_text)
         else:
             # Same as on linux
-            return cls.get_clang_version_str_linux(output_text)
+            return cls._get_clang_version_str_linux(output_text)
 
     @classmethod
-    def get_apple_clang_version_str(cls, output_text):
-        """Get Clang version string from output of "clang_binary -v".
-
-        This is the AppleClang-specific variant.
-
-        Args:
-            output_text (str): output of "clang_binary -v"
-
-        Returns:
-            str: clang version number
-
-        Raises: RuntimeError: There is an error while getting version. This is
-            too important to continue. If this fails the plugin will not work
-            at all.
-        """
+    def _get_apple_clang_version_str(cls, output_text):
         version_regex = re.compile("\d\.\d\.*\d*")
         match = version_regex.search(output_text)
         if match:
@@ -779,21 +751,7 @@ class Tools:
                 " Couldn't find clang version in clang version output.")
 
     @classmethod
-    def get_clang_version_str_linux(cls, output_text):
-        """Get Clang version string from output of "clang_binary -v".
-
-        This is the linux-specific variant.
-
-        Args:
-            output_text (str): output of "clang_binary -v"
-
-        Returns:
-            str: clang version number
-
-        Raises: RuntimeError: There is an error while getting version. This is
-            too important to continue. If this fails the plugin will not work
-            at all.
-        """
+    def _get_clang_version_str_linux(cls, output_text):
         # now we have the output, and can extract version from it
         version_regex = re.compile("\d\.\d\.*\d*")
         match = version_regex.search(output_text)
@@ -805,30 +763,8 @@ class Tools:
                 " Couldn't find clang version in clang version output.")
 
     @classmethod
-    def get_clang_version_str_windows(cls, output_text):
-        """Get Clang version string from output of "clang_binary -v".
-
-        This is the windows-specific variant.
-
-        Args:
-            output_text (str): output of "clang_binary -v"
-
-        Returns:
-            str: clang version number
-
-        Raises: RuntimeError: There is an error while getting version. This is
-            too important to continue. If this fails the plugin will not work
-            at all.
-        """
-        # now we have the output, and can extract version from it
-        version_regex = re.compile("\d\.\d\.*\d*")
-        match = version_regex.search(output_text)
-        if match:
-            version_str = match.group()
-            return version_str
-        else:
-            raise RuntimeError(
-                " Couldn't find clang version in clang version output.")
+    def _get_clang_version_str_windows(cls, output_text):
+        return cls._get_clang_version_str_linux(output_text)
 
     @staticmethod
     def get_unique_str(init_string):
