@@ -17,7 +17,6 @@ from os import listdir
 import sublime
 import logging
 import tempfile
-import platform
 import subprocess
 
 import re
@@ -666,7 +665,7 @@ class Tools:
             if isinstance(command, list):
                 command = subprocess.list2cmdline(command)
                 log.debug("command: \n%s", command)
-            if platform.system() == "Windows":
+            if sublime.platform() == "windows":
                 # Don't let console window pop-up briefly.
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
