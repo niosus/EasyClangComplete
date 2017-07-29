@@ -439,9 +439,10 @@ class ActionRequest(object):
         current_position = view.sel()[0].a
         valid_positions = [current_position, view.word(current_position).a]
         if self._trigger_position not in valid_positions:
-            log.debug(
-                " view's trigger positions %s doesn't match action trigger "
-                "position %s" % (valid_positions, self._trigger_position))
+            log.debug(" view's trigger positions %s doesn't match action "
+                      "trigger position %s",
+                      valid_positions,
+                      self._trigger_position)
             return False
         return True
 
@@ -708,7 +709,7 @@ class Tools:
         elif sublime.platform() == "windows":
             return cls._get_clang_version_windows(output_text)
         else:
-            log.error("Unknown platform: %s" % sublime.platform())
+            log.error("Unknown platform: %s", sublime.platform())
             return None
 
     @classmethod
@@ -738,9 +739,10 @@ class Tools:
                                       "supported yet. Please open an issue "
                                       "for it".format(osx_version))
                 raise e
-            log.warning(" OSX version {} reported. Reducing it to {}."
-                        .format(osx_version, version_str))
-            log.info("Found clang version: {}".format(version_str))
+            log.warning("OSX version %s reported. Reducing it to %s.",
+                        osx_version,
+                        version_str)
+            log.info("Found clang version %s", version_str)
             return version_str
         else:
             raise RuntimeError(" Couldn't find clang version in clang version "
