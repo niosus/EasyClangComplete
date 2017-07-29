@@ -728,27 +728,25 @@ class Tools:
         match = version_regex.search(output_text)
         if match:
             version_str = match.group()
-            if version_str >= "4.2":
-                # info from this table: https://gist.github.com/yamaya/2924292
-                osx_version = version_str[:3]
-                try:
-                    version_str = OSX_CLANG_VERSION_DICT[osx_version]
-                except Exception as e:
-                    error_msg = """{}
-                    Version '{}' of apple-clang is not supported yet.
-                    Please open an issue for it.""".format(
-                        "EasyClangComplete", osx_version)
-                    sublime.error_message(error_msg)
-                    raise e
-                info = {"platform": platform.system()}
-                log.warning(
-                    " OSX version %s reported. Reducing it to %s. Info: %s",
-                    osx_version, version_str, info)
-            log.info("Found clang version: %s", version_str)
+            # throw away the patch number
+            osx_version = version_str[:3]
+            try:
+                # info from this table:
+                # https://gist.github.com/yamaya/2924292
+                version_str = OSX_CLANG_VERSION_DICT[osx_version]
+            except Exception as e:
+                sublime.error_message("Version '{}' of AppleClang is not "
+                                      "supported yet. Please open an issue "
+                                      "for it".format(osx_version))
+                raise e
+            info = {"platform": platform.system()}
+            log.warning(" OSX version {} reported. Reducing it to {}. "
+                        "Info: {}".format(osx_version, version_str, info))
+            log.info("Found clang version: {}".format(version_str))
             return version_str
         else:
-            raise RuntimeError(
-                " Couldn't find clang version in clang version output.")
+            raise RuntimeError(" Couldn't find clang version in clang version "
+                               "output.")
 
     @classmethod
     def _get_clang_version_str_linux(cls, output_text):
@@ -759,11 +757,12 @@ class Tools:
             version_str = match.group()
             return version_str
         else:
-            raise RuntimeError(
-                " Couldn't find clang version in clang version output.")
+            raise RuntimeError(" Couldn't find clang version in clang version "
+                               "output.")
 
     @classmethod
     def _get_clang_version_str_windows(cls, output_text):
+        # same as on linux for now.
         return cls._get_clang_version_str_linux(output_text)
 
     @staticmethod
