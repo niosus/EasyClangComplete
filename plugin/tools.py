@@ -739,9 +739,8 @@ class Tools:
                                       "supported yet. Please open an issue "
                                       "for it".format(osx_version))
                 raise e
-            info = {"platform": platform.system()}
-            log.warning(" OSX version {} reported. Reducing it to {}. "
-                        "Info: {}".format(osx_version, version_str, info))
+            log.warning(" OSX version {} reported. Reducing it to {}."
+                        .format(osx_version, version_str))
             log.info("Found clang version: {}".format(version_str))
             return version_str
         else:
