@@ -707,7 +707,7 @@ class Tools:
         elif sublime.platform() == "linux":
             return cls._get_clang_version_str_linux(output_text)
         elif sublime.platform() == "windows":
-            return cls._get_clang_version_windows(output_text)
+            return cls._get_clang_version_str_windows(output_text)
         else:
             log.error("Unknown platform: %s", sublime.platform())
             return None
