@@ -19,6 +19,7 @@ class MacroParser(object):
     Clang doesn't provide much information for MACRO_DEFINITION cursors,
     so we have to parse this info ourselves.
     """
+
     def __init__(self, name, location):
         """Parse the macro with the given name from its location.
 
@@ -422,15 +423,25 @@ class ClangUtils:
     @staticmethod
     def cleanup_comment(raw_comment):
         """Cleanup raw doxygen comment."""
+        def pop_prepending_empty_lines(lines):
+            first_non_empty_line_idx = 0
+            for line in lines:
+                if line == '':
+                    first_non_empty_line_idx += 1
+                else:
+                    break
+            return lines[first_non_empty_line_idx:]
+
         import string
         lines = raw_comment.split('\n')
         chars_to_strip = '/' + '*' + string.whitespace
         lines = [line.lstrip(chars_to_strip) for line in lines]
+        lines = pop_prepending_empty_lines(lines)
         clean_lines = []
-        print(lines)
         is_brief_comment = True
         for line in lines:
             if line == '' and is_brief_comment:
+                # Skip lines that belong to brief comment.
                 is_brief_comment = False
                 continue
             if is_brief_comment:
