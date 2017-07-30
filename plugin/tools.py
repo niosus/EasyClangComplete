@@ -761,12 +761,3 @@ class Tools:
             if flag.startswith(prefix):
                 return idx
         return None
-
-    @staticmethod
-    def generate_next_progress_message():
-        """Get next progress animation message."""
-        from random import sample
-        mod = len(PROGRESS_CHARS)
-        rands = [PROGRESS_CHARS[x % mod] for x in sample(range(100), 10)]
-        msg = PROGRESS_MSG.format(''.join(rands))
-        return msg
