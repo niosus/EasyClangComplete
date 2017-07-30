@@ -25,7 +25,6 @@ class Wildcards:
     PROJECT_PATH = "project_base_path"
     PROJECT_NAME = "project_name"
     CLANG_VERSION = "clang_version"
-    HOME = "~"
 
 
 class SettingsStorage:
