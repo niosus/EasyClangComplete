@@ -272,18 +272,18 @@ class SettingsStorage:
         """Update values for wildcard variables."""
         variables = view.window().extract_variables()
         self._wildcard_values.update(variables)
-        if 'folder' in variables:
-            project_folder = variables['folder'].replace('\\', '\\\\')
-            self._wildcard_values[Wildcards.PROJECT_PATH] = project_folder
-        if 'project_name' in variables:
-            project_name = path.splitext(variables['project_name'])[0]
-            self._wildcard_values[Wildcards.PROJECT_NAME] = project_name
 
-        # duplicate as fields
-        self.project_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
-        self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
+        self._wildcard_values[Wildcards.PROJECT_PATH] = \
+            variables.get("folder", "").replace("\\", "\\\\")
+
+        self._wildcard_values[Wildcards.PROJECT_NAME] = \
+            variables.get("project_base_name", "")
 
         # get clang version string
         version_str = Tools.get_clang_version_str(self.clang_binary)
         self._wildcard_values[Wildcards.CLANG_VERSION] = version_str
+
+        # duplicate as fields
+        self.project_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
+        self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
         self.clang_version = self._wildcard_values[Wildcards.CLANG_VERSION]
