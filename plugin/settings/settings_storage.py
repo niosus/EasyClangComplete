@@ -248,6 +248,18 @@ class SettingsStorage:
         if self.include_file_parent_folder:
             self.common_flags.append("-I" + file_parent_folder)
 
+    def __expand_star_wildcard(self, line):
+        """Expand paths like /some/path/* to a list of all folders."""
+        import os
+        if not line.endswith('*'):
+            return [line]
+        folders = []
+        base_folder = path.abspath(line[:-1])
+        for content in os.listdir(base_folder):
+            if path.isdir(content):
+                folders.append(content)
+        return folders
+
     def __replace_wildcard_if_needed(self, line):
         """Replace wildcards in a line if they are present there.
 
