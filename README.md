@@ -140,7 +140,7 @@ Some functionality is there only because of the help of the following users (in
 no particualr order):
 
 @Ventero, @riazanovskiy, @rchl, @Mischa-Alff, @jdumas, @simia, @tastytea,
-@brupelo, @randy3k, @david9991, @kjteske, @darwinyip.
+@brupelo, @randy3k, @david9991, @kjteske, @darwinyip, @rwols, @papadokolos.
 
 ## Tests ##
 Most crucial functionality is covered with unit tests using

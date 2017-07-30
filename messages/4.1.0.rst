@@ -1,0 +1,19 @@
+Version 4.1.0
+=============
+
+Fixes and improvements:
+-------------
+- removed a couple of threads related memoty leaks
+- change debug and info logging style
+- disambiguate between apple clang and general clang (@rwols)
+- allow using all variables of sublime's window in settings (@rwols)
+- fix disappearing param tag in Doxygen comments (@papadokolos)
+
+Thansk!
+-------
+Huge thanks go to the contributors: @rwols and @papadokolos
+
+I need your support!
+--------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it
