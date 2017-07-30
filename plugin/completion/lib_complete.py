@@ -33,7 +33,7 @@ cindex_dict = {
     '3.8': PKG_NAME + ".plugin.clang.cindex38",
     '3.9': PKG_NAME + ".plugin.clang.cindex39",
     '4.0': PKG_NAME + ".plugin.clang.cindex40",
-    '5.0': PKG_NAME + ".plugin.clang.cindex40"
+    '5.0': PKG_NAME + ".plugin.clang.cindex40"  # TODO: fixme
 }
 
 
@@ -196,7 +196,7 @@ class Completer(BaseCompleter):
             try:
                 if not file_name or not path.exists(file_name):
                     raise ValueError("file name does not exist anymore")
-                if self.version_str.startswith('4'):
+                if int(self.version_str[0]) > 3:
                     log.debug("using newer version of clang: %s",
                               self.version_str)
                     # It is important to set this option for clang 4.0 as

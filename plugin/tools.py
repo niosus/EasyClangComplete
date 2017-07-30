@@ -17,7 +17,6 @@ from os import listdir
 import sublime
 import logging
 import tempfile
-import platform
 import subprocess
 
 import re
@@ -440,9 +439,10 @@ class ActionRequest(object):
         current_position = view.sel()[0].a
         valid_positions = [current_position, view.word(current_position).a]
         if self._trigger_position not in valid_positions:
-            log.debug(
-                " view's trigger positions %s doesn't match action trigger "
-                "position %s" % (valid_positions, self._trigger_position))
+            log.debug(" view's trigger positions %s doesn't match action "
+                      "trigger position %s",
+                      valid_positions,
+                      self._trigger_position)
             return False
         return True
 
@@ -666,7 +666,7 @@ class Tools:
             if isinstance(command, list):
                 command = subprocess.list2cmdline(command)
                 log.debug("command: \n%s", command)
-            if platform.system() == "Windows":
+            if sublime.platform() == "windows":
                 # Don't let console window pop-up briefly.
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -684,8 +684,8 @@ class Tools:
             log.debug("clang process output: \n%s", output_text)
         return output_text
 
-    @staticmethod
-    def get_clang_version_str(clang_binary):
+    @classmethod
+    def get_clang_version_str(cls, clang_binary):
         """Get Clang version string from subprocess run of "clang_binary -v".
 
         Args:
@@ -702,34 +702,48 @@ class Tools:
         log.info("Getting version from command: `%s`", check_version_cmd)
         output_text = Tools.run_command(check_version_cmd, shell=True)
 
+        if "Apple" in output_text:
+            return cls._get_apple_clang_version_str(output_text)
+        else:
+            return cls._get_regular_clang_version_str(output_text)
+
+    @classmethod
+    def _get_regular_clang_version_str(cls, output_text):
         # now we have the output, and can extract version from it
         version_regex = re.compile("\d\.\d\.*\d*")
         match = version_regex.search(output_text)
         if match:
             version_str = match.group()
-            # TODO: we may need to revisit this and detect, say, word apple in
-            # the output of clang --version
-            if version_str >= "4.2" and platform.system() == "Darwin":
-                # info from this table: https://gist.github.com/yamaya/2924292
-                osx_version = version_str[:3]
-                try:
-                    version_str = OSX_CLANG_VERSION_DICT[osx_version]
-                except Exception as e:
-                    error_msg = """{}
-                    Version '{}' of apple-clang is not supported yet.
-                    Please open an issue for it.""".format(
-                        "EasyClangComplete", osx_version)
-                    sublime.error_message(error_msg)
-                    raise e
-                info = {"platform": platform.system()}
-                log.warning(
-                    " OSX version %s reported. Reducing it to %s. Info: %s",
-                    osx_version, version_str, info)
-            log.info("Found clang version: %s", version_str)
             return version_str
         else:
-            raise RuntimeError(
-                " Couldn't find clang version in clang version output.")
+            raise RuntimeError(" Couldn't find clang version in clang version "
+                               "output.")
+
+    @classmethod
+    def _get_apple_clang_version_str(cls, output_text):
+        version_regex = re.compile("\d\.\d\.*\d*")
+        match = version_regex.search(output_text)
+        if match:
+            version_str = match.group()
+            # throw away the patch number
+            osx_version = version_str[:3]
+            try:
+                # info from this table:
+                # https://gist.github.com/yamaya/2924292
+                version_str = OSX_CLANG_VERSION_DICT[osx_version]
+            except Exception as e:
+                sublime.error_message("Version '{}' of AppleClang is not "
+                                      "supported yet. Please open an issue "
+                                      "for it".format(osx_version))
+                raise e
+            log.warning("OSX version %s reported. Reducing it to %s.",
+                        osx_version,
+                        version_str)
+            log.info("Found clang version %s", version_str)
+            return version_str
+        else:
+            raise RuntimeError(" Couldn't find clang version in clang version "
+                               "output.")
 
     @staticmethod
     def get_unique_str(init_string):
