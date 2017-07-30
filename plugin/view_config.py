@@ -30,7 +30,7 @@ from .flags_sources.compilation_db import CompilationDb
 
 from .settings.settings_storage import SettingsStorage
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class ViewConfig(object):
@@ -85,14 +85,14 @@ class ViewConfig(object):
         # update if needed
         completer, flags = ViewConfig.__generate_essentials(view, settings)
         if self.needs_update(completer, flags):
-            log.debug(" config needs new completer.")
+            log.debug("config needs new completer.")
             self.completer = completer
             self.completer.clang_flags = flags
             self.completer.update(view, settings)
             File.update_mod_time(view.file_name())
             return self
         if ViewConfig.needs_reparse(view):
-            log.debug(" config updates existing completer.")
+            log.debug("config updates existing completer.")
             self.completer.update(view, settings)
         return self
 
@@ -115,7 +115,7 @@ class ViewConfig(object):
         if flags != self.completer.clang_flags:
             log.debug("different completer flags. Need to update.")
             return True
-        log.debug(" view config needs no update.")
+        log.debug("view config needs no update.")
         return False
 
     def is_older_than(self, age_in_seconds):
@@ -151,7 +151,7 @@ class ViewConfig(object):
         """
         if not File.is_unchanged(view.file_name()):
             return True
-        log.debug(" view config needs no reparse.")
+        log.debug("view config needs no reparse.")
         return False
 
     @staticmethod
@@ -224,7 +224,7 @@ class ViewConfig(object):
             flags = flag_source.get_flags(view.file_name(), search_scope)
             if flags:
                 # don't load anything more if we have flags
-                log.debug(" flags generated from '%s'.", file_name)
+                log.debug("flags generated from '%s'.", file_name)
                 return flags
         return []
 
@@ -261,14 +261,14 @@ class ViewConfig(object):
             error_vis = PhantomErrorVis()
         completer = None
         if settings.use_libclang:
-            log.info(" init completer based on libclang")
+            log.info("init completer based on libclang")
             completer = lib_complete.Completer(settings, error_vis)
             if not completer.valid:
-                log.error(" cannot initialize completer with libclang.")
-                log.info(" falling back to using clang in a subprocess.")
+                log.error("cannot initialize completer with libclang.")
+                log.info("falling back to using clang in a subprocess.")
                 completer = None
         if not completer:
-            log.info(" init completer based on clang from cmd")
+            log.info("init completer based on clang from cmd")
             completer = bin_complete.Completer(settings, error_vis)
         return completer
 
@@ -326,11 +326,11 @@ class ViewConfigManager(object):
     def get_from_cache(self, view):
         """Get config from cache with no modifications."""
         if not Tools.is_valid_view(view):
-            log.error(" view %s is not valid. Cannot get config.", view)
+            log.error("view %s is not valid. Cannot get config.", view)
             return None
         v_id = view.buffer_id()
         if v_id in self._cache:
-            log.debug(" config exists for path: %s", v_id)
+            log.debug("config exists for path: %s", v_id)
             self._cache[v_id].touch()
             return self._cache[v_id]
         return None
@@ -346,7 +346,7 @@ class ViewConfigManager(object):
             ViewConfig: Config for current view and settings.
         """
         if not Tools.is_valid_view(view):
-            log.error(" view %s is not valid. Cannot get config.", view)
+            log.error("view %s is not valid. Cannot get config.", view)
             return None
         try:
             v_id = view.buffer_id()
@@ -355,18 +355,18 @@ class ViewConfigManager(object):
             # between creating and removing a config.
             with ViewConfigManager.__rlock:
                 if v_id in self._cache:
-                    log.debug(" config exists for path: %s", v_id)
+                    log.debug("config exists for path: %s", v_id)
                     res = self._cache[v_id].update_if_needed(view, settings)
                 else:
-                    log.debug(" generate new config for path: %s", v_id)
+                    log.debug("generate new config for path: %s", v_id)
                     config = ViewConfig(view, settings)
                     self._cache[v_id] = config
                     res = config
 
                 # start timer if it is not set yet
-                log.debug(" starting timer to remove old configs.")
+                log.debug("starting timer to remove old configs.")
                 if v_id in ViewConfigManager.__timers:
-                    log.debug(" cancel old timer.")
+                    log.debug("cancel old timer.")
                     ViewConfigManager.__cancel_timer(v_id)
                 ViewConfigManager.__start_timer(
                     self.__remove_old_config, v_id, settings.max_cache_age)
@@ -375,13 +375,13 @@ class ViewConfigManager(object):
         except AttributeError as e:
             import traceback
             tb = traceback.format_exc()
-            log.error(" view became invalid while loading config: %s", e)
-            log.error(" traceback: %s", tb)
+            log.error("view became invalid while loading config: %s", e)
+            log.error("traceback: %s", tb)
             return None
 
     def clear_for_view(self, v_id):
         """Clear config for path."""
-        log.debug(" trying to clear config for view: %s", v_id)
+        log.debug("trying to clear config for view: %s", v_id)
         with ViewConfigManager.__rlock:
             if v_id in self._cache:
                 del self._cache[v_id]
@@ -391,12 +391,12 @@ class ViewConfigManager(object):
     @staticmethod
     def __start_timer(callback, v_id, max_age):
         """Start timer for file path and callback."""
-        log.debug(" [timer]: start for view: %s", v_id)
+        log.debug("[timer]: start for view: %s", v_id)
         ViewConfigManager.__timers[v_id] = Timer(
             ViewConfigManager.__timer_period,
             callback, [v_id, max_age])
         ViewConfigManager.__timers[v_id].start()
-        log.debug(" [timer]: active for views: %s",
+        log.debug("[timer]: active for views: %s",
                   ViewConfigManager.__timers.keys())
 
     @staticmethod
@@ -404,10 +404,10 @@ class ViewConfigManager(object):
         """Stop timer for file path."""
         with ViewConfigManager.__rlock:
             if v_id in ViewConfigManager.__timers:
-                log.debug(" [timer]: stop for view: %s", v_id)
+                log.debug("[timer]: stop for view: %s", v_id)
                 ViewConfigManager.__timers[v_id].cancel()
                 del ViewConfigManager.__timers[v_id]
-                log.debug(" [timer]: active for views: %s",
+                log.debug("[timer]: active for views: %s",
                           ViewConfigManager.__timers.keys())
 
     def __remove_old_config(self, v_id, max_config_age):
@@ -420,13 +420,13 @@ class ViewConfigManager(object):
         with ViewConfigManager.__rlock:
             ViewConfigManager.__cancel_timer(v_id)
             if self._cache[v_id].is_older_than(max_config_age):
-                log.debug(" [delete] old config: %s", v_id)
+                log.debug("[delete] old config: %s", v_id)
                 del self._cache[v_id]
             else:
-                log.debug(" [skip] young config: Age %s < %s. View: %s.",
+                log.debug("[skip] young config: Age %s < %s. View: %s.",
                           self._cache[v_id].get_age(),
                           max_config_age,
                           v_id)
-                log.debug(" [timer]: restart.")
+                log.debug("[timer]: restart.")
                 ViewConfigManager.__start_timer(
                     self.__remove_old_config, v_id, max_config_age)

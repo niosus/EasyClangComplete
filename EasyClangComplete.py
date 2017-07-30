@@ -38,7 +38,20 @@ CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
 ThreadPool = thread_pool.ThreadPool
 ThreadJob = thread_pool.ThreadJob
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
+log.setLevel(logging.DEBUG)
+log.propagate = False
+formatter_default = logging.Formatter(
+    '[%(name)s:%(levelname)-7s]: %(message)s')
+formatter_verbose = logging.Formatter(
+    '[%(name)s:%(levelname)-7s]:[%(filename)s]:[%(funcName)s]:'
+    '[%(threadName)s]: %(message)s')
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+ch.setFormatter(formatter_default)
+if not log.hasHandlers():
+    log.addHandler(ch)
+
 
 handle_plugin_loaded_function = None
 handle_plugin_unloaded_function = None
@@ -74,15 +87,15 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
         cmake_cache = CMakeFileCache()
         try:
             cmake_file_path = cmake_cache[file_path]
-            log.debug(" Cleaning file: '%s'", cmake_file_path)
+            log.debug("Cleaning file: '%s'", cmake_file_path)
             del cmake_cache[file_path]
             del cmake_cache[cmake_file_path]
             temp_proj_dir = CMakeFile.unique_folder_name(cmake_file_path)
             if path.exists(temp_proj_dir):
-                log.debug(" Cleaning build directory: '%s'", temp_proj_dir)
+                log.debug("Cleaning build directory: '%s'", temp_proj_dir)
                 shutil.rmtree(temp_proj_dir, ignore_errors=True)
         except KeyError:
-            log.debug(" Nothing to clean")
+            log.debug("Nothing to clean")
 
 
 class EasyClangComplete(sublime_plugin.EventListener):
@@ -104,9 +117,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         global handle_plugin_unloaded_function
         handle_plugin_loaded_function = self.on_plugin_loaded
         handle_plugin_unloaded_function = self.on_plugin_unloaded
-        # By default be verbose and limit on settings change if verbose flag is
-        # not set.
-        logging.basicConfig(level=logging.DEBUG)
 
         # init instance variables to reasonable defaults
         self.current_completions = None
@@ -117,14 +127,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def on_plugin_unloaded(self):
         """Manage what we do when the plugin is unloaded."""
-        log.debug(" plugin unloaded")
+        log.debug("plugin unloaded")
         self.loaded = False
 
     def on_plugin_loaded(self):
         """Called upon plugin load event."""
         # init settings manager
         self.loaded = True
-        log.debug(" handle plugin loaded")
+        log.debug("handle plugin loaded")
         self.settings_manager = SettingsManager()
         # self.on_settings_changed()
         self.settings_manager.add_change_listener(self.on_settings_changed)
@@ -138,7 +148,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     def on_settings_changed(self):
         """Called when any of the settings changes."""
-        log.debug(" on settings changed handle")
+        log.debug("on settings changed handle")
         if not self.loaded:
             log.warning(
                 " cannot process settings change as plugin is not loaded")
@@ -146,10 +156,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if not self.settings_manager:
             self.settings_manager = SettingsManager()
         user_settings = self.settings_manager.user_settings()
-        # If verbose flag is set then respect default DEBUG level.
-        # Otherwise disable level DEBUG and allow INFO and higher levels.
-        off_level = logging.NOTSET if user_settings.verbose else logging.DEBUG
-        logging.disable(level=off_level)
+        if user_settings.verbose:
+            ch.setFormatter(formatter_verbose)
+            ch.setLevel(logging.DEBUG)
+        else:
+            ch.setFormatter(formatter_default)
+            ch.setLevel(logging.INFO)
 
         if user_settings.need_reparse():
             # stop processing this if the settings are still invalid
@@ -179,10 +191,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
             try:
                 EasyClangComplete.thread_pool.progress_status.erase_status()
             except AttributeError as e:
-                log.debug(" cannot clear status, %s", e)
+                log.debug("cannot clear status, %s", e)
             return
         EasyClangComplete.thread_pool.progress_status.showing = True
-        log.debug(" on_activated_async view id %s", view.buffer_id())
+        log.debug("on_activated_async view id %s", view.buffer_id())
         settings = self.settings_manager.settings_for_view(view)
         # All is taken care of. The view is built if needed.
         job = ThreadJob(name=EasyClangComplete.UPDATE_JOB_TAG,
@@ -216,7 +228,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
         """
         if Tools.is_valid_view(view):
-            log.debug(" on_modified_async view id %s", view.buffer_id())
+            log.debug("on_modified_async view id %s", view.buffer_id())
             view_config = self.view_config_manager.get_from_cache(view)
             if not view_config:
                 return
@@ -234,8 +246,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
+        if view.file_name().endswith('.sublime-project'):
+            if not self.settings_manager:
+                log.error("no settings manager, no cannot reload settings")
+                return
+            log.debug("Project file changed. Reloading settings.")
+            self.settings_manager.on_settings_changed()
         if Tools.is_valid_view(view):
-            log.debug(" saving view: %s", view.buffer_id())
+            log.debug("saving view: %s", view.buffer_id())
             settings = self.settings_manager.settings_for_view(view)
             job = ThreadJob(name=EasyClangComplete.UPDATE_JOB_TAG,
                             callback=EasyClangComplete.config_updated,
@@ -253,7 +271,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         if Tools.is_valid_view(view):
-            log.debug(" closing view %s", view.buffer_id())
+            log.debug("closing view %s", view.buffer_id())
             self.settings_manager.clear_for_view(view)
             file_path = view.buffer_id()
             job = ThreadJob(name=EasyClangComplete.CLEAR_JOB_TAG,
@@ -272,9 +290,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             future (concurrent.Future): future holding id of removed view
         """
         if future.done():
-            log.debug(" removed config for id: %s", future.result())
+            log.debug("removed config for id: %s", future.result())
         elif future.cancelled():
-            log.debug(" could not remove config -> cancelled")
+            log.debug("could not remove config -> cancelled")
 
     @staticmethod
     def config_updated(future):
@@ -284,9 +302,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             future (concurrent.Future): future holding config of updated view
         """
         if future.done():
-            log.debug(" updated config: %s", future.result())
+            log.debug("updated config: %s", future.result())
         elif future.cancelled():
-            log.debug(" could not update config -> cancelled")
+            log.debug("could not update config -> cancelled")
 
     @staticmethod
     def on_open_declaration(location):
@@ -339,7 +357,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if completion_request.is_suitable_for_view(active_view):
             self.current_completions = completions
         else:
-            log.debug(" ignoring completions")
+            log.debug("ignoring completions")
             self.current_completions = []
         if self.current_completions:
             # we only want to trigger the autocompletion popup if there
@@ -385,26 +403,26 @@ class EasyClangComplete(sublime_plugin.EventListener):
             sublime.Completions: completions with a flag
         """
         if not Tools.is_valid_view(view):
-            log.debug(" not a valid view")
+            log.debug("not a valid view")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
-        log.debug(" on_query_completions view id %s", view.buffer_id())
-        log.debug(" prefix: %s, locations: %s" % (prefix, locations))
+        log.debug("on_query_completions view id %s", view.buffer_id())
+        log.debug("prefix: %s, locations: %s" % (prefix, locations))
         trigger_pos = locations[0] - len(prefix)
         completion_request = tools.ActionRequest(view, trigger_pos)
         current_pos_id = completion_request.get_identifier()
-        log.debug(" this position has identifier: '%s'", current_pos_id)
+        log.debug("this position has identifier: '%s'", current_pos_id)
 
         # get settings for this view
         settings = self.settings_manager.settings_for_view(view)
         # get view config
         view_config = self.view_config_manager.get_from_cache(view)
         if not view_config:
-            log.debug(" no view config")
+            log.debug("no view config")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
         if self.current_completions and current_pos_id == self.current_job_id:
-            log.debug(" returning existing completions")
+            log.debug("returning existing completions")
             return SublBridge.format_completions(
                 self.current_completions,
                 settings.hide_default_completions)
@@ -413,20 +431,20 @@ class EasyClangComplete(sublime_plugin.EventListener):
         pos_status = Tools.get_pos_status(trigger_pos, view, settings)
         if pos_status == PosStatus.WRONG_TRIGGER:
             # we are at a wrong trigger, remove all completions from the list
-            log.debug(" wrong trigger")
-            log.debug(" hiding default completions")
+            log.debug("wrong trigger")
+            log.debug("hiding default completions")
             return Tools.HIDE_DEFAULT_COMPLETIONS
         if pos_status == PosStatus.COMPLETION_NOT_NEEDED:
-            log.debug(" completion not needed")
+            log.debug("completion not needed")
             # show default completions for now if allowed
             if settings.hide_default_completions:
-                log.debug(" hiding default completions")
+                log.debug("hiding default completions")
                 return Tools.HIDE_DEFAULT_COMPLETIONS
-            log.debug(" showing default completions")
+            log.debug("showing default completions")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
         self.current_job_id = current_pos_id
-        log.debug(" starting async auto_complete with id: %s",
+        log.debug("starting async auto_complete with id: %s",
                   self.current_job_id)
 
         # submit async completion job
@@ -438,7 +456,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # show default completions for now if allowed
         if settings.hide_default_completions:
-            log.debug(" hiding default completions")
+            log.debug("hiding default completions")
             return Tools.HIDE_DEFAULT_COMPLETIONS
-        log.debug(" showing default completions")
+        log.debug("showing default completions")
         return Tools.SHOW_DEFAULT_COMPLETIONS

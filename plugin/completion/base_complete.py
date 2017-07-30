@@ -8,7 +8,7 @@ import logging
 
 from ..tools import Tools
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class BaseCompleter:
@@ -95,7 +95,7 @@ class BaseCompleter:
         """
         errors = self.compiler_variant.errors_from_output(output)
         if not Tools.is_valid_view(view):
-            log.error(" cannot show errors. View became invalid!")
+            log.error("cannot show errors. View became invalid!")
             return
         self.error_vis.generate(view, errors)
         self.error_vis.show_errors(view)

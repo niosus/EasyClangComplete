@@ -10,7 +10,7 @@ from os import path
 
 from ..tools import Tools
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class Wildcards:
@@ -85,7 +85,7 @@ class SettingsStorage:
         Args:
             settings_handle (sublime.Settings): handle to sublime settings
         """
-        log.debug(" creating new settings storage object")
+        log.debug("creating new settings storage object")
         self.clang_version = ''
         self.libclang_path = ''
         self.clang_binary = ''
@@ -109,7 +109,7 @@ class SettingsStorage:
         try:
             # init current and parrent folders:
             if not Tools.is_valid_view(view):
-                log.error(" no view to populate common flags from")
+                log.error("no view to populate common flags from")
                 return
             self.__load_vars_from_settings(view.settings(),
                                            project_specific=True)
@@ -123,8 +123,8 @@ class SettingsStorage:
             self.clang_binary = self.__replace_wildcard_if_needed(
                 self.clang_binary)
         except AttributeError as e:
-            log.error(" view became None. Do not continue.")
-            log.error(" original error: %s", e)
+            log.error("view became None. Do not continue.")
+            log.error("original error: %s", e)
 
     def need_reparse(self):
         """A very hacky check that there was an incomplete load.
@@ -140,9 +140,9 @@ class SettingsStorage:
 
         """
         if 'progress_style' in self.__dict__:
-            log.debug(' settings complete')
+            log.debug('settings complete')
             return False
-        log.debug(' settings incomplete and will be reloaded a bit later')
+        log.debug('settings incomplete and will be reloaded a bit later')
         return True
 
     def is_valid(self):
@@ -189,9 +189,9 @@ class SettingsStorage:
                 project-specific and should be read with appropriate prefixes
         """
         if project_specific:
-            log.debug(" Overriding settings by project ones if needed:")
-            log.debug(" Valid prefixes: %s", SettingsStorage.PREFIXES)
-        log.debug(" Reading settings...")
+            log.debug("Overriding settings by project ones if needed:")
+            log.debug("Valid prefixes: %s", SettingsStorage.PREFIXES)
+        log.debug("Reading settings...")
         # project settings are all prefixed to disambiguate them from others
         if project_specific:
             prefixes = SettingsStorage.PREFIXES
@@ -207,8 +207,8 @@ class SettingsStorage:
                 # set this value to this object too
                 setattr(self, setting_name, val)
                 # tell the user what we have done
-                log.debug("  %-26s <-- '%s'", setting_name, val)
-        log.debug(" Settings sucessfully read...")
+                log.debug("%-26s <-- '%s'", setting_name, val)
+        log.debug("Settings sucessfully read...")
 
         # initialize max_cache_age if is it not yet, default to 30 minutes
         self.max_cache_age = getattr(self, "max_cache_age", "00:30:00")
@@ -242,7 +242,7 @@ class SettingsStorage:
             current_file_name (str): current view file name
         """
         # populate variables to real values
-        log.debug(" populating common_flags with current variables.")
+        log.debug("populating common_flags with current variables.")
         for idx, flag in enumerate(self.common_flags):
             self.common_flags[idx] = self.__replace_wildcard_if_needed(flag)
 
@@ -269,7 +269,7 @@ class SettingsStorage:
         for wildcard, value in self._wildcard_values.items():
             res = re.sub(re.escape(wildcard), value, res)
         if res != line:
-            log.debug(" populated '%s' to '%s'", line, res)
+            log.debug("populated '%s' to '%s'", line, res)
         return res
 
     def __update_widcard_values(self, view):

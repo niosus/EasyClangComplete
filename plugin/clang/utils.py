@@ -7,10 +7,12 @@ import platform
 import logging
 import subprocess
 import html
+import string
+import itertools
 
 from os import path
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class MacroParser(object):
@@ -116,14 +118,14 @@ class ClangUtils:
         Returns:
             str: path to folder with libclang
         """
-        log.debug(" real output: %s", output)
+        log.debug("real output: %s", output)
         if platform.system() == "Darwin":
             # [HACK] uh... I'm not sure why it happens like this...
             folder_to_search = path.join(output, '..', '..')
-            log.debug(" folder to search: %s", folder_to_search)
+            log.debug("folder to search: %s", folder_to_search)
             return folder_to_search
         elif platform.system() == "Windows":
-            log.debug(" architecture: %s", platform.architecture())
+            log.debug("architecture: %s", platform.architecture())
             return path.normpath(output)
         elif platform.system() == "Linux":
             return path.normpath(path.dirname(output))
@@ -156,11 +158,11 @@ class ClangUtils:
         """
         stdin = None
         stderr = None
-        log.debug(" platform: %s", platform.architecture())
-        log.debug(" python version: %s", platform.python_version())
+        log.debug("platform: %s", platform.architecture())
+        log.debug("python version: %s", platform.python_version())
         current_system = platform.system()
-        log.debug(" we are on '%s'", platform.system())
-        log.debug(" user provided libclang_path: %s", libclang_path)
+        log.debug("we are on '%s'", platform.system())
+        log.debug("user provided libclang_path: %s", libclang_path)
         # Get version string for help finding the proper libclang library on
         # Linux
         if libclang_path:
@@ -169,7 +171,7 @@ class ClangUtils:
             if libclang_dir:
                 # It was found! No need to search any further!
                 ClangUtils.libclang_name = path.basename(libclang_path)
-                log.info(" using user-provided libclang: '%s'", libclang_path)
+                log.info("using user-provided libclang: '%s'", libclang_path)
                 return libclang_dir
         # If the user hint did not work, we look for it normally
         if current_system == "Linux":
@@ -179,7 +181,7 @@ class ClangUtils:
             # pick a name for a file
             for name in ClangUtils.possible_filenames[current_system]:
                 file = "{name}{suffix}".format(name=name, suffix=suffix)
-                log.debug(" searching for: '%s'", file)
+                log.debug("searching for: '%s'", file)
                 startupinfo = None
                 # let's find the library
                 if platform.system() == "Darwin":
@@ -202,19 +204,19 @@ class ClangUtils:
                     stdin=stdin,
                     stderr=stderr,
                     startupinfo=startupinfo).decode('utf8').strip()
-                log.debug(" libclang search output = '%s'", output)
+                log.debug("libclang search output = '%s'", output)
                 if output:
                     libclang_dir = ClangUtils.dir_from_output(output)
                     if path.isdir(libclang_dir):
                         full_libclang_path = path.join(libclang_dir, file)
                         if path.exists(full_libclang_path):
-                            log.info(" found libclang library file: '%s'",
+                            log.info("found libclang library file: '%s'",
                                      full_libclang_path)
                             ClangUtils.libclang_name = file
                             return libclang_dir
                 log.warning(" clang could not find '%s'", file)
         # if we haven't found anything there is nothing to return
-        log.error(" no libclang found at all")
+        log.error("no libclang found at all")
         return None
 
     @staticmethod
@@ -343,7 +345,8 @@ class ClangUtils:
             result += "<div>" + cursor.brief_comment + "</div>"
 
         if cursor.raw_comment:
-            html_raw_comment = ClangUtils.cleanup_comment(cursor.raw_comment)
+            html_raw_comment = ClangUtils.cleanup_comment(
+                cursor.raw_comment, cursor.brief_comment)
             if len(html_raw_comment) > 0:
                 result += "<br><b>Full Doxygen comment:</b>"
                 result += "<br><div>" + html_raw_comment + "</div>"
@@ -420,34 +423,39 @@ class ClangUtils:
         return result
 
     @staticmethod
-    def cleanup_comment(raw_comment):
+    def cleanup_comment(raw_comment, brief_comment_to_remove):
         """Cleanup raw doxygen comment."""
-        lines = raw_comment.split('\n')
-        clean_lines = []
-        prev_line = ''
-        is_brief_comment = False
-        non_brief_found = False
-        for line in lines:
-            clean = line.strip()
-            if clean.startswith('/'):
-                clean = clean[3:]
-            elif clean.startswith('*'):
-                clean = clean[2:]
-            prev_line = clean
-            if clean[1:].startswith('brief'):
-                is_brief_comment = True
-                continue
-            if clean == '':
-                is_brief_comment = False
-            if clean == '' and prev_line == '':
-                # We want to ignore trailing empty lines.
-                continue
-            if is_brief_comment:
-                continue
-            if not non_brief_found:
-                non_brief_found = True
-                is_brief_comment = True
-                continue
-            non_brief_found = True
-            clean_lines.append(clean)
+        def find_brief_comment(comment_lines, brief_comment_to_remove):
+            for idx, line in enumerate(comment_lines):
+                if line.endswith(brief_comment_to_remove):
+                    return idx
+            raise ValueError("comment_lines does contain a brief comment")
+
+        # Split comment to lines
+        lines = raw_comment.splitlines()
+
+        # Remove comment prefixes from all lines
+        chars_to_strip = '/' + '*' + string.whitespace
+        clean_lines = [line.lstrip(chars_to_strip) for line in lines]
+
+        # Remove leading and trailing empty lines
+        while not clean_lines[0]:
+            del clean_lines[0]
+        while not clean_lines[-1]:
+            del clean_lines[-1]
+
+        # Exclude the brief comment from full comment if exists
+        if brief_comment_to_remove:
+            brief_comment_index = find_brief_comment(
+                clean_lines, brief_comment_to_remove)
+
+            # Remove the brief comment
+            del clean_lines[brief_comment_index]
+
+            # Remove any trailing empty lines
+            clean_lines = (
+                clean_lines[:brief_comment_index] + list(itertools.dropwhile(
+                    lambda line: not line, clean_lines[brief_comment_index:])))
+
+        # Combine all comment lines to valid HTML representation
         return '<br>'.join(clean_lines)

@@ -11,7 +11,7 @@ from ..tools import PKG_NAME
 
 from .settings_storage import SettingsStorage
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class SettingsManager:
@@ -29,6 +29,7 @@ class SettingsManager:
 
     def __init__(self):
         """Initialize the class by loading the default user settings."""
+        log.debug("create new setting manager object")
         self.__default_settings = None
         self.__settings_dict = {}
         self.__change_listeners = []
@@ -46,7 +47,7 @@ class SettingsManager:
             self.__init_default_settings()
         view_id = view.buffer_id()
         if view_id not in self.__settings_dict:
-            log.debug(" no settings for view %s. Reinitializing.", view_id)
+            log.debug("no settings for view %s. Reinitializing.", view_id)
             self.__init_for_view(view)
         if view_id in self.__settings_dict:
             # when the view is closed quickly there can be an error here
@@ -61,7 +62,7 @@ class SettingsManager:
         """
         view_id = view.buffer_id()
         if view_id in self.__settings_dict:
-            log.debug(" clearing settings for view: %s", view_id)
+            log.debug("clearing settings for view: %s", view_id)
             del self.__settings_dict[view_id]
 
     def user_settings(self):
@@ -81,7 +82,7 @@ class SettingsManager:
             listener (function): function to call on settings change
         """
         if listener in self.__change_listeners:
-            log.error(' this settings listener was already added before')
+            log.error('this settings listener was already added before')
         self.__change_listeners.append(listener)
 
     def __init_for_view(self, view):
@@ -96,9 +97,9 @@ class SettingsManager:
         view_id = view.buffer_id()
         self.__settings_dict[view_id] = copy.deepcopy(self.__default_settings)
         self.__settings_dict[view_id].update_from_view(view)
-        log.debug(" settings initialized for view: %s", view_id)
+        log.debug("settings initialized for view: %s", view_id)
 
-    def __on_settings_changed(self):
+    def on_settings_changed(self):
         """When user changes settings, trigger this."""
         self.__init_default_settings()
 
@@ -108,7 +109,7 @@ class SettingsManager:
         # notify all the listeners
         for listener in self.__change_listeners:
             listener()
-        log.info(" settings changed and reloaded")
+        log.info("settings changed and reloaded")
 
     def __init_default_settings(self):
         """Initialize default user settings.
@@ -117,12 +118,12 @@ class SettingsManager:
             RuntimeError: If settings are not loaded, throw an error
         """
         settings_file_name = PKG_NAME + ".sublime-settings"
-        log.debug(" loading settings: '%s'", settings_file_name)
+        log.debug("loading settings: '%s'", settings_file_name)
         self.__subl_settings = sublime.load_settings(
             PKG_NAME + ".sublime-settings")
         self.__subl_settings.clear_on_change(PKG_NAME)
         self.__subl_settings.add_on_change(PKG_NAME,
-                                           self.__on_settings_changed)
+                                           self.on_settings_changed)
 
         # initialize default settings
         self.__default_settings = SettingsStorage(self.__subl_settings)

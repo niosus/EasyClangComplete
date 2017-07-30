@@ -17,7 +17,7 @@ import logging
 import re
 import os
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 @singleton
@@ -69,15 +69,15 @@ class CMakeFile(FlagsSource):
         search_scope = self._update_search_scope(search_scope, file_path)
         # TODO(igor): probably can be simplified. Why do we need to load
         # cached? should we just test if currently found one is in cache?
-        log.debug(" [cmake]:[get]: for file %s", file_path)
+        log.debug("[cmake]:[get]: for file %s", file_path)
         cached_cmake_path = self._get_cached_from(file_path)
-        log.debug(" [cmake]:[cached]: '%s'", cached_cmake_path)
+        log.debug("[cmake]:[cached]: '%s'", cached_cmake_path)
         current_cmake_path = self._find_current_in(search_scope, 'project')
-        log.debug(" [cmake]:[current]: '%s'", current_cmake_path)
+        log.debug("[cmake]:[current]: '%s'", current_cmake_path)
 
         parsed_before = current_cmake_path in self._cache
         if parsed_before:
-            log.debug(" [cmake]: found cached CMakeLists.txt.")
+            log.debug("[cmake]: found cached CMakeLists.txt.")
             cached_cmake_path = current_cmake_path
             # remember that for this file we have found this cmakelists
             self._cache[file_path] = current_cmake_path
@@ -90,14 +90,14 @@ class CMakeFile(FlagsSource):
             if cached_cmake_path not in self._cache:
                 use_cached = False
             if use_cached:
-                log.debug(" [cmake]:[unchanged]: use existing db.")
+                log.debug("[cmake]:[unchanged]: use existing db.")
                 db_file_path = self._cache[cached_cmake_path]
                 db = CompilationDb(self._include_prefixes)
                 db_search_scope = SearchScope(
                     from_folder=path.dirname(db_file_path))
                 return db.get_flags(file_path, db_search_scope)
 
-        log.debug(" [cmake]:[generate new db]")
+        log.debug("[cmake]:[generate new db]")
         db_file = CMakeFile.__compile_cmake(
             cmake_file=File(current_cmake_path),
             prefix_paths=self.__cmake_prefix_paths,
@@ -158,19 +158,19 @@ class CMakeFile(FlagsSource):
         try:
             os.makedirs(tempdir)
         except OSError:
-            log.debug(" Folder %s exists.", tempdir)
+            log.debug("Folder %s exists.", tempdir)
         try:
             # sometimes there are variables missing to carry out the build. We
             # can set them here from the settings.
             my_env = os.environ.copy()
-            log.debug(" prefix paths: %s", prefix_paths)
+            log.debug("prefix paths: %s", prefix_paths)
             merged_paths = ""
             for prefix_path in prefix_paths:
                 merged_paths += prefix_path + ":"
             merged_paths = merged_paths[:-1]
-            log.debug(" merged paths: %s", merged_paths)
+            log.debug("merged paths: %s", merged_paths)
             my_env['CMAKE_PREFIX_PATH'] = merged_paths
-            log.debug(" CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
+            log.debug("CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
             log.info(' running command: %s', cmake_cmd)
             output = subprocess.check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,
@@ -180,12 +180,12 @@ class CMakeFile(FlagsSource):
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
-            log.info(" cmake process finished with code: %s", e.returncode)
-        log.info(" cmake produced output: \n%s", output_text)
+            log.info("cmake process finished with code: %s", e.returncode)
+        log.info("cmake produced output: \n%s", output_text)
 
         database_path = path.join(tempdir, CompilationDb._FILE_NAME)
         if not path.exists(database_path):
-            log.error(" cmake has finished, but no compilation database.")
+            log.error("cmake has finished, but no compilation database.")
             return None
         # update the dependency modification time
         dep_file_path = path.join(tempdir, 'CMakeFiles', 'Makefile.cmake')

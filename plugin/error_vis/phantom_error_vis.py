@@ -12,7 +12,7 @@ from ..tools import SublBridge
 from .popup_error_vis import PopupErrorVis
 from .popup_error_vis import PATH_TO_HTML_FOLDER
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 HTML_FILE_PATH = path.join(PATH_TO_HTML_FOLDER, "error_phantom.html")
 
@@ -72,7 +72,7 @@ class PhantomErrorVis(PopupErrorVis):
             view (sublime.View): current view
             row (int): number of row
         """
-        log.debug(" not showing popup as we use phantoms")
+        log.debug("not showing popup as we use phantoms")
 
     def clear(self, view):
         """Clear errors from dict for view.

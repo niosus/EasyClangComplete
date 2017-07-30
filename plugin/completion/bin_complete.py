@@ -17,7 +17,7 @@ from .compiler_variant import ClangCompilerVariant
 from .compiler_variant import ClangClCompilerVariant
 from ..settings.settings_storage import SettingsStorage
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 
 class Completer(BaseCompleter):
@@ -90,17 +90,17 @@ class Completer(BaseCompleter):
 
         It builds up a clang command that is then executed
         as a subprocess. The output is parsed for completions """
-        log.debug(" completing with cmd command")
+        log.debug("completing with cmd command")
         view = completion_request.get_view()
         start = time.time()
         output_text = self.run_clang_command(
             view, "complete", completion_request.get_trigger_position())
         raw_complete = output_text.splitlines()
         end = time.time()
-        log.debug(" code complete done in %s seconds", end - start)
+        log.debug("code complete done in %s seconds", end - start)
 
         completions = Completer._parse_completions(raw_complete)
-        log.debug(' completions: %s' % completions)
+        log.debug('completions: %s' % completions)
         return (completion_request, completions)
 
     def info(self, tooltip_request):
@@ -147,7 +147,7 @@ class Completer(BaseCompleter):
         start = time.time()
         output_text = self.run_clang_command(view, "update")
         end = time.time()
-        log.debug(" rebuilding done in %s seconds", end - start)
+        log.debug("rebuilding done in %s seconds", end - start)
 
         self.show_errors(view, output_text)
 
@@ -187,7 +187,7 @@ class Completer(BaseCompleter):
         # construct cmd from building parts
         complete_cmd = [self.clang_binary] + flags + [temp_file_name]
         # now run this command
-        log.debug(" clang command: \n%s", complete_cmd)
+        log.debug("clang command: \n%s", complete_cmd)
 
         return Tools.run_command(complete_cmd)
 

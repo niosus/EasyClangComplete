@@ -21,7 +21,7 @@ from ..settings.settings_storage import SettingsStorage
 from threading import RLock
 from os import path
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ECC")
 
 cindex_dict = {
     '3.2': PKG_NAME + ".plugin.clang.cindex32",
@@ -86,7 +86,7 @@ class Completer(BaseCompleter):
             # import cindex bundled with this plugin. We cannot use the default
             # one because sublime uses python 3, but there are no python
             # bindings for python 3
-            log.debug(" using bundled cindex: %s", cindex_module_name)
+            log.debug("using bundled cindex: %s", cindex_module_name)
             self.cindex = importlib.import_module(cindex_module_name)
 
             # initialize ignore list to account for private methods etc.
@@ -111,7 +111,7 @@ class Completer(BaseCompleter):
                 self.cindex.Index.create()
                 self.valid = True
             except Exception as e:
-                log.error(" error: %s", e)
+                log.error("error: %s", e)
                 self.valid = False
 
     def parse_tu(self, view, settings):
@@ -133,7 +133,7 @@ class Completer(BaseCompleter):
         unsaved_files = [(file_name, file_body)]
 
         # flags are loaded by base completer already
-        log.debug(" clang flags are: %s", self.clang_flags)
+        log.debug("clang flags are: %s", self.clang_flags)
         v_id = view.buffer_id()
         if v_id == 0:
             log.warning(" this is default id. View is closed. Abort!")
@@ -142,7 +142,7 @@ class Completer(BaseCompleter):
             start = time.time()
             try:
                 TU = self.cindex.TranslationUnit
-                log.debug(" compilation started for view id: %s", v_id)
+                log.debug("compilation started for view id: %s", v_id)
                 if not file_name or not path.exists(file_name):
                     raise ValueError("file name does not exist anymore")
 
@@ -160,9 +160,9 @@ class Completer(BaseCompleter):
                     options=parse_options)
                 self.tu = trans_unit
             except Exception as e:
-                log.error(" error while compiling: %s", e)
+                log.error("error while compiling: %s", e)
             end = time.time()
-            log.debug(" compilation done in %s seconds", end - start)
+            log.debug("compilation done in %s seconds", end - start)
 
     def complete(self, completion_request):
         """Called asynchronously to create a list of autocompletions.
@@ -192,12 +192,12 @@ class Completer(BaseCompleter):
         with Completer.rlock:
             # execute clang code completion
             start = time.time()
-            log.debug(" started code complete for view %s", v_id)
+            log.debug("started code complete for view %s", v_id)
             try:
                 if not file_name or not path.exists(file_name):
                     raise ValueError("file name does not exist anymore")
                 if self.version_str.startswith('4'):
-                    log.debug(" using newer version of clang: %s",
+                    log.debug("using newer version of clang: %s",
                               self.version_str)
                     # It is important to set this option for clang 4.0 as
                     # there is an assert in ASTUnit.cpp that checks if this
@@ -206,7 +206,7 @@ class Completer(BaseCompleter):
                     # we need it here too. See issue #230.
                     include_brief_comments = True
                 else:
-                    log.debug(" using older version of clang: %s",
+                    log.debug("using older version of clang: %s",
                               self.version_str)
                     # To avoid breaking compatibility with old versions of
                     # clang, where the assert is different, we make sure to
@@ -219,10 +219,10 @@ class Completer(BaseCompleter):
                     include_macros=True,
                     include_brief_comments=include_brief_comments)
             except Exception as e:
-                log.error(" error while completing view %s: %s", file_name, e)
+                log.error("error while completing view %s: %s", file_name, e)
                 complete_obj = None
             end = time.time()
-            log.debug(" code complete done in %s seconds", end - start)
+            log.debug("code complete done in %s seconds", end - start)
 
         if complete_obj is None or len(complete_obj.results) == 0:
             completions = []
@@ -234,7 +234,7 @@ class Completer(BaseCompleter):
             else:
                 excluded = self.default_ignore_list
             completions = Completer._parse_completions(complete_obj, excluded)
-        log.debug(' completions: %s' % completions)
+        log.debug('completions: %s' % completions)
         return (completion_request, completions)
 
     def info(self, tooltip_request):
@@ -289,17 +289,17 @@ class Completer(BaseCompleter):
 
         """
         v_id = view.buffer_id()
-        log.debug(" view is %s", v_id)
+        log.debug("view is %s", v_id)
         with Completer.rlock:
             if not self.tu:
-                log.debug(" translation unit does not exist. Creating.")
+                log.debug("translation unit does not exist. Creating.")
                 self.parse_tu(view, settings)
             if not self.tu:
                 log.critical(" cannot create translation unit. Abort.")
                 return False
             if isinstance(self.tu.cursor.displayname, bytes):
                 # it is bytes, convert!
-                log.debug(" converting bytes '%s' into str",
+                log.debug("converting bytes '%s' into str",
                           self.tu.cursor.displayname)
                 displayname = self.tu.cursor.displayname.decode('utf-8')
             else:
@@ -310,23 +310,23 @@ class Completer(BaseCompleter):
                 # the old name in it and crashes the plugin host. We need to
                 # completely recreate a translation unit if the filename has
                 # changed. Addressed in issue #191.
-                log.debug(" translation unit file does not match view one")
-                log.debug(" names: '%s' vs '%s'",
+                log.debug("translation unit file does not match view one")
+                log.debug("names: '%s' vs '%s'",
                           displayname, view.file_name())
-                log.debug(" recreate translation unit completely")
+                log.debug("recreate translation unit completely")
                 self.parse_tu(view, settings)
-            log.debug(" reparsing translation_unit for view %s", v_id)
+            log.debug("reparsing translation_unit for view %s", v_id)
             if not self.tu:
-                log.error(" translation unit is not available. Not reparsing.")
+                log.error("translation unit is not available. Not reparsing.")
                 return False
             start = time.time()
             self.tu.reparse()
             end = time.time()
-            log.debug(" reparsed in %s seconds", end - start)
+            log.debug("reparsed in %s seconds", end - start)
             if settings.errors_style != SettingsStorage.NONE_STYLE:
                 self.show_errors(view, self.tu.diagnostics)
             return True
-        log.error(" no translation unit for view id %s", v_id)
+        log.error("no translation unit for view id %s", v_id)
         return False
 
     @staticmethod
@@ -364,7 +364,7 @@ class Completer(BaseCompleter):
             if completion_result.kind in excluded_kinds:
                 return False
         except ValueError as e:
-            log.error(" error: %s", e)
+            log.error("error: %s", e)
         return True
 
     @staticmethod
