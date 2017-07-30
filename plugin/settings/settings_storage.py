@@ -5,6 +5,7 @@ Attributes:
 """
 import logging
 import re
+import sublime
 
 from os import path
 
@@ -21,10 +22,9 @@ class Wildcards:
         PROJECT_NAME (str): a wildcard to be replaced by the project name
         PROJECT_PATH (str): a wildcard to be replaced by the project path
     """
-    PROJECT_PATH = "$project_base_path"
-    PROJECT_NAME = "$project_name"
-    CLANG_VERSION = "$clang_version"
-    HOME = "~"
+    PROJECT_PATH = "project_base_path"
+    PROJECT_NAME = "project_name"
+    CLANG_VERSION = "clang_version"
 
 
 class SettingsStorage:
@@ -91,12 +91,7 @@ class SettingsStorage:
         self.clang_binary = ''
         self.project_folder = ''
         self.project_name = ''
-        self._wildcard_values = {
-            Wildcards.PROJECT_PATH: "",
-            Wildcards.PROJECT_NAME: "",
-            Wildcards.CLANG_VERSION: "",
-            Wildcards.HOME: ""
-        }
+        self._wildcard_values = {}
         self.__load_vars_from_settings(settings_handle,
                                        project_specific=False)
 
@@ -262,8 +257,8 @@ class SettingsStorage:
         Returns:
             str: line with replaced wildcards
         """
-        res = str(line)
-        res = path.expanduser(path.expandvars(res))
+        res = sublime.expand_variables(line, self._wildcard_values)
+        res = path.expanduser(res)
 
         # replace all wildcards in the line
         for wildcard, value in self._wildcard_values.items():
@@ -274,21 +269,20 @@ class SettingsStorage:
 
     def __update_widcard_values(self, view):
         """Update values for wildcard variables."""
-        from os.path import expanduser
-        self._wildcard_values[Wildcards.HOME] = expanduser("~")
         variables = view.window().extract_variables()
-        if 'folder' in variables:
-            project_folder = variables['folder'].replace('\\', '\\\\')
-            self._wildcard_values[Wildcards.PROJECT_PATH] = project_folder
-        if 'project_name' in variables:
-            project_name = path.splitext(variables['project_name'])[0]
-            self._wildcard_values[Wildcards.PROJECT_NAME] = project_name
+        self._wildcard_values.update(variables)
 
-        # duplicate as fields
-        self.project_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
-        self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
+        self._wildcard_values[Wildcards.PROJECT_PATH] = \
+            variables.get("folder", "").replace("\\", "\\\\")
+
+        self._wildcard_values[Wildcards.PROJECT_NAME] = \
+            variables.get("project_base_name", "")
 
         # get clang version string
         version_str = Tools.get_clang_version_str(self.clang_binary)
         self._wildcard_values[Wildcards.CLANG_VERSION] = version_str
+
+        # duplicate as fields
+        self.project_folder = self._wildcard_values[Wildcards.PROJECT_PATH]
+        self.project_name = self._wildcard_values[Wildcards.PROJECT_NAME]
         self.clang_version = self._wildcard_values[Wildcards.CLANG_VERSION]
