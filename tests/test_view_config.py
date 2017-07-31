@@ -56,6 +56,17 @@ class TestViewConfig(GuiTestWrapper):
         view_config = ViewConfig(self.view, settings)
 
         self.assertIsNotNone(view_config.completer)
+        p = path.join(sublime.packages_path(),
+                      "User",
+                      "EasyClangComplete.sublime-settings")
+        if path.exists(p):
+            user = sublime.load_resource(
+                "Packages/User/EasyClangComplete.sublime-settings")
+            if "common_flags" in user:
+                # The user modified the default common flags, just skip the
+                # next few tests.
+                self.tear_down()
+                return
         completer = view_config.completer
         self.assertEqual(len(completer.clang_flags), 14)
         # test from the start

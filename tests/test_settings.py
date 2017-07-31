@@ -1,4 +1,6 @@
 """Tests for settings."""
+import sublime
+
 from os import path
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
@@ -48,6 +50,18 @@ class test_settings(GuiTestWrapper):
         settings = manager.user_settings()
         valid, _ = settings.is_valid()
         self.assertTrue(valid)
+
+        p = path.join(sublime.packages_path(),
+                      "User",
+                      "EasyClangComplete.sublime-settings")
+        if path.exists(p):
+            user = sublime.load_resource(
+                "Packages/User/EasyClangComplete.sublime-settings")
+            if "common_flags" in user:
+                # The user modified the default common flags, just skip the
+                # next few tests.
+                self.tear_down()
+                return
 
         initial_common_flags = list(settings.common_flags)
         settings = manager.settings_for_view(self.view)
