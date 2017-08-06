@@ -2,6 +2,7 @@
 from os import path
 
 from ..tools import File
+from ..tools import Tools
 from ..tools import SearchScope
 from ..utils.flag import Flag
 
@@ -34,7 +35,7 @@ class FlagsSource(object):
         Returns:
             Flag[]: Flags with absolute include paths.
         """
-        def to_absolute_include_path(flag, include_prefixes):
+        def normalize_and_expand(flag, include_prefixes):
             """Change path of include paths to absolute if needed.
 
             Args:
@@ -42,29 +43,36 @@ class FlagsSource(object):
                 include_prefixes (str[]): allowed include prefixes
 
             Returns:
-                Flag: either original flag or modified to have absolute path
+                Flag[]: a list of flags with absolute paths and expanded stars
             """
+            flags = []
             for prefix in include_prefixes:
                 if flag.prefix() == prefix:
                     include_path = flag.body()
                     if not path.isabs(include_path):
                         include_path = path.join(folder, include_path)
-                    return Flag(prefix, include_path)
+                    paths = Tools.expand_star_wildcard(include_path)
+                    for expanded_path in paths:
+                        flags.append(Flag(prefix, expanded_path))
+                    return flags
                 # this flag is not separable, check if we still need to update
                 # relative path to absolute one
                 if flag.body().startswith(prefix):
                     include_path = flag.body()[len(prefix):]
                     if not path.isabs(include_path):
-                        include_path = path.join(folder, include_path)
-                    return Flag(prefix + path.normpath(include_path))
-            # not an include flag
-            return flag
+                        include_path = path.normpath(
+                            path.join(folder, include_path))
+                    paths = Tools.expand_star_wildcard(include_path)
+                    for expanded_path in paths:
+                        flags.append(Flag(prefix, expanded_path))
+                    return flags
+            # We did not expand anything and did no changes.
+            return [flag]
 
         local_flags = Flag.tokenize_list(chunks)
         absolute_flags = []
         for flag in local_flags:
-            absolute_flags.append(
-                to_absolute_include_path(flag, include_prefixes))
+            absolute_flags += normalize_and_expand(flag, include_prefixes)
         return absolute_flags
 
     @staticmethod

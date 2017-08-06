@@ -25,6 +25,7 @@ class Wildcards:
     PROJECT_PATH = "project_base_path"
     PROJECT_NAME = "project_name"
     CLANG_VERSION = "clang_version"
+    HOME_PATH = "~"
 
 
 class SettingsStorage:
@@ -248,18 +249,6 @@ class SettingsStorage:
         if self.include_file_parent_folder:
             self.common_flags.append("-I" + file_parent_folder)
 
-    def __expand_star_wildcard(self, line):
-        """Expand paths like /some/path/* to a list of all folders."""
-        import os
-        if not line.endswith('*'):
-            return [line]
-        folders = []
-        base_folder = path.abspath(line[:-1])
-        for content in os.listdir(base_folder):
-            if path.isdir(content):
-                folders.append(content)
-        return folders
-
     def __replace_wildcard_if_needed(self, line):
         """Replace wildcards in a line if they are present there.
 
@@ -270,7 +259,12 @@ class SettingsStorage:
             str: line with replaced wildcards
         """
         res = sublime.expand_variables(line, self._wildcard_values)
-        res = path.expanduser(res)
+        if Wildcards.HOME_PATH in res:
+            # replace '~' by full home path. Leave everything else intact.
+            prefix_idx = res.index(Wildcards.HOME_PATH)
+            prefix = res[:prefix_idx]
+            home_path = path.expanduser(res[prefix_idx:prefix_idx + 1])
+            res = prefix + home_path + res[prefix_idx + 1:]
 
         # replace all wildcards in the line
         for wildcard, value in self._wildcard_values.items():

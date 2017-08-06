@@ -478,6 +478,22 @@ class Tools:
                                 sublime.INHIBIT_EXPLICIT_COMPLETIONS)
 
     @staticmethod
+    def expand_star_wildcard(input_path):
+        """Expand a path like /some/path/* to a list of all folders."""
+        expanded = []
+        if not input_path.endswith('*'):
+            expanded.append(input_path)
+            return expanded
+        log.debug("Expanding entry: %s", input_path)
+        base_folder = path.abspath(input_path[:-1])
+        for child in listdir(base_folder):
+            child = path.join(base_folder, child)
+            if path.isdir(child):
+                log.debug("Found folder: %s", child)
+                expanded.append(child)
+        return expanded
+
+    @staticmethod
     def get_temp_dir():
         """Create a temporary folder if needed and return it."""
         tempdir = path.join(tempfile.gettempdir(), PKG_NAME)
