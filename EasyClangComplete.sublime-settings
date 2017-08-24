@@ -21,21 +21,13 @@
     "-I/usr/lib/clang/$clang_version/include",
   ],
   // C specific flags. Prepend common_flags for C files.
-  "c_flags" : [
-    "-std=c11"
-  ],
+  "c_flags" : [ "-std=c11" ],
   // C++ specific flags. Prepend common_flags for C++ files.
-  "cpp_flags" : [
-    "-std=c++11"
-  ],
+  "cpp_flags" : [ "-std=c++11" ],
   // Objective-C specific flags. Prepend common_flags for Objective-C files.
-  "objective_c_flags" : [
-    "-std=c11"
-  ],
+  "objective_c_flags" : [ "-std=c11" ],
   // Objective-C++ specific flags. Prepend common_flags for Objective-C++ files.
-  "objective_cpp_flags" : [
-    "-std=c++11"
-  ],
+  "objective_cpp_flags" : [ "-std=c++11" ],
 
   // Define how we search needed flags. Prioritized from top to bottom.
   // Possible entries for "file":
@@ -62,7 +54,7 @@
   "errors_style": "popups",
 
   // triggers for auto-completion
-  "triggers" : [ ".", "->", "::", " ", "	", "(", "["],
+  "triggers" : [ ".", "->", "::", " ", "	", "(", "[" ],
 
   // Use libclang.
   // If set to false will use clang_binary and parse the output of
