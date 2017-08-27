@@ -53,7 +53,8 @@ class FlagsSource(object):
                         include_path = path.join(folder, include_path)
                     paths = Tools.expand_star_wildcard(include_path)
                     for expanded_path in paths:
-                        flags.append(Flag(prefix, expanded_path))
+                        flags.append(
+                            Flag(prefix, path.normpath(expanded_path)))
                     return flags
                 # this flag is not separable, check if we still need to update
                 # relative path to absolute one
@@ -64,7 +65,8 @@ class FlagsSource(object):
                             path.join(folder, include_path))
                     paths = Tools.expand_star_wildcard(include_path)
                     for expanded_path in paths:
-                        flags.append(Flag(prefix + expanded_path))
+                        flags.append(
+                            Flag(prefix + path.normpath(expanded_path)))
                     return flags
             # We did not expand anything and did no changes.
             return [flag]
