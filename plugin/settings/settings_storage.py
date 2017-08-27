@@ -110,7 +110,7 @@ class SettingsStorage:
             self.__load_vars_from_settings(view.settings(),
                                            project_specific=True)
             # initialize wildcard values with view
-            self.__update_widcard_values(view)
+            self.__update_wildcard_values(view)
             # replace wildcards
             self.__populate_common_flags(view.file_name())
             self.__populate_flags_source_paths()
@@ -273,7 +273,7 @@ class SettingsStorage:
             log.debug("populated '%s' to '%s'", line, res)
         return res
 
-    def __update_widcard_values(self, view):
+    def __update_wildcard_values(self, view):
         """Update values for wildcard variables."""
         variables = view.window().extract_variables()
         self._wildcard_values.update(variables)
