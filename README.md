@@ -151,6 +151,9 @@ Most crucial functionality is covered with unit tests using
 Contributions are welcome! Look at the issue list. If there is something you
 think you can tackle, write about it in that issue and submit a Pull Request.
 
+Pull requests and some issues are partially managed by
+[maintainerd][maintainerd].
+
 Please don't jump into creating a Pull Request straight away and open an issue
 first. This way, we can synchronize our views on the problem, so that everyone
 avoids losing time.
@@ -183,9 +186,9 @@ Please buy me a cup of tea if you appreciate the effort.
 Also, pull requests are welcome! And don't forget to tell people about this
 plugin! The more people use it - the merrier.
 
-                      ╔═╗┌─┐┌─┐┬ ┬  ╔═╗┬  ┌─┐┌┐┌┌─┐  ╔═╗┌─┐┌┬┐┌─┐┬  ┌─┐┌┬┐┌─┐
-                      ║╣ ├─┤└─┐└┬┘  ║  │  ├─┤││││ ┬  ║  │ ││││├─┘│  ├┤  │ ├┤
-                      ╚═╝┴ ┴└─┘ ┴   ╚═╝┴─┘┴ ┴┘└┘└─┘  ╚═╝└─┘┴ ┴┴  ┴─┘└─┘ ┴ └─┘
+                        ╔═╗┌─┐┌─┐┬ ┬  ╔═╗┬  ┌─┐┌┐┌┌─┐  ╔═╗┌─┐┌┬┐┌─┐┬  ┌─┐┌┬┐┌─┐
+                        ║╣ ├─┤└─┐└┬┘  ║  │  ├─┤││││ ┬  ║  │ ││││├─┘│  ├┤  │ ├┤
+                        ╚═╝┴ ┴└─┘ ┴   ╚═╝┴─┘┴ ┴┘└┘└─┘  ╚═╝└─┘┴ ┴┴  ┴─┘└─┘ ┴ └─┘
 
 [release]: https://github.com/niosus/EasyClangComplete/releases
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
@@ -201,6 +204,7 @@ plugin! The more people use it - the merrier.
 [bountysource-link]: https://www.bountysource.com/teams/easyclangcomplete
 [beerpay]: https://beerpay.io/niosus/EasyClangComplete
 [gratipay]: https://gratipay.com/EasyClangComplete/
+[maintainerd]: https://github.com/divmain/maintainerd
 
 [img-gratipay]: https://img.shields.io/gratipay/user/niosus.svg?style=flat-square
 [img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
