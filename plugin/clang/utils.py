@@ -334,6 +334,11 @@ class ClangUtils:
         if args_string:
             result += args_string
 
+        # Show value for enum
+        if cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
+            result += " = " + str(cursor.enum_value)
+            result += "(" + hex(cursor.enum_value) + ")"
+
         # Method modifiers
         if cursor.is_const_method():
             result += " const"
