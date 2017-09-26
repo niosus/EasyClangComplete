@@ -151,6 +151,26 @@ class Completer(BaseCompleter):
 
         self.show_errors(view, output_text)
 
+    def get_reference(self, view):
+        """Get location to declaration/definition from given location.
+
+        Args:
+            view (sublime.View): current view
+
+        Returns:
+            Location: location to declaration/definition
+        """
+        msg = """
+        EasyClangComplete:
+        "use_libclang" is false.
+
+        Unfortunately, there is no way to get declaration
+        if you are not using libclang.
+
+        Please use libclang.
+        """
+        sublime.error_message(msg)
+
     def run_clang_command(self, view, task_type, cursor_pos=0):
         """Construct and run clang command based on task.
 

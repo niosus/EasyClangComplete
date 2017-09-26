@@ -86,6 +86,17 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
+    def get_reference(self, view):
+        """Get location to declaration/definition from given location.
+
+        Args:
+            view (sublime.View): current view
+
+        Returns:
+            Location: location to declaration/definition
+        """
+        raise NotImplementedError("calling abstract method")
+
     def show_errors(self, view, output):
         """Show current complie errors.
 

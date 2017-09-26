@@ -1,0 +1,3 @@
+[
+  { "keys": ["shift+f12"], "command": "easy_clang_goto_declaration"}
+]
