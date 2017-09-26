@@ -151,6 +151,17 @@ class Completer(BaseCompleter):
 
         self.show_errors(view, output_text)
 
+    def get_reference(self, view):
+        """Get location to declaration/definition from given location.
+
+        Args:
+            view (sublime.View): current view
+
+        Returns:
+            Location: location to declaration/definition
+        """
+        sublime.error_message("Not supported for this backend.")
+
     def run_clang_command(self, view, task_type, cursor_pos=0):
         """Construct and run clang command based on task.
 

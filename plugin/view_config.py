@@ -389,6 +389,15 @@ class ViewConfigManager(object):
             ViewConfigManager.__cancel_timer(v_id)
         return v_id
 
+    def trigger_get_reference(self, view):
+        """Returns location to object declaration."""
+        config = self.get_from_cache(view)
+        if not config:
+            log.debug("Config is not ready yet. No reference is available.")
+            return None
+
+        return config.completer.get_reference(view)
+
     def trigger_info(self, view, tooltip_request):
         """A proxy function to handle getting info from completer.
 
