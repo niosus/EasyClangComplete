@@ -35,6 +35,7 @@ class MacroParser(object):
         """
         self._args_string = ''
         self._name = name
+        self._body = ''
         if location and location.file and location.file.name:
             with open(location.file.name, 'r') as f:
                 macro_file_lines = f.readlines()
@@ -66,6 +67,13 @@ class MacroParser(object):
                 args_str = ''.join(args_str.split())
                 args_str = args_str.replace(',', ', ')
                 self._args_string = '(' + args_str + ')'
+                macro_line = macro_line[end_args_index + 1:]
+
+        self._body = macro_line.strip()
+        while self._body.endswith("\\"):
+            macro_line_number += 1
+            line = macro_file_lines[macro_line_number - 1].rstrip()
+            self._body += "\n" + line
 
     @property
     def args_string(self):
@@ -77,6 +85,11 @@ class MacroParser(object):
             '#define MACRO' would return ''
         """
         return self._args_string
+
+    @property
+    def body_string(self):
+        """Get macro body string."""
+        return self._body
 
 
 class ClangUtils:
@@ -337,6 +350,18 @@ class ClangUtils:
         # Method modifiers
         if cursor.is_const_method():
             result += " const"
+
+        # Show macro body
+        if is_macro:
+            body = html.escape(macro_parser.body_string)
+            body = body.replace("\\\n", "<br>")
+            body = body.replace(" ", "&nbsp;")
+            body = body.replace("\t", 4 * "&nbsp;")
+
+            # sublime does not recognize &quot;
+            body = body.replace("&quot;", "&nbsp;")
+
+            result += " " + body
 
         # Doxygen comments
         if cursor.brief_comment:
