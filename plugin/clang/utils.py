@@ -277,6 +277,37 @@ class ClangUtils:
         return result
 
     @staticmethod
+    def get_text_by_extent(extent):
+        """Load lines of code in range, pointed by extent.
+
+        Args:
+            extent (Cursor.extent): Ranges of source file.
+        """
+        if extent.start.file.name != extent.end.file.name:
+            return None
+
+        with open(extent.start.file.name, 'r') as f:
+            lines = f.readlines()
+            return "".join(lines[extent.start.line - 1:extent.end.line])
+
+    @staticmethod
+    def htmlize_text(text):
+        """Convert plain text to HTML like representation.
+
+        Args:
+            text: Plain text to convert.
+        """
+        result = html.escape(text)
+        result = result.replace("\\\n", "<br>")
+        result = result.replace("\n", "<br>")
+        result = result.replace("\t", 4 * "&nbsp;")
+        result = result.replace(" ", "&nbsp;")
+
+        # sublime does not recognize &quot;
+        result = result.replace("&quot;", "&nbsp;")
+        return result
+
+    @staticmethod
     def build_info_details(cursor, cindex):
         """Provide information about given cursor.
 
@@ -287,6 +318,17 @@ class ClangUtils:
             cindex (module): clang cindex.py module for the correct version
 
         """
+        type_decl = [
+            cindex.CursorKind.STRUCT_DECL,
+            cindex.CursorKind.UNION_DECL,
+            cindex.CursorKind.CLASS_DECL,
+            cindex.CursorKind.ENUM_DECL,
+            cindex.CursorKind.TYPEDEF_DECL,
+            cindex.CursorKind.CLASS_TEMPLATE,
+            cindex.CursorKind.TYPE_ALIAS_DECL,
+            cindex.CursorKind.TYPE_REF
+        ]
+
         result = ""
 
         result += '<b>Declaration:</b><br>'
@@ -295,6 +337,7 @@ class ClangUtils:
         # macros just show that they are a macro.
         macro_parser = None
         is_macro = cursor.kind == cindex.CursorKind.MACRO_DEFINITION
+        is_type = cursor.kind in type_decl
         if is_macro:
             macro_parser = MacroParser(cursor.spelling, cursor.location)
             result += '#define '
@@ -359,15 +402,12 @@ class ClangUtils:
 
         # Show macro body
         if is_macro:
-            body = html.escape(macro_parser.body_string)
-            body = body.replace("\\\n", "<br>")
-            body = body.replace(" ", "&nbsp;")
-            body = body.replace("\t", 4 * "&nbsp;")
+            result += " " + ClangUtils.htmlize_text(macro_parser.body_string)
 
-            # sublime does not recognize &quot;
-            body = body.replace("&quot;", "&nbsp;")
-
-            result += " " + body
+        # Show type declaration
+        if is_type and cursor.extent:
+            body = ClangUtils.get_text_by_extent(cursor.extent)
+            result += "<br><br>" + ClangUtils.htmlize_text(body)
 
         # Doxygen comments
         if cursor.brief_comment:
