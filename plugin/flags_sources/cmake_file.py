@@ -2,6 +2,7 @@
 
 Attributes:
     log (logging.Log): Current logger.
+
 """
 from .flags_source import FlagsSource
 from .compilation_db import CompilationDb
@@ -16,13 +17,40 @@ import subprocess
 import logging
 import re
 import os
+import platform
 
 log = logging.getLogger("ECC")
+
+
+def subprocess_check_output(
+    cmd, stderr, shell, cwd, env, stdin=None, startupinfo=None
+):
+    """subprocess.check_output wrapper.
+
+    Same behaviour than subprocess.check_output but forcing stdin to be
+    subprocess.PIPE on windows.
+    """
+    if platform.system() == "Windows":
+        # Don't let console window pop-up briefly.
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        startupinfo.wShowWindow = subprocess.SW_HIDE
+        stdin = subprocess.PIPE
+
+    return subprocess.check_output(
+        cmd,
+        stdin=stdin,
+        stderr=stderr,
+        shell=shell,
+        cwd=cwd,
+        env=env,
+        startupinfo=startupinfo)
 
 
 @singleton
 class CMakeFileCache(dict):
     """Singleton for CMakeLists.txt file cache."""
+
     pass
 
 
@@ -33,7 +61,9 @@ class CMakeFile(FlagsSource):
         _cache (dict): Cache of database filenames for each analyzed
             CMakeLists.txt file and of CMakeLists.txt file paths for each
             analyzed view path.
+
     """
+
     _FILE_NAME = 'CMakeLists.txt'
     _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {flags} "{path}"'
     _DEP_REGEX = re.compile('\"(.+\..+)\"')
@@ -64,6 +94,7 @@ class CMakeFile(FlagsSource):
         Returns:
             str[]: List of flags for this view, or all flags merged if this
                 view path is not found in the generated compilation db.
+
         """
         # prepare search scope
         search_scope = self._update_search_scope(search_scope, file_path)
@@ -123,6 +154,7 @@ class CMakeFile(FlagsSource):
 
         Returns:
             str: Path to a unique temp folder.
+
         """
         unique_proj_str = Tools.get_unique_str(cmake_path)
         tempdir = path.join(
@@ -172,7 +204,7 @@ class CMakeFile(FlagsSource):
             my_env['CMAKE_PREFIX_PATH'] = merged_paths
             log.debug("CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
             log.info(' running command: %s', cmake_cmd)
-            output = subprocess.check_output(cmake_cmd,
+            output = subprocess_check_output(cmake_cmd,
                                              stderr=subprocess.STDOUT,
                                              shell=True,
                                              cwd=tempdir,
@@ -203,6 +235,7 @@ class CMakeFile(FlagsSource):
 
         Returns:
             str[]: List of full paths to dependency files.
+
         """
         folder = path.dirname(path.dirname(deps_file))
         deps = []
