@@ -34,6 +34,8 @@ class MacroParser(object):
             to find it and create a proper args string.
         """
         self._args_string = ''
+        self._definition = ''
+        self._definition_is_complete = True
         self._name = name
         if location and location.file and location.file.name:
             with open(location.file.name, 'r') as f:
@@ -53,6 +55,7 @@ class MacroParser(object):
         macro_line = macro_line.lstrip('#').lstrip().lstrip('define')
         macro_line = macro_line.lstrip().lstrip(self._name)
         # macro that looks like a function, possibly with args
+        definition = macro_line
         if macro_line.startswith('('):
             end_args_index = macro_line.find(')')
             # There should always be a closing parenthesis, but check
@@ -66,6 +69,18 @@ class MacroParser(object):
                 args_str = ''.join(args_str.split())
                 args_str = args_str.replace(',', ', ')
                 self._args_string = '(' + args_str + ')'
+                definition = macro_line[end_args_index+1:]
+            else:
+                # Triggers setting definition to incomplete below
+                definition = '\\'
+        if definition.endswith('\\') :
+            self._definition_is_complete = False
+        else:
+            self._definition_is_complete = True
+        definition = definition.rstrip('\\')
+        definition = definition.strip()
+        if len(definition) > 0:
+            self._definition = definition
 
     @property
     def args_string(self):
@@ -77,6 +92,26 @@ class MacroParser(object):
             '#define MACRO' would return ''
         """
         return self._args_string
+
+    @property
+    def definition(self):
+        """Get macro definition
+
+        Examples:
+            '#define MACRO()' would return ''
+            '#define MACRO() foo()' would return 'foo()'
+            '#define MACRO() foo\
+                    definition_after_line_continuation()'
+                would return '', and definition_is_complete will return False
+        """
+        return self._definition
+
+    @property
+    def definition_is_complete(self):
+        """ Get if the macro definition returned by defition is complete.
+        Returns False if the macro is continued onto more than one line,
+        as we currently do not parse past the first line."""
+        return self._definition_is_complete
 
 
 class ClangUtils:
@@ -314,10 +349,14 @@ class ClangUtils:
 
         # Macro/function/method arguments
         args_string = None
+        short_definition = None
         if is_macro:
             # cursor.get_arguments() doesn't give us anything for macros,
             # so we have to parse those ourselves
             args_string = macro_parser.args_string
+            short_definition = macro_parser.definition
+            if not macro_parser.definition_is_complete:
+                short_definition += " \\<br> ..."
         else:
             args = []
             for arg in cursor.get_arguments():
@@ -337,6 +376,10 @@ class ClangUtils:
         # Method modifiers
         if cursor.is_const_method():
             result += " const"
+
+        # Macro
+        if short_definition:
+            result += " " + short_definition
 
         # Doxygen comments
         if cursor.brief_comment:
