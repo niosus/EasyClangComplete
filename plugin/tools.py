@@ -697,7 +697,6 @@ class Tools:
                                              cwd=cwd,
                                              env=env,
                                              startupinfo=startupinfo)
-            print(output)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")
