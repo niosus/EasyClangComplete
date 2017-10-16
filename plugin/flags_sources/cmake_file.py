@@ -159,25 +159,21 @@ class CMakeFile(FlagsSource):
             os.makedirs(tempdir)
         except OSError:
             log.debug("Folder %s exists.", tempdir)
-        try:
-            # sometimes there are variables missing to carry out the build. We
-            # can set them here from the settings.
-            my_env = os.environ.copy()
-            log.debug("prefix paths: %s", prefix_paths)
-            merged_paths = ""
-            for prefix_path in prefix_paths:
-                merged_paths += prefix_path + ":"
-            merged_paths = merged_paths[:-1]
-            log.debug("merged paths: %s", merged_paths)
-            my_env['CMAKE_PREFIX_PATH'] = merged_paths
-            log.debug("CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
-            log.info(' running command: %s', cmake_cmd)
-            output = Tools.run_command(
-                command=cmake_cmd, cwd=tempdir, env=my_env)
-            output_text = ''.join(map(chr, output))
-        except subprocess.CalledProcessError as e:
-            output_text = e.output.decode("utf-8")
-            log.info("cmake process finished with code: %s", e.returncode)
+        # sometimes there are variables missing to carry out the build. We
+        # can set them here from the settings.
+        my_env = os.environ.copy()
+        log.debug("prefix paths: %s", prefix_paths)
+        merged_paths = ""
+        for prefix_path in prefix_paths:
+            merged_paths += prefix_path + ":"
+        merged_paths = merged_paths[:-1]
+        log.debug("merged paths: %s", merged_paths)
+        my_env['CMAKE_PREFIX_PATH'] = merged_paths
+        log.debug("CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
+        log.info(' running command: %s', cmake_cmd)
+        output_text = Tools.run_command(
+            command=cmake_cmd, cwd=tempdir, env=my_env)
+
         log.info("cmake produced output: \n%s", output_text)
 
         database_path = path.join(tempdir, CompilationDb._FILE_NAME)
