@@ -172,11 +172,8 @@ class CMakeFile(FlagsSource):
             my_env['CMAKE_PREFIX_PATH'] = merged_paths
             log.debug("CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
             log.info(' running command: %s', cmake_cmd)
-            output = subprocess.check_output(cmake_cmd,
-                                             stderr=subprocess.STDOUT,
-                                             shell=True,
-                                             cwd=tempdir,
-                                             env=my_env)
+            output = Tools.run_command(
+                command=cmake_cmd, cwd=tempdir, env=my_env)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
             output_text = e.output.decode("utf-8")

@@ -11,6 +11,7 @@ Attributes:
     PROGRESS_MSG (str): unicode string of chars to show progress with
 """
 from os import path
+from os import environ
 from os import makedirs
 from os import listdir
 
@@ -668,7 +669,7 @@ class Tools:
         return PosStatus.COMPLETION_NOT_NEEDED
 
     @staticmethod
-    def run_command(command, shell=True):
+    def run_command(command, shell=True, cwd=path.curdir, env=environ):
         """Run a generic command in a subprocess.
 
         Args:
@@ -693,6 +694,8 @@ class Tools:
                                              stdin=stdin,
                                              stderr=subprocess.STDOUT,
                                              shell=shell,
+                                             cwd=cwd,
+                                             env=env,
                                              startupinfo=startupinfo)
             output_text = ''.join(map(chr, output))
         except subprocess.CalledProcessError as e:
