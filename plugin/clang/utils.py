@@ -37,7 +37,8 @@ class MacroParser(object):
         self._name = name
         self._body = ''
         if location and location.file and location.file.name:
-            with open(location.file.name, 'r') as f:
+            with open(location.file.name, 'r', encoding='utf-8',
+                      errors='ignore') as f:
                 macro_file_lines = f.readlines()
                 self._parse_macro_file_lines(macro_file_lines, location.line)
 
