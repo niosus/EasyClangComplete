@@ -73,26 +73,26 @@ def plugin_unloaded():
 
 
 class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
-    """Handle easy_clan_goto_declaration command."""
+    """Handle easy_clang_goto_declaration command."""
 
     def run(self, edit):
-        """Run goto delcaration command.
+        """Run goto declaration command.
 
         Navigates to delcaration of entity located by current position
         of cursor.
         """
-        if not EasyClangComplete.view_config_manager:
-            return
         if not Tools.is_valid_view(self.view):
             return
+        config_manager = EasyClangComplete.view_config_manager
+        if not config_manager:
+            return
 
-        location = EasyClangComplete.view_config_manager.trigger_get_reference(
-            self.view)
+        location = config_manager.trigger_get_declaration_location(self.view)
         if location:
             loc = location.file.name
             loc += ":" + str(location.line)
             loc += ":" + str(location.column)
-            log.debug("Navigating to file: %s", loc)
+            log.debug("Navigating to declaration: %s", loc)
             sublime.active_window().open_file(loc, sublime.ENCODED_POSITION)
 
 

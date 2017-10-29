@@ -151,14 +151,14 @@ class Completer(BaseCompleter):
 
         self.show_errors(view, output_text)
 
-    def get_reference(self, view):
-        """Get location to declaration/definition from given location.
+    def get_declaration_location(self, view):
+        """Get location of declaration from given location in file.
 
         Args:
             view (sublime.View): current view
 
         Returns:
-            Location: location to declaration/definition
+            Location: location of declaration
         """
         sublime.error_message("Not supported for this backend.")
 

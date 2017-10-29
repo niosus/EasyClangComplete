@@ -330,14 +330,14 @@ class Completer(BaseCompleter):
         log.error("no translation unit for view id %s", v_id)
         return False
 
-    def get_reference(self, view):
-        """Get location to declaration/definition from given location.
+    def get_declaration_location(self, view):
+        """Get location of declaration from given location in file.
 
         Args:
             view (sublime.View): current view
 
         Returns:
-            Location: location to declaration/definition
+            Location: location of declaration
 
         """
         with Completer.rlock:
