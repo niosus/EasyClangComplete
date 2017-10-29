@@ -133,15 +133,8 @@ The trick with multiple `clang.cindex` files is inspired by this repo:
 The progress indicator idea is from
 [ColorSublime](https://github.com/Colorsublime/Colorsublime-Plugin) plugin.
 
-If you are an experienced python developer and find that something in my code
-sucks completely - **DO** tell me. Python is not my main language and I am
-always willing to learn.
-
-Some functionality is there only because of the help of the following users (in
-no particualr order):
-
-@Ventero, @riazanovskiy, @rchl, @Mischa-Alff, @jdumas, @simia, @tastytea,
-@brupelo, @randy3k, @david9991, @kjteske, @darwinyip, @rwols, @papadokolos.
+Some functionality is there only because of the awesome contributors to this
+project. To see their names plese check out the contributors page.
 
 ## Tests ##
 Most crucial functionality is covered with unit tests using
@@ -167,9 +160,9 @@ There are two branches:
 Code style:
 - Line width is `80` characters
 - Every public function should be documented.
-- The code passes linters:
+- The code *must* pass linters:
   + `pep8`
-  + `pep257`: ignoring `["D209", "D203", "D204"]`
+  + `pep257`: ignoring `["D209", "D203", "D204", "D213", "D406", "D407"]`
 
 Please ensure, that your code conforms to this.
 
@@ -186,9 +179,9 @@ Please buy me a cup of tea if you appreciate the effort.
 Also, pull requests are welcome! And don't forget to tell people about this
 plugin! The more people use it - the merrier.
 
-                        ╔═╗┌─┐┌─┐┬ ┬  ╔═╗┬  ┌─┐┌┐┌┌─┐  ╔═╗┌─┐┌┬┐┌─┐┬  ┌─┐┌┬┐┌─┐
-                        ║╣ ├─┤└─┐└┬┘  ║  │  ├─┤││││ ┬  ║  │ ││││├─┘│  ├┤  │ ├┤
-                        ╚═╝┴ ┴└─┘ ┴   ╚═╝┴─┘┴ ┴┘└┘└─┘  ╚═╝└─┘┴ ┴┴  ┴─┘└─┘ ┴ └─┘
+                         ╔═╗┌─┐┌─┐┬ ┬  ╔═╗┬  ┌─┐┌┐┌┌─┐  ╔═╗┌─┐┌┬┐┌─┐┬  ┌─┐┌┬┐┌─┐
+                         ║╣ ├─┤└─┐└┬┘  ║  │  ├─┤││││ ┬  ║  │ ││││├─┘│  ├┤  │ ├┤
+                         ╚═╝┴ ┴└─┘ ┴   ╚═╝┴─┘┴ ┴┘└┘└─┘  ╚═╝└─┘┴ ┴┴  ┴─┘└─┘ ┴ └─┘
 
 [release]: https://github.com/niosus/EasyClangComplete/releases
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete

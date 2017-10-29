@@ -4,7 +4,16 @@ from os import path
 
 from EasyClangComplete.plugin.tools import Tools
 
-PEP257_CMD = "pep257 '{}' --match-dir='^(?!clang$).*' --ignore=D204,D203,D209"
+PEP_257_IGNORE = [
+    "D209",
+    "D203",
+    "D204",
+    "D213",
+    "D406",
+    "D407"
+]
+
+PEP257_CMD = "pep257 '{}' --match-dir='^(?!clang$).*' --ignore={}"
 PEP8_CMD = "pycodestyle '{}' --exclude=clang --count --max-line-length=80"
 
 PLUGIN_SOURCE_FOLDER = path.dirname(path.dirname(__file__))
@@ -28,7 +37,8 @@ class TestStyle(TestCase):
 
     def test_pep257(self):
         """Test conformance to pep257."""
-        cmd = PEP257_CMD.format(PLUGIN_SOURCE_FOLDER)
+        cmd = PEP257_CMD.format(PLUGIN_SOURCE_FOLDER, ','.join(PEP_257_IGNORE))
+        print(cmd)
         output = Tools.run_command(cmd)
         print(output)
         if LINUX_MISSING_MSG in output or WINDOWS_MISSING_MSG in output:

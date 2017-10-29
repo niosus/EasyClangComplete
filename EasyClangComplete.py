@@ -4,6 +4,7 @@ Provides completion suggestions for C/C++ languages based on clang
 
 Attributes:
     log (logging.Logger): logger for this module
+
 """
 
 import sublime
@@ -58,7 +59,7 @@ handle_plugin_unloaded_function = None
 
 
 def plugin_loaded():
-    """Called right after sublime api is ready to use.
+    """Call right after sublime api is ready to use.
 
     We need it to initialize all the different classes that encapsulate
     functionality. We can only properly init them after sublime api is
@@ -68,7 +69,7 @@ def plugin_loaded():
 
 
 def plugin_unloaded():
-    """Called right before the package was unloaded."""
+    """Call right before the package was unloaded."""
     handle_plugin_unloaded_function()
 
 
@@ -134,7 +135,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.loaded = False
 
     def on_plugin_loaded(self):
-        """Called upon plugin load event."""
+        """Call upon plugin load event."""
         # init settings manager
         self.loaded = True
         log.debug("handle plugin loaded")
@@ -150,7 +151,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.on_activated_async(sublime.active_window().active_view())
 
     def on_settings_changed(self):
-        """Called when any of the settings changes."""
+        """Call when any of the settings changes."""
         log.debug("on settings changed handle")
         if not self.loaded:
             log.warning(
@@ -181,7 +182,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         EasyClangComplete.thread_pool.progress_status = progress_style
 
     def on_activated_async(self, view):
-        """Called upon activating a view. Execution in a worker thread.
+        """Call upon activating a view. Execution in a worker thread.
 
         Args:
             view (sublime.View): current view
@@ -207,7 +208,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         EasyClangComplete.thread_pool.new_job(job)
 
     def on_selection_modified_async(self, view):
-        """Called when selection is modified. Executed in gui thread.
+        """Call when selection is modified. Executed in gui thread.
 
         Args:
             view (sublime.View): current view
@@ -225,7 +226,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view_config.completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
-        """Called in a worker thread when view is modified.
+        """Call in a worker thread when view is modified.
 
         Args:
             view (sublime.View): current view
@@ -240,7 +241,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view_config.completer.error_vis.clear(view)
 
     def on_post_save_async(self, view):
-        """Executed in a worker thread on save.
+        """Execute in a worker thread on save.
 
         Args:
             view (sublime.View): current view
@@ -267,7 +268,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             self.current_completions = None
 
     def on_close(self, view):
-        """Called on closing the view.
+        """Call on closing the view.
 
         Args:
             view (sublime.View): current view
@@ -285,7 +286,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     @staticmethod
     def config_removed(future):
-        """Callback called when config has been removed for a view.
+        """Call this callback when config has been removed for a view.
 
         The corresponding view id is saved in future.result()
 
@@ -299,7 +300,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     @staticmethod
     def config_updated(future):
-        """Callback called when config has been updated for a view.
+        """Call this callback when config has been updated for a view.
 
         Args:
             future (concurrent.Future): future holding config of updated view
@@ -311,7 +312,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     @staticmethod
     def on_open_declaration(location):
-        """Callback called when link to type is clicked in info popup.
+        """Call this callback when link to type is clicked in info popup.
 
         Opens location with type declaration
 
@@ -319,7 +320,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         sublime.active_window().open_file(location, sublime.ENCODED_POSITION)
 
     def info_finished(self, future):
-        """Callback called when additional information for tag is available.
+        """Call this callback when additional information for tag is available.
 
         Creates popup containing information about text under the cursor
 
@@ -341,7 +342,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                         on_navigate=self.on_open_declaration)
 
     def completion_finished(self, future):
-        """Callback called when completion async function has returned.
+        """Call this callback when completion async function has returned.
 
         Checks if job id equals the one that is expected now and updates the
         completion list that is going to be used in on_query_completions
@@ -368,7 +369,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             SublBridge.show_auto_complete(active_view)
 
     def on_hover(self, view, point, hover_zone):
-        """Function that is called when mouse pointer hovers over text.
+        """Call this when mouse pointer hovers over text.
 
         Triggers showing popup with additional information about element under
         cursor.
@@ -392,15 +393,16 @@ class EasyClangComplete(sublime_plugin.EventListener):
         EasyClangComplete.thread_pool.new_job(job)
 
     def on_query_completions(self, view, prefix, locations):
-        """Function that is called when user queries completions in the code.
+        """Call this when user queries completions in the code.
 
         Args:
             view (sublime.View): current view
             prefix (TYPE): Description
-            locations (list[int]): positions of the cursor (first if many).
+            locations (list[int]): positions of the cursor (first if many)
 
         Returns:
-            sublime.Completions: completions with a flag
+            sublime.Completions: completions with a flag.
+
         """
         if not Tools.is_valid_view(view):
             log.debug("not a valid view")
