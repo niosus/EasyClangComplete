@@ -390,7 +390,7 @@ class ViewConfigManager(object):
         return v_id
 
     def trigger_get_declaration_location(self, view):
-        """Returns location to object declaration."""
+        """Return location to object declaration."""
         config = self.get_from_cache(view)
         if not config:
             log.debug("Config is not ready yet. No reference is available.")
