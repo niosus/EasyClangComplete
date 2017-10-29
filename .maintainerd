@@ -17,10 +17,6 @@ pullRequest:
       # If `required` is true, the PR will not be allowed to be merged before
       # the checkbox is checked.
       required: true
-  # maintainerd can ask the submitter whether the pull request represents a
-  # "major", "minor", "patch", or "documentation only" level change
-  semver:
-    enabled: false
 # maintainerd can also help you with managing issues.
 issue:
   # When a label is added to an issue...
