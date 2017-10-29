@@ -55,7 +55,6 @@ if not log.hasHandlers():
 
 handle_plugin_loaded_function = None
 handle_plugin_unloaded_function = None
-view_config_manager = None
 
 
 def plugin_loaded():
