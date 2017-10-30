@@ -60,24 +60,25 @@ class SettingsStorage:
         "autocomplete_all",
         "c_flags",
         "clang_binary",
+        "cmake_binary",
         "common_flags",
         "cpp_flags",
-        "use_libclang_caching",
+        "errors_style",
         "flags_sources",
         "hide_default_completions",
         "include_file_folder",
         "include_file_parent_folder",
+        "libclang_path",
         "max_cache_age",
         "objective_c_flags",
         "objective_cpp_flags",
-        "triggers",
-        "use_libclang",
-        "verbose",
-        "show_type_info",
-        "libclang_path",
-        "errors_style",
         "progress_style",
         "show_optional_arguments"
+        "show_type_info",
+        "triggers",
+        "use_libclang",
+        "use_libclang_caching",
+        "verbose",
     ]
 
     def __init__(self, settings_handle):
@@ -90,6 +91,7 @@ class SettingsStorage:
         self.clang_version = ''
         self.libclang_path = ''
         self.clang_binary = ''
+        self.cmake_binary = ''
         self.project_folder = ''
         self.project_name = ''
         self._wildcard_values = {}
@@ -118,6 +120,8 @@ class SettingsStorage:
                 self.libclang_path)
             self.clang_binary = self.__replace_wildcard_if_needed(
                 self.clang_binary)
+            self.cmake_binary = self.__replace_wildcard_if_needed(
+                self.cmake_binary)
         except AttributeError as e:
             log.error("view became None. Do not continue.")
             log.error("original error: %s", e)

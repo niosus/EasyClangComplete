@@ -12,7 +12,6 @@ from ..tools import singleton
 
 from os import path
 
-import subprocess
 import logging
 import re
 import os
@@ -35,10 +34,14 @@ class CMakeFile(FlagsSource):
             analyzed view path.
     """
     _FILE_NAME = 'CMakeLists.txt'
-    _CMAKE_MASK = 'cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {flags} "{path}"'
+    _CMAKE_MASK = '{cmake} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {flags} "{path}"'
     _DEP_REGEX = re.compile('\"(.+\..+)\"')
 
-    def __init__(self, include_prefixes, prefix_paths, flags):
+    def __init__(self,
+                 include_prefixes,
+                 prefix_paths,
+                 flags,
+                 cmake_binary="cmake"):
         """Initialize a cmake-based flag storage.
 
         Args:
@@ -51,6 +54,7 @@ class CMakeFile(FlagsSource):
         self._cache = CMakeFileCache()
         self.__cmake_prefix_paths = prefix_paths
         self.__cmake_flags = flags
+        self.__cmake_binary = cmake_binary
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -100,6 +104,7 @@ class CMakeFile(FlagsSource):
         log.debug("[cmake]:[generate new db]")
         db_file = CMakeFile.__compile_cmake(
             cmake_file=File(current_cmake_path),
+            cmake_binary=self.__cmake_binary,
             prefix_paths=self.__cmake_prefix_paths,
             flags=self.__cmake_flags)
         if not db_file:
@@ -130,7 +135,7 @@ class CMakeFile(FlagsSource):
         return tempdir
 
     @staticmethod
-    def __compile_cmake(cmake_file, prefix_paths, flags):
+    def __compile_cmake(cmake_file, cmake_binary, prefix_paths, flags):
         """Compile cmake given a CMakeLists.txt file.
 
         This returns  a new compilation database path to further parse the
@@ -152,8 +157,10 @@ class CMakeFile(FlagsSource):
         if not flags:
             flags = []
         cmake_cmd = CMakeFile._CMAKE_MASK.format(
+            cmake=cmake_binary,
             flags=" ".join(flags),
             path=cmake_file.folder())
+        print("!!!!!! ", cmake_cmd)
         tempdir = CMakeFile.unique_folder_name(cmake_file.full_path())
         try:
             os.makedirs(tempdir)

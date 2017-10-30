@@ -76,6 +76,10 @@
   // version of the plugin and pick correct libclang bindings.
   "clang_binary" : "clang++",
 
+  // pick the binary used for cmake. Please make sure the binary you provide is
+  // accessible from the command line on your system.
+  "cmake_binary" : "cmake",
+
   // ignore triggers and try to complete after each character
   // WARNING: can be very slow
   "autocomplete_all" : false,
