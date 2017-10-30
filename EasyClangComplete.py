@@ -422,7 +422,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             name=EasyClangComplete.INFO_JOB_TAG,
             callback=self.info_finished,
             function=EasyClangComplete.view_config_manager.trigger_info,
-            args=[view, tooltip_request])
+            args=[view, tooltip_request, settings])
         EasyClangComplete.thread_pool.new_job(job)
 
     def on_query_completions(self, view, prefix, locations):

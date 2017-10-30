@@ -74,6 +74,7 @@ class SettingsStorage:
         "objective_cpp_flags",
         "progress_style",
         "show_type_info",
+        "show_type_body",
         "triggers",
         "use_libclang",
         "use_libclang_caching",

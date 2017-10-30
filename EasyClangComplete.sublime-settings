@@ -96,6 +96,9 @@
   // This replaces default sublime on hover behaviour
   "show_type_info": true,
 
+  // Show body of struct/class/typedef declaration.
+  "show_type_body" : true,
+
   // On some esoteric systems we cannot find libclang properly.
   // If you know where your libclang is - set the full path here.
   "libclang_path": "<some_path_here>",

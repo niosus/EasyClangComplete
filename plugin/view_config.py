@@ -401,7 +401,7 @@ class ViewConfigManager(object):
         (row, col) = SublBridge.cursor_pos(view)
         return config.completer.get_declaration_location(view, row, col)
 
-    def trigger_info(self, view, tooltip_request):
+    def trigger_info(self, view, tooltip_request, settings):
         """A proxy function to handle getting info from completer.
 
         The main purpose of this function is to ensure that python correctly
@@ -412,7 +412,7 @@ class ViewConfigManager(object):
         if not config:
             log.debug("Config is not ready yet. No info tooltip shown.")
             return tooltip_request, ""
-        return config.completer.info(tooltip_request)
+        return config.completer.info(tooltip_request, settings)
 
     def trigger_completion(self, view, completion_request):
         """A proxy function to get completions.

@@ -238,7 +238,7 @@ class Completer(BaseCompleter):
         log.debug('completions: %s' % completions)
         return (completion_request, completions)
 
-    def info(self, tooltip_request):
+    def info(self, tooltip_request, settings):
         """Provide information about object in given location.
 
         Using the current translation unit it queries libclang for available
@@ -247,6 +247,7 @@ class Completer(BaseCompleter):
         Args:
             tooltip_request (tools.ActionRequest): A request for action
                 from the plugin.
+            settings: All plugin settings.
 
         Returns:
             (tools.ActionRequest, str): completion request along with the
@@ -271,7 +272,7 @@ class Completer(BaseCompleter):
                 return (tooltip_request, info_details)
             if cursor.referenced:
                 info_details = ClangUtils.build_info_details(
-                    cursor.referenced, self.cindex)
+                    cursor.referenced, self.cindex, settings)
                 return (tooltip_request, info_details)
             return empty_info
 

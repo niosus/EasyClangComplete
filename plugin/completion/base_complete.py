@@ -56,7 +56,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def info(self, tooltip_request):
+    def info(self, tooltip_request, settings):
         """Provide information about object in given location.
 
         Using the current translation unit it queries libclang for available
@@ -65,6 +65,7 @@ class BaseCompleter:
         Args:
             tooltip_request (tools.ActionRequest): A request for action
                 from the plugin.
+            settings: All plugin settings.
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method

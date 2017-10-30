@@ -308,7 +308,7 @@ class ClangUtils:
         return result
 
     @staticmethod
-    def build_info_details(cursor, cindex):
+    def build_info_details(cursor, cindex, settings):
         """Provide information about given cursor.
 
         Builds detailed information about cursor.
@@ -405,7 +405,7 @@ class ClangUtils:
             result += " " + ClangUtils.htmlize_text(macro_parser.body_string)
 
         # Show type declaration
-        if is_type and cursor.extent:
+        if settings.show_type_body and is_type and cursor.extent:
             body = ClangUtils.get_text_by_extent(cursor.extent)
             result += "<br><br>" + ClangUtils.htmlize_text(body)
 
