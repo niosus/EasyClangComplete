@@ -379,6 +379,32 @@ class BaseTestCompleter(object):
         self.tear_down_completer()
         self.tear_down()
 
+    def test_get_declaration_location(self):
+        """Test getting declaration location."""
+        if not self.use_libclang:
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_location.cpp')
+        self.set_up_view(file_name)
+
+        completer = self.set_up_completer()
+
+        # Check the current cursor position is completable.
+        row_num = 9
+        self.assertEqual(self.get_row(row_num), "  cool_class.foo();")
+        pos = self.view.text_point(row_num, 15)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, "foo")
+
+        loc = completer.get_declaration_location(self.view)
+        self.assertEqual(loc.file.name, file_name)
+        self.assertEqual(loc.line, 3)
+        self.assertEqual(loc.column, 8)
+
+        self.tear_down_completer()
+        self.tear_down()
+
 
 class TestBinCompleter(BaseTestCompleter, GuiTestWrapper):
     """Test class for the binary based completer."""
