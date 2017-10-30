@@ -151,7 +151,7 @@ class Completer(BaseCompleter):
 
         self.show_errors(view, output_text)
 
-    def get_declaration_location(self, view):
+    def get_declaration_location(self, view, row, col):
         """Get location of declaration from given location in file.
 
         Args:

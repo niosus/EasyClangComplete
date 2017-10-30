@@ -86,7 +86,7 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def get_declaration_location(self, view):
+    def get_declaration_location(self, view, row, col):
         """Get location of declaration from given location in file.
 
         Args:

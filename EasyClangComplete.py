@@ -86,7 +86,6 @@ class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
         config_manager = EasyClangComplete.view_config_manager
         if not config_manager:
             return
-
         location = config_manager.trigger_get_declaration_location(self.view)
         if location:
             loc = location.file.name

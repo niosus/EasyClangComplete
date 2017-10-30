@@ -330,11 +330,13 @@ class Completer(BaseCompleter):
         log.error("no translation unit for view id %s", v_id)
         return False
 
-    def get_declaration_location(self, view):
+    def get_declaration_location(self, view, row, col):
         """Get location of declaration from given location in file.
 
         Args:
             view (sublime.View): current view
+            row (int): cursor row
+            col (int): cursor col
 
         Returns:
             Location: location of declaration
@@ -343,12 +345,8 @@ class Completer(BaseCompleter):
         with Completer.rlock:
             if not self.tu:
                 return None
-
-            (row, col) = SublBridge.cursor_pos(view)
-
             cursor = self.tu.cursor.from_location(
                 self.tu, self.tu.get_location(view.file_name(), (row, col)))
-
             ref_new = None
             if cursor and cursor.referenced:
                 ref = cursor.referenced

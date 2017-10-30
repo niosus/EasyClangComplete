@@ -13,6 +13,7 @@ from threading import Timer
 from .tools import File
 from .tools import Tools
 from .tools import singleton
+from .tools import SublBridge
 from .tools import SearchScope
 
 from .utils.flag import Flag
@@ -395,7 +396,8 @@ class ViewConfigManager(object):
         if not config:
             log.debug("Config is not ready yet. No reference is available.")
             return None
-        return config.completer.get_declaration_location(view)
+        (row, col) = SublBridge.cursor_pos(view)
+        return config.completer.get_declaration_location(view, row, col)
 
     def trigger_info(self, view, tooltip_request):
         """A proxy function to handle getting info from completer.
