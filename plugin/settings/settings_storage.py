@@ -73,7 +73,7 @@ class SettingsStorage:
         "objective_c_flags",
         "objective_cpp_flags",
         "progress_style",
-        "show_optional_arguments"
+        "show_optional_arguments",
         "show_type_info",
         "triggers",
         "use_libclang",
