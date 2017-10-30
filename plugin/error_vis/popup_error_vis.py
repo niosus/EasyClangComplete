@@ -4,6 +4,8 @@ Attributes:
     log (logging): this module logger
 """
 import logging
+import mdpopups
+import sublime
 from os import path
 from string import Template
 
@@ -21,6 +23,8 @@ PATH_TO_ICON = "Packages/EasyClangComplete/pics/icons/{icon}"
 
 POPUP_ERROR_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "error_popup.html")
 POPUP_WARNING_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "warning_popup.html")
+
+POPUP_MD_FILE = "Packages/EasyClangComplete/plugin/error_vis/popup_error.md"
 
 
 class PopupErrorVis:
@@ -144,11 +148,33 @@ class PopupErrorVis:
         """
         if view.buffer_id() not in self.err_regions:
             return
+
         current_err_region_dict = self.err_regions[view.buffer_id()]
         if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
-            errors_html = PopupErrorVis._as_html(errors_dict)
-            view.show_popup(errors_html, max_width=self._MAX_POPUP_WIDTH)
+            max_severity, error_list = PopupErrorVis._as_list(errors_dict)
+            popup_type = 'panel-warning "ECC: Warning"'
+
+            css = '''
+.ECC .admonition-title
+{
+    border-top-left-radius: 0rem;
+    border-top-right-radius: 0rem;
+}
+.ECC .admonition
+{
+    border-radius: 0rem;
+}
+'''
+            if max_severity > 2:
+                popup_type = 'panel-error "ECC: Error"'
+            text = sublime.load_resource(POPUP_MD_FILE).format(
+                type=popup_type, content='\n'.join(error_list))
+            mdpopups.show_popup(view, text, max_width=self._MAX_POPUP_WIDTH,
+                                wrapper_class='ECC',
+                                css=css)
+            # errors_html = PopupErrorVis._as_html(errors_dict)
+            # view.show_popup(errors_html, max_width=self._MAX_POPUP_WIDTH)
         else:
             log.debug("no error regions for row: %s", row)
 
@@ -166,27 +192,22 @@ class PopupErrorVis:
         del self.err_regions[view.buffer_id()]
 
     @staticmethod
-    def _as_html(errors_dict):
+    def _as_list(errors_dict):
         """Show error as html.
 
         Args:
             errors_dict (dict): Current error
         """
-        import cgi
-        errors_html_mask = PopupErrorVis.WARNING_HTML_TEMPLATE
-        errors_html = ""
+        error_list = []
+        max_severity = 0
         for entry in errors_dict:
-            processed_error = cgi.escape(entry['error'])
-            # Add non-breaking space to prevent popup from getting a newline
-            # after every word
-            processed_error = processed_error.replace(' ', '&nbsp;')
+            error_list.append(entry['error'])
             if LibClangCompilerVariant.SEVERITY_TAG in entry:
                 severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
-                if severity > 2:
-                    errors_html_mask = PopupErrorVis.ERROR_HTML_TEMPLATE
-            errors_html += "<div>" + processed_error + "</div>"
+                if severity > max_severity:
+                    max_severity = severity
         # add error to html template
-        return errors_html_mask.substitute(content=errors_html)
+        return max_severity, error_list
 
     @staticmethod
     def _as_region_list(err_regions_dict):
