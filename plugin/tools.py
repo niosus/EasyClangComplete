@@ -229,8 +229,11 @@ class File:
             # leave the object unitialized
             return
         self.__full_path = path.abspath(file_path)
-        # initialize the file
-        open(self.__full_path, 'a+').close()
+        # initialize the file if it does not exist already
+        if path.isfile(self.__full_path):
+            open(self.__full_path, 'r').close()
+        else:
+            open(self.__full_path, 'a+').close()
 
     def full_path(self):
         """Get full path to file.
