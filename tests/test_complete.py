@@ -88,296 +88,296 @@ class BaseTestCompleter(object):
         self.tear_down_completer()
         self.tear_down()
 
-    # def test_complete(self):
-    #     """Test autocompletion for user type."""
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test.cpp')
-    #     self.set_up_view(file_name)
+    def test_complete(self):
+        """Test autocompletion for user type."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(8), "  a.")
-    #     pos = self.view.text_point(8, 4)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, ".\n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
 
-    #     self.assertIn(expected, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_excluded_private(self):
-    #     """Test autocompletion for user type."""
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test.cpp')
-    #     self.set_up_view(file_name)
+    def test_excluded_private(self):
+        """Test autocompletion for user type."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(8), "  a.")
-    #     pos = self.view.text_point(8, 4)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, ".\n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
-    #     unexpected = ['foo\tvoid foo(int a)', 'foo(${1:int a})']
-    #     if self.use_libclang:
-    #         self.assertIn(expected, completions)
-    #         self.assertNotIn(unexpected, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['foo\tvoid foo(double a)', 'foo(${1:double a})']
+        unexpected = ['foo\tvoid foo(int a)', 'foo(${1:int a})']
+        if self.use_libclang:
+            self.assertIn(expected, completions)
+            self.assertNotIn(unexpected, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_excluded_destructor(self):
-    #     """Test autocompletion for user type."""
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test.cpp')
-    #     self.set_up_view(file_name)
+    def test_excluded_destructor(self):
+        """Test autocompletion for user type."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test.cpp')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(8), "  a.")
-    #     pos = self.view.text_point(8, 4)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, ".\n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8), "  a.")
+        pos = self.view.text_point(8, 4)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     destructor = ['~A\tvoid ~A()', '~A()']
-    #     if self.use_libclang:
-    #         self.assertNotIn(destructor, completions)
-    #     else:
-    #         self.assertIn(destructor, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        destructor = ['~A\tvoid ~A()', '~A()']
+        if self.use_libclang:
+            self.assertNotIn(destructor, completions)
+        else:
+            self.assertIn(destructor, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_complete_vector(self):
-    #     """Test that we can complete vector members."""
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test_vector.cpp')
-    #     self.set_up_view(file_name)
+    def test_complete_vector(self):
+        """Test that we can complete vector members."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_vector.cpp')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(3), "  vec.")
-    #     pos = self.view.text_point(3, 6)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, ".\n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(3), "  vec.")
+        pos = self.view.text_point(3, 6)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     expected = ['begin\titerator begin()', 'begin()']
-    #     self.assertIn(expected, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['begin\titerator begin()', 'begin()']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_complete_objc_property(self):
-    #     """Test that we can complete Objective C properties."""
-    #     if not should_run_objc_tests():
-    #         return
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test_property.m')
-    #     self.set_up_view(file_name)
+    def test_complete_objc_property(self):
+        """Test that we can complete Objective C properties."""
+        if not should_run_objc_tests():
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_property.m')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(6), "  foo.")
-    #     pos = self.view.text_point(6, 6)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, ".\n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(6), "  foo.")
+        pos = self.view.text_point(6, 6)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     expected = ['boolProperty\tBOOL boolProperty', 'boolProperty']
-    #     self.assertIn(expected, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['boolProperty\tBOOL boolProperty', 'boolProperty']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_complete_objc_void_method(self):
-    #     """Test that we can complete Objective C void methods."""
-    #     if not should_run_objc_tests():
-    #         return
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test_void_method.m')
-    #     self.set_up_view(file_name)
+    def test_complete_objc_void_method(self):
+        """Test that we can complete Objective C void methods."""
+        if not should_run_objc_tests():
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_void_method.m')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(6), "  [foo ")
-    #     pos = self.view.text_point(6, 7)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, " \n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(6), "  [foo ")
+        pos = self.view.text_point(6, 7)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, " \n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     expected = ['voidMethod\tvoid voidMethod', 'voidMethod']
-    #     self.assertIn(expected, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['voidMethod\tvoid voidMethod', 'voidMethod']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_complete_objc_method_one_parameter(self):
-    #     """Test that we can complete Objective C methods with one parameter."""
-    #     if not should_run_objc_tests():
-    #         return
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test_method_one_parameter.m')
-    #     self.set_up_view(file_name)
+    def test_complete_objc_method_one_parameter(self):
+        """Test that we can complete Objective C methods with one parameter."""
+        if not should_run_objc_tests():
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_method_one_parameter.m')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(6), "  [foo ")
-    #     pos = self.view.text_point(6, 7)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, " \n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(6), "  [foo ")
+        pos = self.view.text_point(6, 7)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, " \n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     expected = ['oneParameterMethod:\tvoid oneParameterMethod:(BOOL)',
-    #                 'oneParameterMethod:${1:(BOOL)}']
-    #     self.assertIn(expected, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = ['oneParameterMethod:\tvoid oneParameterMethod:(BOOL)',
+                    'oneParameterMethod:${1:(BOOL)}']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_complete_objc_method_multiple_parameters(self):
-    #     """Test that we can complete Objective C methods with 2+ parameters."""
-    #     if not should_run_objc_tests():
-    #         return
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test_method_two_parameters.m')
-    #     self.set_up_view(file_name)
+    def test_complete_objc_method_multiple_parameters(self):
+        """Test that we can complete Objective C methods with 2+ parameters."""
+        if not should_run_objc_tests():
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_method_two_parameters.m')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(6), "  [foo ")
-    #     pos = self.view.text_point(6, 7)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, " \n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(6), "  [foo ")
+        pos = self.view.text_point(6, 7)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, " \n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     expected = [
-    #         'bar:strParam:\tNSInteger * bar:(BOOL) strParam:(NSString *)',
-    #         'bar:${1:(BOOL)} strParam:${2:(NSString *)}']
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = [
+            'bar:strParam:\tNSInteger * bar:(BOOL) strParam:(NSString *)',
+            'bar:${1:(BOOL)} strParam:${2:(NSString *)}']
 
-    #     self.assertIn(expected, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_complete_objcpp(self):
-    #     """Test that we can complete code in Objective-C++ files."""
-    #     if not should_run_objc_tests():
-    #         return
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test_objective_cpp.mm')
-    #     self.set_up_view(file_name)
+    def test_complete_objcpp(self):
+        """Test that we can complete code in Objective-C++ files."""
+        if not should_run_objc_tests():
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_objective_cpp.mm')
+        self.set_up_view(file_name)
 
-    #     completer = self.set_up_completer()
+        completer = self.set_up_completer()
 
-    #     # Check the current cursor position is completable.
-    #     self.assertEqual(self.get_row(3), "  str.")
-    #     pos = self.view.text_point(3, 6)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, ".\n")
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(3), "  str.")
+        pos = self.view.text_point(3, 6)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
 
-    #     # Load the completions.
-    #     request = ActionRequest(self.view, pos)
-    #     (_, completions) = completer.complete(request)
+        # Load the completions.
+        request = ActionRequest(self.view, pos)
+        (_, completions) = completer.complete(request)
 
-    #     # Verify that we got the expected completions back.
-    #     self.assertIsNotNone(completions)
-    #     expected = [
-    #         'clear\tvoid clear()', 'clear()']
-    #     self.assertIn(expected, completions)
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        # Verify that we got the expected completions back.
+        self.assertIsNotNone(completions)
+        expected = [
+            'clear\tvoid clear()', 'clear()']
+        self.assertIn(expected, completions)
+        self.tear_down_completer()
+        self.tear_down()
 
-    # def test_unsaved_views(self):
-    #     """Test that we gracefully handle unsaved views."""
-    #     # Construct an unsaved scratch view.
-    #     self.view = sublime.active_window().new_file()
-    #     self.view.set_scratch(True)
+    def test_unsaved_views(self):
+        """Test that we gracefully handle unsaved views."""
+        # Construct an unsaved scratch view.
+        self.view = sublime.active_window().new_file()
+        self.view.set_scratch(True)
 
-    #     # Manually set up a completer.
-    #     manager = SettingsManager()
-    #     settings = manager.settings_for_view(self.view)
-    #     view_config_manager = ViewConfigManager()
-    #     view_config = view_config_manager.load_for_view(self.view, settings)
-    #     self.assertIsNone(view_config)
-    #     self.tear_down()
+        # Manually set up a completer.
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
+        view_config_manager = ViewConfigManager()
+        view_config = view_config_manager.load_for_view(self.view, settings)
+        self.assertIsNone(view_config)
+        self.tear_down()
 
-    # def test_cooperation_with_default_completions(self):
-    #     """Empty clang completions should not hide default completions."""
-    #     file_name = path.join(path.dirname(__file__),
-    #                           'test_files',
-    #                           'test_errors.cpp')
-    #     self.set_up_view(file_name)
+    def test_cooperation_with_default_completions(self):
+        """Empty clang completions should not hide default completions."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_errors.cpp')
+        self.set_up_view(file_name)
 
-    #     self.set_up_completer()
+        self.set_up_completer()
 
-    #     # Undefined foo object has no completions.
-    #     self.assertEqual(self.get_row(1), "  foo.")
-    #     pos = self.view.text_point(1, 6)
-    #     current_word = self.view.substr(self.view.word(pos))
-    #     self.assertEqual(current_word, ".\n")
+        # Undefined foo object has no completions.
+        self.assertEqual(self.get_row(1), "  foo.")
+        pos = self.view.text_point(1, 6)
+        current_word = self.view.substr(self.view.word(pos))
+        self.assertEqual(current_word, ".\n")
 
-    #     # Trigger default completions popup.
-    #     self.view.run_command('auto_complete')
-    #     self.assertTrue(self.view.is_auto_complete_visible())
-    #     self.tear_down_completer()
-    #     self.tear_down()
+        # Trigger default completions popup.
+        self.view.run_command('auto_complete')
+        self.assertTrue(self.view.is_auto_complete_visible())
+        self.tear_down_completer()
+        self.tear_down()
 
     def test_get_declaration_location(self):
         """Test getting declaration location."""
