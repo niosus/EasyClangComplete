@@ -7,6 +7,8 @@ import logging
 from os import path
 from string import Template
 
+import sublime
+
 from ..completion.compiler_variant import LibClangCompilerVariant
 
 log = logging.getLogger("ECC")
@@ -26,6 +28,8 @@ class PopupErrorVis:
     """
     _TAG = "easy_clang_complete_errors"
     _MAX_POPUP_WIDTH = 1800
+    _ERROR_FLAGS = sublime.DRAW_EMPTY | sublime.DRAW_NO_FILL
+    _ERROR_SCOPE = "invalid.illegal"
 
     ERROR_HTML_TEMPLATE = Template(
         open(POPUP_ERROR_HTML_FILE, encoding='utf8').read())
@@ -104,7 +108,12 @@ class PopupErrorVis:
         current_error_dict = self.err_regions[view.buffer_id()]
         regions = PopupErrorVis._as_region_list(current_error_dict)
         log.debug("showing error regions: %s", regions)
-        view.add_regions(PopupErrorVis._TAG, regions, "code", self.gutter_mark)
+        view.add_regions(
+            PopupErrorVis._TAG,
+            regions,
+            PopupErrorVis._ERROR_SCOPE,
+            self.gutter_mark,
+            PopupErrorVis._ERROR_FLAGS)
 
     def erase_regions(self, view):
         """Erase error regions for view.
