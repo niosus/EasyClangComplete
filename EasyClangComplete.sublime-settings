@@ -55,6 +55,10 @@
   // Possible styles: "popups", "phantoms", "none"
   "errors_style": "popups",
 
+  // Mark the gutter (between the sidebar and text view) with a color to flag
+  // errors.
+  "mark_gutter": false,
+
   // triggers for auto-completion
   "triggers" : [ ".", "->", "::", " ", "	", "(", "[" ],
 

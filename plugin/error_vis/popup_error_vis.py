@@ -32,9 +32,14 @@ class PopupErrorVis:
     WARNING_HTML_TEMPLATE = Template(
         open(POPUP_WARNING_HTML_FILE, encoding='utf8').read())
 
-    def __init__(self):
-        """Initialize error visualization."""
+    def __init__(self, mark_gutter=False):
+        """Initialize error visualization.
+
+        Args:
+            mark_gutter (bool): add a mark to the gutter for error regions
+        """
         self.err_regions = {}
+        self.gutter_mark = "dot" if mark_gutter else ""
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
@@ -99,7 +104,7 @@ class PopupErrorVis:
         current_error_dict = self.err_regions[view.buffer_id()]
         regions = PopupErrorVis._as_region_list(current_error_dict)
         log.debug("showing error regions: %s", regions)
-        view.add_regions(PopupErrorVis._TAG, regions, "code")
+        view.add_regions(PopupErrorVis._TAG, regions, "code", self.gutter_mark)
 
     def erase_regions(self, view):
         """Erase error regions for view.

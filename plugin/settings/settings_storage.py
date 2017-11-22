@@ -69,6 +69,7 @@ class SettingsStorage:
         "include_file_folder",
         "include_file_parent_folder",
         "libclang_path",
+        "mark_gutter",
         "max_cache_age",
         "objective_c_flags",
         "objective_cpp_flags",

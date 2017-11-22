@@ -256,9 +256,13 @@ class ViewConfig(object):
         Returns:
             Completer: A completer. Can be lib completer or bin completer.
         """
-        error_vis = PopupErrorVis()
+        mark_gutter = settings.mark_gutter
+
         if settings.errors_style == SettingsStorage.PHANTOMS_STYLE:
-            error_vis = PhantomErrorVis()
+            error_vis = PhantomErrorVis(mark_gutter)
+        else:
+            error_vis = PopupErrorVis(mark_gutter)
+
         completer = None
         if settings.use_libclang:
             log.info("init completer based on libclang")
