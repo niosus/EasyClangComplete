@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "intelliSenseMode": "msvc-x64",
+            "includePath": [ "/lib_include_dir" ],
+            "defines": [ "lib_EXPORTS" ],
+            "compileCommands": "/path/to/compile_commands.json",
+            "browse": {
+                "path": [ "${workspaceRoot}" ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 2
+}

@@ -28,6 +28,7 @@ from .error_vis.popup_error_vis import PopupErrorVis
 from .flags_sources.flags_file import FlagsFile
 from .flags_sources.cmake_file import CMakeFile
 from .flags_sources.flags_source import FlagsSource
+from .flags_sources.cpp_properties import CppProperties
 from .flags_sources.compilation_db import CompilationDb
 
 from .settings.settings_storage import SettingsStorage
@@ -222,6 +223,8 @@ class ViewConfig(object):
                     include_prefixes, settings.header_to_source_mapping)
             elif file_name == ".clang_complete":
                 flag_source = FlagsFile(include_prefixes)
+            elif file_name == "c_cpp_properties.json":
+                flag_source = CppProperties(include_prefixes)
             # try to get flags (uses cache when needed)
             flags = flag_source.get_flags(view.file_name(), search_scope)
             if flags:
