@@ -48,6 +48,7 @@
   "flags_sources": [
     {"file": "CMakeLists.txt"},
     {"file": "compile_commands.json"},
+    {"file": "c_cpp_properties.json"},
     {"file": ".clang_complete"},
   ],
 
