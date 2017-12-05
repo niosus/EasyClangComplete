@@ -4,7 +4,6 @@ Attributes:
     log (logging.Logger): logger for this module
 """
 import logging
-import re
 import sublime
 
 from os import path
@@ -55,6 +54,10 @@ class SettingsStorage:
     NONE_STYLE = "none"
     ERROR_STYLES = [POPUPS_STYLE, PHANTOMS_STYLE, NONE_STYLE]
 
+    GUTTER_COLOR_STYLE = "color"
+    GUTTER_MONO_STYLE = "mono"
+    GUTTER_STYLES = [GUTTER_COLOR_STYLE, GUTTER_MONO_STYLE, NONE_STYLE]
+
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
@@ -69,7 +72,7 @@ class SettingsStorage:
         "include_file_folder",
         "include_file_parent_folder",
         "libclang_path",
-        "mark_gutter",
+        "gutter_style",
         "max_cache_age",
         "objective_c_flags",
         "objective_cpp_flags",
@@ -127,7 +130,7 @@ class SettingsStorage:
             log.error("original error: %s", e)
 
     def need_reparse(self):
-        """A very hacky check that there was an incomplete load.
+        """Define a very hacky check that there was an incomplete load.
 
         This is needed because of something I believe is a bug in sublime text
         plugin handling. When we enable the plugin and load its settings with
@@ -168,6 +171,10 @@ class SettingsStorage:
         if self.errors_style not in SettingsStorage.ERROR_STYLES:
             error_msg = "Error style '{}' is not one of {}".format(
                 self.errors_style, SettingsStorage.ERROR_STYLES)
+            return False, error_msg
+        if self.gutter_style not in SettingsStorage.GUTTER_STYLES:
+            error_msg = "Gutter style '{}' is not one of {}".format(
+                self.gutter_style, SettingsStorage.GUTTER_STYLES)
             return False, error_msg
         for source_dict in self.flags_sources:
             if "file" not in source_dict:

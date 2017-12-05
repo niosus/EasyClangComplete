@@ -256,12 +256,10 @@ class ViewConfig(object):
         Returns:
             Completer: A completer. Can be lib completer or bin completer.
         """
-        mark_gutter = settings.mark_gutter
-
         if settings.errors_style == SettingsStorage.PHANTOMS_STYLE:
-            error_vis = PhantomErrorVis(mark_gutter)
+            error_vis = PhantomErrorVis(settings.gutter_style)
         else:
-            error_vis = PopupErrorVis(mark_gutter)
+            error_vis = PopupErrorVis(settings.gutter_style)
 
         completer = None
         if settings.use_libclang:

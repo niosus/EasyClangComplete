@@ -10,11 +10,14 @@ from string import Template
 import sublime
 
 from ..completion.compiler_variant import LibClangCompilerVariant
+from ..settings.settings_storage import SettingsStorage
 
 log = logging.getLogger("ECC")
 
 PATH_TO_HTML_FOLDER = path.join(
     path.dirname(path.dirname(__file__)), 'html')
+
+PATH_TO_ICON = "Packages/EasyClangComplete/pics/icons/{icon}"
 
 POPUP_ERROR_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "error_popup.html")
 POPUP_WARNING_HTML_FILE = path.join(PATH_TO_HTML_FOLDER, "warning_popup.html")
@@ -36,14 +39,19 @@ class PopupErrorVis:
     WARNING_HTML_TEMPLATE = Template(
         open(POPUP_WARNING_HTML_FILE, encoding='utf8').read())
 
-    def __init__(self, mark_gutter=False):
+    def __init__(self, gutter_style=None):
         """Initialize error visualization.
 
         Args:
             mark_gutter (bool): add a mark to the gutter for error regions
         """
         self.err_regions = {}
-        self.gutter_mark = "dot" if mark_gutter else ""
+        if gutter_style == SettingsStorage.GUTTER_COLOR_STYLE:
+            self.gutter_mark = PATH_TO_ICON.format(icon="error_color.png")
+        elif gutter_style == SettingsStorage.GUTTER_MONO_STYLE:
+            self.gutter_mark = PATH_TO_ICON.format(icon="error_mono.png")
+        else:
+            self.gutter_mark = ""
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
