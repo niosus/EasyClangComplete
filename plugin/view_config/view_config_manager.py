@@ -135,7 +135,7 @@ class ViewConfigManager(object):
             return tooltip_request, ""
         return config.completer.info(tooltip_request, settings)
 
-    def trigger_completion(self, view, completion_request):
+    def trigger_completion(self, view, completion_request, settings):
         """Get completions.
 
         This function is needed to ensure that python can get everything
@@ -143,7 +143,7 @@ class ViewConfigManager(object):
         to an async task. This left a reference to a completer forever active.
         """
         view_config = self.get_from_cache(view)
-        return view_config.completer.complete(completion_request)
+        return view_config.completer.complete(completion_request, settings)
 
     def __run_timer(self):
         """We make sure we run a single thread."""

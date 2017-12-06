@@ -96,7 +96,7 @@ class Completer(BaseCompleter):
         else:
             self.compiler_variant = ClangCompilerVariant()
 
-    def complete(self, completion_request):
+    def complete(self, completion_request, settings):
         """Create a list of autocompletions. Called asynchronously.
 
         It builds up a clang command that is then executed
@@ -111,7 +111,7 @@ class Completer(BaseCompleter):
         end = time.time()
         log.debug("code complete done in %s seconds", end - start)
 
-        completions = Completer._parse_completions(raw_complete)
+        completions = Completer._parse_completions(raw_complete, settings)
         log.debug('completions: %s' % completions)
         return (completion_request, completions)
 
@@ -206,11 +206,12 @@ class Completer(BaseCompleter):
         return Tools.run_command(complete_cmd)
 
     @staticmethod
-    def _parse_completions(complete_results):
+    def _parse_completions(complete_results, settings):
         """Create snippet-like structures from a list of completions.
 
         Args:
             complete_results (list): raw completions list
+            settings: all plugin settings
 
         Returns:
             list: updated completions
@@ -286,5 +287,8 @@ class Completer(BaseCompleter):
             hint = re.sub(Completer.compl_content_regex,
                           Parser.make_pretty,
                           comp_dict['content'])
+            hint = Tools.filter_spelling(hint, settings.spelling_filters)
+            contents = Tools.filter_spelling(contents,
+                                             settings.spelling_filters)
             completions.append([trigger + "\t" + hint, contents])
         return completions

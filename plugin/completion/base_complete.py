@@ -47,11 +47,12 @@ class BaseCompleter:
         # Store the latest errors here
         self.latest_errors = None
 
-    def complete(self, completion_request):
+    def complete(self, completion_request, settings):
         """Generate completions. See children for implementation.
 
         Args:
             completion_request (ActionRequest): request object
+            settings: all plugin settings
 
         Raises:
             NotImplementedError: Guarantees we do not call this abstract method
