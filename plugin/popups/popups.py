@@ -6,6 +6,7 @@ import markupsafe
 import logging
 import re
 
+from ..tools import Tools
 from ..utils.macro_parser import MacroParser
 from ..utils.index_location import IndexLocation
 
@@ -126,7 +127,8 @@ class Popup:
             if result_type_not_none and cursor.spelling != cursor.type.spelling:
                 # Don't show duplicates if the user focuses type, not variable
                 declaration_text += Popup._declaration_for_type(result_type,
-                                                                cindex)
+                                                                cindex,
+                                                                settings)
                 declaration_text += " "
         # Link to declaration of item under cursor
         if cursor.location:
@@ -144,7 +146,8 @@ class Popup:
             args = []
             for arg in cursor.get_arguments():
                 arg_type_decl = Popup._declaration_for_type(arg.type,
-                                                            cindex)
+                                                            cindex,
+                                                            settings)
                 if arg.spelling:
                     args.append(arg_type_decl + " " + arg.spelling)
                 else:
@@ -347,6 +350,7 @@ class Popup:
     @staticmethod
     def _declaration_for_type(clang_type,
                               cindex,
+                              settings,
                               default_spelling=None):
         """Get declaration for a cindex.Type.
 
@@ -356,11 +360,13 @@ class Popup:
         """
         if clang_type.kind == cindex.TypeKind.POINTER:
             pointee_type = clang_type.get_pointee()
-            pointee_text = Popup._declaration_for_type(pointee_type, cindex)
+            pointee_text = Popup._declaration_for_type(pointee_type, cindex,
+                                                       settings)
             return pointee_text + ' \\*'
         if clang_type.kind == cindex.TypeKind.LVALUEREFERENCE:
             referee_type = clang_type.get_pointee()
-            referee_text = Popup._declaration_for_type(referee_type, cindex)
+            referee_text = Popup._declaration_for_type(referee_type, cindex,
+                                                       settings)
             return referee_text + ' &'
         if clang_type.spelling is None or clang_type.spelling == "":
             # This happens, for example, when using an integer literal as
@@ -376,9 +382,11 @@ class Popup:
         if num_template_args < 1:
             # Just link to the type
             log.debug('Number of template args is too low.')
+            type_spelling = Tools.filter_spelling(
+                clang_type.spelling, settings.spelling_filters)
             declaration_text += Popup.link_from_location(
                 Popup.location_from_type(clang_type),
-                clang_type.spelling,
+                type_spelling,
                 trailing_space=False)
             return declaration_text
 
@@ -410,12 +418,16 @@ class Popup:
         if not type_name or len(arg_list) != num_template_args:
             log.debug('Wrong number of template args: len(%s) vs %s',
                       arg_list, num_template_args)
+            type_spelling = Tools.filter_spelling(
+                clang_type.spelling, settings.spelling_filters)
             declaration_text += Popup.link_from_location(
                 Popup.location_from_type(clang_type),
-                clang_type.spelling,
+                type_spelling,
                 trailing_space=False)
             return declaration_text
 
+        type_name = Tools.filter_spelling(
+            type_name, settings.spelling_filters)
         declaration_text += Popup.link_from_location(
             Popup.location_from_type(clang_type),
             type_name,
@@ -426,6 +438,7 @@ class Popup:
             declaration_text += Popup._declaration_for_type(
                 templ_type,
                 cindex,
+                settings,
                 default_spelling=arg_list[arg_index].strip())
             if arg_index + 1 < num_template_args:
                 declaration_text += ", "

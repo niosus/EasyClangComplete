@@ -580,7 +580,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 name=ThreadJob.COMPLETE_TAG,
                 callback=self.completion_finished,
                 function=config_manager.trigger_completion,
-                args=[view, completion_request])
+                args=[view, completion_request, settings])
             EasyClangComplete.thread_pool.new_job(job)
         elif pos_status == PosStatus.COMPLETE_INCLUDES:
             log.debug("Completing includes")

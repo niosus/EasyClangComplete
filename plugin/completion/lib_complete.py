@@ -175,7 +175,7 @@ class Completer(BaseCompleter):
             end = time.time()
             log.debug("compilation done in %s seconds", end - start)
 
-    def complete(self, completion_request):
+    def complete(self, completion_request, settings):
         """Create a list of autocompletions. Called asynchronously.
 
         Using the current translation unit it queries libclang for the
@@ -184,6 +184,7 @@ class Completer(BaseCompleter):
         Args:
             completion_request (tools.ActionRequest): completion request
                 holding information about the view and needed location.
+            settings: all plugin settings
 
         Raises:
             ValueError: if file name does not exist - throw exception.
@@ -249,7 +250,8 @@ class Completer(BaseCompleter):
                 excluded = self.bigger_ignore_list
             else:
                 excluded = self.default_ignore_list
-            completions = Completer._parse_completions(complete_obj, excluded)
+            completions = Completer._parse_completions(
+                complete_obj, excluded, settings)
         log.debug('completions: %s' % completions)
         return (completion_request, completions)
 
@@ -429,12 +431,13 @@ class Completer(BaseCompleter):
         return True
 
     @staticmethod
-    def _parse_completions(complete_results, excluded):
+    def _parse_completions(complete_results, excluded, settings):
         """Create snippet-like structures from a list of completions.
 
         Args:
             complete_results (list): raw completions list
             excluded (list): list of excluded classes of completions
+            settings: all plugin settings
 
         Returns:
             list: updated completions
@@ -457,9 +460,13 @@ class Completer(BaseCompleter):
                     continue
                 if not chunk.spelling:
                     continue
-                hint += chunk.spelling
+                spelling = Tools.filter_spelling(
+                    chunk.spelling, settings.spelling_filters)
+                if not spelling:
+                    continue
+                hint += spelling
                 if chunk.isKindTypedText():
-                    trigger += chunk.spelling
+                    trigger += spelling
                 if chunk.isKindResultType():
                     hint += ' '
                     continue
@@ -469,9 +476,9 @@ class Completer(BaseCompleter):
                     continue
                 if chunk.isKindPlaceHolder():
                     contents += ('${' + str(place_holders) + ':' +
-                                 chunk.spelling + '}')
+                                 spelling + '}')
                     place_holders += 1
                 else:
-                    contents += chunk.spelling
+                    contents += spelling
             completions.append([trigger + "\t" + hint, contents])
         return completions

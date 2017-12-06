@@ -91,6 +91,7 @@ class SettingsStorage:
         "show_index_references",
         "show_type_body",
         "show_type_info",
+        "spelling_filters",
         "target_compilers",
         "triggers",
         "use_default_includes",

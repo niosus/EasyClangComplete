@@ -784,3 +784,21 @@ class Tools:
             if flag.startswith(prefix):
                 return idx
         return None
+
+    @staticmethod
+    def filter_spelling(string, filters):
+        """Run the string through the user-defined spelling filters."""
+        # use the regex module instead of re if available
+        import re
+        sub = re.sub
+        try:
+            import regex
+            sub = regex.sub
+        except ImportError:
+            pass
+
+        # apply all filters
+        for f in filters:
+            string = sub(f["pattern"], f["replace"], string)
+
+        return string
