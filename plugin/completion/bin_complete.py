@@ -85,6 +85,9 @@ class Completer(BaseCompleter):
         else:
             self.compiler_variant = ClangCompilerVariant()
 
+        # pass in use_libclang option for to prevent info poput if true.
+        self.use_libclang = settings.use_libclang
+
     def complete(self, completion_request):
         """Called asynchronously to create a list of autocompletions.
 
@@ -129,7 +132,15 @@ class Completer(BaseCompleter):
 
         Please use libclang or set "show_type_info" to false.
         """
-        sublime.error_message(msg)
+        # This error message can also occur when lib_complete completer cannot
+        # be initialized. This can happen for newly created files for folders
+        # that have cached cmake output. Therefore, it makes more sense to log
+        # here instead of a pop up error message.
+        if not self.use_libclang:
+            sublime.error_message(msg)
+        else:
+            log.info("clear cmake cache.")
+        return (tooltip_request, "")
 
     def update(self, view, settings):
         """Update build for current view.
