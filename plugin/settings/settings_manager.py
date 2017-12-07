@@ -34,6 +34,10 @@ class SettingsManager:
         self.__settings_dict = {}
         self.__change_listeners = []
 
+    def has_settings_for_view(self, view):
+        """Check if we have settings for this view."""
+        return view.buffer_id() in self.__settings_dict
+
     def settings_for_view(self, view):
         """Get settings stored for a view.
 

@@ -305,16 +305,24 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        if Tools.is_valid_view(view):
-            log.debug("closing view %s", view.buffer_id())
-            EasyClangComplete.settings_manager.clear_for_view(view)
-            file_id = view.buffer_id()
-            job = ThreadJob(
-                name=EasyClangComplete.CLEAR_JOB_TAG,
-                callback=EasyClangComplete.config_removed,
-                function=EasyClangComplete.view_config_manager.clear_for_view,
-                args=[file_id])
-            EasyClangComplete.thread_pool.new_job(job)
+        if not Tools.is_valid_view(view):
+            # View is invalid, so just ignore it.
+            return
+        if not EasyClangComplete.settings_manager.has_settings_for_view(view):
+            # View is valid, but is temporary and was never actually opened.
+            # This mostly happens when previewing views while in Ctrl + P
+            # environment. Do nothing for such a view.
+            return
+        # Now we know that the view is valid and we need to clear it.
+        log.debug("closing view %s", view.buffer_id())
+        EasyClangComplete.settings_manager.clear_for_view(view)
+        file_id = view.buffer_id()
+        job = ThreadJob(
+            name=EasyClangComplete.CLEAR_JOB_TAG,
+            callback=EasyClangComplete.config_removed,
+            function=EasyClangComplete.view_config_manager.clear_for_view,
+            args=[file_id])
+        EasyClangComplete.thread_pool.new_job(job)
 
     @staticmethod
     def config_removed(future):
