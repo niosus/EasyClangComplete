@@ -9,7 +9,7 @@ from ..tools import singleton
 from ..utils.unique_list import UniqueList
 
 from os import path
-from glob import glob
+from fnmatch import fnmatch
 
 import logging
 
@@ -32,7 +32,7 @@ class CompilationDb(FlagsSource):
     _FILE_NAME = "compile_commands.json"
 
     def __init__(self, include_prefixes,
-                 header_to_source_map=["{stamp}.*", "../src/{stamp}.*"]):
+                 header_to_source_map=["{stamp}.*"]):
         """Initialize a compilation database.
 
         Args:
@@ -99,14 +99,13 @@ class CompilationDb(FlagsSource):
             return db[file_path]
         # Next, use the header to source map to try to find a related source
         # file:
-        for related_file_path in self._find_related_sources(file_path):
-            if related_file_path in db:
-                log.debug("[db]: Found matching source file")
-                self._cache[file_path] = current_db_path
-                File.update_mod_time(current_db_path)
-                # Copy over the arguments from the related file to the header:
-                db[file_path] = db[related_file_path]
-                return db[file_path]
+        related_file_path = self._find_related_sources(file_path, db)
+        if related_file_path is not None:
+            self._cache[file_path] = current_db_path
+            File.update_mod_time(current_db_path)
+            # Copy over the arguments from the related file to the header:
+            db[file_path] = db[related_file_path]
+            return db[file_path]
         log.debug("[db]: return entry for 'all'.")
         return db['all']
 
@@ -196,7 +195,7 @@ class CompilationDb(FlagsSource):
             new_args.append(argument)
         return new_args
 
-    def _find_related_sources(self, file_path):
+    def _find_related_sources(self, file_path, db):
         if not file_path:
             return
         templates = self._header_to_source_map
@@ -214,9 +213,10 @@ class CompilationDb(FlagsSource):
                 ext=ext
             )
             pattern = path.join(dirname, pattern)
-            for rel_path in glob(pattern):
-                # Normalize the path, as templates might contain references
-                # to parent directories:
-                rel_path = path.normpath(rel_path)
-                log.debug("[db]:[header-to-source]: found match %s" % rel_path)
-                yield rel_path
+            # Normalize the path, as templates might contain references
+            # to parent directories:
+            pattern = path.normpath(pattern)
+            for key in db:
+                if fnmatch(key, pattern):
+                    log.debug("[db]:[header-to-source]: found match %s" % key)
+                    return key

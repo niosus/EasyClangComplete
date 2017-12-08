@@ -42,7 +42,7 @@ class CMakeFile(FlagsSource):
                  prefix_paths,
                  flags,
                  cmake_binary="cmake",
-                 header_to_source_mapping=[]):
+                 header_to_source_mapping=["{stamp}.*"]):
         """Initialize a cmake-based flag storage.
 
         Args:
