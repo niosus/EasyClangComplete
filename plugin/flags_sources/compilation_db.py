@@ -9,6 +9,7 @@ from ..tools import singleton
 from ..utils.unique_list import UniqueList
 
 from os import path
+from glob import glob
 
 import logging
 
@@ -30,14 +31,17 @@ class CompilationDb(FlagsSource):
     """
     _FILE_NAME = "compile_commands.json"
 
-    def __init__(self, include_prefixes):
+    def __init__(self, include_prefixes,
+                 header_to_source_map=["{stamp}.*", "../src/{stamp}.*"]):
         """Initialize a compilation database.
 
         Args:
             include_prefixes (str[]): A List of valid include prefixes.
+            header_to_source_map (str[]): Templates to map header to sources.
         """
         super().__init__(include_prefixes)
         self._cache = ComplationDbCache()
+        self._header_to_source_map = header_to_source_map
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -56,10 +60,6 @@ class CompilationDb(FlagsSource):
         search_scope = self._update_search_scope(search_scope, file_path)
         # make sure the file name conforms to standard
         file_path = File.canonical_path(file_path)
-        # remove extension from a file
-        if file_path:
-            # strip the file path from extension.
-            file_path = path.splitext(file_path)[0]
         # initialize search scope if not initialized before
         # check if we have a hashed version
         log.debug("[db]:[get]: for file %s", file_path)
@@ -92,10 +92,21 @@ class CompilationDb(FlagsSource):
         if not db:
             log.debug("[db]: not found, return None.")
             return None
+        # First, check if the file is known to the DB:
         if file_path and file_path in db:
             self._cache[file_path] = current_db_path
             File.update_mod_time(current_db_path)
             return db[file_path]
+        # Next, use the header to source map to try to find a related source
+        # file:
+        for related_file_path in self._find_related_sources(file_path):
+            if related_file_path in db:
+                log.debug("[db]: Found matching source file")
+                self._cache[file_path] = current_db_path
+                File.update_mod_time(current_db_path)
+                # Copy over the arguments from the related file to the header:
+                db[file_path] = db[related_file_path]
+                return db[file_path]
         log.debug("[db]: return entry for 'all'.")
         return db['all']
 
@@ -121,7 +132,6 @@ class CompilationDb(FlagsSource):
         for entry in data:
             file_path = File.canonical_path(entry['file'],
                                             database_file.folder())
-            file_path = path.splitext(file_path)[0]
             argument_list = []
 
             base_path = database_file.folder()
@@ -185,3 +195,26 @@ class CompilationDb(FlagsSource):
                 continue
             new_args.append(argument)
         return new_args
+
+    def _find_related_sources(self, file_path):
+        templates = self._header_to_source_map
+        dirname = path.dirname(file_path)
+        basename = path.basename(file_path)
+        (stamp, ext) = path.splitext(basename)
+        for template in templates:
+            log.debug("[db]:[header-to-source]: looking up via %s" % template)
+            # Construct a globbing pattern by taking the dirname of the input
+            # file and join it with the template part which may contain
+            # some pre-defined placeholders:
+            pattern = template.format(
+                basename=basename,
+                stamp=stamp,
+                ext=ext
+            )
+            pattern = path.join(dirname, pattern)
+            for rel_path in glob(pattern):
+                # Normalize the path, as templates might contain references
+                # to parent directories:
+                rel_path = path.normpath(rel_path)
+                log.debug("[db]:[header-to-source]: found match %s" % rel_path)
+                yield rel_path

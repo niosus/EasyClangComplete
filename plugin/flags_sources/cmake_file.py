@@ -41,7 +41,8 @@ class CMakeFile(FlagsSource):
                  include_prefixes,
                  prefix_paths,
                  flags,
-                 cmake_binary="cmake"):
+                 cmake_binary="cmake",
+                 header_to_source_mapping=[]):
         """Initialize a cmake-based flag storage.
 
         Args:
@@ -55,6 +56,7 @@ class CMakeFile(FlagsSource):
         self.__cmake_prefix_paths = prefix_paths
         self.__cmake_flags = flags
         self.__cmake_binary = cmake_binary
+        self.__header_to_source_mapping = header_to_source_mapping
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -96,7 +98,8 @@ class CMakeFile(FlagsSource):
             if use_cached:
                 log.debug("[cmake]:[unchanged]: use existing db.")
                 db_file_path = self._cache[cached_cmake_path]
-                db = CompilationDb(self._include_prefixes)
+                db = CompilationDb(
+                    self._include_prefixes, self.__header_to_source_mapping)
                 db_search_scope = SearchScope(
                     from_folder=path.dirname(db_file_path))
                 return db.get_flags(file_path, db_search_scope)
@@ -114,7 +117,8 @@ class CMakeFile(FlagsSource):
             self._cache[file_path] = current_cmake_path
             self._cache[current_cmake_path] = db_file.full_path()
             File.update_mod_time(current_cmake_path)
-        db = CompilationDb(self._include_prefixes)
+        db = CompilationDb(
+            self._include_prefixes, self.__header_to_source_mapping)
         db_search_scope = SearchScope(from_folder=db_file.folder())
         flags = db.get_flags(file_path, db_search_scope)
         return flags

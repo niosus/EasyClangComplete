@@ -116,4 +116,20 @@
   // Controls if libclang will cache the results.
   // This works faster, but in rare cases can generate wrong completions.
   "use_libclang_caching": true,
+
+  // Templates to find source files for headers in case we use a
+  // compilation database: Such a DB does not contain the required
+  // compile flags for header files. In order to find a best matching
+  // source file instead, you can use templates. Such templates describe how
+  // to find (relative to the header file) a source file which we can
+  // use to get compile flags for. You can use UNIX style globbing patterns.
+  // In addition, you can use some pre-defined placeholders that are derived
+  // from the file we try to look up flags for:
+  // - basename: The base file name without the directory part.
+  // - stamp: Like "basename", but with the file name extension removed.
+  // - ext: The file name extension of the header file.
+  "header_to_source_mapping": [
+    "{stamp}.*", "../inc/{stamp}.*", "../src/{stamp}.*", "*.*", "../inc/*.*",
+    "../src/*.*"
+  ],
 }

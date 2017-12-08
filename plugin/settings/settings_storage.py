@@ -83,6 +83,7 @@ class SettingsStorage:
         "use_libclang",
         "use_libclang_caching",
         "verbose",
+        "header_to_source_mapping",
     ]
 
     def __init__(self, settings_handle):
