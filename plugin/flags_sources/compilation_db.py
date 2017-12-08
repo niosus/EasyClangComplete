@@ -197,6 +197,8 @@ class CompilationDb(FlagsSource):
         return new_args
 
     def _find_related_sources(self, file_path):
+        if not file_path:
+            return
         templates = self._header_to_source_map
         dirname = path.dirname(file_path)
         basename = path.basename(file_path)
