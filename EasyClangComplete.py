@@ -130,12 +130,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     Most of the functionality is delegated.
     """
-    thread_pool = ThreadPool(max_workers=4)
-
-    CLEAR_JOB_TAG = "clear"
-    COMPLETE_JOB_TAG = "complete"
-    UPDATE_JOB_TAG = "update"
-    INFO_JOB_TAG = "info"
+    thread_pool = ThreadPool()
 
     view_config_manager = None
     settings_manager = None
@@ -228,7 +223,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
         # All is taken care of. The view is built if needed.
         job = ThreadJob(
-            name=EasyClangComplete.UPDATE_JOB_TAG,
+            name=ThreadJob.UPDATE_TAG,
             callback=EasyClangComplete.config_updated,
             function=EasyClangComplete.view_config_manager.load_for_view,
             args=[view, settings])
@@ -290,7 +285,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             settings = EasyClangComplete.settings_manager.settings_for_view(
                 view)
             job = ThreadJob(
-                name=EasyClangComplete.UPDATE_JOB_TAG,
+                name=ThreadJob.UPDATE_TAG,
                 callback=EasyClangComplete.config_updated,
                 function=EasyClangComplete.view_config_manager.load_for_view,
                 args=[view, settings])
@@ -318,7 +313,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         EasyClangComplete.settings_manager.clear_for_view(view)
         file_id = view.buffer_id()
         job = ThreadJob(
-            name=EasyClangComplete.CLEAR_JOB_TAG,
+            name=ThreadJob.CLEAR_TAG,
             callback=EasyClangComplete.config_removed,
             function=EasyClangComplete.view_config_manager.clear_for_view,
             args=[file_id])
@@ -333,9 +328,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             future (concurrent.Future): future holding id of removed view
         """
-        if future.done():
+        if future.done() and not future.cancelled():
             log.debug("removed config for id: %s", future.result())
-        elif future.cancelled():
+        else:
             log.debug("could not remove config -> cancelled")
 
     @staticmethod
@@ -345,9 +340,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             future (concurrent.Future): future holding config of updated view
         """
-        if future.done():
+        if future.done() and not future.cancelled():
             log.debug("updated config: %s", future.result())
-        elif future.cancelled():
+        else:
             log.debug("could not update config -> cancelled")
 
     @staticmethod
@@ -366,6 +361,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         """
         if not future.done():
+            return
+        if future.cancelled():
             return
         (tooltip_request, result) = future.result()
         if result == "":
@@ -391,6 +388,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             future (concurrent.Future): future holding completion result
         """
         if not future.done():
+            return
+        if future.cancelled():
             return
         (completion_request, completions) = future.result()
         if not completion_request:
@@ -427,7 +426,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         self.current_job_id = tooltip_request.get_identifier()
 
         job = ThreadJob(
-            name=EasyClangComplete.INFO_JOB_TAG,
+            name=ThreadJob.INFO_TAG,
             callback=self.info_finished,
             function=EasyClangComplete.view_config_manager.trigger_info,
             args=[view, tooltip_request, settings])
@@ -487,7 +486,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         # submit async completion job
         job = ThreadJob(
-            name=EasyClangComplete.COMPLETE_JOB_TAG,
+            name=ThreadJob.COMPLETE_TAG,
             callback=self.completion_finished,
             function=EasyClangComplete.view_config_manager.trigger_completion,
             args=[view, completion_request])
