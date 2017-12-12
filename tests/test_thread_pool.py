@@ -82,3 +82,23 @@ class test_thread_pool(TestCase):
         time.sleep(0.3)
         self.assertTrue(test_container.result)
         self.assertTrue(test_container.cancelled)
+
+    def test_no_override_job(self):
+        """Test adding the same job while running another instance of it."""
+        test_container = TestContainer(False, False)
+        job_good = ThreadJob(name="test_job",
+                             function=run_me,
+                             callback=test_container.on_job_done,
+                             args=[True])
+        job_bad = ThreadJob(name="test_job",
+                            function=run_me,
+                            callback=test_container.on_job_done,
+                            args=[False])
+        pool = ThreadPool()
+        pool.new_job(job_good)  # Initial.
+        time.sleep(0.05)
+        self.assertFalse(test_container.result)
+        pool.new_job(job_bad)   # Cannot override as prev is running.
+        time.sleep(0.1)
+        self.assertTrue(test_container.result)
+        self.assertFalse(test_container.cancelled)
