@@ -32,7 +32,7 @@ class CompilationDb(FlagsSource):
     _FILE_NAME = "compile_commands.json"
 
     def __init__(self, include_prefixes,
-                 header_to_source_map=["{stamp}.*"]):
+                 header_to_source_map=None):
         """Initialize a compilation database.
 
         Args:
@@ -198,10 +198,14 @@ class CompilationDb(FlagsSource):
             log.debug("[db]:[header-to-source]: skip retrieving related "
                       "files for invalid file_path input")
             return
-        templates = self._header_to_source_map
+        templates = self._get_templates()
+        log.debug("[db]:[header-to-source]: using lookup table:" +
+                  str(templates))
+
         dirname = path.dirname(file_path)
         basename = path.basename(file_path)
         (stamp, ext) = path.splitext(basename)
+        # Search in all templates plus a set of default ones:
         for template in templates:
             log.debug("[db]:[header-to-source]: looking up via %s" % template)
             # Construct a globbing pattern by taking the dirname of the input
@@ -220,3 +224,26 @@ class CompilationDb(FlagsSource):
                 if fnmatch(key, pattern):
                     log.debug("[db]:[header-to-source]: found match %s" % key)
                     return key
+
+    def _get_templates(self):
+        templates = self._header_to_source_map
+        # If we use the plain default (None), make it an empty array
+        if templates is None:
+            templates = list()
+        # Flatten directory entries (i.e. templates which end with a trailing
+        # path delimiter):
+
+        result = list()
+        for template in templates:
+            if template.endswith("/") or template.endswith("\\"):
+                result.append(template + "{stamp}.*")
+                result.append(template + "*.*")
+            else:
+                result.append(template)
+
+        # Include default templates:
+        default_templates = ["{stamp}.*", "*.*"]
+        for default_template in default_templates:
+            if default_template not in result:
+                result.append(default_template)
+        return result
