@@ -3,12 +3,12 @@
 Attributes:
     log (logging.Logger): Logger for this module.
 """
+import time
 import logging
 import weakref
 from os import path
-from time import time
 from threading import RLock
-from threading import Timer
+from threading import Thread
 
 from .tools import File
 from .tools import Tools
@@ -55,7 +55,7 @@ class ViewConfig(object):
             return
 
         # init creation time
-        self.__last_usage_time = time()
+        self.__last_usage_time = time.time()
 
         # set up a proper object
         completer, flags = ViewConfig.__generate_essentials(view, settings)
@@ -125,17 +125,17 @@ class ViewConfig(object):
         Returns:
             bool: True if older, False otherwise
         """
-        if time() - self.__last_usage_time > age_in_seconds:
+        if time.time() - self.__last_usage_time > age_in_seconds:
             return True
         return False
 
     def get_age(self):
         """Return age of config."""
-        return time() - self.__last_usage_time
+        return time.time() - self.__last_usage_time
 
     def touch(self):
         """Update time of usage of this config."""
-        self.__last_usage_time = time()
+        self.__last_usage_time = time.time()
 
     @staticmethod
     def needs_reparse(view):
@@ -313,18 +313,27 @@ class ViewConfigCache(dict):
     pass
 
 
+@singleton
 class ViewConfigManager(object):
     """A utility class that stores a cache of all view configurations."""
 
-    __rlock = RLock()
+    def __init__(self, timer_period=30, max_config_age=60):
+        """Initialize view config manager.
 
-    __timers = {}
-    __timer_period = 60  # seconds
+        All the values aregiven in seconds and can be overridden by settings.
 
-    def __init__(self):
-        """Initialize view config manager."""
-        with ViewConfigManager.__rlock:
-            self._cache = ViewConfigCache()
+        Args:
+            timer_period (int, optional): How often to run timer in seconds.
+            max_config_age (int, optional): How long should a TU stay alive.
+        """
+        self.__rlock = RLock()
+        with self.__rlock:
+            self.__cache = ViewConfigCache()
+
+        self.__timer_period = timer_period      # Seconds.
+        self.__max_config_age = max_config_age  # Seconds.
+        self.__progress_thread = Thread(target=self.__remove_old_configs,
+                                        daemon=True).start()
 
     def get_from_cache(self, view):
         """Get config from cache with no modifications."""
@@ -332,10 +341,10 @@ class ViewConfigManager(object):
             log.error("view %s is not valid. Cannot get config.", view)
             return None
         v_id = view.buffer_id()
-        if v_id in self._cache:
+        if v_id in self.__cache:
             log.debug("config exists for path: %s", v_id)
-            self._cache[v_id].touch()
-            return self._cache[v_id]
+            self.__cache[v_id].touch()
+            return self.__cache[v_id]
         return None
 
     def load_for_view(self, view, settings):
@@ -356,23 +365,19 @@ class ViewConfigManager(object):
             res = None
             # we need to protect this with mutex to avoid race condition
             # between creating and removing a config.
-            with ViewConfigManager.__rlock:
-                if v_id in self._cache:
+            with self.__rlock:
+                if v_id in self.__cache:
                     log.debug("config exists for path: %s", v_id)
-                    res = self._cache[v_id].update_if_needed(view, settings)
+                    res = self.__cache[v_id].update_if_needed(view, settings)
                 else:
                     log.debug("generate new config for path: %s", v_id)
                     config = ViewConfig(view, settings)
-                    self._cache[v_id] = config
+                    self.__cache[v_id] = config
                     res = config
 
-                # start timer if it is not set yet
-                log.debug("starting timer to remove old configs.")
-                if v_id in ViewConfigManager.__timers:
-                    log.debug("cancel old timer.")
-                    ViewConfigManager.__cancel_timer(v_id)
-                ViewConfigManager.__start_timer(
-                    self.__remove_old_config, v_id, settings.max_cache_age)
+                # Set the internal max config age.
+                self.__max_config_age = settings.max_cache_age
+
             # now return the needed config
             return weakref.proxy(res)
         except AttributeError as e:
@@ -386,12 +391,10 @@ class ViewConfigManager(object):
         """Clear config for a view id."""
         import gc
         log.debug("trying to clear config for view: %s", v_id)
-        with ViewConfigManager.__rlock:
-            if v_id in self._cache:
-                del self._cache[v_id]
-                # explicitly collect garbage
-                gc.collect()
-            ViewConfigManager.__cancel_timer(v_id)
+        with self.__rlock:
+            if v_id in self.__cache:
+                del self.__cache[v_id]
+                gc.collect()  # Explicitly collect garbage.
         return v_id
 
     def trigger_get_declaration_location(self, view):
@@ -404,7 +407,7 @@ class ViewConfigManager(object):
         return config.completer.get_declaration_location(view, row, col)
 
     def trigger_info(self, view, tooltip_request, settings):
-        """A proxy function to handle getting info from completer.
+        """Handle getting info from completer.
 
         The main purpose of this function is to ensure that python correctly
         collects garbage. Before, a direct call to info of the completer was
@@ -417,7 +420,7 @@ class ViewConfigManager(object):
         return config.completer.info(tooltip_request, settings)
 
     def trigger_completion(self, view, completion_request):
-        """A proxy function to get completions.
+        """Get completions.
 
         This function is needed to ensure that python can get everything
         properly garbage collected. Before we passed a function of a completer
@@ -426,48 +429,23 @@ class ViewConfigManager(object):
         view_config = self.get_from_cache(view)
         return view_config.completer.complete(completion_request)
 
-    @staticmethod
-    def __start_timer(callback, v_id, max_age):
-        """Start timer for file path and callback."""
-        log.debug("[timer]: start for view: %s", v_id)
-        ViewConfigManager.__timers[v_id] = Timer(
-            ViewConfigManager.__timer_period,
-            callback, [v_id, max_age])
-        ViewConfigManager.__timers[v_id].start()
-        log.debug("[timer]: active for views: %s",
-                  ViewConfigManager.__timers.keys())
+    def __remove_old_configs(self):
+        """Remove old configs if they are older than max age.
 
-    @staticmethod
-    def __cancel_timer(v_id):
-        """Stop timer for file path."""
-        with ViewConfigManager.__rlock:
-            if v_id in ViewConfigManager.__timers:
-                log.debug("[timer]: stop for view: %s", v_id)
-                ViewConfigManager.__timers[v_id].cancel()
-                del ViewConfigManager.__timers[v_id]
-                log.debug("[timer]: active for views: %s",
-                          ViewConfigManager.__timers.keys())
-
-    def __remove_old_config(self, v_id, max_config_age):
-        """Remove old config if it is older than max age.
-
-        Args:
-            v_id (str): Path to a file
-            max_config_age (int): Max config age in seconds.
+        This function is called by a thread that keeps running forever checking
+        if there are any new configs to remove based on a timer.
         """
         import gc
-        with ViewConfigManager.__rlock:
-            ViewConfigManager.__cancel_timer(v_id)
-            if self._cache[v_id].is_older_than(max_config_age):
-                log.debug("[delete] old config: %s", v_id)
-                del self._cache[v_id]
-                # explicitly collect garbage
-                gc.collect()
-            else:
-                log.debug("[skip] young config: Age %s < %s. View: %s.",
-                          self._cache[v_id].get_age(),
-                          max_config_age,
-                          v_id)
-                log.debug("[timer]: restart.")
-                ViewConfigManager.__start_timer(
-                    self.__remove_old_config, v_id, max_config_age)
+        while True:
+            time.sleep(self.__timer_period)
+            with self.__rlock:
+                for v_id in list(self.__cache.keys()):
+                    if self.__cache[v_id].is_older_than(self.__max_config_age):
+                        log.debug("Remove old config: %s", v_id)
+                        del self.__cache[v_id]
+                        gc.collect()  # Explicitly collect garbage
+                    else:
+                        log.debug("Skip young config: Age %s < %s. View: %s.",
+                                  self.__cache[v_id].get_age(),
+                                  self.__max_config_age,
+                                  v_id)

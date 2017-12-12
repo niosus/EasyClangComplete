@@ -167,7 +167,7 @@ class TestViewConfigManager(GuiTestWrapper):
                               'test.cpp')
         self.set_up_view(file_name)
         manager = SettingsManager()
-        config_manager = ViewConfigManager()
+        config_manager = ViewConfigManager(timer_period=1)
         settings = manager.settings_for_view(self.view)
         view_config = config_manager.load_for_view(self.view, settings)
         self.assertEqual(view_config.completer.name, "lib")
@@ -184,7 +184,7 @@ class TestViewConfigManager(GuiTestWrapper):
                               'test.cpp')
         self.set_up_view(file_name)
         manager = SettingsManager()
-        config_manager = ViewConfigManager()
+        config_manager = ViewConfigManager(timer_period=1)
         settings = manager.settings_for_view(self.view)
         view_config = config_manager.load_for_view(self.view, settings)
         self.assertIsNotNone(view_config)
@@ -201,14 +201,14 @@ class TestViewConfigManager(GuiTestWrapper):
                               'test.cpp')
         self.set_up_view(file_name)
         manager = SettingsManager()
-        config_manager = ViewConfigManager()
+        config_manager = ViewConfigManager(timer_period=1)
         settings = manager.settings_for_view(self.view)
-        settings.max_cache_age = 3  # seconds
-        initial_period = ViewConfigManager._ViewConfigManager__timer_period
+        settings.max_cache_age = 2  # seconds
+        initial_period = config_manager._ViewConfigManager__timer_period
         ViewConfigManager._ViewConfigManager__timer_period = 1
         view_config = config_manager.load_for_view(self.view, settings)
         self.assertIsNotNone(view_config)
-        time.sleep(4)
+        time.sleep(3)
         view_config = config_manager.get_from_cache(self.view)
         self.assertIsNone(view_config)
         ViewConfigManager._ViewConfigManager__timer_period = initial_period

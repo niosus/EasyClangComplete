@@ -274,6 +274,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
+        if not view.file_name():
+            return
         if view.file_name().endswith('.sublime-project'):
             if not EasyClangComplete.settings_manager:
                 log.error("no settings manager, no cannot reload settings")
