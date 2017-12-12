@@ -6,7 +6,7 @@ Attributes:
 import time
 import logging
 from concurrent import futures
-from threading import RLock
+from threading import Lock
 from threading import Thread
 
 from ..tools import singleton
@@ -55,8 +55,10 @@ class ThreadJob:
         """Representation."""
         return "job: '{name}'".format(name=self.name)
 
-    def is_higher_priority_than(self, other):
+    def overrides(self, other):
         """Define if one job is higher priority than the other."""
+        if self.is_same_type_as(other):
+            return True
         if self.__is_high_priority() and not other.__is_high_priority():
             return True
         return False
@@ -95,8 +97,8 @@ class ThreadPool:
         self.__thread_pool = futures.ThreadPoolExecutor(
             max_workers=max_workers)
 
-        self.__lock = RLock()
-        self.__progress_lock = RLock()
+        self.__lock = Lock()
+        self.__progress_lock = Lock()
 
         self.__show_animation = False
 
@@ -123,30 +125,32 @@ class ThreadPool:
             self.__progress_status = val
 
     def new_job(self, job):
-        """Add a new job to be submitted.
+        """Add a new job to be submitted to a thread pool.
 
         Args:
             job (ThreadJob): A job to be run asynchronously.
         """
         # Cancel all the jobs with the same name that are already running.
+        # Iterating over a list is atomic in python, so we should be safe.
+        for active_job in self.__active_jobs:
+            if job.overrides(active_job):
+                if active_job.future.cancel():
+                    log.debug("Canceled job: '%s'", job)
+                else:
+                    log.debug("Cannot cancel job: '%s'", active_job)
+        # Submit a new job to the pool.
+        future = self.__thread_pool.submit(job.function, *job.args)
+        future.add_done_callback(job.callback)
+        future.add_done_callback(self.__on_job_done)
+        job.future = future  # Set the future for this job.
         with self.__lock:
-            for active_job in self.__active_jobs:
-                if job.is_same_type_as(active_job) \
-                        or job.is_higher_priority_than(active_job):
-                    if active_job.future.cancel():
-                        log.debug("Canceled job: '%s'", job)
-                    else:
-                        log.debug("Cannot cancel job: '%s'", active_job)
-            # Submit a new job to the pool.
-            future = self.__thread_pool.submit(job.function, *job.args)
-            future.add_done_callback(job.callback)
-            future.add_done_callback(self.__on_job_done)
-            job.future = future  # Set the future for this job.
             self.__active_jobs.append(job)
             self.__show_animation = True
 
     def __on_job_done(self, future):
-        """Call this when the job is done."""
+        """Call this when the job is done or cancelled."""
+        # We want to clear the old list and alter the positions of elements.
+        # This is a potentially dangerous operation, so protect it by a mutex.
         with self.__lock:
             self.__active_jobs[:] = [
                 job for job in self.__active_jobs if not job.future.done()]
