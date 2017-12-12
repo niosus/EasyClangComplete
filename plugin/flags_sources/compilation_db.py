@@ -92,19 +92,17 @@ class CompilationDb(FlagsSource):
         if not db:
             log.debug("[db]: not found, return None.")
             return None
-        # First, check if the file is known to the DB:
+        # If the file is not in the DB, try to find a related file:
+        if file_path and file_path not in db:
+            related_file_path = self._find_related_sources(file_path, db)
+            if related_file_path:
+                db[file_path] = db[related_file_path]
+                file_path = related_file_path
+        # If there are any flags in the DB (directly or via a related file),
+        # retrieve them:
         if file_path and file_path in db:
             self._cache[file_path] = current_db_path
             File.update_mod_time(current_db_path)
-            return db[file_path]
-        # Next, use the header to source map to try to find a related source
-        # file:
-        related_file_path = self._find_related_sources(file_path, db)
-        if related_file_path is not None:
-            self._cache[file_path] = current_db_path
-            File.update_mod_time(current_db_path)
-            # Copy over the arguments from the related file to the header:
-            db[file_path] = db[related_file_path]
             return db[file_path]
         log.debug("[db]: return entry for 'all'.")
         return db['all']
@@ -197,6 +195,8 @@ class CompilationDb(FlagsSource):
 
     def _find_related_sources(self, file_path, db):
         if not file_path:
+            log.debug("[db]:[header-to-source]: skip retrieving related "
+                      "files for invalid file_path input")
             return
         templates = self._header_to_source_map
         dirname = path.dirname(file_path)
