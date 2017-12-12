@@ -1,22 +1,3 @@
-# maintainerd can keep a log of all interactions with the Pull Request
-# integrations as a comment in your PR.
-log: true
-# This contains all pull request related config options.
-pullRequest:
-  # maintainerd will insert checkboxes and other information for the
-  # PR submitter to interact with.  The preamble is the text inserted
-  # before all of that.
-  preamble: >
-    Hi! Thanks for the PR! To keep things clean, please check the boxes below:
-  # Check boxes that will be inserted into the PR description.
-  items:
-    - prompt: >
-        This PR is set to merge with `dev` branch.
-      # If `default` is true, it will start in the checked state.
-      default: false
-      # If `required` is true, the PR will not be allowed to be merged before
-      # the checkbox is checked.
-      required: true
 # maintainerd can also help you with managing issues.
 issue:
   # When a label is added to an issue...
