@@ -1,0 +1,4 @@
+[
+  { "keys": ["shift+f12"], "command": "ecc_goto_declaration"},
+  { "keys": ["ctrl+shift+e"], "command": "ecc_show_all_errors"}
+]

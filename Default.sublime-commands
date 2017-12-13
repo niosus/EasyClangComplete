@@ -14,6 +14,10 @@
         }
     },
     {
+        "caption": "EasyClangComplete: Show all errors",
+        "command": "ecc_show_all_errors"
+    },
+    {
         "caption": "EasyClangComplete: Clean current CMake cache",
         "command": "clean_cmake"
     },
