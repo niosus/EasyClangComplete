@@ -19,6 +19,7 @@ from .plugin import view_config
 from .plugin import flags_sources
 from .plugin.utils import thread_pool
 from .plugin.utils import progress_status
+from .plugin.utils import quick_panel_handler
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
@@ -38,6 +39,7 @@ CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
 ThreadPool = thread_pool.ThreadPool
 ThreadJob = thread_pool.ThreadJob
+QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
@@ -71,6 +73,39 @@ def plugin_loaded():
 def plugin_unloaded():
     """Call right before the package was unloaded."""
     handle_plugin_unloaded_function()
+
+
+class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
+    """Handle easy_clang_goto_declaration command."""
+
+    def run(self, edit):
+        """Show all errors available in this view.
+
+        This function shows all errors that are available from within a view.
+        Note that the errors can be from different files.
+        """
+        if not Tools.is_valid_view(self.view):
+            return
+        config_manager = EasyClangComplete.view_config_manager
+        if not config_manager:
+            log.error("No ViewConfigManager available.")
+            return
+        config = config_manager.get_from_cache(self.view)
+        log.debug("config: %s", config)
+        if not config:
+            log.error("No ViewConfig for view: %s.", self.view.buffer_id())
+            return
+        if not config.completer:
+            log.error("No Completer for view: %s.", self.view.buffer_id())
+        handler = QuickPanelHandler(self.view, config.completer.latest_errors)
+        start_idx = 0
+        self.view.window().show_quick_panel(
+            handler.items_to_show(),
+            handler.on_done,
+            sublime.MONOSPACE_FONT,
+            start_idx,
+            handler.on_highlighted)
+        print(config.completer.latest_errors)
 
 
 class EccGotoDeclarationCommand(sublime_plugin.TextCommand):

@@ -44,9 +44,11 @@ class BaseCompleter:
         self.clang_binary = settings.clang_binary
         # initialize error visualization
         self.error_vis = error_vis
+        # Store the latest errors here
+        self.latest_errors = None
 
     def complete(self, completion_request):
-        """Function to generate completions. See children for implementation.
+        """Generate completions. See children for implementation.
 
         Args:
             completion_request (ActionRequest): request object
@@ -98,16 +100,22 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def show_errors(self, view, output):
+    def save_errors(self, output):
+        """Generate and store the errors.
+
+        Args:
+            output (object): opaque output to be parsed by compiler variant
+        """
+        self.latest_errors = self.compiler_variant.errors_from_output(output)
+
+    def show_errors(self, view):
         """Show current complie errors.
 
         Args:
             view (sublime.View): Current view
-            output (object): opaque output to be parsed by compiler variant
         """
-        errors = self.compiler_variant.errors_from_output(output)
         if not Tools.is_valid_view(view):
             log.error("cannot show errors. View became invalid!")
             return
-        self.error_vis.generate(view, errors)
+        self.error_vis.generate(view, self.latest_errors)
         self.error_vis.show_errors(view)

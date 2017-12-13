@@ -160,13 +160,14 @@ class Completer(BaseCompleter):
                     unsaved_files=unsaved_files,
                     options=parse_options)
                 self.tu = trans_unit
+                self.save_errors(self.tu.diagnostics)  # Store for the future.
             except Exception as e:
                 log.error("error while compiling: %s", e)
             end = time.time()
             log.debug("compilation done in %s seconds", end - start)
 
     def complete(self, completion_request):
-        """Called asynchronously to create a list of autocompletions.
+        """Create a list of autocompletions. Called asynchronously.
 
         Using the current translation unit it queries libclang for the
         possible completions.
@@ -325,8 +326,10 @@ class Completer(BaseCompleter):
             self.tu.reparse()
             end = time.time()
             log.debug("reparsed in %s seconds", end - start)
+            # Store and potentially show errors to the user.
+            self.save_errors(self.tu.diagnostics)  # Store for the future.
             if settings.errors_style != SettingsStorage.NONE_STYLE:
-                self.show_errors(view, self.tu.diagnostics)
+                self.show_errors(view)
             return True
         log.error("no translation unit for view id %s", v_id)
         return False

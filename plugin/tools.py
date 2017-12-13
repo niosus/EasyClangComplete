@@ -65,6 +65,8 @@ def singleton(class_):
 class Reloader:
     """Reloader for all dependencies."""
 
+    MAX_RELOAD_TRIES = 10
+
     @staticmethod
     def reload_all():
         """Reload all loaded modules."""
@@ -79,10 +81,20 @@ class Reloader:
     @staticmethod
     def reload_once(prefix):
         """Reload all modules once."""
-        for name, module in sys.modules.items():
-            if name.startswith(prefix):
-                log.debug("reloading module: '%s'", name)
-                imp.reload(module)
+        try_counter = 0
+        try:
+            for name, module in sys.modules.items():
+                if name.startswith(prefix):
+                    log.debug("reloading module: '%s'", name)
+                    imp.reload(module)
+        except OSError as e:
+            if try_counter >= Reloader.MAX_RELOAD_TRIES:
+                log.fatal("Too many tries to reload and no success. Fail.")
+                return
+            try_counter += 1
+            log.error("Received an error: %s on try %s. Try again.",
+                      e, try_counter)
+            Reloader.reload_once(prefix)
 
 
 class SublBridge:

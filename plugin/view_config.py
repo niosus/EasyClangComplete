@@ -344,8 +344,9 @@ class ViewConfigManager(object):
             return None
         v_id = view.buffer_id()
         if v_id in self.__cache:
-            log.debug("config exists for path: %s", v_id)
+            log.debug("config exists for view: %s", v_id)
             self.__cache[v_id].touch()
+            log.debug("config: %s", self.__cache[v_id])
             return self.__cache[v_id]
         return None
 

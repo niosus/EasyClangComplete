@@ -19,12 +19,24 @@ from ..settings.settings_storage import SettingsStorage
 
 log = logging.getLogger("ECC")
 
+DUMMY_INFO_MSG = """
+EasyClangComplete:
+"use_libclang" is false
+"show_type_info" is true.
+
+Unfortunately, there is no way to show type info
+if you are not using libclang.
+
+Please use libclang or set "show_type_info" to false.
+
+If you *are* using libclang and still see this, open an issue.
+"""
+
 
 class Completer(BaseCompleter):
-    """Encapsulates completions based on the output from clang_binary.
+    """Encapsulate completions based on the output from clang_binary.
 
     Attributes:
-
         clang_binary (str): e.g. "clang++" or "clang++-3.6"
         flags_dict (dict): compilation flags lists for each view
         std_flag (TYPE): std flag, e.g. "std=c++11"
@@ -73,7 +85,6 @@ class Completer(BaseCompleter):
         Args:
             settings (SettingsStorage): object that stores all settings
             error_vis (ErrorVis): an object of error visualizer
-
         """
         # init common completer interface
         super().__init__(settings, error_vis)
@@ -86,10 +97,11 @@ class Completer(BaseCompleter):
             self.compiler_variant = ClangCompilerVariant()
 
     def complete(self, completion_request):
-        """Called asynchronously to create a list of autocompletions.
+        """Create a list of autocompletions. Called asynchronously.
 
         It builds up a clang command that is then executed
-        as a subprocess. The output is parsed for completions """
+        as a subprocess. The output is parsed for completions.
+        """
         log.debug("completing with cmd command")
         view = completion_request.get_view()
         start = time.time()
@@ -118,18 +130,8 @@ class Completer(BaseCompleter):
             (tools.ActionRequest, str): completion request along with the
                 info details read from the translation unit.
         """
-        # This is a dummy implementation.
-        msg = """
-        EasyClangComplete:
-        "use_libclang" is false
-        "show_type_info" is true.
-
-        Unfortunately, there is no way to show type info
-        if you are not using libclang.
-
-        Please use libclang or set "show_type_info" to false.
-        """
-        sublime.error_message(msg)
+        # This is a dummy implementation that just shows an error to the user.
+        sublime.error_message(DUMMY_INFO_MSG)
 
     def update(self, view, settings):
         """Update build for current view.
@@ -149,8 +151,8 @@ class Completer(BaseCompleter):
         output_text = self.run_clang_command(view, "update")
         end = time.time()
         log.debug("rebuilding done in %s seconds", end - start)
-
-        self.show_errors(view, output_text)
+        self.save_errors(output_text)
+        self.show_errors(view)
 
     def get_declaration_location(self, view, row, col):
         """Get location of declaration from given location in file.
