@@ -6,4 +6,8 @@ thread_pool: A class that encapsulates a thread pool to allow delayed run.
 progress_status: A class for showing a progress indicator in status line.
 
 """
-__all__ = ("unique_list", "flag", "thread_pool", "progress_status")
+__all__ = ("unique_list",
+           "flag",
+           "thread_pool",
+           "progress_status",
+           "quick_panel_handler")
