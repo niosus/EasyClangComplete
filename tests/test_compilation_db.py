@@ -138,3 +138,20 @@ class TestCompilationDb(TestCase):
                                'directory')
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected, db.get_flags(search_scope=scope))
+
+    def test_get_c_flags(self):
+        """Test argument filtering for c language."""
+        include_prefixes = ['-I']
+        db = CompilationDb(include_prefixes)
+
+        main_file_path = path.normpath('/home/blah.c')
+        # also try to test a header
+        path_to_db = path.join(path.dirname(__file__),
+                               'compilation_db_files',
+                               'command_c')
+        scope = SearchScope(from_folder=path_to_db)
+        flags = db.get_flags(main_file_path, scope)
+        self.assertNotIn(Flag('-c'), flags)
+        self.assertNotIn(Flag('-o'), flags)
+        self.assertIn(Flag('-Wno-poison-system-directories'), flags)
+        self.assertIn(Flag('-march=armv7-a'), flags)

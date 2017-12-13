@@ -1,0 +1,7 @@
+[
+  {
+    "command": "cc -c -I/home/blah/clients -I/home/blah -I/home/blah/core/h -I/home/blah/network/h -I/home/blah/update/h -I/home/blah/h -I/home/blah/h -I/usr/include -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/libsoup-2.4 -I/usr/include/libxml2 -I/usr/include -I/platform/include/fd655 -I/platform/include/ct1628 -I/home/blah/h -I/home/blah/fs/h -I/home/blah/network/h -I/home/blah/update/h -I/home/blah/update/h -Wall -Wno-unused-function -D_REENTRANT -DWITH_THREADS=1 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -fgnu89-inline -fPIC -D_ALI_BUILD_ -D_GNU_SOURCE -shared-libgcc -std=gnu99 -march=armv7-a -mtune=cortex-a9 -DARMV7SP -ggdb -O2 -Werror -DDEVELOP -o -mfpu=vfp3 -mfloat-abi=softfp -mtune=cortex-a9 -march=armv7-a -Wno-poison-system-directories /home/blah/c/blah.c",
+    "directory": "/home/blah",
+    "file": "/home/blah.c"
+  }
+]
