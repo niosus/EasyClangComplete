@@ -24,6 +24,7 @@ from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
 # reload the modules
+tools.Reloader.reload_all()
 
 # some aliases
 SettingsManager = settings_manager.SettingsManager
