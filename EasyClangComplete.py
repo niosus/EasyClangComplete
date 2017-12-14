@@ -168,6 +168,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
     """
     thread_pool = ThreadPool()
 
+    # random thing
+
     view_config_manager = None
     settings_manager = None
 
