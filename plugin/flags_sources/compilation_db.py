@@ -32,7 +32,8 @@ class CompilationDb(FlagsSource):
     _FILE_NAME = "compile_commands.json"
 
     def __init__(self, include_prefixes,
-                 header_to_source_map=None):
+                 header_to_source_map=None,
+                 use_compiler_builtins=False):
         """Initialize a compilation database.
 
         Args:
@@ -42,6 +43,7 @@ class CompilationDb(FlagsSource):
         super().__init__(include_prefixes)
         self._cache = ComplationDbCache()
         self._header_to_source_map = header_to_source_map
+        self._use_compiler_builtins = use_compiler_builtins
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -117,6 +119,8 @@ class CompilationDb(FlagsSource):
             unique entries for 'all' entry.
         """
         import json
+        from ..utils.compiler_builtins import CompilerBuiltIns
+
         data = None
 
         with open(database_file.full_path()) as data_file:
@@ -144,6 +148,25 @@ class CompilationDb(FlagsSource):
                 # TODO(igor): maybe show message to the user instead here
                 log.critical(" compilation database has unsupported format")
                 return None
+
+            # If enabled, try to retrieve default flags for the compiler
+            # and language combination:
+            if self._use_compiler_builtins:
+
+                # Note: Calling the CompilerBuiltIns constructor shells out to
+                # calling the compiler; however, for every
+                # compiler/standard/language
+                # combination, the results are cached by the class internally.
+                builtins = CompilerBuiltIns(argument_list)
+
+                # Append built-in flags to the end of the list:
+                # Note: Currently, we only pass through defines.
+                # If we start passing include paths, we end up nowhere
+                # right now, as clang then uses a wild mix of its own
+                # include paths and the ones of the compiler used by the
+                # project...
+                argument_list = argument_list[:-1] + builtins.defines + argument_list[-1:]
+                #argument_list += builtins.defines
 
             argument_list = CompilationDb.filter_bad_arguments(argument_list)
             flags = FlagsSource.parse_flags(base_path,

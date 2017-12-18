@@ -152,4 +152,13 @@
     // "exotic" file name suffix:
     // "{stamp}.mycustomext
   ],
+
+  // Controls if we try to retrieve built-in flags from the compiler.
+  // Compilers tend to set some pre-defined symbols as well as include
+  // paths. If this option is on, we will ask the compiler for these and
+  // explicitly append them to the list of flags passed to clang when
+  // retrieving auto-completions.
+  // Generally, this option should improve the completion quality, however,
+  // if you encounter issues, you can turn it off.
+  "use_compiler_built_in_flags": false,
 }

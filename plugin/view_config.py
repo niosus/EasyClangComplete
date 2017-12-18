@@ -216,10 +216,14 @@ class ViewConfig(object):
                                         prefix_paths,
                                         cmake_flags,
                                         settings.cmake_binary,
-                                        settings.header_to_source_mapping)
+                                        settings.header_to_source_mapping,
+                                        settings.use_compiler_built_in_flags)
             elif file_name == "compile_commands.json":
                 flag_source = CompilationDb(
-                    include_prefixes, settings.header_to_source_mapping)
+                    include_prefixes,
+                    settings.header_to_source_mapping,
+                    settings.use_compiler_built_in_flags
+                )
             elif file_name == ".clang_complete":
                 flag_source = FlagsFile(include_prefixes)
             # try to get flags (uses cache when needed)
