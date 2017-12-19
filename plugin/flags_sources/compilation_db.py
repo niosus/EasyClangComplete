@@ -33,7 +33,7 @@ class CompilationDb(FlagsSource):
 
     def __init__(self, include_prefixes,
                  header_to_source_map=None,
-                 use_compiler_builtins=False):
+                 use_target_compiler_builtins=False):
         """Initialize a compilation database.
 
         Args:
@@ -43,7 +43,7 @@ class CompilationDb(FlagsSource):
         super().__init__(include_prefixes)
         self._cache = ComplationDbCache()
         self._header_to_source_map = header_to_source_map
-        self._use_compiler_builtins = use_compiler_builtins
+        self._use_target_compiler_builtins = use_target_compiler_builtins
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -151,12 +151,12 @@ class CompilationDb(FlagsSource):
 
             # If enabled, try to retrieve default flags for the compiler
             # and language combination:
-            if self._use_compiler_builtins:
+            if self._use_target_compiler_builtins:
                 # Note: Calling the CompilerBuiltIns constructor shells out to
                 # calling the compiler; however, for every
                 # compiler/standard/language
                 # combination, the results are cached by the class internally.
-                builtins = CompilerBuiltIns(argument_list)
+                builtins = CompilerBuiltIns(argument_list, file_path)
 
                 # Append built-in flags to the end of the list:
                 # Note: We keep the last argument as last, as it

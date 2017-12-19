@@ -84,7 +84,11 @@ class SettingsStorage:
         "use_libclang_caching",
         "verbose",
         "header_to_source_mapping",
-        "use_compiler_built_in_flags",
+        "use_target_compiler_built_in_flags",
+        "target_c_compiler",
+        "target_cpp_compiler",
+        "target_objective_c_compiler",
+        "target_objective_cpp_compiler",
     ]
 
     def __init__(self, settings_handle):

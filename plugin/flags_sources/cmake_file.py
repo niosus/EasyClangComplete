@@ -43,7 +43,7 @@ class CMakeFile(FlagsSource):
                  flags,
                  cmake_binary="cmake",
                  header_to_source_mapping=None,
-                 use_compiler_builtins=False):
+                 use_target_compiler_builtins=False):
         """Initialize a cmake-based flag storage.
 
         Args:
@@ -58,7 +58,7 @@ class CMakeFile(FlagsSource):
         self.__cmake_flags = flags
         self.__cmake_binary = cmake_binary
         self.__header_to_source_mapping = header_to_source_mapping
-        self.__use_compiler_builtins = use_compiler_builtins
+        self.__use_target_compiler_builtins = use_target_compiler_builtins
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -103,7 +103,7 @@ class CMakeFile(FlagsSource):
                 db = CompilationDb(
                     self._include_prefixes,
                     self.__header_to_source_mapping,
-                    self.__use_compiler_builtins
+                    self.__use_target_compiler_builtins
                 )
                 db_search_scope = SearchScope(
                     from_folder=path.dirname(db_file_path))

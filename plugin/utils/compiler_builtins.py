@@ -24,7 +24,7 @@ class CompilerBuiltIns:
         "__STDC__"
     ]
 
-    def __init__(self, args):
+    def __init__(self, args, filename):
         """
         Create an object holding the built-in flags of a compiler.
 
@@ -34,7 +34,9 @@ class CompilerBuiltIns:
         is interpreted as the call of a compiler (i.e. the first entry
         is the compiler to call and everything else are arguments to the
         compiler). If a single string is given, it is parsed into a string
-        list first.
+        list first. The `filename` is the name of the file that is compiled
+        by the arguments. It can be passed in to derive additional
+        information.
         """
         from shlex import split
         super().__init__()
@@ -48,7 +50,7 @@ class CompilerBuiltIns:
         if compiler is not None:
             # Guess the language (we need to pass it to the compiler
             # explicitly):
-            language = self._guess_language(compiler)
+            language = self._guess_language(compiler, args, filename)
             # Get defines and include paths from the compier:
             cfg = (compiler, std, language)
             _log.debug("Getting default flags for {}".format(cfg))
@@ -97,17 +99,48 @@ class CompilerBuiltIns:
                     std = arg[5:]
         return (compiler, std)
 
-    def _guess_language(self, compiler):
+    def _guess_language(self, compiler, args, filename):
         """
         Try to guess the language based on the compiler.
 
         This is required as we need to explicitly pass a language when asking
         the compiler later for its default flags.
+
+        TODO: It might be better to bind the view's language to the
+              one we pass to the compiler instead of trying to guess
+              stuff.
         """
-        if compiler.endswith("++"):
-            return "c++"
-        else:
-            return "c"
+        # First, we look for a `-x` flag in the arguments. This flag usually
+        # is used to select the language the compiler shall use to parse
+        # the input file.
+        from os.path import splitext
+        language = None
+        try:
+            index = args.index("-x")
+            try:
+                language = args[index + 1]
+            except IndexError:
+                # The "-x" switch was given as last argument.
+                _log.warning("Encountered -x switch without argument")
+        except ValueError:
+            # There's no "-x" flag. Hence, we try to guess the language from
+            # the file name:
+            if filename is not None:
+                ext = splitext(filename)[1]
+                if ext in ["cc", "cpp", "cxx", "C", "c++"]:
+                    language = "c++"
+                elif ext in ["m", "mm"]:
+                    language = "objective-c"
+            if language is None:
+                # If we still are not sure, we try to guess the language
+                # from the compiler's name:
+                if compiler.endswith("++"):
+                    language = "c++"
+        # Note: It could be that language is unset, in this case we just
+        # won't pass any language flag to the compiler later, which
+        # will cause the compiler's "native" flags to be used,
+        #  i.e. usually for C.
+        return language
 
     def _get_default_flags(self, compiler, std, language):
         import subprocess
@@ -115,7 +148,9 @@ class CompilerBuiltIns:
 
         result = list()
 
-        args = [compiler, "-x", language]
+        args = [compiler]
+        if language is not None:
+            args += ["-x", language]
         if std is not None:
             args += ['-std=' + std]
         args += ["-dM", "-E", "-"]
@@ -147,7 +182,9 @@ class CompilerBuiltIns:
 
         result = list()
 
-        args = [compiler, '-x', language]
+        args = [compiler]
+        if language is not None:
+            args += ["-x", language]
         if std is not None:
             args += ['-std=' + std]
         args += ['-Wp,-v', '-E', '-']
