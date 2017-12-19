@@ -165,7 +165,6 @@ class CompilationDb(FlagsSource):
                 argument_list = (
                     argument_list[:-1] + builtins.flags +
                     argument_list[-1:])
-                #argument_list += builtins.defines
 
             argument_list = CompilationDb.filter_bad_arguments(argument_list)
             flags = FlagsSource.parse_flags(base_path,
