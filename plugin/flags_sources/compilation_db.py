@@ -160,12 +160,11 @@ class CompilationDb(FlagsSource):
                 builtins = CompilerBuiltIns(argument_list)
 
                 # Append built-in flags to the end of the list:
-                # Note: Currently, we only pass through defines.
-                # If we start passing include paths, we end up nowhere
-                # right now, as clang then uses a wild mix of its own
-                # include paths and the ones of the compiler used by the
-                # project...
-                argument_list = argument_list[:-1] + builtins.defines + argument_list[-1:]
+                # Note: We keep the last argument as last, as it
+                # usually is the file name.
+                argument_list = (
+                    argument_list[:-1] + builtins.flags +
+                    argument_list[-1:])
                 #argument_list += builtins.defines
 
             argument_list = CompilationDb.filter_bad_arguments(argument_list)
