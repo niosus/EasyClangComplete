@@ -64,7 +64,6 @@ class CompilerBuiltIns:
             self._defines = defines
             self._include_paths = includes
 
-
     @property
     def defines(self):
         """The built-in defines provided by the compiler."""
