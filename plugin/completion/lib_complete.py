@@ -255,10 +255,10 @@ class Completer(BaseCompleter):
                 info details read from the translation unit.
 
         """
-        empty_info = (tooltip_request, "")
+        empty_info = (tooltip_request, None)
         with Completer.rlock:
             if not self.tu:
-                return (tooltip_request, "")
+                return empty_info
             view = tooltip_request.get_view()
             (row, col) = SublBridge.cursor_pos(
                 view, tooltip_request.get_trigger_position())

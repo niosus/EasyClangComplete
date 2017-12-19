@@ -1,3 +1,5 @@
+#include <vec>
+
 class A {
   int a;
   void foo(int a);
