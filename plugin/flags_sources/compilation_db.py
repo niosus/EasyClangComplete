@@ -152,7 +152,6 @@ class CompilationDb(FlagsSource):
             # If enabled, try to retrieve default flags for the compiler
             # and language combination:
             if self._use_compiler_builtins:
-
                 # Note: Calling the CompilerBuiltIns constructor shells out to
                 # calling the compiler; however, for every
                 # compiler/standard/language

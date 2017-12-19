@@ -51,12 +51,12 @@ class CompilerBuiltIns:
             language = self._guess_language(compiler)
             # Get defines and include paths from the compier:
             cfg = (compiler, std, language)
-            self._debug("Getting default flags for {}".format(cfg))
+            _log.debug("Getting default flags for {}".format(cfg))
             if cfg in CompilerBuiltIns.__cache:
-                self._debug("Reusing flags from cache")
+                _log.debug("Reusing flags from cache")
                 (defines, includes) = CompilerBuiltIns.__cache[cfg]
             else:
-                self._debug("Querying compiler for defaults")
+                _log.debug("Querying compiler for defaults")
                 defines = self._get_default_flags(compiler, std, language)
                 includes = self._get_default_include_paths(
                     compiler, std, language)
@@ -90,7 +90,7 @@ class CompilerBuiltIns:
         if len(args) > 0:
             compiler = args[0]
         else:
-            self._debug("Got empty command line - cannot extract compiler")
+            _log.debug("Got empty command line - cannot extract compiler")
         if len(args) > 1:
             for arg in args[1:]:
                 if arg.startswith("-std="):
@@ -137,7 +137,7 @@ class CompilerBuiltIns:
                     if m is not None:
                         result.append("-D{}".format(m.group(1)))
         except FileNotFoundError:
-            self._warn("Cannot find compiler %s in PATH." % compiler)
+            _log.warning("Cannot find compiler %s in PATH." % compiler)
 
         return self._filter_defines(result)
 
@@ -175,7 +175,7 @@ class CompilerBuiltIns:
                     if m is not None:
                         result.append("-I{}".format(m.group(1)))
         except FileNotFoundError:
-            self._warn("Cannot find compiler %s in PATH." % compiler)
+            _log.warning("Cannot find compiler %s in PATH." % compiler)
 
         return result
 
@@ -188,9 +188,3 @@ class CompilerBuiltIns:
                 if define.startswith(prefix):
                     defines.remove(define)
         return defines
-
-    def _debug(self, msg):
-        _log.debug("[compilerbuiltins] %s" % msg)
-
-    def _warn(self, msg):
-        _logging.warning("[compilerbuiltins] %s" % msg)

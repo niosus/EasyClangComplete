@@ -160,5 +160,5 @@
   // retrieving auto-completions.
   // Generally, this option should improve the completion quality, however,
   // if you encounter issues, you can turn it off.
-  "use_compiler_built_in_flags": false,
+  "use_compiler_built_in_flags": true,
 }
