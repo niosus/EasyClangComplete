@@ -57,7 +57,6 @@ class TestFlag(TestCase):
         # C specific define which it is worth checking for?
         # self.assertIn("-D__STDC__=1", builtIns.flags)
 
-
     def test_cxx(self):
         """
         Test retrieval of flags for a C++ compiler.
@@ -114,7 +113,6 @@ class TestFlag(TestCase):
                 if define.startswith("-D__cplusplus="):
                     is_cpp = True
             self.assertTrue(is_cpp)
-
 
     def test_objc(self):
         """
