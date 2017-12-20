@@ -55,7 +55,11 @@ class TestCmakeFile(object):
         expected_lib_include = Flag('-I' + path_to_file_folder)
         cmake_file = CMakeFile(['-I', '-isystem'], None, None)
         flags = cmake_file.get_flags(test_file_path)
-        db = CompilationDb(['-I', '-isystem'])
+        db = CompilationDb(
+            ['-I', '-isystem'],
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
         self.assertEqual(flags[0], Flag('-Dliba_EXPORTS'))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(

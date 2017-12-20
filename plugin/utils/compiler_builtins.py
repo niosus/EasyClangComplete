@@ -47,6 +47,9 @@ class CompilerBuiltIns:
             args = split(args)
         # Guess the compiler and standard:
         (compiler, std) = self._guess_compiler(args)
+        self._compiler = compiler
+        self._std = std
+        self._language = None
         if compiler is not None:
             # Guess the language (we need to pass it to the compiler
             # explicitly):
@@ -65,6 +68,7 @@ class CompilerBuiltIns:
                 CompilerBuiltIns.__cache[cfg] = (defines, includes)
             self._defines = defines
             self._include_paths = includes
+            self._language = language
 
     @property
     def defines(self):
@@ -85,6 +89,21 @@ class CompilerBuiltIns:
         include paths of the compiler.
         """
         return self._defines + self._include_paths
+
+    @property
+    def compiler(self):
+        """The detected compiler."""
+        return self._compiler
+
+    @property
+    def std(self):
+        """The detected standard to use."""
+        return self._std
+
+    @property
+    def language(self):
+        """The detected target language."""
+        return self._language
 
     def _guess_compiler(self, args):
         compiler = None
@@ -126,7 +145,7 @@ class CompilerBuiltIns:
             # There's no "-x" flag. Hence, we try to guess the language from
             # the file name:
             if filename is not None:
-                ext = splitext(filename)[1]
+                ext = splitext(filename)[1][1:]
                 if ext in ["cc", "cpp", "cxx", "C", "c++"]:
                     language = "c++"
                 elif ext in ["m", "mm"]:
@@ -145,6 +164,7 @@ class CompilerBuiltIns:
     def _get_default_flags(self, compiler, std, language):
         import subprocess
         import re
+        from ..tools import Tools
 
         result = list()
 
@@ -155,30 +175,22 @@ class CompilerBuiltIns:
             args += ['-std=' + std]
         args += ["-dM", "-E", "-"]
 
-        try:
-            res = subprocess.Popen(
-                args,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT
-            )
-            res.wait()
-            for line in res.stdout.read().decode().splitlines():
-                m = re.search(r'#define ([\w()]+) (.+)', line)
+        output = Tools.run_command(args, stdin=subprocess.DEVNULL, default="")
+        for line in output.splitlines():
+            m = re.search(r'#define ([\w()]+) (.+)', line)
+            if m is not None:
+                result.append("-D{}={}".format(m.group(1), m.group(2)))
+            else:
+                m = re.search(r'#define (\w+)', line)
                 if m is not None:
-                    result.append("-D{}={}".format(m.group(1), m.group(2)))
-                else:
-                    m = re.search(r'#define (\w+)', line)
-                    if m is not None:
-                        result.append("-D{}".format(m.group(1)))
-        except FileNotFoundError:
-            _log.warning("Cannot find compiler %s in PATH." % compiler)
+                    result.append("-D{}".format(m.group(1)))
 
         return self._filter_defines(result)
 
     def _get_default_include_paths(self, compiler, std, language):
         import subprocess
         import re
+        from ..tools import Tools
 
         result = list()
 
@@ -189,31 +201,21 @@ class CompilerBuiltIns:
             args += ['-std=' + std]
         args += ['-Wp,-v', '-E', '-']
 
-        try:
-            res = subprocess.Popen(
-                args,
-                stdin=subprocess.DEVNULL,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT
-            )
-            res.wait()
-            pick = False
-            for line in res.stdout.read().decode().splitlines():
-                if '#include <...> search starts here:' in line:
-                    pick = True
-                    continue
-                if '#include "..." search starts here:' in line:
-                    pick = True
-                    continue
-                if 'End of search list.' in line:
-                    break
-                if pick:
-                    m = re.search(r'\s*(.*)$', line)
-                    if m is not None:
-                        result.append("-I{}".format(m.group(1)))
-        except FileNotFoundError:
-            _log.warning("Cannot find compiler %s in PATH." % compiler)
-
+        output = Tools.run_command(args, stdin=subprocess.DEVNULL, default="")
+        pick = False
+        for line in output.splitlines():
+            if '#include <...> search starts here:' in line:
+                pick = True
+                continue
+            if '#include "..." search starts here:' in line:
+                pick = True
+                continue
+            if 'End of search list.' in line:
+                break
+            if pick:
+                m = re.search(r'\s*(.*)$', line)
+                if m is not None:
+                    result.append("-I{}".format(m.group(1)))
         return result
 
     def _filter_defines(self, defines):

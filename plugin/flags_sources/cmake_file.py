@@ -123,7 +123,9 @@ class CMakeFile(FlagsSource):
             self._cache[current_cmake_path] = db_file.full_path()
             File.update_mod_time(current_cmake_path)
         db = CompilationDb(
-            self._include_prefixes, self.__header_to_source_mapping)
+            self._include_prefixes,
+            self.__header_to_source_mapping,
+            self.__use_target_compiler_builtins)
         db_search_scope = SearchScope(from_folder=db_file.folder())
         flags = db.get_flags(file_path, db_search_scope)
         return flags

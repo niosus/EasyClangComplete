@@ -32,13 +32,15 @@ class CompilationDb(FlagsSource):
     _FILE_NAME = "compile_commands.json"
 
     def __init__(self, include_prefixes,
-                 header_to_source_map=None,
-                 use_target_compiler_builtins=False):
+                 header_to_source_map,
+                 use_target_compiler_builtins):
         """Initialize a compilation database.
 
         Args:
             include_prefixes (str[]): A List of valid include prefixes.
             header_to_source_map (str[]): Templates to map header to sources.
+            use_target_compiler_builtins (bool): Retrieve target compiler built
+                                                 ins.
         """
         super().__init__(include_prefixes)
         self._cache = ComplationDbCache()
