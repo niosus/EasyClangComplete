@@ -17,13 +17,6 @@ class CompilerBuiltIns:
 
     __cache = dict()
 
-    __DEFINES_BLACKLIST = [
-        "__USER_LABEL_PREFIX__",
-        "__STDC_HOSTED__",
-        "__REGISTER_PREFIX__",
-        "__STDC__"
-    ]
-
     def __init__(self, args, filename):
         """
         Create an object holding the built-in flags of a compiler.
@@ -184,8 +177,7 @@ class CompilerBuiltIns:
                 m = re.search(r'#define (\w+)', line)
                 if m is not None:
                     result.append("-D{}".format(m.group(1)))
-
-        return self._filter_defines(result)
+        return result
 
     def _get_default_include_paths(self, compiler, std, language):
         import subprocess
@@ -217,13 +209,3 @@ class CompilerBuiltIns:
                 if m is not None:
                     result.append("-I{}".format(m.group(1)))
         return result
-
-    def _filter_defines(self, defines):
-        # Remove some default flags which get set by clang itself.
-        # Otherwise, we will get error later:
-        for flag in CompilerBuiltIns.__DEFINES_BLACKLIST:
-            prefix = "-D%s" % flag
-            for define in defines:
-                if define.startswith(prefix):
-                    defines.remove(define)
-        return defines
