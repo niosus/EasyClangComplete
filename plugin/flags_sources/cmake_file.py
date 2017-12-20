@@ -41,9 +41,9 @@ class CMakeFile(FlagsSource):
                  include_prefixes,
                  prefix_paths,
                  flags,
-                 cmake_binary="cmake",
-                 header_to_source_mapping=None,
-                 use_target_compiler_builtins=False):
+                 cmake_binary,
+                 header_to_source_mapping,
+                 use_target_compiler_builtins):
         """Initialize a cmake-based flag storage.
 
         Args:
