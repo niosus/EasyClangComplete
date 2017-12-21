@@ -293,24 +293,47 @@ class ViewConfig(object):
         Returns:
             Flag[]: A list of language-specific flags.
         """
+        from .utils.compiler_builtins import CompilerBuiltIns
         current_lang = Tools.get_view_lang(view)
         lang_flags = []
+        target_compilers = settings.target_compilers
+        target_lang = None
+        lang_args = list()
         if current_lang == "Objective-C":
-            if need_lang_flags:
-                lang_flags += ["-x"] + ["objective-c"]
-            lang_flags += settings.objective_c_flags
+            target_lang = "objective-c"
+            lang_args = settings.objective_c_flags
         elif current_lang == "Objective-C++":
-            if need_lang_flags:
-                lang_flags += ["-x"] + ["objective-c++"]
-            lang_flags += settings.objective_cpp_flags
+            target_lang = "objective-c++"
+            lang_args = settings.objective_cpp_flags
         elif current_lang == 'C':
-            if need_lang_flags:
-                lang_flags += ["-x"] + ["c"]
-            lang_flags += settings.c_flags
+            target_lang = "c"
+            lang_args = settings.c_flags
         else:
-            if need_lang_flags:
-                lang_flags += ["-x"] + ["c++"]
-            lang_flags += settings.cpp_flags
+            target_lang = "c++"
+            lang_args = settings.cpp_flags
+        if need_lang_flags:
+            lang_flags += ["-x", target_lang]
+        lang_flags += lang_args
+
+        # If the user provided explicit target compilers, retrieve their
+        # default flags and append them to the list:
+        if target_lang in target_compilers:
+            target_compiler = target_compilers[target_lang]
+            if target_compiler is not None:
+                target_compiler_args = [target_compiler, "-x", target_lang]
+                builtIns = CompilerBuiltIns(target_compiler_args, None)
+                for builtin_flag in builtIns.flags:
+                    # Note: Only append new flags; this is done as depending
+                    # on the user's configuration we already might have
+                    # added appropriate flags from another flag source.
+                    # The approach assumes that each entry in the built-in
+                    # flags consists of a single argument (which is true
+                    # for the ones we expect to be in, i.e. only -Dxxx and
+                    # -Ixxx flags). Note that it shouldn't do any harm
+                    # if flags appear multiple times.
+                    if builtin_flag not in lang_flags:
+                        lang_flags.append(builtin_flag)
+
         return Flag.tokenize_list(lang_flags)
 
 
