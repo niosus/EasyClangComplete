@@ -218,7 +218,8 @@ class ViewConfig(object):
                     cmake_flags,
                     settings.cmake_binary,
                     settings.header_to_source_mapping,
-                    settings.use_target_compiler_built_in_flags)
+                    settings.use_target_compiler_built_in_flags,
+                    settings.target_compilers)
             elif file_name == "compile_commands.json":
                 flag_source = CompilationDb(
                     include_prefixes,

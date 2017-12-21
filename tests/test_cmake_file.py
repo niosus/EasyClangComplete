@@ -42,7 +42,8 @@ class TestCmakeFile(object):
             flags=None,
             cmake_binary="cmake",
             header_to_source_mapping=[],
-            use_target_compiler_builtins=False
+            use_target_compiler_builtins=False,
+            target_compilers={}
         )
         expected_lib = path.join(path_to_cmake_proj, 'lib')
         flags = cmake_file.get_flags(test_file_path)
@@ -66,7 +67,8 @@ class TestCmakeFile(object):
             flags=None,
             cmake_binary="cmake",
             header_to_source_mapping=[],
-            use_target_compiler_builtins=False
+            use_target_compiler_builtins=False,
+            target_compilers={}
         )
         flags = cmake_file.get_flags(test_file_path)
         db = CompilationDb(
@@ -96,7 +98,8 @@ class TestCmakeFile(object):
             flags=None,
             cmake_binary="cmake",
             header_to_source_mapping=[],
-            use_target_compiler_builtins=False
+            use_target_compiler_builtins=False,
+            target_compilers={}
         )
         wrong_scope = SearchScope(from_folder=folder_with_no_cmake)
         flags = cmake_file.get_flags(test_file_path, wrong_scope)
