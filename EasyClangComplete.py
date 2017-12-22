@@ -402,19 +402,17 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return
         if future.cancelled():
             return
-        (tooltip_request, result) = future.result()
-        if result == "":
+        (tooltip_request, current_popup) = future.result()
+        if current_popup == "":
             return
         if not tooltip_request:
             return
         if tooltip_request.get_identifier() != self.current_job_id:
             return
+        if not current_popup:
+            return
         view = tooltip_request.get_view()
-        view.show_popup(result,
-                        location=tooltip_request.get_trigger_position(),
-                        flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY,
-                        max_width=1000,
-                        on_navigate=self.on_open_declaration)
+        current_popup.show(view, on_navigate=self.on_open_declaration)
 
     def completion_finished(self, future):
         """Call this callback when completion async function has returned.

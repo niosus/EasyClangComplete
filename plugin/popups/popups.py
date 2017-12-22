@@ -68,6 +68,7 @@ class Popup:
             cindex.CursorKind.TYPE_REF
         ]
 
+        popup.__text = ''
         popup.__text += '## Declaration: ##\n'
 
         # Show the return type of the function/method if applicable,
@@ -158,14 +159,15 @@ class Popup:
 
         return popup
 
-    def show(self, view):
+    def show(self, view, on_navigate=None):
         """Show this popup."""
         md_contents = self.MD_TEMPLATE.format(type=self.__popup_type,
                                               contents=self.__text)
         mdpopups.show_popup(view, md_contents,
                             max_width=Popup.MAX_POPUP_WIDTH,
                             wrapper_class=Popup.WRAPPER_CLASS,
-                            css=self.CSS)
+                            css=self.CSS,
+                            on_navigate=on_navigate)
 
     @staticmethod
     def location_from_type(clang_type):
@@ -192,7 +194,7 @@ class Popup:
     def link_from_location(location, text):
         """Provide link to given cursor.
 
-        Transforms SourceLocation object into html string.
+        Transforms SourceLocation object into markdown string.
 
         Args:
             location (Cursor.location): Current location.
@@ -200,13 +202,11 @@ class Popup:
         """
         result = ""
         if location and location.file and location.file.name:
-            result += "<a href=\""
-            result += location.file.name
-            result += ":"
-            result += str(location.line)
-            result += ":"
-            result += str(location.column)
-            result += "\">" + text + "</a>"
+            result += "[" + text + "]"
+            result += "(" + location.file.name
+            result += ":" + str(location.line)
+            result += ":" + str(location.column)
+            result += ")"
         else:
             result += text
         return result

@@ -17,6 +17,7 @@ from ..tools import SublBridge
 from ..tools import PKG_NAME
 from ..clang.utils import ClangUtils
 from ..settings.settings_storage import SettingsStorage
+from ..popups.popups import Popup
 
 from threading import RLock
 from os import path
@@ -268,13 +269,15 @@ class Completer(BaseCompleter):
             if not cursor:
                 return empty_info
             if cursor.kind == self.cindex.CursorKind.OBJC_MESSAGE_EXPR:
-                info_details = ClangUtils.build_objc_message_info_details(
-                    cursor)
-                return (tooltip_request, info_details)
+                # TODO: deprecate this for now.
+                # info_details = ClangUtils.build_objc_message_info_details(
+                #     cursor)
+                # return (tooltip_request, info_details)
+                return empty_info
             if cursor.referenced:
-                info_details = ClangUtils.build_info_details(
+                info_popup = Popup.info(
                     cursor.referenced, self.cindex, settings)
-                return (tooltip_request, info_details)
+                return (tooltip_request, info_popup)
             return empty_info
 
     def update(self, view, settings):
