@@ -12,9 +12,8 @@ POPUP_CSS_FILE = "Packages/EasyClangComplete/plugin/popups/popup.css"
 log = logging.getLogger("ECC")
 
 CODE_TEMPLATE = """```{lang}
-{code}
-```
-"""
+    {code}
+    ```"""
 
 
 class PopupStyle:
@@ -159,14 +158,11 @@ class Popup:
 
         return popup
 
-
     def show(self, view):
         """Show this popup."""
-
-        contents = self.MD_TEMPLATE.format(type=self.__popup_type,
-                                           code_style=self.__code_style,
-                                           content=self.__text)
-        mdpopups.show_popup(view, contents,
+        md_contents = self.MD_TEMPLATE.format(type=self.__popup_type,
+                                              contents=self.__text)
+        mdpopups.show_popup(view, md_contents,
                             max_width=Popup.MAX_POPUP_WIDTH,
                             wrapper_class=Popup.WRAPPER_CLASS,
                             css=self.CSS)
