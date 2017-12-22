@@ -15,6 +15,10 @@ CODE_TEMPLATE = """```{lang}
     {code}
     ```"""
 
+DECLARATION_TEMPLATE = """## Declaration ##
+    {type_declaration}
+    """
+
 
 class PopupStyle:
     """Enum with possible popup styles."""
@@ -68,8 +72,8 @@ class Popup:
             cindex.CursorKind.TYPE_REF
         ]
 
-        popup.__text = ''
-        popup.__text += '## Declaration: ##\n'
+        # Initialize the text the declaration.
+        declaration_text = ''
 
         # Show the return type of the function/method if applicable,
         # macros just show that they are a macro.
@@ -78,7 +82,7 @@ class Popup:
         is_type = cursor.kind in type_decl
         if is_macro:
             macro_parser = MacroParser(cursor.spelling, cursor.location)
-            popup.__text += '#define '
+            declaration_text += '#define '
         else:
             if cursor.result_type.spelling:
                 result_type = cursor.result_type
@@ -90,20 +94,20 @@ class Popup:
                 return ""
 
             if cursor.is_static_method():
-                popup.__text += "static "
+                declaration_text += "static "
 
             if cursor.spelling != cursor.type.spelling:
                 # Don't show duplicates if the user focuses type, not variable
-                popup.__text += Popup.link_from_location(
+                declaration_text += Popup.link_from_location(
                     Popup.location_from_type(result_type),
                     result_type.spelling)
 
         # Link to declaration of item under cursor
         if cursor.location:
-            popup.__text += Popup.link_from_location(cursor.location,
-                                                     cursor.spelling)
+            declaration_text += Popup.link_from_location(cursor.location,
+                                                         cursor.spelling)
         else:
-            popup.__text += cursor.spelling
+            declaration_text += cursor.spelling
 
         # Macro/function/method arguments
         args_string = None
@@ -125,16 +129,19 @@ class Popup:
                     args_string += ', '.join(args)
                 args_string += ')'
         if args_string:
-            popup.__text += args_string
+            declaration_text += args_string
 
         # Show value for enum
         if cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
-            popup.__text += " = " + str(cursor.enum_value)
-            popup.__text += "(" + hex(cursor.enum_value) + ")"
+            declaration_text += " = " + str(cursor.enum_value)
+            declaration_text += "(" + hex(cursor.enum_value) + ")"
 
         # Method modifiers
         if cursor.is_const_method():
-            popup.__text += " const"
+            declaration_text += " const"
+
+        popup.__text = DECLARATION_TEMPLATE.format(
+            type_declaration=declaration_text)
 
         # Show macro body
         if is_macro:
@@ -206,7 +213,7 @@ class Popup:
             result += "(" + location.file.name
             result += ":" + str(location.line)
             result += ":" + str(location.column)
-            result += ")"
+            result += ") "
         else:
             result += text
         return result
