@@ -76,6 +76,8 @@ def plugin_unloaded():
     handle_plugin_unloaded_function()
 
 
+
+
 class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
     """Handle easy_clang_goto_declaration command."""
 
@@ -85,28 +87,50 @@ class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
         This function shows all errors that are available from within a view.
         Note that the errors can be from different files.
         """
-        if not Tools.is_valid_view(self.view):
-            return
-        config_manager = EasyClangComplete.view_config_manager
-        if not config_manager:
-            log.error("No ViewConfigManager available.")
-            return
-        config = config_manager.get_from_cache(self.view)
-        log.debug("config: %s", config)
-        if not config:
-            log.error("No ViewConfig for view: %s.", self.view.buffer_id())
-            return
-        if not config.completer:
-            log.error("No Completer for view: %s.", self.view.buffer_id())
-        handler = QuickPanelHandler(self.view, config.completer.latest_errors)
-        start_idx = 0
-        self.view.window().show_quick_panel(
-            handler.items_to_show(),
-            handler.on_done,
-            sublime.MONOSPACE_FONT,
-            start_idx,
-            handler.on_highlighted)
-        print(config.completer.latest_errors)
+        severity_level = 3
+        showexceptions(self, severity_level)
+
+class EccShowAllWarnsCommand(sublime_plugin.TextCommand):
+    """Handle easy_clang_goto_declaration command."""
+
+    def run(self, edit):
+        """Show all warnings and errors available in this view.
+
+        This function shows all errors that are available from within a view.
+        Note that the errors can be from different files.
+        """
+        severity_level = 2
+        showexceptions(self, severity_level)
+
+
+def showexceptions(self, severity_level):
+    if not Tools.is_valid_view(self.view):
+        return
+    config_manager = EasyClangComplete.view_config_manager
+    if not config_manager:
+        log.error("No ViewConfigManager available.")
+        return
+    config = config_manager.get_from_cache(self.view)
+    log.debug("config: %s", config)
+    if not config:
+        log.error("No ViewConfig for view: %s.", self.view.buffer_id())
+        return
+    if not config.completer:
+        log.error("No Completer for view: %s.", self.view.buffer_id())
+    _errors = []
+    for _err in config.completer.latest_errors:
+        if _err['severity'] >= severity_level:
+            print(_err)
+            _errors.append(_err)
+    handler = QuickPanelHandler(self.view, _errors)
+    start_idx = 0
+    self.view.window().show_quick_panel(
+        handler.items_to_show(),
+        handler.on_done,
+        sublime.MONOSPACE_FONT,
+        start_idx,
+        handler.on_highlighted)
+
 
 
 class EccGotoDeclarationCommand(sublime_plugin.TextCommand):

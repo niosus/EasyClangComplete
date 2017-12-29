@@ -23,7 +23,7 @@ class QuickPanelHandler(object):
         """Present errors as list of lists."""
         contents = []
         for error_dict in self.errors:
-            contents.append([error_dict['error'], error_dict['file']])
+            contents.append(["<S{}> {}".format(error_dict['severity'], error_dict['error']), error_dict['file']])
         return contents
 
     def on_done(self, idx):

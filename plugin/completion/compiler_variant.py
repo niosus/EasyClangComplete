@@ -57,6 +57,7 @@ class ClangCompilerVariant(CompilerVariant):
             if not error_search:
                 continue
             error_dict = error_search.groupdict()
+            error_dict['severity'] = 3
             errors.append(error_dict)
         return errors
 
