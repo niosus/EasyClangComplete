@@ -141,7 +141,12 @@ class PopupErrorVis:
             errors_dict = current_err_region_dict[row]
             max_severity, error_list = PopupErrorVis._as_list(errors_dict)
 
-            text_to_show = '\n'.join(error_list)
+            if len(error_list) > 1:
+                # Make it a markdown list.
+                text_to_show = '\n- '.join(error_list)
+                text_to_show = '- ' + text_to_show
+            else:
+                text_to_show = error_list[0]
             popup = None
             if max_severity > 2:
                 popup = Popup.error(text_to_show)
