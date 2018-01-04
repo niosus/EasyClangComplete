@@ -11,13 +11,17 @@ POPUP_CSS_FILE = "Packages/EasyClangComplete/plugin/popups/popup.css"
 
 log = logging.getLogger("ECC")
 
+MD_TEMPLATE = """!!! {type}
+    {contents}
+"""
+
 CODE_TEMPLATE = """```{lang}
-    {code}
-    ```"""
+{code}
+```\n"""
 
 DECLARATION_TEMPLATE = """## Declaration ##
-    {type_declaration}
-    """
+{type_declaration}
+"""
 
 
 class PopupStyle:
@@ -37,7 +41,6 @@ class Popup:
     def __init__(self):
         """Initialize basic needs."""
         self.CSS = sublime.load_resource(POPUP_CSS_FILE)
-        self.MD_TEMPLATE = sublime.load_resource(POPUP_MD_FILE)
 
     @staticmethod
     def error(text):
@@ -152,29 +155,57 @@ class Popup:
         if settings.show_type_body and is_type and cursor.extent:
             body = Popup.get_text_by_extent(cursor.extent)
             popup.__text += CODE_TEMPLATE.format(lang="c++", code=body)
-
         # Doxygen comments
         if cursor.brief_comment:
             popup.__text += "## Brief documentation: ##\n"
             popup.__text += CODE_TEMPLATE.format(lang="",
                                                  code=cursor.brief_comment)
-
         if cursor.raw_comment:
             popup.__text += "## Full doxygen comment: ##\n"
-            popup.__text += CODE_TEMPLATE.format(lang="",
-                                                 code=cursor.raw_comment)
-
+            popup.__text += CODE_TEMPLATE.format(
+                lang="", code=Popup.cleanup_comment(cursor.raw_comment))
+        print(type(popup.__text))
         return popup
 
     def show(self, view, on_navigate=None):
         """Show this popup."""
-        md_contents = self.MD_TEMPLATE.format(type=self.__popup_type,
-                                              contents=self.__text)
+        md_contents = MD_TEMPLATE.format(type=self.__popup_type,
+                                         contents=self.__text)
+        print(md_contents)
         mdpopups.show_popup(view, md_contents,
                             max_width=Popup.MAX_POPUP_WIDTH,
                             wrapper_class=Popup.WRAPPER_CLASS,
                             css=self.CSS,
                             on_navigate=on_navigate)
+
+    @staticmethod
+    def cleanup_comment(raw_comment):
+        """Cleanup raw doxygen comment."""
+        def pop_prepending_empty_lines(lines):
+            first_non_empty_line_idx = 0
+            for line in lines:
+                if line == '':
+                    first_non_empty_line_idx += 1
+                else:
+                    break
+            return lines[first_non_empty_line_idx:]
+
+        import string
+        lines = raw_comment.split('\n')
+        chars_to_strip = '/' + '*' + string.whitespace
+        lines = [line.lstrip(chars_to_strip) for line in lines]
+        lines = pop_prepending_empty_lines(lines)
+        clean_lines = []
+        is_brief_comment = True
+        for line in lines:
+            if line == '' and is_brief_comment:
+                # Skip lines that belong to brief comment.
+                is_brief_comment = False
+                continue
+            if is_brief_comment:
+                continue
+            clean_lines.append(line)
+        return '\n'.join(clean_lines)
 
     @staticmethod
     def location_from_type(clang_type):
