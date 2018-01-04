@@ -147,21 +147,22 @@ class Popup:
 
         # Show macro body
         if is_macro:
+            popup.__text += "### Body:\n"
             popup.__text += CODE_TEMPLATE.format(
                 lang="c++", code=macro_parser.body_string)
 
         # Show type declaration
         if settings.show_type_body and is_type and cursor.extent:
             body = Popup.get_text_by_extent(cursor.extent)
-            popup.__text += "## Body: ##\n"
+            popup.__text += "### Body:\n"
             popup.__text += CODE_TEMPLATE.format(lang="c++", code=body)
         # Doxygen comments
         if cursor.brief_comment:
-            popup.__text += "## Brief documentation: ##\n"
+            popup.__text += "### Brief documentation:\n"
             popup.__text += CODE_TEMPLATE.format(lang="",
                                                  code=cursor.brief_comment)
         if cursor.raw_comment:
-            popup.__text += "## Full doxygen comment: ##\n"
+            popup.__text += "### Full doxygen comment:\n"
             popup.__text += CODE_TEMPLATE.format(
                 lang="", code=Popup.cleanup_comment(cursor.raw_comment))
         return popup
