@@ -6,7 +6,6 @@ import logging
 
 from ..utils.macro_parser import MacroParser
 
-POPUP_MD_FILE = "Packages/EasyClangComplete/plugin/popups/popup.md"
 POPUP_CSS_FILE = "Packages/EasyClangComplete/plugin/popups/popup.css"
 
 log = logging.getLogger("ECC")
@@ -19,7 +18,7 @@ CODE_TEMPLATE = """```{lang}
 {code}
 ```\n"""
 
-DECLARATION_TEMPLATE = """## Declaration ##
+DECLARATION_TEMPLATE = """## Declaration: ##
 {type_declaration}
 """
 
