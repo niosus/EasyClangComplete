@@ -1,11 +1,9 @@
-.ECC .admonition-title
-{
-    border-radius: 0rem;
-    padding-left: 10px;
-}
 .ECC .admonition
 {
     border-radius: 0rem;
-    padding: 0rem;
     top: -3rem;
+}
+.ECC .admonition-title
+{
+    border-radius: 0rem;
 }

@@ -168,8 +168,9 @@ class Popup:
 
     def show(self, view, on_navigate=None):
         """Show this popup."""
+        tabbed_text = "\n\t".join(self.__text.split('\n'))
         md_contents = MD_TEMPLATE.format(type=self.__popup_type,
-                                         contents=self.__text)
+                                         contents=tabbed_text)
         print(md_contents)
         mdpopups.show_popup(view, md_contents,
                             max_width=Popup.MAX_POPUP_WIDTH,
