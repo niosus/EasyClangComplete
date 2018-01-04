@@ -164,7 +164,6 @@ class Popup:
             popup.__text += "## Full doxygen comment: ##\n"
             popup.__text += CODE_TEMPLATE.format(
                 lang="", code=Popup.cleanup_comment(cursor.raw_comment))
-        print(type(popup.__text))
         return popup
 
     def show(self, view, on_navigate=None):
@@ -172,7 +171,6 @@ class Popup:
         tabbed_text = "\n\t".join(self.__text.split('\n'))
         md_contents = MD_TEMPLATE.format(type=self.__popup_type,
                                          contents=tabbed_text)
-        print(md_contents)
         mdpopups.show_popup(view, md_contents,
                             max_width=Popup.MAX_POPUP_WIDTH,
                             wrapper_class=Popup.WRAPPER_CLASS,
