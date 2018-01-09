@@ -1,6 +1,6 @@
 """Stores a class that manages flags generation using cpp_properies.
 
-see https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/c_cpp_properties.json.md
+see https://blogs.msdn.microsoft.com/vcblog/2017/11/02/customizing-your-environment-with-visual-c-and-open-folder/
 
 Attributes:
     log (logging.Log): Current logger.
@@ -9,27 +9,27 @@ from .flags_source import FlagsSource
 from ..tools import File
 from ..tools import singleton
 
-from os import path
 import json
-
+import os
+import re
 import logging
 
 log = logging.getLogger("ECC")
 
 @singleton
 class CppPropertiesCache(dict):
-    """Singleton for cppProperties.json file cache."""
+    """Singleton for CppProperties.json file cache."""
     pass
 
 class CppProperties(FlagsSource):
-    """Manages flags parsing from cppProperties.json file.
+    """Manages flags parsing from CppProperties.json file.
 
     Attributes:
         cache (dict): Cache of all parsed files to date. Stored by full file
             path. Needed to avoid reparsing the file multiple times.
         path_for_file (dict): A path to a database for every source file path.
     """
-    _FILE_NAME = "c_cpp_properties.json"
+    _FILE_NAME = "CppProperties.json"
 
     def __init__(self, include_prefixes):
         """Initialize a flag file storage.
@@ -46,34 +46,34 @@ class CppProperties(FlagsSource):
 
         Args:
             file_path (None, optional): A path to the query file.
-            search_scope (SearchScope, optional): Where to search for a
-                cppProperties.json file.
+            search_scope (SearchScope, optional): c_ to search for a
+                CppProperties.json file.
 
         Returns:
-            str[]: Return a list of flags in this cppProperties.json file
+            str[]: Return a list of flags in this CppProperties.json file
         """
         # prepare search scope
         search_scope = self._update_search_scope(search_scope, file_path)
         # check if we have a hashed version
-        log.debug("[cpp_properties_file]:[get]: for file %s", file_path)
+        log.debug("[CppProperties]:[get]: for file %s", file_path)
         cached_flags_path = self._get_cached_from(file_path)
-        log.debug("[cpp_properties_file]:[cached]: '%s'", cached_flags_path)
+        log.debug("[CppProperties]:[cached]: '%s'", cached_flags_path)
         flags_file_path = self._find_current_in(search_scope)
-        log.debug("[cpp_properties_file]:[current]: '%s'", flags_file_path)
+        log.debug("[CppProperties]:[current]: '%s'", flags_file_path)
         if not flags_file_path:
             return None
 
         flags = None
         parsed_before = flags_file_path in self._cache
         if parsed_before:
-            log.debug("[cpp_properties_file]: found cached cppProperties.json")
+            log.debug("[CppProperties]: found cached CppProperties.json")
             cached_flags_path = flags_file_path
         flags_file_path_same = (flags_file_path == cached_flags_path)
         flags_file_same = File.is_unchanged(cached_flags_path)
         if flags_file_path_same and flags_file_same:
-            log.debug("[cpp_properties_file]:[unchanged]: load cached")
+            log.debug("[CppProperties]:[unchanged]: load cached")
             return self._cache[cached_flags_path]
-        log.debug("[cpp_properties_file]:[changed]: load new")
+        log.debug("[CppProperties]:[changed]: load new")
         if cached_flags_path and cached_flags_path in self._cache:
             del self._cache[cached_flags_path]
         flags = self.__flags_from_cpp_properties_file(File(flags_file_path))
@@ -95,12 +95,16 @@ class CppProperties(FlagsSource):
         Returns:
             str[]: List of flags from file.
         """
+        def expand_env_vars(paths):
+            expandable_path = re.sub(r'\$\{env\.', '${', paths)
+            return os.path.expandvars(expandable_path)
+
         def parse_includes_from_json(json):
             try:
                 include_paths = content["configurations"][0]["includePath"]
             except Exception:
                 include_paths = []
-            includes = [path.expandvars(i) for i in include_paths]
+            includes = [expand_env_vars(i) for i in include_paths]
             includes = ["-I{}".format(include) for include in includes]
             return includes
 

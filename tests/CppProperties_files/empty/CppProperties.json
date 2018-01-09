@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "includePath": [
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "name": "waf_build_tree"
+        }
+    ]
+}

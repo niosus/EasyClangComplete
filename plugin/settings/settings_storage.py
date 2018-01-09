@@ -38,6 +38,7 @@ class SettingsStorage:
     """
     FLAG_SOURCES = ["CMakeLists.txt",
                     "compile_commands.json",
+                    "CppProperties.json",
                     "c_cpp_properties.json",
                     ".clang_complete"]
     FLAG_SOURCES_ENTRIES_WITH_PATHS = ["search_in", "prefix_paths"]

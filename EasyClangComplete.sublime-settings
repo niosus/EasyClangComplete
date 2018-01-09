@@ -48,6 +48,7 @@
   "flags_sources": [
     {"file": "CMakeLists.txt"},
     {"file": "compile_commands.json"},
+    {"file": "CppProperties.json"},
     {"file": "c_cpp_properties.json"},
     {"file": ".clang_complete"},
   ],
@@ -69,7 +70,7 @@
   "use_libclang" : true,
 
   // make plugin verbose
-  "verbose" : false,
+  "verbose" : true,
 
   // add folder with current file with `-I` flag
   "include_file_folder" : true,
