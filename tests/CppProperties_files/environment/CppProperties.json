@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "includePath": [
+                "${env.TEST_VARIABLE_TO_EXPAND}"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "name": "waf_build_tree"
+        }
+    ]
+}
