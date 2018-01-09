@@ -151,12 +151,6 @@ class Popup:
             popup.__text += "### Body:\n"
             popup.__text += CODE_TEMPLATE.format(
                 lang="c++", code=macro_parser.body_string)
-
-        # Show type declaration
-        if settings.show_type_body and is_type and cursor.extent:
-            body = Popup.get_text_by_extent(cursor.extent)
-            popup.__text += "### Body:\n"
-            popup.__text += CODE_TEMPLATE.format(lang="c++", code=body)
         # Doxygen comments
         if cursor.brief_comment:
             popup.__text += "### Brief documentation:\n"
@@ -166,6 +160,11 @@ class Popup:
             popup.__text += "### Full doxygen comment:\n"
             popup.__text += CODE_TEMPLATE.format(
                 lang="", code=Popup.cleanup_comment(cursor.raw_comment))
+        # Show type declaration
+        if settings.show_type_body and is_type and cursor.extent:
+            body = Popup.get_text_by_extent(cursor.extent)
+            popup.__text += "### Body:\n"
+            popup.__text += CODE_TEMPLATE.format(lang="c++", code=body)
         return popup
 
     def show(self, view, location=-1, on_navigate=None):
