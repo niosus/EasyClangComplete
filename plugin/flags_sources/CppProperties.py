@@ -116,7 +116,7 @@ class CppProperties(FlagsSource):
             defines = ["-D{}".format(define) for define in defines]
             return defines
 
-        if not path.exists(file.full_path()):
+        if not os.path.exists(file.full_path()):
             log.debug(
                 "{} does not exist yet. No flags present.".format(_FILE_NAME))
             return []
