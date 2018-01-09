@@ -36,6 +36,7 @@ class Popup:
 
     WRAPPER_CLASS = "ECC"
     MAX_POPUP_WIDTH = 1800
+    MAX_POPUP_HEIGHT = 1800
 
     def __init__(self):
         """Initialize basic needs."""
@@ -167,15 +168,17 @@ class Popup:
                 lang="", code=Popup.cleanup_comment(cursor.raw_comment))
         return popup
 
-    def show(self, view, on_navigate=None):
+    def show(self, view, location=-1, on_navigate=None):
         """Show this popup."""
         tabbed_text = "\n\t".join(self.__text.split('\n'))
         md_contents = MD_TEMPLATE.format(type=self.__popup_type,
                                          contents=tabbed_text)
         mdpopups.show_popup(view, md_contents,
                             max_width=Popup.MAX_POPUP_WIDTH,
+                            max_height=Popup.MAX_POPUP_HEIGHT,
                             wrapper_class=Popup.WRAPPER_CLASS,
                             css=self.CSS,
+                            location=location,
                             on_navigate=on_navigate)
 
     @staticmethod
