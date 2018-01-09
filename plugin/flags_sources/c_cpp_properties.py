@@ -16,10 +16,12 @@ import logging
 
 log = logging.getLogger("ECC")
 
+
 @singleton
 class CCppPropertiesCache(dict):
     """Singleton for c_cpp_properties.json file cache."""
     pass
+
 
 class CCppProperties(FlagsSource):
     """Manages flags parsing from c_cpp_properties.json file.
@@ -84,8 +86,6 @@ class CCppProperties(FlagsSource):
         # now we return whatever we have
         return flags
 
-
-
     def __flags_from_cpp_properties_file(self, file):
         """Get flags from cpp properties file.
 
@@ -113,7 +113,8 @@ class CCppProperties(FlagsSource):
             return defines
 
         if not path.exists(file.full_path()):
-            log.debug("{} does not exist yet. No flags present.".format(_FILE_NAME))
+            log.debug(
+                "{} does not exist yet. No flags present.".format(_FILE_NAME))
             return []
         if not file.loaded():
             log.error("cannot get flags from {}. No file.".format(_FILE_NAME))
@@ -129,4 +130,3 @@ class CCppProperties(FlagsSource):
             flags = FlagsSource.parse_flags(
                 file.folder(), content, self._include_prefixes)
         return flags
-

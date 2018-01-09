@@ -15,6 +15,7 @@ CppProperties = CppProperties.CppProperties
 SearchScope = tools.SearchScope
 Flag = flag.Flag
 
+
 def _get_test_folder(name):
     return path.join(path.dirname(__file__), 'CppProperties_files', name)
 
@@ -55,7 +56,8 @@ class TestCppProperties(TestCase):
 
         expected = None
 
-        self.assertEqual(expected, db.get_flags(path.normpath('/home/user/dummy_main.cpp')))
+        self.assertEqual(expected, db.get_flags(
+            path.normpath('/home/user/dummy_main.cpp')))
 
     def test_empty_include_and_defines(self):
         """Test that empty fields are handled correctly"""
