@@ -1,11 +1,12 @@
-"""Test macro parsing"""
+"""Test macro parsing."""
 from unittest import TestCase
 
-from EasyClangComplete.plugin.clang.utils import MacroParser
+from EasyClangComplete.plugin.utils.macro_parser import MacroParser
 
 
 class TestMacroParser(TestCase):
-    """Tests MacroParser"""
+    """Tests MacroParser."""
+
     def test_args_string_non_function_like_macro(self):
         """Test parsing a macro with no '()'."""
         parser = MacroParser('TEST_MACRO', None)
