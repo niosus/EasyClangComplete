@@ -4,10 +4,12 @@ environment:
         PACKAGE: "EasyClangComplete"
     matrix:
         - SUBLIME_TEXT_VERSION : "3"
+          PCINSTALL: true
 
 install:
     - ps: appveyor DownloadFile "https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/appveyor.ps1"
     - ps: .\appveyor.ps1 "bootstrap" -verbose
+    - ps: if (${env:PCINSTALL} -eq $true) { .\sbin\appveyor.ps1 "install_package_control" -verbose }
     # install Package Control
     # - ps: .\appveyor.ps1 "install_package_control" -verbose
 

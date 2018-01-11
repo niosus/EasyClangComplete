@@ -2,7 +2,7 @@ env:
     global:
         # Your package name
         - PACKAGE="EasyClangComplete"
-        - SUBLIME_TEXT_VERSION="3"
+        - SUBLIME_TEXT_VERSION="3" PCINSTALL=true
 
 language:
     - python
@@ -31,6 +31,7 @@ before_install:
 
 install:
     - sh travis.sh bootstrap
+    - if [ "$PCINSTALL" == true ]; then sh sbin/travis.sh install_package_control; fi
 
 script:
     - ls
