@@ -31,7 +31,7 @@ before_install:
 
 install:
     - sh travis.sh bootstrap
-    - if [ "$PCINSTALL" == true ]; then sh sbin/travis.sh install_package_control; fi
+    - if [ "$PCINSTALL" == true ]; then sh travis.sh install_package_control; fi
 
 script:
     - ls
