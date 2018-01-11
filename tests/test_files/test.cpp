@@ -1,5 +1,3 @@
-#include <vec>
-
 class A {
   int a;
   void foo(int a);
@@ -8,5 +6,6 @@ public:
 };
 int main(int argc, char const *argv[]) {
   A a;
+  a.
   return 0;
 }
