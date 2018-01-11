@@ -511,6 +511,17 @@ class Tools:
         return expanded
 
     @staticmethod
+    def to_md(error_list):
+        """Convert an error dict to markdown string."""
+        if len(error_list) > 1:
+            # Make it a markdown list.
+            text_to_show = '\n- '.join(error_list)
+            text_to_show = '- ' + text_to_show
+        else:
+            text_to_show = error_list[0]
+        return text_to_show
+
+    @staticmethod
     def get_temp_dir():
         """Create a temporary folder if needed and return it."""
         tempdir = path.join(tempfile.gettempdir(), PKG_NAME)
