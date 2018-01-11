@@ -36,7 +36,7 @@ class Popup:
 
     WRAPPER_CLASS = "ECC"
     MAX_POPUP_WIDTH = 1800
-    MAX_POPUP_HEIGHT = 1800
+    MAX_POPUP_HEIGHT = 800
 
     def __init__(self):
         """Initialize basic needs."""
