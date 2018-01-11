@@ -32,7 +32,7 @@ class TestErrorVis:
     """Test error visualization."""
 
     def set_up_completer(self, error_style):
-        """Utility method to set up a completer for the current view.
+        """Set up a completer for the current view.
 
         Returns:
             BaseCompleter: completer for the current view.
@@ -49,7 +49,7 @@ class TestErrorVis:
         return completer
 
     def tear_down_completer(self):
-        """Utility method to set up a completer for the current view.
+        """Tear down a completer for the current view.
 
         Returns:
             BaseCompleter: completer for the current view.
@@ -124,76 +124,6 @@ class TestErrorVis:
         self.assertTrue(v_id in phantom_sets)
         self.tear_down_completer()
         self.tear_down()
-
-    def test_popup_html(self):
-        """Test html formatting for popups."""
-        error_dict = {
-            'error': "expected ';' at end of declaration",
-            'severity': 3,
-            'row': '6',
-            'file': 'filename',
-            'col': '25'
-        }
-        html_error = PopupErrorVis._as_html([error_dict])
-        expected = """<body id="ecc_popup_error">
-    <style>
-        html {
-            background-color: #883333;
-            color: #EEEEEE;
-        }
-    </style>
-    <b>Error:</b>
-    <div>expected&nbsp;';'&nbsp;at&nbsp;end&nbsp;of&nbsp;declaration</div>
-</body>
-"""
-        self.assertEqual(html_error, expected)
-
-    def test_phantom_html(self):
-        """Test html formatting for phantoms."""
-        error_dict = {
-            'error': "expected ';' at end of declaration",
-            'severity': 3,
-            'row': '6',
-            'file': 'filename',
-            'col': '25'
-        }
-        html_error = PhantomErrorVis._as_html([error_dict])
-        expected = """<body id="ecc_phantom_error">
-    <style>
-        div.error {
-            padding: 0.4rem 0 0.4rem 0.7rem;
-            margin: 0.2rem 0;
-            border-radius: 2px;
-        }
-
-        div.error span.message {
-            padding-right: 0.7rem;
-        }
-
-        div.error a {
-            text-decoration: inherit;
-            padding: 0.35rem 0.7rem 0.45rem 0.8rem;
-            position: relative;
-            bottom: 0.05rem;
-            border-radius: 0 2px 2px 0;
-            font-weight: bold;
-        }
-        html.dark div.error a {
-            color: #CCCCCC;
-        }
-        html.light div.error a {
-            color: #222222;
-        }
-    </style>
-    <div class="error">
-      <span class="message">
-      expected&nbsp;';'&nbsp;at&nbsp;end&nbsp;of&nbsp;declaration
-      </span>
-      <a href=hide>❌</a>
-    </div>
-</body>
-"""
-        self.assertEqual(html_error, expected)
 
 
 class TestErrorVisBin(TestErrorVis, GuiTestWrapper):
