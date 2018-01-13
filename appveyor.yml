@@ -10,6 +10,9 @@ install:
     - ps: .\appveyor.ps1 "bootstrap" -verbose
     # install Package Control
     # - ps: .\appveyor.ps1 "install_package_control" -verbose
+    - "pip install --upgrade pep8"
+    - "pip install --upgrade pep257"
+    - "pip install --upgrade pycodestyle"
 
 build: off
 
