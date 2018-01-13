@@ -35,7 +35,7 @@ class TestFlagsSource(TestCase):
         flags = FlagsSource.parse_flags(
             current_folder, initial_str_flags, include_prefixes)
         expected_blah_path = path.join(current_folder, "blah")
-        self.assertEqual(len(flags), 9)
+        self.assertEqual(len(flags), len(initial_str_flags))
         self.assertIn(Flag("-I", current_folder), flags)
         self.assertIn(Flag("-I" + current_folder), flags)
         self.assertIn(Flag("-isystem", current_folder), flags)

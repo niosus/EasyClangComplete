@@ -171,13 +171,15 @@ class test_tools(TestCase):
         this_folder_with_star = path.join(this_folder, '*')
         print(this_folder_with_star)
         expanded = Tools.expand_star_wildcard(this_folder_with_star)
-        folder1 = path.join(this_folder, 'cmake_tests')
-        folder2 = path.join(this_folder, 'compilation_db_files')
-        folder3 = path.join(this_folder, 'test_files')
-        self.assertEqual(len(expanded), 3)
-        self.assertIn(folder1, expanded)
-        self.assertIn(folder2, expanded)
-        self.assertIn(folder3, expanded)
+        expected_folders = [
+            path.join(this_folder, 'c_cpp_properties_files'),
+            path.join(this_folder, 'cmake_tests'),
+            path.join(this_folder, 'compilation_db_files'),
+            path.join(this_folder, 'CppProperties_files'),
+            path.join(this_folder, 'test_files'),
+        ]
+        self.assertEqual(len(expanded), len(expected_folders))
+        self.assertEqual(sorted(expected_folders), sorted(expanded))
 
     def test_singleton(self):
         """Test if singleton returns a unique reference."""
