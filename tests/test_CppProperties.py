@@ -29,8 +29,8 @@ class TestCppProperties(TestCase):
         db = CppProperties(include_prefixes)
 
         expected = [
-            Flag('-I' + path.normpath('C:\\folder\\include\\path')),
-            Flag('-I' + path.normpath('C:\\another\\file\\path')),
+            Flag('-I' + path.normpath('/folder/include/path')),
+            Flag('-I' + path.normpath('/another/file/path')),
         ]
 
         scope = SearchScope(from_folder=_get_test_folder('simple'))
