@@ -29,7 +29,7 @@ from .flags_sources.flags_file import FlagsFile
 from .flags_sources.cmake_file import CMakeFile
 from .flags_sources.flags_source import FlagsSource
 from .flags_sources.c_cpp_properties import CCppProperties
-from .flags_sources.CppProperties  import CppProperties
+from .flags_sources.CppProperties import CppProperties
 from .flags_sources.compilation_db import CompilationDb
 
 from .settings.settings_storage import SettingsStorage

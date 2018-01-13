@@ -43,7 +43,6 @@ class CCppProperties(FlagsSource):
         self._cache = CCppPropertiesCache()
 
     def get_flags(self, file_path=None, search_scope=None):
-        log.debug("--- get flags")
         """Get flags for file.
 
         Args:
