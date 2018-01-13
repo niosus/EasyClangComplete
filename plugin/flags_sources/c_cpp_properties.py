@@ -1,6 +1,6 @@
 """Stores a class that manages flags generation using cpp_properies.
 
-see https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/c_cpp_properties.json.md #noqa
+see https://github.com/Microsoft/vscode-cpptools/blob/master/Documentation/LanguageServer/c_cpp_properties.json.md # noqa
 
 Attributes:
     log (logging.Log): Current logger.

@@ -1,6 +1,6 @@
 """Stores a class that manages flags generation using cpp_properies.
 
-see https://blogs.msdn.microsoft.com/vcblog/2017/11/02/customizing-your-environment-with-visual-c-and-open-folder/ #noqa
+see https://blogs.msdn.microsoft.com/vcblog/2017/11/02/customizing-your-environment-with-visual-c-and-open-folder/ # noqa
 
 Attributes:
     log (logging.Log): Current logger.
