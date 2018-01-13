@@ -22,7 +22,11 @@ class TestCompilationDb(TestCase):
     def test_get_all_flags(self):
         """Test if compilation db is found."""
         include_prefixes = ['-I']
-        db = CompilationDb(include_prefixes)
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
 
         expected = [Flag('-I' + path.normpath('/lib_include_dir')),
                     Flag('-Dlib_EXPORTS'),
@@ -49,7 +53,11 @@ class TestCompilationDb(TestCase):
     def test_strip_wrong_arguments(self):
         """Test if compilation db is found and flags loaded from arguments."""
         include_prefixes = ['-I']
-        db = CompilationDb(include_prefixes)
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
 
         expected = [Flag('-I' + path.normpath('/lib_include_dir')),
                     Flag('-Dlib_EXPORTS'),
@@ -63,7 +71,11 @@ class TestCompilationDb(TestCase):
     def test_get_flags_for_path(self):
         """Test if compilation db is found."""
         include_prefixes = ['-I']
-        db = CompilationDb(include_prefixes)
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
 
         expected_lib = [Flag('-Dlib_EXPORTS'), Flag('-fPIC')]
         expected_main = [Flag('-I' + path.normpath('/lib_include_dir'))]
@@ -96,7 +108,11 @@ class TestCompilationDb(TestCase):
     def test_no_db_in_folder(self):
         """Test if compilation db is found."""
         include_prefixes = ['-I']
-        db = CompilationDb(include_prefixes)
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
 
         flags = db.get_flags(path.normpath('/home/user/dummy_main.cpp'))
         self.assertTrue(flags is None)
@@ -104,7 +120,11 @@ class TestCompilationDb(TestCase):
     def test_persistence(self):
         """Test if compilation db is persistent."""
         include_prefixes = ['-I']
-        db = CompilationDb(include_prefixes)
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
 
         expected_lib = [Flag('-Dlib_EXPORTS'), Flag('-fPIC')]
         expected_main = [Flag('-I' + path.normpath('/lib_include_dir'))]
@@ -126,7 +146,11 @@ class TestCompilationDb(TestCase):
     def test_relative_directory(self):
         """Test if compilation db 'directory' records are applied."""
         include_prefixes = ['-I', '-isystem']
-        db = CompilationDb(include_prefixes)
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
 
         expected = [Flag('-I' + path.normpath('/usr/local/foo')),
                     Flag('-I' + path.normpath('/foo/bar/test/include')),
@@ -142,7 +166,11 @@ class TestCompilationDb(TestCase):
     def test_get_c_flags(self):
         """Test argument filtering for c language."""
         include_prefixes = ['-I']
-        db = CompilationDb(include_prefixes)
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
 
         main_file_path = path.normpath('/home/blah.c')
         # also try to test a header

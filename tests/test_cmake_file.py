@@ -36,7 +36,15 @@ class TestCmakeFile(object):
             path.dirname(__file__), 'cmake_tests', 'test_a.cpp')
 
         path_to_cmake_proj = path.dirname(test_file_path)
-        cmake_file = CMakeFile(['-I', '-isystem'], None, None)
+        cmake_file = CMakeFile(
+            ['-I', '-isystem'],
+            prefix_paths=None,
+            flags=None,
+            cmake_binary="cmake",
+            header_to_source_mapping=[],
+            use_target_compiler_builtins=False,
+            target_compilers={}
+        )
         expected_lib = path.join(path_to_cmake_proj, 'lib')
         flags = cmake_file.get_flags(test_file_path)
         self.assertEqual(flags[0], Flag('-I' + expected_lib))
@@ -53,9 +61,21 @@ class TestCmakeFile(object):
 
         path_to_file_folder = path.dirname(test_file_path)
         expected_lib_include = Flag('-I' + path_to_file_folder)
-        cmake_file = CMakeFile(['-I', '-isystem'], None, None)
+        cmake_file = CMakeFile(
+            ['-I', '-isystem'],
+            prefix_paths=None,
+            flags=None,
+            cmake_binary="cmake",
+            header_to_source_mapping=[],
+            use_target_compiler_builtins=False,
+            target_compilers={}
+        )
         flags = cmake_file.get_flags(test_file_path)
-        db = CompilationDb(['-I', '-isystem'])
+        db = CompilationDb(
+            ['-I', '-isystem'],
+            header_to_source_map=[],
+            use_target_compiler_builtins=False
+        )
         self.assertEqual(flags[0], Flag('-Dliba_EXPORTS'))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
@@ -72,7 +92,15 @@ class TestCmakeFile(object):
             path.dirname(__file__), 'cmake_tests', 'test_a.cpp')
 
         folder_with_no_cmake = path.dirname(__file__)
-        cmake_file = CMakeFile(['-I', '-isystem'], None, None)
+        cmake_file = CMakeFile(
+            ['-I', '-isystem'],
+            prefix_paths=None,
+            flags=None,
+            cmake_binary="cmake",
+            header_to_source_mapping=[],
+            use_target_compiler_builtins=False,
+            target_compilers={}
+        )
         wrong_scope = SearchScope(from_folder=folder_with_no_cmake)
         flags = cmake_file.get_flags(test_file_path, wrong_scope)
         self.assertTrue(flags is None)

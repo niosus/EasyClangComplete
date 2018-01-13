@@ -86,6 +86,11 @@ class SettingsStorage:
         "use_libclang_caching",
         "verbose",
         "header_to_source_mapping",
+        "use_target_compiler_built_in_flags",
+        "target_c_compiler",
+        "target_cpp_compiler",
+        "target_objective_c_compiler",
+        "target_objective_cpp_compiler",
     ]
 
     def __init__(self, settings_handle):
@@ -112,7 +117,7 @@ class SettingsStorage:
             view (sublime.View): current view
         """
         try:
-            # init current and parrent folders:
+            # init current and parent folders:
             if not Tools.is_valid_view(view):
                 log.error("no view to populate common flags from")
                 return
@@ -190,6 +195,20 @@ class SettingsStorage:
                     source_dict["file"], SettingsStorage.FLAG_SOURCES)
                 return False, error_msg
         return True, ""
+
+    @property
+    def target_compilers(self):
+        """A dictionary with the target compilers to use."""
+        result = dict()
+        if hasattr(self, "target_c_compiler"):
+            result["c"] = self.target_c_compiler
+        if hasattr(self, "target_cpp_compiler"):
+            result["c++"] = self.target_cpp_compiler
+        if hasattr(self, "target_objective_c_compiler"):
+            result["objective-c"] = self.target_objective_c_compiler
+        if hasattr(self, "target_objective_cpp_compiler"):
+            result["objective-c++"] = self.target_objective_cpp_compiler
+        return result
 
     def __load_vars_from_settings(self, settings, project_specific=False):
         """Load all settings and add them as attributes of self.

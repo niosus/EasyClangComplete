@@ -41,8 +41,10 @@ class CMakeFile(FlagsSource):
                  include_prefixes,
                  prefix_paths,
                  flags,
-                 cmake_binary="cmake",
-                 header_to_source_mapping=None):
+                 cmake_binary,
+                 header_to_source_mapping,
+                 use_target_compiler_builtins,
+                 target_compilers):
         """Initialize a cmake-based flag storage.
 
         Args:
@@ -57,6 +59,8 @@ class CMakeFile(FlagsSource):
         self.__cmake_flags = flags
         self.__cmake_binary = cmake_binary
         self.__header_to_source_mapping = header_to_source_mapping
+        self.__use_target_compiler_builtins = use_target_compiler_builtins
+        self.__target_compilers = target_compilers
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -99,7 +103,10 @@ class CMakeFile(FlagsSource):
                 log.debug("[cmake]:[unchanged]: use existing db.")
                 db_file_path = self._cache[cached_cmake_path]
                 db = CompilationDb(
-                    self._include_prefixes, self.__header_to_source_mapping)
+                    self._include_prefixes,
+                    self.__header_to_source_mapping,
+                    self.__use_target_compiler_builtins
+                )
                 db_search_scope = SearchScope(
                     from_folder=path.dirname(db_file_path))
                 return db.get_flags(file_path, db_search_scope)
@@ -109,7 +116,8 @@ class CMakeFile(FlagsSource):
             cmake_file=File(current_cmake_path),
             cmake_binary=self.__cmake_binary,
             prefix_paths=self.__cmake_prefix_paths,
-            flags=self.__cmake_flags)
+            flags=self.__cmake_flags,
+            target_compilers=self.__target_compilers)
         if not db_file:
             return None
         if file_path:
@@ -118,7 +126,9 @@ class CMakeFile(FlagsSource):
             self._cache[current_cmake_path] = db_file.full_path()
             File.update_mod_time(current_cmake_path)
         db = CompilationDb(
-            self._include_prefixes, self.__header_to_source_mapping)
+            self._include_prefixes,
+            self.__header_to_source_mapping,
+            self.__use_target_compiler_builtins)
         db_search_scope = SearchScope(from_folder=db_file.folder())
         flags = db.get_flags(file_path, db_search_scope)
         return flags
@@ -139,7 +149,8 @@ class CMakeFile(FlagsSource):
         return tempdir
 
     @staticmethod
-    def __compile_cmake(cmake_file, cmake_binary, prefix_paths, flags):
+    def __compile_cmake(cmake_file, cmake_binary, prefix_paths, flags,
+                        target_compilers):
         """Compile cmake given a CMakeLists.txt file.
 
         This returns  a new compilation database path to further parse the
@@ -152,6 +163,7 @@ class CMakeFile(FlagsSource):
             prefix_paths (str[]): paths to add to CMAKE_PREFIX_PATH before
                                   running `cmake`
             flags (str[]): flags to pass to cmake
+            target_compilers(dict): Compilers to use
         """
         if not cmake_file or not cmake_file.loaded():
             return None
@@ -181,6 +193,26 @@ class CMakeFile(FlagsSource):
         log.debug("merged paths: %s", merged_paths)
         my_env['CMAKE_PREFIX_PATH'] = merged_paths
         log.debug("CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
+
+        # If target compilers are set, create a toolchain file to force
+        # cmake using them:
+        c_compiler = target_compilers.get("c", None)
+        cpp_compiler = target_compilers.get("c++", None)
+        # Note: CMake does not let us explicitly set Objective-C/C++ compilers.
+        #       Hence, we only set ones for C/C++ and let it derive the rest.
+        if c_compiler is not None or cpp_compiler is not None:
+            toolchain_file_path = path.join(tempdir, "ECC-Toolchain.cmake")
+            with open(toolchain_file_path, "w") as file:
+                file.write("include(CMakeForceCompiler)\n")
+                if c_compiler is not None:
+                    file.write(
+                        "set(CMAKE_C_COMPILER  {})\n".format(c_compiler))
+                if cpp_compiler is not None:
+                    file.write(
+                        "set(CMAKE_CPP_COMPILER  {})\n".format(cpp_compiler))
+            cmake_cmd += " -DCMAKE_TOOLCHAIN_FILE={}".format(
+                toolchain_file_path)
+
         log.info(' running command: %s', cmake_cmd)
         output_text = Tools.run_command(
             command=cmake_cmd, cwd=tempdir, env=my_env)

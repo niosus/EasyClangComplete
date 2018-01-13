@@ -4,6 +4,7 @@ import sublime
 from os import path
 
 from EasyClangComplete.plugin.settings import settings_manager
+from EasyClangComplete.plugin.settings import settings_storage
 from EasyClangComplete.plugin import view_config
 from EasyClangComplete.plugin import tools
 
@@ -11,6 +12,7 @@ from EasyClangComplete.tests import gui_test_wrapper
 
 imp.reload(gui_test_wrapper)
 imp.reload(settings_manager)
+imp.reload(settings_storage)
 imp.reload(view_config)
 imp.reload(tools)
 

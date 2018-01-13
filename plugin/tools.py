@@ -684,17 +684,20 @@ class Tools:
         return PosStatus.COMPLETION_NOT_NEEDED
 
     @staticmethod
-    def run_command(command, shell=True, cwd=path.curdir, env=environ):
+    def run_command(command, shell=True, cwd=path.curdir, env=environ,
+                    stdin=None, default=None):
         """Run a generic command in a subprocess.
 
         Args:
             command (str): command to run
+            stdin: The standard input channel for the started process.
+            default (andy): The default return value in case run fails.
 
         Returns:
-            str: raw command output
+            str: raw command output or default value
         """
+        output_text = default
         try:
-            stdin = None
             startupinfo = None
             if isinstance(command, list):
                 command = subprocess.list2cmdline(command)
@@ -704,7 +707,8 @@ class Tools:
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 startupinfo.wShowWindow = subprocess.SW_HIDE
-                stdin = subprocess.PIPE
+                if stdin is None:
+                    stdin = subprocess.PIPE
             output = subprocess.check_output(command,
                                              stdin=stdin,
                                              stderr=subprocess.STDOUT,
@@ -717,6 +721,9 @@ class Tools:
             output_text = e.output.decode("utf-8")
             log.debug("command finished with code: %s", e.returncode)
             log.debug("command output: \n%s", output_text)
+        except FileNotFoundError:
+            log.debug(
+                "executable file not found executing: {}".format(command))
         return output_text
 
     @classmethod
