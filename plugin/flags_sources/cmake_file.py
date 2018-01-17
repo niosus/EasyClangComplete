@@ -176,7 +176,6 @@ class CMakeFile(FlagsSource):
             cmake=cmake_binary,
             flags=" ".join(flags),
             path=cmake_file.folder())
-        print("!!!!!! ", cmake_cmd)
         tempdir = CMakeFile.unique_folder_name(cmake_file.full_path())
         try:
             os.makedirs(tempdir)
