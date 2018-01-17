@@ -23,14 +23,6 @@ DECLARATION_TEMPLATE = """## Declaration: ##
 """
 
 
-class PopupStyle:
-    """Enum with possible popup styles."""
-
-    ERROR = "error"
-    WARNING = "warning"
-    INFO = "info"
-
-
 class Popup:
     """Incapsulate popup creation."""
 
@@ -167,12 +159,15 @@ class Popup:
             popup.__text += CODE_TEMPLATE.format(lang="c++", code=body)
         return popup
 
+    def as_markdown(self):
+        """Represent all the text as markdown."""
+        tabbed_text = "\n\t".join(self.__text.split('\n'))
+        return MD_TEMPLATE.format(type=self.__popup_type,
+                                  contents=tabbed_text)
+
     def show(self, view, location=-1, on_navigate=None):
         """Show this popup."""
-        tabbed_text = "\n\t".join(self.__text.split('\n'))
-        md_contents = MD_TEMPLATE.format(type=self.__popup_type,
-                                         contents=tabbed_text)
-        mdpopups.show_popup(view, md_contents,
+        mdpopups.show_popup(view, self.as_markdown(),
                             max_width=Popup.MAX_POPUP_WIDTH,
                             max_height=Popup.MAX_POPUP_HEIGHT,
                             wrapper_class=Popup.WRAPPER_CLASS,

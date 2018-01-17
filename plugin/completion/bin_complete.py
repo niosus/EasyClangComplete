@@ -142,7 +142,7 @@ class Completer(BaseCompleter):
                 dummy function as we gain nothing from building it with binary.
 
         """
-        if settings.errors_style == SettingsStorage.NONE_STYLE:
+        if not settings.show_errors:
             # in this class there is no need to rebuild the file. It brings no
             # benefits. We only want to do it if we need to show errors.
             return False

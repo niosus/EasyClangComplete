@@ -331,7 +331,7 @@ class Completer(BaseCompleter):
             log.debug("reparsed in %s seconds", end - start)
             # Store and potentially show errors to the user.
             self.save_errors(self.tu.diagnostics)  # Store for the future.
-            if settings.errors_style != SettingsStorage.NONE_STYLE:
+            if settings.show_errors:
                 self.show_errors(view)
             return True
         log.error("no translation unit for view id %s", v_id)

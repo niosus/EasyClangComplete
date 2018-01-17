@@ -49,13 +49,9 @@ class SettingsStorage:
 
     PROGRESS_STYLES = [COLOR_SUBLIME_STYLE_TAG, MOON_STYLE_TAG, NONE_STYLE_TAG]
 
-    POPUPS_STYLE = "popups"
-    PHANTOMS_STYLE = "phantoms"
-    NONE_STYLE = "none"
-    ERROR_STYLES = [POPUPS_STYLE, PHANTOMS_STYLE, NONE_STYLE]
-
     GUTTER_COLOR_STYLE = "color"
     GUTTER_MONO_STYLE = "mono"
+    NONE_STYLE = "none"
     GUTTER_STYLES = [GUTTER_COLOR_STYLE, GUTTER_MONO_STYLE, NONE_STYLE]
 
     # refer to Preferences.sublime-settings for usage explanation
@@ -66,7 +62,6 @@ class SettingsStorage:
         "cmake_binary",
         "common_flags",
         "cpp_flags",
-        "errors_style",
         "flags_sources",
         "hide_default_completions",
         "include_file_folder",
@@ -78,6 +73,7 @@ class SettingsStorage:
         "objective_cpp_flags",
         "progress_style",
         "show_type_info",
+        "show_errors",
         "show_type_body",
         "triggers",
         "use_libclang",
@@ -174,10 +170,6 @@ class SettingsStorage:
         if self.progress_style not in SettingsStorage.PROGRESS_STYLES:
             error_msg = "Progress style '{}' is not one of {}".format(
                 self.progress_style, SettingsStorage.PROGRESS_STYLES)
-            return False, error_msg
-        if self.errors_style not in SettingsStorage.ERROR_STYLES:
-            error_msg = "Error style '{}' is not one of {}".format(
-                self.errors_style, SettingsStorage.ERROR_STYLES)
             return False, error_msg
         if self.gutter_style not in SettingsStorage.GUTTER_STYLES:
             error_msg = "Gutter style '{}' is not one of {}".format(

@@ -51,9 +51,8 @@
     {"file": ".clang_complete"},
   ],
 
-  // Show compile errors in this style on file save.
-  // Possible styles: "popups", "phantoms", "none"
-  "errors_style": "popups",
+  // Show compile errors on file save or not.
+  "show_errors": true,
 
   // Show gutter icon for highlighted errors on the side bar.
   // Possible styles: "color", "mono", "none"

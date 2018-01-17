@@ -272,8 +272,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
         """
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
-        if settings.errors_style == SettingsStorage.PHANTOMS_STYLE:
-            return
         if Tools.is_valid_view(view):
             (row, _) = SublBridge.cursor_pos(view)
             view_config = EasyClangComplete.view_config_manager.get_from_cache(
