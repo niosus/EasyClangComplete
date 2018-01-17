@@ -403,8 +403,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if future.cancelled():
             return
         (tooltip_request, current_popup) = future.result()
-        if current_popup == "":
-            return
         if not tooltip_request:
             return
         if tooltip_request.get_identifier() != self.current_job_id:
