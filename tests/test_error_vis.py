@@ -150,6 +150,18 @@ class TestErrorVis:
 """
         self.assertEqual(md_text, expected_error)
 
+    def test_error_to_list(self):
+        """Test transforming an error dict into a list."""
+        error_dicts = [
+            {"error": "error_1", "severity": 1},
+            {"error": "error_2", "severity": 2}
+        ]
+        max_severity, msg_list = PopupErrorVis._as_msg_list(error_dicts)
+        self.assertEqual(max_severity, 2)
+        self.assertEqual(len(msg_list), 2)
+        self.assertEqual(msg_list[0], "error_1")
+        self.assertEqual(msg_list[1], "error_2")
+
     def test_info_simple(self):
         """Test that info message is generated correctly."""
         if not self.use_libclang:
@@ -171,6 +183,9 @@ class TestErrorVis:
     int [main]({file}:7:5) (int argc, const char *[] argv)
 """.format(file=file_name)
         self.assertEqual(info_popup.as_markdown(), expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
 
     def test_info_full(self):
         """Test that info message is generated correctly."""
@@ -215,6 +230,9 @@ class TestErrorVis:
         actual_msg_array = [s.rstrip() for s in actual_msg_array]
         actual_msg = '\n'.join(actual_msg_array)
         self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
 
 
 class TestErrorVisBin(TestErrorVis, GuiTestWrapper):

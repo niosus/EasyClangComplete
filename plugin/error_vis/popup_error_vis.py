@@ -136,7 +136,7 @@ class PopupErrorVis:
         current_err_region_dict = self.err_regions[view.buffer_id()]
         if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
-            max_severity, error_list = PopupErrorVis._as_list(errors_dict)
+            max_severity, error_list = PopupErrorVis._as_msg_list(errors_dict)
             text_to_show = Tools.to_md(error_list)
             if max_severity > 2:
                 popup = Popup.error(text_to_show)
@@ -160,21 +160,20 @@ class PopupErrorVis:
         del self.err_regions[view.buffer_id()]
 
     @staticmethod
-    def _as_list(errors_dict):
-        """Show error as html.
+    def _as_msg_list(errors_dicts):
+        """Return errors as list.
 
         Args:
-            errors_dict (dict): Current error
+            errors_dicts (dict[]): A list of error dicts
         """
         error_list = []
         max_severity = 0
-        for entry in errors_dict:
+        for entry in errors_dicts:
             error_list.append(entry['error'])
             if LibClangCompilerVariant.SEVERITY_TAG in entry:
                 severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
                 if severity > max_severity:
                     max_severity = severity
-        # add error to html template
         return max_severity, error_list
 
     @staticmethod
