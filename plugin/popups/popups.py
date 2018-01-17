@@ -161,7 +161,7 @@ class Popup:
 
     def as_markdown(self):
         """Represent all the text as markdown."""
-        tabbed_text = "\n\t".join(self.__text.split('\n'))
+        tabbed_text = "\n    ".join(self.__text.split('\n')).strip()
         return MD_TEMPLATE.format(type=self.__popup_type,
                                   contents=tabbed_text)
 

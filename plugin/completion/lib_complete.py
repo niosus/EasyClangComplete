@@ -16,7 +16,6 @@ from ..tools import Tools
 from ..tools import SublBridge
 from ..tools import PKG_NAME
 from ..clang.utils import ClangUtils
-from ..settings.settings_storage import SettingsStorage
 from ..popups.popups import Popup
 
 from threading import RLock

@@ -150,7 +150,7 @@ class TestErrorVis:
 """
         self.assertEqual(md_text, expected_error)
 
-    def test_info(self):
+    def test_info_simple(self):
         """Test that info message is generated correctly."""
         if not self.use_libclang:
             # Ignore this test for binary completer.
@@ -161,10 +161,60 @@ class TestErrorVis:
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(8), "  a.")
-        pos = self.view.text_point(8, 4)
+        self.assertEqual(self.get_row(6),
+                         "int main(int argc, char const *argv[]) {")
+        pos = self.view.text_point(6, 7)
         action_request = ActionRequest(self.view, pos)
-        completer.info(action_request, settings)
+        request, info_popup = completer.info(action_request, settings)
+        expected_info_msg = """!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    int [main]({file}:7:5) (int argc, const char *[] argv)
+""".format(file=file_name)
+        self.assertEqual(info_popup.as_markdown(), expected_info_msg)
+
+    def test_info_full(self):
+        """Test that info message is generated correctly."""
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_info.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(9), "  MyCoolClass cool_class;")
+        pos = self.view.text_point(9, 7)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        expected_info_msg = """!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [MyCoolClass]({file}:4:7)
+    ### Brief documentation:
+    ```
+    Class for my cool class.
+    ```
+    ### Full doxygen comment:
+    ```
+
+    ```
+    ### Body:
+    ```c++
+    class MyCoolClass {{
+     public:
+      void foo();
+    }};
+
+    ```
+""".format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = info_popup.as_markdown()
+        actual_msg_array = actual_msg.split('\n')
+        actual_msg_array = [s.rstrip() for s in actual_msg_array]
+        actual_msg = '\n'.join(actual_msg_array)
+        self.assertEqual(actual_msg, expected_info_msg)
 
 
 class TestErrorVisBin(TestErrorVis, GuiTestWrapper):
