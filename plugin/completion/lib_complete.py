@@ -37,6 +37,8 @@ cindex_dict = {
     '6.0': PKG_NAME + ".plugin.clang.cindex50",  # FIXME
 }
 
+GLOBAL_TRIGGERS = ["::", "\t", " "]  # Triggers that should show types.
+
 
 class Completer(BaseCompleter):
     """Encapsulates completions based on libclang.
@@ -231,7 +233,7 @@ class Completer(BaseCompleter):
         else:
             point = completion_request.get_trigger_position()
             trigger = view.substr(point - 2) + view.substr(point - 1)
-            if trigger != "::":
+            if trigger not in GLOBAL_TRIGGERS:
                 excluded = self.bigger_ignore_list
             else:
                 excluded = self.default_ignore_list
