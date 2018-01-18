@@ -268,15 +268,12 @@ class Completer(BaseCompleter):
             if not cursor:
                 return empty_info
             if cursor.kind == self.cindex.CursorKind.OBJC_MESSAGE_EXPR:
-                # TODO: deprecate this for now.
-                # info_details = ClangUtils.build_objc_message_info_details(
-                #     cursor)
-                # return (tooltip_request, info_details)
-                return empty_info
+                info_popup = Popup.info_objc(cursor)
+                return tooltip_request, info_popup
             if cursor.referenced:
                 info_popup = Popup.info(
                     cursor.referenced, self.cindex, settings)
-                return (tooltip_request, info_popup)
+                return tooltip_request, info_popup
             return empty_info
 
     def update(self, view, settings):

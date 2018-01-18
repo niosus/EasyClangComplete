@@ -16,10 +16,22 @@ MD_TEMPLATE = """!!! {type}
 
 CODE_TEMPLATE = """```{lang}
 {code}
-```\n"""
+```"""
 
 DECLARATION_TEMPLATE = """## Declaration: ##
 {type_declaration}
+"""
+
+BRIEF_DOC_TEMPLATE = """### Brief documentation: ###
+{content}
+"""
+
+FULL_DOC_TEMPLATE = """### Full doxygen comment: ###
+{content}
+"""
+
+BODY_TEMPLATE = """### Body: ###
+{content}
 """
 
 
@@ -55,7 +67,6 @@ class Popup:
         """Initialize a new warning popup."""
         popup = Popup()
         popup.__popup_type = 'panel-info "ECC: Info"'
-
         type_decl = [
             cindex.CursorKind.STRUCT_DECL,
             cindex.CursorKind.UNION_DECL,
@@ -66,10 +77,8 @@ class Popup:
             cindex.CursorKind.TYPE_ALIAS_DECL,
             cindex.CursorKind.TYPE_REF
         ]
-
         # Initialize the text the declaration.
         declaration_text = ''
-
         # Show the return type of the function/method if applicable,
         # macros just show that they are a macro.
         macro_parser = None
@@ -87,23 +96,19 @@ class Popup:
                 result_type = None
                 log.warning("No spelling for type provided in info.")
                 return ""
-
             if cursor.is_static_method():
                 declaration_text += "static "
-
             if cursor.spelling != cursor.type.spelling:
                 # Don't show duplicates if the user focuses type, not variable
                 declaration_text += Popup.link_from_location(
                     Popup.location_from_type(result_type),
                     result_type.spelling)
-
         # Link to declaration of item under cursor
         if cursor.location:
             declaration_text += Popup.link_from_location(cursor.location,
                                                          cursor.spelling)
         else:
             declaration_text += cursor.spelling
-
         # Macro/function/method arguments
         args_string = None
         if is_macro:
@@ -125,38 +130,38 @@ class Popup:
                 args_string += ')'
         if args_string:
             declaration_text += args_string
-
         # Show value for enum
         if cursor.kind == cindex.CursorKind.ENUM_CONSTANT_DECL:
             declaration_text += " = " + str(cursor.enum_value)
             declaration_text += "(" + hex(cursor.enum_value) + ")"
-
         # Method modifiers
         if cursor.is_const_method():
             declaration_text += " const"
-
+        # Save declaration text.
         popup.__text = DECLARATION_TEMPLATE.format(
             type_declaration=declaration_text)
-
-        # Show macro body
-        if is_macro:
-            popup.__text += "### Body:\n"
-            popup.__text += CODE_TEMPLATE.format(
-                lang="c++", code=macro_parser.body_string)
         # Doxygen comments
         if cursor.brief_comment:
-            popup.__text += "### Brief documentation:\n"
-            popup.__text += CODE_TEMPLATE.format(lang="",
-                                                 code=cursor.brief_comment)
+            popup.__text += BRIEF_DOC_TEMPLATE.format(
+                content=CODE_TEMPLATE.format(lang="",
+                                             code=cursor.brief_comment))
         if cursor.raw_comment:
-            popup.__text += "### Full doxygen comment:\n"
-            popup.__text += CODE_TEMPLATE.format(
-                lang="", code=Popup.cleanup_comment(cursor.raw_comment))
+            clean_comment = Popup.cleanup_comment(cursor.raw_comment).strip()
+            print(clean_comment)
+            if clean_comment:
+                # Only add this if there is a Doxygen comment.
+                popup.__text += FULL_DOC_TEMPLATE.format(
+                    content=CODE_TEMPLATE.format(lang="", code=clean_comment))
+        # Show macro body
+        if is_macro:
+            popup.__text += BODY_TEMPLATE.format(
+                content=CODE_TEMPLATE.format(lang="c++",
+                                             code=macro_parser.body_string))
         # Show type declaration
         if settings.show_type_body and is_type and cursor.extent:
             body = Popup.get_text_by_extent(cursor.extent)
-            popup.__text += "### Body:\n"
-            popup.__text += CODE_TEMPLATE.format(lang="c++", code=body)
+            popup.__text += BODY_TEMPLATE.format(
+                content=CODE_TEMPLATE.format(lang="c++", code=body))
         return popup
 
     def as_markdown(self):
@@ -259,3 +264,79 @@ class Popup:
         with open(extent.start.file.name, 'r') as f:
             lines = f.readlines()
             return "".join(lines[extent.start.line - 1:extent.end.line])
+
+    @staticmethod
+    def info_objc(cursor):
+        """Provide information about cursor to Objective C message expression.
+
+        Builds detailed information about cursor when cursor is
+        a CursorKind.OBJC_MESSAGE_EXPR. OBJC_MESSAGE_EXPR cursors
+        behave very differently from other C/C++ cursors in that:
+        - The return type we want to show in the tooltip
+          is stored in the original 'cursor.type' from the cursor the user is
+          hovering over; in C/C++ we only used 'cursor.referenced' but nothing
+          else from the original cursor.
+        - 'cursor.referenced' is still important, as it holds the name and args
+          of the method being called in the message. But
+          'cursor.referenced.spelling' comes in a different format then what
+          For example, if we have this method declaration for 'bar':
+            @interface Foo
+              -(void)bar:(BOOL)b1 boolParam2:(BOOL):b2
+            @end
+          And later, we hover over the text calling bar():
+            Foo* foo = [[Foo alloc] init];
+            [foo bar:YES boolParam2:NO]; // <- Hover over 'bar' here
+          Then we would see:
+            cursor.kind = CursorKind.OBJC_INSTANCE_METHOD_DECL
+            cursor.type.spelling = 'void'
+            cursor.referenced.kind: CursorKind.OBJC_INSTANCE_METHOD_DECL
+            cursor.referenced.spelling = 'bar:boolParam2:'
+            cursor.referenced.arguments[0].type.spelling = 'BOOL'
+            cursor.referenced.arguments[0].spelling = 'b1'
+            cursor.referenced.arguments[1].spelling = 'BOOL'
+            cursor.referenced.arguments[1].spelling = 'b2'
+          Our goal is to make the tooltip match the method declaration:
+            'void bar:(BOOL)b1 boolParam2:(BOOL):b2'
+        - Objective C methods also don't need to worry about static/const
+
+        Args:
+            cursor (Cursor): Current cursor.
+        """
+        # TODO(@kjteske): check this for correctness and add a test to
+        # test_error_vis.py please.
+        popup = Popup()
+        popup.__popup_type = 'panel-info "ECC: Info"'
+        # Type declaration.
+        declaration_text = ""
+        return_type = cursor.type
+        declaration_text += Popup.link_from_location(
+            Popup.location_from_type(return_type),
+            return_type.spelling)
+        declaration_text += ' '
+        # Method declaration.
+        method_cursor = cursor.referenced
+        method_and_params = method_cursor.spelling.split(':')
+        method_name = method_and_params[0]
+        if method_cursor.location:
+            declaration_text += Popup.link_from_location(
+                method_cursor.location,
+                method_name)
+        else:
+            declaration_text += method_cursor.spelling
+        # Params declaration.
+        method_params_index = 1
+        for arg in method_cursor.get_arguments():
+            declaration_text += ":(" + arg.type.spelling + ")"
+            if arg.spelling:
+                declaration_text += arg.spelling + " "
+            declaration_text += method_and_params[method_params_index]
+            method_params_index += 1
+        # Set the popup text from declaration.
+        popup.__text = DECLARATION_TEMPLATE.format(
+            type_declaration=declaration_text)
+        # Brief comment.
+        if method_cursor.brief_comment:
+            popup.__text += BRIEF_DOC_TEMPLATE.format(
+                content=CODE_TEMPLATE.format(lang="",
+                                             code=method_cursor.brief_comment))
+        return popup

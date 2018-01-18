@@ -34,6 +34,13 @@ test_cursor = namedtuple('test_cursor', 'file line')
 test_extent = namedtuple('test_extent', 'start end')
 
 
+def cleanup_trailing_spaces(message):
+    """We need to cleanup trailing spaces as Sublime text removes them."""
+    actual_msg_array = message.split('\n')
+    actual_msg_array = [s.rstrip() for s in actual_msg_array]
+    return '\n'.join(actual_msg_array)
+
+
 class TestErrorVis:
     """Test error visualization."""
 
@@ -187,6 +194,54 @@ class TestErrorVis:
         self.tear_down_completer()
         self.tear_down()
 
+    def test_info_no_full(self):
+        """Test that info message is generated correctly."""
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_info.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(17), "  MyCoolClass cool_class;")
+        pos = self.view.text_point(17, 7)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        expected_info_msg = """!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [MyCoolClass]({file}:4:7)
+    ### Brief documentation: ###
+    ```
+    Class for my cool class.
+    ```
+    ### Body: ###
+    ```c++
+    class MyCoolClass {{
+     public:
+      /**
+       * @brief      This is short.
+       *
+       *             And this is a full comment.
+       *
+       * @param[in]  a     param a
+       * @param[in]  b     param b
+       */
+      void foo(int a, int b);
+    }};
+
+    ```
+""".format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
     def test_info_full(self):
         """Test that info message is generated correctly."""
         if not self.use_libclang:
@@ -198,37 +253,29 @@ class TestErrorVis:
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(9), "  MyCoolClass cool_class;")
-        pos = self.view.text_point(9, 7)
+        self.assertEqual(self.get_row(18), "  cool_class.foo(2, 2);")
+        pos = self.view.text_point(18, 15)
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
         expected_info_msg = """!!! panel-info "ECC: Info"
     ## Declaration: ##
-    [MyCoolClass]({file}:4:7)
-    ### Brief documentation:
+    void [foo]({file}:14:8) (int a, int b)
+    ### Brief documentation: ###
     ```
-    Class for my cool class.
+    This is short.
     ```
-    ### Full doxygen comment:
+    ### Full doxygen comment: ###
     ```
+    And this is a full comment.
 
-    ```
-    ### Body:
-    ```c++
-    class MyCoolClass {{
-     public:
-      void foo();
-    }};
-
+    @param[in]  a     param a
+    @param[in]  b     param b
     ```
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
-        actual_msg = info_popup.as_markdown()
-        actual_msg_array = actual_msg.split('\n')
-        actual_msg_array = [s.rstrip() for s in actual_msg_array]
-        actual_msg = '\n'.join(actual_msg_array)
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
