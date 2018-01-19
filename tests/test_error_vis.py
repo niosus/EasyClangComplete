@@ -149,7 +149,7 @@ class TestErrorVis:
         self.assertEqual(md_text, expected_error)
 
     def test_warning(self):
-        """Test getting text from multiline extent."""
+        """Test generating a simple warning."""
         error_popup = Popup.warning("warning_text")
         md_text = error_popup.as_markdown()
         expected_error = """!!! panel-warning "ECC: Warning"
@@ -195,7 +195,7 @@ class TestErrorVis:
         self.tear_down()
 
     def test_info_no_full(self):
-        """Test that info message is generated correctly."""
+        """Test that doxygen comments are generated correctly."""
         if not self.use_libclang:
             # Ignore this test for binary completer.
             return
@@ -243,7 +243,7 @@ class TestErrorVis:
         self.tear_down()
 
     def test_info_full(self):
-        """Test that info message is generated correctly."""
+        """Test that the full info message is generated correctly."""
         if not self.use_libclang:
             # Ignore this test for binary completer.
             return
@@ -288,5 +288,5 @@ class TestErrorVisBin(TestErrorVis, GuiTestWrapper):
 
 
 class TestErrorVisLib(TestErrorVis, GuiTestWrapper):
-    """Test class for the binary based completer."""
+    """Test class for the libclang based completer."""
     use_libclang = True
