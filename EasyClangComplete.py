@@ -37,8 +37,8 @@ ColorSublimeProgressStatus = progress_status.ColorSublimeProgressStatus
 NoneSublimeProgressStatus = progress_status.NoneSublimeProgressStatus
 PosStatus = tools.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
-CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
-ThreadPool = thread_pool.ThreadPool
+# CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
+# ThreadPool = thread_pool.ThreadPool
 ThreadJob = thread_pool.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 
@@ -145,7 +145,7 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
             return
         import gc
         file_path = self.view.file_name()
-        cmake_cache = CMakeFileCache()
+        cmake_cache = flags_sources.cmake_file.CMakeFileCache()
         try:
             cmake_file_path = cmake_cache[file_path]
             log.debug("Cleaning file: '%s'", cmake_file_path)
@@ -166,7 +166,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     Most of the functionality is delegated.
     """
-    thread_pool = ThreadPool()
+    thread_pool = thread_pool.ThreadPool()
 
     view_config_manager = None
     settings_manager = None
