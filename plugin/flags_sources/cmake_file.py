@@ -8,7 +8,7 @@ from .compilation_db import CompilationDb
 from ..tools import File
 from ..tools import Tools
 from ..tools import SearchScope
-from ..tools import singleton
+from ..utils.singleton import CMakeFileCache
 
 from os import path
 
@@ -17,12 +17,6 @@ import re
 import os
 
 log = logging.getLogger("ECC")
-
-
-@singleton
-class CMakeFileCache(dict):
-    """Singleton for CMakeLists.txt file cache."""
-    pass
 
 
 class CMakeFile(FlagsSource):
@@ -213,12 +207,10 @@ class CMakeFile(FlagsSource):
             cmake_cmd += " -DCMAKE_TOOLCHAIN_FILE={}".format(
                 toolchain_file_path)
 
-        log.info(' running command: %s', cmake_cmd)
+        log.debug(' running command: %s', cmake_cmd)
         output_text = Tools.run_command(
             command=cmake_cmd, cwd=tempdir, env=my_env)
-
-        log.info("cmake produced output: \n%s", output_text)
-
+        log.debug("cmake produced output: \n%s", output_text)
         database_path = path.join(tempdir, CompilationDb._FILE_NAME)
         if not path.exists(database_path):
             log.error("cmake has finished, but no compilation database.")

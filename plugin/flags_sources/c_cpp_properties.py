@@ -7,7 +7,7 @@ Attributes:
 """
 from .flags_source import FlagsSource
 from ..tools import File
-from ..tools import singleton
+from ..utils.singleton import CCppPropertiesCache
 
 from os import path
 import json
@@ -15,12 +15,6 @@ import json
 import logging
 
 log = logging.getLogger("ECC")
-
-
-@singleton
-class CCppPropertiesCache(dict):
-    """Singleton for c_cpp_properties.json file cache."""
-    pass
 
 
 class CCppProperties(FlagsSource):
@@ -112,11 +106,12 @@ class CCppProperties(FlagsSource):
             return defines
 
         if not path.exists(file.full_path()):
-            log.debug(
-                "{} does not exist yet. No flags present.".format(_FILE_NAME))
+            log.error("File '%s' does not exist yet. No flags present.",
+                      CCppProperties._FILE_NAME)
             return []
         if not file.loaded():
-            log.error("cannot get flags from {}. No file.".format(_FILE_NAME))
+            log.error("cannot get flags from %s. No file.",
+                      CCppProperties._FILE_NAME)
             return []
 
         flags = []

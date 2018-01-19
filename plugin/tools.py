@@ -1,4 +1,4 @@
-"""This module contains various tools.
+"""Collection of various tools.
 
 Attributes:
     log (logging): logger for this module
@@ -21,8 +21,7 @@ import tempfile
 import subprocess
 
 import re
-import sys
-import imp
+
 
 PKG_NAME = path.basename(path.dirname(path.dirname(__file__)))
 
@@ -41,60 +40,6 @@ OSX_CLANG_VERSION_DICT = {
 }
 
 log = logging.getLogger("ECC")
-
-
-def singleton(class_):
-    """Singleton class wrapper.
-
-    Args:
-      class_ (Class): Class to wrap.
-
-    Returns:
-      class_: unique instance of object.
-    """
-    instances = {}
-
-    def getinstance(*args, **kwargs):
-        """Get instance of a class."""
-        if class_ not in instances:
-            instances[class_] = class_(*args, **kwargs)
-        return instances[class_]
-    return getinstance
-
-
-class Reloader:
-    """Reloader for all dependencies."""
-
-    MAX_RELOAD_TRIES = 10
-
-    @staticmethod
-    def reload_all():
-        """Reload all loaded modules."""
-        prefix = PKG_NAME + '.plugin.'
-        # reload all twice to make sure all dependencies are satisfied
-        log.debug("reload all modules first time")
-        Reloader.reload_once(prefix)
-        log.debug("reload all modules second time")
-        Reloader.reload_once(prefix)
-        log.debug("all modules reloaded")
-
-    @staticmethod
-    def reload_once(prefix):
-        """Reload all modules once."""
-        try_counter = 0
-        try:
-            for name, module in sys.modules.items():
-                if name.startswith(prefix):
-                    log.debug("reloading module: '%s'", name)
-                    imp.reload(module)
-        except OSError as e:
-            if try_counter >= Reloader.MAX_RELOAD_TRIES:
-                log.fatal("Too many tries to reload and no success. Fail.")
-                return
-            try_counter += 1
-            log.error("Received an error: %s on try %s. Try again.",
-                      e, try_counter)
-            Reloader.reload_once(prefix)
 
 
 class SublBridge:
@@ -194,7 +139,7 @@ class SublBridge:
 
     @staticmethod
     def show_auto_complete(view):
-        """Calling this function reopens completion popup.
+        """Reopen completion popup.
 
         It therefore subsequently calls
         EasyClangComplete.on_query_completions(...)
@@ -721,7 +666,7 @@ class Tools:
             output_text = e.output.decode("utf-8")
             log.debug("command finished with code: %s", e.returncode)
             log.debug("command output: \n%s", output_text)
-        except FileNotFoundError:
+        except OSError:
             log.debug(
                 "executable file not found executing: {}".format(command))
         return output_text

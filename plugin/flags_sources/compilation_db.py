@@ -5,8 +5,8 @@ Attributes:
 """
 from .flags_source import FlagsSource
 from ..tools import File
-from ..tools import singleton
 from ..utils.unique_list import UniqueList
+from ..utils.singleton import ComplationDbCache
 
 from os import path
 from fnmatch import fnmatch
@@ -14,12 +14,6 @@ from fnmatch import fnmatch
 import logging
 
 log = logging.getLogger("ECC")
-
-
-@singleton
-class ComplationDbCache(dict):
-    """Singleton for compilation database cache."""
-    pass
 
 
 class CompilationDb(FlagsSource):

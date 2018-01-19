@@ -5,19 +5,13 @@ Attributes:
 """
 from .flags_source import FlagsSource
 from ..tools import File
-from ..tools import singleton
+from ..utils.singleton import FlagsFileCache
 
 from os import path
 
 import logging
 
 log = logging.getLogger("ECC")
-
-
-@singleton
-class FlagsFileCache(dict):
-    """Singleton for .clang_fomplete file cache."""
-    pass
 
 
 class FlagsFile(FlagsSource):

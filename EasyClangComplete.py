@@ -17,16 +17,18 @@ from os import path
 from .plugin import tools
 from .plugin import view_config
 from .plugin import flags_sources
-from .plugin.utils import thread_pool
+from .plugin.utils import singleton_thread_pool
+from .plugin.utils import thread_job
 from .plugin.utils import progress_status
 from .plugin.utils import quick_panel_handler
+from .plugin.utils import module_reloader
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
-# reload the modules
-tools.Reloader.reload_all()
+# Reload all modules modules ignoring those that contain the given string.
+module_reloader.ModuleReloader.reload_all(ignore_string='singleton')
 
-# some aliases
+# Set some aliases for simplicity.
 SettingsManager = settings_manager.SettingsManager
 SettingsStorage = settings_storage.SettingsStorage
 ViewConfigManager = view_config.ViewConfigManager
@@ -38,8 +40,8 @@ NoneSublimeProgressStatus = progress_status.NoneSublimeProgressStatus
 PosStatus = tools.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
-ThreadPool = thread_pool.ThreadPool
-ThreadJob = thread_pool.ThreadJob
+ThreadPool = singleton_thread_pool.ThreadPool
+ThreadJob = thread_job.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 
 log = logging.getLogger("ECC")
@@ -67,7 +69,7 @@ def plugin_loaded():
     We need it to initialize all the different classes that encapsulate
     functionality. We can only properly init them after sublime api is
     available."""
-    tools.Reloader.reload_all()
+    module_reloader.ModuleReloader.reload_all(ignore_string='singleton')
     handle_plugin_loaded_function()
 
 

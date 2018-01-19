@@ -12,12 +12,12 @@ from threading import Thread
 
 from .tools import File
 from .tools import Tools
-from .tools import singleton
 from .tools import SublBridge
 from .tools import SearchScope
 
 from .utils.flag import Flag
 from .utils.unique_list import UniqueList
+from .utils.singleton import ViewConfigCache
 
 from .completion import lib_complete
 from .completion import bin_complete
@@ -344,20 +344,13 @@ class ViewConfig(object):
         return Flag.tokenize_list(lang_flags)
 
 
-@singleton
-class ViewConfigCache(dict):
-    """Singleton for view configurations cache."""
-    pass
-
-
-@singleton
 class ViewConfigManager(object):
     """A utility class that stores a cache of all view configurations."""
 
     def __init__(self, timer_period=30, max_config_age=60):
         """Initialize view config manager.
 
-        All the values aregiven in seconds and can be overridden by settings.
+        All the values are given in seconds and can be overridden by settings.
 
         Args:
             timer_period (int, optional): How often to run timer in seconds.

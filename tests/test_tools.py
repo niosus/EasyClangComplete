@@ -16,11 +16,12 @@ from EasyClangComplete.plugin.tools import Tools
 from EasyClangComplete.plugin.tools import File
 from EasyClangComplete.plugin.tools import PosStatus
 from EasyClangComplete.plugin.tools import PKG_NAME
-from EasyClangComplete.plugin.tools import singleton
+from EasyClangComplete.plugin.utils.singleton import singleton
 
 
 class test_tools_command(TestCase):
     """Test sublime commands."""
+
     def setUp(self):
         """Set up testing environment."""
         self.view = sublime.active_window().new_file()
@@ -28,9 +29,8 @@ class test_tools_command(TestCase):
         s = sublime.load_settings("Preferences.sublime-settings")
         s.set("close_windows_when_empty", False)
 
-    def setUpView(self, filename):
-        """
-        Utility method to set up a view for a given file.
+    def set_up_view(self, filename):
+        """Set up a view for a given file.
 
         Args:
             filename (str): The filename to open in a new view.
@@ -119,7 +119,7 @@ class test_tools_command(TestCase):
     def test_wrong_triggers(self):
         """Test that we don't complete on numbers and wrong triggers."""
         self.tearDown()
-        self.setUpView(path.join('test_files', 'test_wrong_triggers.cpp'))
+        self.set_up_view(path.join('test_files', 'test_wrong_triggers.cpp'))
         # Load the completions.
         manager = SettingsManager()
         settings = manager.user_settings()
@@ -204,14 +204,15 @@ class test_tools(TestCase):
 
 class test_file(TestCase):
     """Testing file related stuff."""
+
     def test_find_file(self):
         """Test if we can find a file."""
         current_folder = path.dirname(path.abspath(__file__))
         parent_folder = path.dirname(current_folder)
         file = File.search(
-             file_name='README.md',
-             from_folder=current_folder,
-             to_folder=parent_folder)
+            file_name='README.md',
+            from_folder=current_folder,
+            to_folder=parent_folder)
         expected = path.join(parent_folder, 'README.md')
         self.assertTrue(file.loaded())
         self.assertEqual(file.full_path(), expected)
