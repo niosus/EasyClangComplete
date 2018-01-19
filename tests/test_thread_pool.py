@@ -1,14 +1,12 @@
 """Test delayed thread pool."""
-import imp
 import time
 from unittest import TestCase
 
-import EasyClangComplete.plugin.utils.thread_pool
+import EasyClangComplete.plugin.utils.singleton_thread_pool
+import EasyClangComplete.plugin.utils.thread_job
 
-imp.reload(EasyClangComplete.plugin.utils.thread_pool)
-
-ThreadPool = EasyClangComplete.plugin.utils.thread_pool.ThreadPool
-ThreadJob = EasyClangComplete.plugin.utils.thread_pool.ThreadJob
+ThreadPool = EasyClangComplete.plugin.utils.singleton_thread_pool.ThreadPool
+ThreadJob = EasyClangComplete.plugin.utils.thread_job.ThreadJob
 
 
 def run_me(succeed):
