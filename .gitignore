@@ -20,3 +20,4 @@
 EasyClangComplete.sublime-workspace
 
 *.pyc
+.idea

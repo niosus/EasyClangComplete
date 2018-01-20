@@ -1,0 +1,16 @@
+Version 4.3.0
+=============
+
+Improvements and bug fixes:
+---------------------------
+- There was a delay when browsing files with Ctrl+P. Fixed now.
+- Async jobs are properly cancelled now when needed.
+- Better cleanup of old TUs.
+- New setting "header_to_source_mapping" to better handle header files inside of
+  a compilation database. Thanks @mhoeher.
+- Press Ctrl+Shift+E when seeing errors in a file to show a list of them.
+
+Show your support!
+------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it
