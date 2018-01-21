@@ -41,6 +41,7 @@ def cleanup_trailing_spaces(message):
     actual_msg_array = [s.rstrip() for s in actual_msg_array]
     return '\n'.join(actual_msg_array)
 
+
 def should_run_objc_tests():
     """Decide if Objective C tests should be run.
 
@@ -306,7 +307,7 @@ class TestErrorVis:
         completer, settings = self.set_up_completer()
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(63),
-            "  [interface interfaceMethodVoidNoParameters];")
+                         "  [interface interfaceMethodVoidNoParameters];")
         pos = self.view.text_point(63, 14)
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
@@ -337,15 +338,19 @@ class TestErrorVis:
         completer, settings = self.set_up_completer()
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(67),
-            "  [interface interfaceMethodVoidTwoStringParametersSecondUnnamed:nil :nil];")
+                         ("  [interface "
+                          "interfaceMethodVoidTwoStringParametersSecondUnnamed"
+                          ":nil :nil];"))
         pos = self.view.text_point(67, 14)
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
-    ## Declaration: ##
-    void  [interfaceMethodVoidTwoStringParametersSecondUnnamed]({file}:23:10) :(NSString *)s1 :(NSString *)s2
-""".format(file=file_name)
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    void  [interfaceMethodVoidTwoStringParametersSecondUnnamed]'
+        fmt += '({file}:23:10) :(NSString *)s1 :(NSString *)s2\n'
+        expected_info_msg = fmt.format(file=file_name)
+
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
         actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
@@ -367,16 +372,19 @@ class TestErrorVis:
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(68),
-            "  [Interface interfaceClassMethodFooTwoFooParameters:nil fooParam2:nil];")
+        self.assertEqual(
+            self.get_row(68),
+            "  [Interface interfaceClassMethodFooTwoFooParameters:nil "
+            + "fooParam2:nil];")
         pos = self.view.text_point(68, 14)
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
-        expected_info_msg = """!!! panel-info "ECC: Info"
-    ## Declaration: ##
-    [Foo *]({file}:6:8)  [interfaceClassMethodFooTwoFooParameters]({file}:25:10) :(Foo *)f1 fooParam2:(Foo *)f2
-""".format(file=file_name)
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    [Foo *]({file}:6:8)  [interfaceClassMethodFooTwoFoo'
+        fmt += 'Parameters]({file}:25:10) :(Foo *)f1 fooParam2:(Foo *)f2\n'
+        expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
         actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
@@ -399,7 +407,7 @@ class TestErrorVis:
         completer, settings = self.set_up_completer()
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(71),
-            "  [interface protocolMethodVoidNoParameters];")
+                         "  [interface protocolMethodVoidNoParameters];")
         pos = self.view.text_point(71, 14)
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
@@ -434,7 +442,7 @@ class TestErrorVis:
         completer, settings = self.set_up_completer()
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(77),
-            "  [interface categoryMethodVoidNoParameters];")
+                         "  [interface categoryMethodVoidNoParameters];")
         pos = self.view.text_point(77, 14)
         action_request = ActionRequest(self.view, pos)
         request, info_popup = completer.info(action_request, settings)
@@ -450,6 +458,7 @@ class TestErrorVis:
         # cleanup
         self.tear_down_completer()
         self.tear_down()
+
 
 class TestErrorVisBin(TestErrorVis, GuiTestWrapper):
     """Test class for the binary based completer."""
