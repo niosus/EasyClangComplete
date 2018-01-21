@@ -234,7 +234,7 @@ class Popup:
         return None
 
     @staticmethod
-    def link_from_location(location, text):
+    def link_from_location(location, text, trailing_space=True):
         """Provide link to given cursor.
 
         Transforms SourceLocation object into markdown string.
@@ -242,6 +242,10 @@ class Popup:
         Args:
             location (Cursor.location): Current location.
             text (str): Text to be added as info.
+            trailing_space (bool): Whether to add a trailing space
+                For C/C++ method & argument names, this would normally be true,
+                but ObjC methods/arguments are usually presented without
+                this space.
         """
         result = ""
         if location and location.file and location.file.name:
@@ -249,9 +253,11 @@ class Popup:
             result += "(" + location.file.name
             result += ":" + str(location.line)
             result += ":" + str(location.column)
-            result += ") "
+            result += ")"
         else:
-            result += text + ' '
+            result += text
+        if trailing_space:
+            result += " "
         return result
 
     @staticmethod
@@ -305,8 +311,6 @@ class Popup:
         Args:
             cursor (Cursor): Current cursor.
         """
-        # TODO(@kjteske): check this for correctness and add a test to
-        # test_error_vis.py please.
         popup = Popup()
         popup.__popup_type = 'panel-info "ECC: Info"'
         # Type declaration.
@@ -323,7 +327,8 @@ class Popup:
         if method_cursor.location:
             declaration_text += Popup.link_from_location(
                 method_cursor.location,
-                method_name)
+                method_name,
+                trailing_space=False)
         else:
             declaration_text += method_cursor.spelling
         # Params declaration.
@@ -331,7 +336,8 @@ class Popup:
         for arg in method_cursor.get_arguments():
             arg_type_location = Popup.location_from_type(arg.type)
             arg_type_link = Popup.link_from_location(arg_type_location,
-                                                     arg.type.spelling)
+                                                     arg.type.spelling,
+                                                     trailing_space=False)
 
             declaration_text += ":(" + arg_type_link + ")"
             if arg.spelling:

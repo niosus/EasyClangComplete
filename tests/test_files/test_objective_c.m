@@ -3,6 +3,8 @@
 #import <Foundation/Foundation.h>
 #import <Foundation/NSString.h>
 
+@class Foo;
+
 @protocol Protocol
   -(void)protocolMethodVoidNoParameters; ///< Has a brief comment
   -(BOOL)protocolMethodBoolNoParameters;
@@ -18,10 +20,10 @@
   -(void)interfaceMethodVoidOneStringParameter:(NSString*)s1;
   -(void)interfaceMethodVoidTwoStringParameters:(NSString*)s1
     stringParam2:(NSString*)s2;
-  -(void)interfaceMethodVoidTwoStringParametersSecondUnnamed:(NSString*)s1
-    :(NSString*)s2;
-  +(BOOL)interfaceClassMethodBoolTwoBoolParameters:(BOOL)b1
-    boolParam2:(BOOL)b2;
+  -(void)interfaceMethodVoidTwoParametersSecondUnnamed:(int)int1
+    :(int)int2;
+  +(Foo*)interfaceClassMethodFooTwoFooParameters:(Foo*)f1
+    fooParam2:(Foo*)f2;
   @property (assign) NSString* interfacePropertyString;
 @end
 
@@ -33,10 +35,10 @@
   -(void)interfaceMethodVoidOneStringParameter:(NSString*)s1 {}
   -(void)interfaceMethodVoidTwoStringParameters:(NSString*)s1
     stringParam2:(NSString*)s2 {}
-  -(void)interfaceMethodVoidTwoStringParametersSecondUnnamed:(NSString*)s1
-    :(NSString*)s2 {}
-  +(BOOL)interfaceClassMethodBoolTwoBoolParameters:(BOOL)b1
-    boolParam2:(BOOL)b2 { return YES; }
+  -(void)interfaceMethodVoidTwoParametersSecondUnnamed:(int)int1
+    :(int)int2 {}
+  +(Foo*)interfaceClassMethodFooTwoFooParameters:(Foo*)f1
+    fooParam2:(Foo*)f2 { return nil; }
 
   -(void)protocolMethodVoidNoParameters {}
   -(BOOL)protocolMethodBoolNoParameters { return YES; }
@@ -63,9 +65,8 @@ int main(int argc, const char * argv[])
   [interface interfaceMethodBoolNoParameters];
   [interface interfaceMethodVoidOneStringParameter:nil];
   [interface interfaceMethodVoidTwoStringParameters:nil stringParam2:nil];
-  [interface interfaceMethodVoidTwoStringParametersSecondUnnamed:nil :nil];
-  BOOL myBool = YES;
-  [Interface interfaceClassMethodBoolTwoBoolParameters:YES boolParam2:myBool];
+  [interface interfaceMethodVoidTwoParametersSecondUnnamed:0 :0];
+  [Interface interfaceClassMethodFooTwoFooParameters:nil fooParam2:nil];
   interface.interfacePropertyString = nil;
 
   [interface protocolMethodVoidNoParameters];
