@@ -298,7 +298,7 @@ class TestErrorVis:
 
         For void method with no parameters.
         """
-        if not should_run_objc_tests():
+        if not should_run_objc_tests() or not self.use_libclang:
             return
         file_name = path.join(path.dirname(__file__),
                               'test_files',
@@ -329,7 +329,7 @@ class TestErrorVis:
 
         For void method with an unnamed parameter.
         """
-        if not should_run_objc_tests():
+        if not should_run_objc_tests() or not self.use_libclang:
             return
         file_name = path.join(path.dirname(__file__),
                               'test_files',
@@ -364,7 +364,7 @@ class TestErrorVis:
 
         For method that returns an object and has two object parameters.
         """
-        if not should_run_objc_tests():
+        if not should_run_objc_tests() or not self.use_libclang:
             return
         file_name = path.join(path.dirname(__file__),
                               'test_files',
@@ -398,7 +398,7 @@ class TestErrorVis:
 
         For a Protocol method that has a doxygen brief comment.
         """
-        if not should_run_objc_tests():
+        if not should_run_objc_tests() or not self.use_libclang:
             return
         file_name = path.join(path.dirname(__file__),
                               'test_files',
@@ -433,7 +433,7 @@ class TestErrorVis:
 
         For a Category method.
         """
-        if not should_run_objc_tests():
+        if not should_run_objc_tests() or not self.use_libclang:
             return
         file_name = path.join(path.dirname(__file__),
                               'test_files',
