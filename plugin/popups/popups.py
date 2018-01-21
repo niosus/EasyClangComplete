@@ -302,8 +302,6 @@ class Popup:
         Args:
             cursor (Cursor): Current cursor.
         """
-        # TODO(@kjteske): check this for correctness and add a test to
-        # test_error_vis.py please.
         popup = Popup()
         popup.__popup_type = 'panel-info "ECC: Info"'
         # Type declaration.
