@@ -1,5 +1,5 @@
 #include <Foundation/Foundation.h>
-@interface Foo
+@interface Foo : NSObject
   -(void) oneParameterMethod:(BOOL)boolParam;
 @end
 int main(int argc, char const *argv[]) {

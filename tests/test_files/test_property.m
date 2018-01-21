@@ -1,5 +1,5 @@
 #include <Foundation/Foundation.h>
-@interface Foo
+@interface Foo : NSObject
   @property BOOL boolProperty;
 @end
 int main(int argc, char const *argv[]) {
