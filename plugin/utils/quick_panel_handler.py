@@ -5,6 +5,8 @@ import sublime
 
 log = logging.getLogger("ECC")
 
+ENTRY_TEMPLATE = "{type}: {error}"
+
 
 class QuickPanelHandler(object):
     """Handle the quick panel."""
@@ -23,7 +25,15 @@ class QuickPanelHandler(object):
         """Present errors as list of lists."""
         contents = []
         for error_dict in self.errors:
-            contents.append([error_dict['error'], error_dict['file']])
+            error_type = 'ERROR'
+            if error_dict['severity'] < 3:
+                error_type = 'WARNING'
+            contents.append(
+                [
+                    ENTRY_TEMPLATE.format(type=error_type,
+                                          error=error_dict['error']),
+                    error_dict['file']
+                ])
         return contents
 
     def on_done(self, idx):
