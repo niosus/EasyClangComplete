@@ -171,10 +171,11 @@ class Popup:
         """Represent all the text as markdown."""
         tabbed_text = "\n    ".join(self.__text.split('\n')).strip()
         return MD_TEMPLATE.format(type=self.__popup_type,
-                                  contents=tabbed_text)
+                                  contents=tabbed_text).strip()
 
     def show(self, view, location=-1, on_navigate=None):
         """Show this popup."""
+        print(self.as_markdown())
         mdpopups.show_popup(view, self.as_markdown(),
                             max_width=Popup.MAX_POPUP_WIDTH,
                             max_height=Popup.MAX_POPUP_HEIGHT,
