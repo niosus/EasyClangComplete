@@ -353,6 +353,7 @@ class ViewConfigManager(object):
         self.__rlock = RLock()
         with self.__rlock:
             self.__cache = ViewConfigCache()
+            self.__cache.clear()
 
         self.__timer_period = timer_period      # Seconds.
         self.__max_config_age = max_config_age  # Seconds.
