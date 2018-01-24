@@ -118,10 +118,13 @@ class Popup:
         else:
             args = []
             for arg in cursor.get_arguments():
+                arg_type_location = Popup.location_from_type(arg.type)
+                arg_type_link = Popup.link_from_location(arg_type_location,
+                                                         arg.type.spelling)
                 if arg.spelling:
-                    args.append(arg.type.spelling + ' ' + arg.spelling)
+                    args.append(arg_type_link + arg.spelling)
                 else:
-                    args.append(arg.type.spelling + ' ')
+                    args.append(arg_type_link)
             if cursor.kind in [cindex.CursorKind.FUNCTION_DECL,
                                cindex.CursorKind.CXX_METHOD]:
                 args_string = '('
@@ -326,7 +329,11 @@ class Popup:
         # Params declaration.
         method_params_index = 1
         for arg in method_cursor.get_arguments():
-            declaration_text += ":(" + arg.type.spelling + ")"
+            arg_type_location = Popup.location_from_type(arg.type)
+            arg_type_link = Popup.link_from_location(arg_type_location,
+                                                     arg.type.spelling)
+
+            declaration_text += ":(" + arg_type_link + ")"
             if arg.spelling:
                 declaration_text += arg.spelling + " "
             declaration_text += method_and_params[method_params_index]

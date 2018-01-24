@@ -281,6 +281,34 @@ class TestErrorVis:
         self.tear_down_completer()
         self.tear_down()
 
+    def test_info_arguments_link(self):
+        """Test that the info message with arg links is generated correctly."""
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_info_arguments_link.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(9), "  cool_class.foo(Foo(), nullptr);")
+        pos = self.view.text_point(9, 15)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        expected_info_msg = """!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    void [foo]({file}:5:8) ([Foo]({file}:1:7) a, [Foo *]({file}:1:7) b)
+""".format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
 
 class TestErrorVisBin(TestErrorVis, GuiTestWrapper):
     """Test class for the binary based completer."""
