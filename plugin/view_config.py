@@ -463,10 +463,8 @@ class ViewConfigManager(object):
         """We make sure we run a single thread."""
         if ViewConfigManager.TAG in self.__timer_cache:
             # We need to kill the old thread before starting the new one.
-            self.__running_thread = False
             self.__timer_cache[ViewConfigManager.TAG].cancel()
             del self.__timer_cache[ViewConfigManager.TAG]
-        self.__running_thread = True
         self.__timer_cache[ViewConfigManager.TAG] = Timer(
             interval=self.__timer_period, function=self.__remove_old_configs)
         self.__timer_cache[ViewConfigManager.TAG].start()
