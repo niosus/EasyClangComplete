@@ -8,7 +8,7 @@ import logging
 import weakref
 from os import path
 from threading import RLock
-from threading import Thread
+from threading import Timer
 
 from .tools import File
 from .tools import Tools
@@ -18,6 +18,7 @@ from .tools import SearchScope
 from .utils.flag import Flag
 from .utils.unique_list import UniqueList
 from .utils.singleton import ViewConfigCache
+from .utils.singleton import ThreadCache
 
 from .completion import lib_complete
 from .completion import bin_complete
@@ -341,6 +342,8 @@ class ViewConfig(object):
 class ViewConfigManager(object):
     """A utility class that stores a cache of all view configurations."""
 
+    TAG = "view_config_progress"
+
     def __init__(self, timer_period=30, max_config_age=60):
         """Initialize view config manager.
 
@@ -350,15 +353,16 @@ class ViewConfigManager(object):
             timer_period (int, optional): How often to run timer in seconds.
             max_config_age (int, optional): How long should a TU stay alive.
         """
-        self.__rlock = RLock()
-        with self.__rlock:
-            self.__cache = ViewConfigCache()
-            self.__cache.clear()
-
         self.__timer_period = timer_period      # Seconds.
         self.__max_config_age = max_config_age  # Seconds.
-        self.__progress_thread = Thread(target=self.__remove_old_configs,
-                                        daemon=True).start()
+        self.__rlock = RLock()
+
+        with self.__rlock:
+            self.__cache = ViewConfigCache()
+            self.__timer_cache = ThreadCache()
+
+        # Run the timer thread correctly.
+        self.__run_timer()
 
     def get_from_cache(self, view):
         """Get config from cache with no modifications."""
@@ -455,6 +459,18 @@ class ViewConfigManager(object):
         view_config = self.get_from_cache(view)
         return view_config.completer.complete(completion_request)
 
+    def __run_timer(self):
+        """We make sure we run a single thread."""
+        if ViewConfigManager.TAG in self.__timer_cache:
+            # We need to kill the old thread before starting the new one.
+            self.__running_thread = False
+            self.__timer_cache[ViewConfigManager.TAG].cancel()
+            del self.__timer_cache[ViewConfigManager.TAG]
+        self.__running_thread = True
+        self.__timer_cache[ViewConfigManager.TAG] = Timer(
+            interval=self.__timer_period, function=self.__remove_old_configs)
+        self.__timer_cache[ViewConfigManager.TAG].start()
+
     def __remove_old_configs(self):
         """Remove old configs if they are older than max age.
 
@@ -462,16 +478,16 @@ class ViewConfigManager(object):
         if there are any new configs to remove based on a timer.
         """
         import gc
-        while True:
-            time.sleep(self.__timer_period)
-            with self.__rlock:
-                for v_id in list(self.__cache.keys()):
-                    if self.__cache[v_id].is_older_than(self.__max_config_age):
-                        log.debug("Remove old config: %s", v_id)
-                        del self.__cache[v_id]
-                        gc.collect()  # Explicitly collect garbage
-                    else:
-                        log.debug("Skip young config: Age %s < %s. View: %s.",
-                                  self.__cache[v_id].get_age(),
-                                  self.__max_config_age,
-                                  v_id)
+        with self.__rlock:
+            for v_id in list(self.__cache.keys()):
+                if self.__cache[v_id].is_older_than(self.__max_config_age):
+                    log.debug("Remove old config: %s", v_id)
+                    del self.__cache[v_id]
+                    gc.collect()  # Explicitly collect garbage
+                else:
+                    log.debug("Skip young config: Age %s < %s. View: %s.",
+                              self.__cache[v_id].get_age(),
+                              self.__max_config_age,
+                              v_id)
+        # Run the timer again.
+        self.__run_timer()

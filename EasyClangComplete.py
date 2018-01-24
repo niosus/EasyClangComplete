@@ -22,8 +22,10 @@ from .plugin.utils import thread_job
 from .plugin.utils import progress_status
 from .plugin.utils import quick_panel_handler
 from .plugin.utils import module_reloader
+from .plugin.utils import singleton
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
+
 
 # Reload all modules modules ignoring those that contain the given string.
 module_reloader.ModuleReloader.reload_all(ignore_string='singleton')
@@ -39,7 +41,8 @@ ColorSublimeProgressStatus = progress_status.ColorSublimeProgressStatus
 NoneSublimeProgressStatus = progress_status.NoneSublimeProgressStatus
 PosStatus = tools.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
-CMakeFileCache = flags_sources.cmake_file.CMakeFileCache
+CMakeFileCache = singleton.CMakeFileCache
+GenericCache = singleton.GenericCache
 ThreadPool = singleton_thread_pool.ThreadPool
 ThreadJob = thread_job.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
@@ -70,6 +73,7 @@ def plugin_loaded():
     functionality. We can only properly init them after sublime api is
     available."""
     module_reloader.ModuleReloader.reload_all(ignore_string='singleton')
+    GenericCache.clear_all_caches()
     handle_plugin_loaded_function()
 
 

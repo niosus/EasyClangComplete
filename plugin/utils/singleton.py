@@ -56,6 +56,26 @@ class ComplationDbCache(dict):
 
 
 @singleton
+class ThreadCache(dict):
+    """Singleton for a cache of running threads."""
+    pass
+
+
+@singleton
 class FlagsFileCache(dict):
     """Singleton for .clang_fomplete file cache."""
     pass
+
+
+class GenericCache:
+    """A class to be able to import the function below."""
+    @staticmethod
+    def clear_all_caches():
+        """Clear all existing caches."""
+        CCppPropertiesCache().clear()
+        CMakeFileCache().clear()
+        ComplationDbCache().clear()
+        CppPropertiesCache().clear()
+        FlagsFileCache().clear()
+        ViewConfigCache().clear()
+        ThreadCache().clear()
