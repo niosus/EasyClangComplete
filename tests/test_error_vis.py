@@ -139,6 +139,17 @@ class TestErrorVis:
         ext = test_extent(cursor1, cursor2)
         self.assertEqual(Popup.get_text_by_extent(ext), '  A a;\n  a.\n')
 
+    def test_get_text_by_extent_unicode(self):
+        """Test getting text from file that contains unicode."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_unicode.cpp')
+        file1 = test_file(file_name)
+        cursor1 = test_cursor(file1, 4)
+        cursor2 = test_cursor(file1, 4)
+        ext = test_extent(cursor1, cursor2)
+        self.assertEqual(Popup.get_text_by_extent(ext), 'class Foo {};\n')
+
     def test_error(self):
         """Test getting text from multiline extent."""
         error_popup = Popup.error("error_text")

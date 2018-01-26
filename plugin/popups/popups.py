@@ -264,7 +264,8 @@ class Popup:
         if extent.start.file.name != extent.end.file.name:
             return None
 
-        with open(extent.start.file.name, 'r') as f:
+        with open(extent.start.file.name, 'r', encoding='utf-8',
+                  errors='ignore') as f:
             lines = f.readlines()
             return "".join(lines[extent.start.line - 1:extent.end.line])
 
