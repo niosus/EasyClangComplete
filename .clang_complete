@@ -2,3 +2,4 @@
 -I/home/igor/.config/sublime-text-3/Packages/EasyClangComplete
 -Ilocal_folder
 -Wabi
+-std=c++14

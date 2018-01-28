@@ -23,10 +23,12 @@ class Flag:
             self.__prefix = ""
             self.__body = part_1.strip()
 
+    @property
     def prefix(self):
         """Prefix of the flag. Empty if not separable."""
         return self.__prefix
 
+    @property
     def body(self):
         """Body of the flag. Full flag if not separable."""
         return self.__body
@@ -57,7 +59,7 @@ class Flag:
 
     def __eq__(self, other):
         """Check if it is equal to another flag."""
-        return self.__prefix == other.prefix() and self.__body == other.body()
+        return self.__prefix == other.prefix and self.__body == other.body
 
     @staticmethod
     def tokenize_list(all_split_line):

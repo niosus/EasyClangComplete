@@ -34,6 +34,13 @@ from .flags_sources.compilation_db import CompilationDb
 
 log = logging.getLogger("ECC")
 
+TOO_MANY_STD_FLAGS_ERROR_MSG = """
+Your {which_settings} define too many std flags:
+{std_flags}
+
+Please fix your settings.
+"""
+
 
 class ViewConfig(object):
     """A bundle representing a view configuration.
@@ -169,17 +176,58 @@ class ViewConfig(object):
         completer = ViewConfig.__init_completer(settings)
         prefixes = completer.compiler_variant.include_prefixes
 
-        flags = UniqueList()
-        flags += completer.compiler_variant.init_flags
-        flags += ViewConfig.__get_lang_flags(
+        init_flags = completer.compiler_variant.init_flags
+        lang_flags = ViewConfig.__get_lang_flags(
             view, settings, completer.compiler_variant.need_lang_flags)
-        flags += ViewConfig.__get_common_flags(prefixes, settings)
-        flags += ViewConfig.__load_source_flags(view, settings, prefixes)
+        common_flags = ViewConfig.__get_common_flags(prefixes, settings)
+        source_flags = ViewConfig.__load_source_flags(view, settings, prefixes)
+        flags = ViewConfig.__merge_flags(
+            init_flags, lang_flags, common_flags, source_flags)
 
         flags_as_str_list = []
         for flag in flags:
             flags_as_str_list += flag.as_list()
         return (completer, flags_as_str_list)
+
+    @staticmethod
+    def __merge_flags(init_flags, lang_flags, common_flags, source_flags):
+        """Merge the flags together.
+
+        This function accounts for the priority and duplicates.
+        """
+        lang_std_flag_indices = [
+            i for i, flag in enumerate(lang_flags)
+            if flag.body.startswith('-std')]
+        source_std_flags_indices = [
+            i for i, flag in enumerate(source_flags)
+            if flag.body.startswith('-std')]
+
+        # Perform checks for user's settings.
+        if len(lang_std_flag_indices) > 1:
+            std_flags = [source_flags[i] for i in lang_std_flag_indices]
+            error_msg = TOO_MANY_STD_FLAGS_ERROR_MSG.format(
+                which_settings="`lang_flags` settings",
+                std_flags=std_flags)
+            SublBridge.show_error_dialog(error_msg)
+        if len(source_std_flags_indices) > 1:
+            std_flags = [source_flags[i] for i in source_std_flags_indices]
+            error_msg = TOO_MANY_STD_FLAGS_ERROR_MSG.format(
+                which_settings="source generated settings",
+                std_flags=std_flags)
+            SublBridge.show_error_dialog(error_msg)
+
+        # Replace default flags with generated ones if needed.
+        if source_std_flags_indices and lang_std_flag_indices:
+            # Remove the lang flags std flag, leave only source one.
+            log.debug("Removing default std flag: '%s' in favor of: '%s'",
+                      lang_flags[lang_std_flag_indices[0]],
+                      source_flags[source_std_flags_indices[0]])
+            del lang_flags[lang_std_flag_indices[0]]
+
+        # Combine all flags into a unique list and return it.
+        flags = UniqueList()
+        flags += lang_flags + common_flags + source_flags
+        return flags
 
     @staticmethod
     def __load_source_flags(view, settings, include_prefixes):

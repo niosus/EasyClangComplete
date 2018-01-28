@@ -16,13 +16,13 @@ class TestFlag(TestCase):
         """Initialization test."""
         flag = Flag("hello")
         self.assertEqual(flag.as_list(), ["hello"])
-        self.assertEqual(flag.prefix(), "")
-        self.assertEqual(flag.body(), "hello")
+        self.assertEqual(flag.prefix, "")
+        self.assertEqual(flag.body, "hello")
         self.assertEqual(str(flag), "hello")
         flag = Flag("hello", "world")
         self.assertEqual(flag.as_list(), ["hello", "world"])
-        self.assertEqual(flag.prefix(), "hello")
-        self.assertEqual(flag.body(), "world")
+        self.assertEqual(flag.prefix, "hello")
+        self.assertEqual(flag.body, "world")
         self.assertEqual(str(flag), "hello world")
 
     def test_hash(self):

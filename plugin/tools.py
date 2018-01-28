@@ -155,6 +155,11 @@ class SublBridge:
             'api_completions_only': False,
             'next_competion_if_showing': False})
 
+    @staticmethod
+    def show_error_dialog(message):
+        """Show an error message dialog."""
+        sublime.error_message(message)
+
 
 class PosStatus:
     """Enum class for position status.

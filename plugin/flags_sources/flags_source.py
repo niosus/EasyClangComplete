@@ -15,7 +15,7 @@ class FlagsSource(object):
         self._include_prefixes = include_prefixes
 
     def get_flags(self, file_path=None, search_scope=None):
-        """An abstract function to gets flags for a view path.
+        """Get flags for a view path [ABSTRACT].
 
         Raises:
             NotImplementedError: Should not be called directly.
@@ -47,8 +47,8 @@ class FlagsSource(object):
             """
             flags = []
             for prefix in include_prefixes:
-                if flag.prefix() == prefix:
-                    include_path = flag.body()
+                if flag.prefix == prefix:
+                    include_path = flag.body
                     if not path.isabs(include_path):
                         include_path = path.join(folder, include_path)
                     paths = Tools.expand_star_wildcard(include_path)
@@ -58,8 +58,8 @@ class FlagsSource(object):
                     return flags
                 # this flag is not separable, check if we still need to update
                 # relative path to absolute one
-                if flag.body().startswith(prefix):
-                    include_path = flag.body()[len(prefix):]
+                if flag.body.startswith(prefix):
+                    include_path = flag.body[len(prefix):]
                     if not path.isabs(include_path):
                         include_path = path.normpath(
                             path.join(folder, include_path))
