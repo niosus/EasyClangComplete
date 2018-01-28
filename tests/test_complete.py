@@ -24,7 +24,7 @@ def has_libclang():
     return True
 
 
-#TODO(@kjteske): For now the tests seem to not be working for binary completer.
+# TODO(@kjteske): For now the tests seem to not be working for binary completer
 def should_run_objc_tests():
     """Decide if Objective C tests should be run.
 
