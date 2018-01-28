@@ -323,8 +323,14 @@ class Completer(BaseCompleter):
             if not self.tu:
                 log.error("translation unit is not available. Not reparsing.")
                 return False
+
+            # Prepare unsaved files.
+            file_name = view.file_name()
+            file_body = view.substr(sublime.Region(0, view.size()))
+            unsaved_files = [(file_name, file_body)]
+
             start = time.time()
-            self.tu.reparse()
+            self.tu.reparse(unsaved_files=unsaved_files)
             end = time.time()
             log.debug("reparsed in %s seconds", end - start)
             # Store and potentially show errors to the user.
