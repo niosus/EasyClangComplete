@@ -65,17 +65,6 @@ class ViewConfig(object):
         # init creation time
         self.__last_usage_time = time.time()
 
-        # set up a proper object
-        completer, flags = ViewConfig.__generate_essentials(view, settings)
-        if not completer:
-            log.warning(" could not generate completer for view %s",
-                        view.buffer_id())
-            return
-
-        self.completer = completer
-        self.completer.clang_flags = flags
-        self.completer.update(view, settings)
-
     def update_if_needed(self, view, settings):
         """Check if the view config has changed.
 
@@ -89,7 +78,8 @@ class ViewConfig(object):
         # update usage time
         self.touch()
         # update if needed
-        completer, flags = ViewConfig.__generate_essentials(view, settings)
+        completer, flags, include_folders = ViewConfig.__generate_essentials(
+            view, settings)
         if self.needs_update(completer, flags):
             log.debug("config needs new completer.")
             self.completer = completer
@@ -188,7 +178,22 @@ class ViewConfig(object):
         flags_as_str_list = []
         for flag in flags:
             flags_as_str_list += flag.as_list()
-        return (completer, flags_as_str_list)
+
+        include_folders = ViewConfig.__get_include_folders(prefixes, flags)
+        return completer, flags_as_str_list, include_folders
+
+    @staticmethod
+    def __get_include_folders(include_prefixes, all_flags):
+        include_folders = []
+        for flag in all_flags:
+            for prefix in include_prefixes:
+                if flag.prefix.startswith(prefix):
+                    include_folders.append(flag.body)
+                    continue
+                if flag.body.startswith(prefix):
+                    include_folders.append(flag.body[len(prefix):])
+                    continue
+        return include_folders
 
     @staticmethod
     def __merge_flags(init_flags, lang_flags, common_flags, source_flags):
