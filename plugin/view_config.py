@@ -65,6 +65,19 @@ class ViewConfig(object):
         # init creation time
         self.__last_usage_time = time.time()
 
+        # set up a proper object
+        completer, flags, include_folders = ViewConfig.__generate_essentials(
+            view, settings)
+        if not completer:
+            log.warning(" could not generate completer for view %s",
+                        view.buffer_id())
+            return
+
+        self.completer = completer
+        self.completer.clang_flags = flags
+        self.completer.update(view, settings)
+        self.include_folders = include_folders
+
     def update_if_needed(self, view, settings):
         """Check if the view config has changed.
 
@@ -85,6 +98,7 @@ class ViewConfig(object):
             self.completer = completer
             self.completer.clang_flags = flags
             self.completer.update(view, settings)
+            self.include_folders = include_folders
             File.update_mod_time(view.file_name())
             return self
         if ViewConfig.needs_reparse(view):
