@@ -74,9 +74,14 @@ class TestViewConfig(GuiTestWrapper):
         self.assertEqual(completer.clang_flags[2], '-x')
         self.assertEqual(completer.clang_flags[3], 'c++')
         self.assertEqual(completer.clang_flags[-1], '-std=c++14')
-        # test last one
+
         expected = path.join(path.dirname(
             path.dirname(__file__)), 'local_folder')
+        # test include folders
+        self.assertEqual(len(view_config.include_folders), 8)
+        self.assertTrue(expected in view_config.include_folders)
+
+        # test include flag
         self.assertEqual(completer.clang_flags[11], '-I' + expected)
 
     def test_unsaved_views(self):
