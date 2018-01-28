@@ -108,6 +108,21 @@ class SublBridge:
         return (row, col)
 
     @staticmethod
+    def get_line(view, pos=None):
+        """Get next line as text.
+
+        Args:
+            view (sublime.View): current view
+
+        Returns:
+            str: text that the next line contains
+        """
+        (row, _) = SublBridge.cursor_pos(view, pos)
+        point_on_line = view.text_point(row - 1, 0)
+        line = view.line(point_on_line)
+        return view.substr(line)
+
+    @staticmethod
     def next_line(view):
         """Get next line as text.
 
@@ -169,10 +184,12 @@ class PosStatus:
         COMPLETION_NEEDED (int): completion needed
         COMPLETION_NOT_NEEDED (int): completion not needed
         WRONG_TRIGGER (int): trigger is wrong
+        COMPLETE_INCLUDES (int): we want to complete an include here
     """
     COMPLETION_NEEDED = 0
     COMPLETION_NOT_NEEDED = 1
     WRONG_TRIGGER = 2
+    COMPLETE_INCLUDES = 3
 
 
 class File:
@@ -639,6 +656,11 @@ class Tools:
         if settings.autocomplete_all:
             return PosStatus.COMPLETION_NEEDED
 
+        this_line = SublBridge.get_line(view, point)
+        print("THIS LINE", this_line)
+        if this_line.startswith('#include'):
+            log.debug("Completing an include")
+            return PosStatus.COMPLETE_INCLUDES
         # if nothing fired we don't need to do anything
         log.debug("no completions needed")
         return PosStatus.COMPLETION_NOT_NEEDED

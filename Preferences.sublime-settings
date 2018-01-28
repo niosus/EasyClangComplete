@@ -23,6 +23,6 @@
     {
       "selector": "source.cuda-c++ - string - comment - constant.numeric",
       "characters": ".>: ",
-    }
+    },
   ],
 }

@@ -571,13 +571,46 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug("starting async auto_complete with id: %s",
                   EasyClangComplete.current_job_id)
 
-        # submit async completion job
-        job = ThreadJob(
-            name=ThreadJob.COMPLETE_TAG,
-            callback=self.completion_finished,
-            function=EasyClangComplete.view_config_manager.trigger_completion,
-            args=[view, completion_request])
-        EasyClangComplete.thread_pool.new_job(job)
+        if pos_status == PosStatus.COMPLETION_NEEDED:
+            # submit async completion job
+            config_manager = EasyClangComplete.view_config_manager
+            job = ThreadJob(
+                name=ThreadJob.COMPLETE_TAG,
+                callback=self.completion_finished,
+                function=config_manager.trigger_completion,
+                args=[view, completion_request])
+            EasyClangComplete.thread_pool.new_job(job)
+        elif pos_status == PosStatus.COMPLETE_INCLUDES:
+            log.debug("Completing includes")
+            # submit async completion job
+            config_manager = EasyClangComplete.view_config_manager
+            view_config = config_manager.get_from_cache(view)
+            include_folders = view_config.include_folders
+
+            def get_all_headers(folders):
+                import fnmatch
+                import os
+                matches = []
+                for folder in folders:
+                    log.debug("Going through: %s", folder)
+                    for root, dirnames, filenames in os.walk(folder):
+                        for filename in fnmatch.filter(filenames, '*.h'):
+                            match = path.join(root, filename)
+                            match = path.relpath(match, folder)
+                            matches.append(
+                                ["{}\tinclude".format(match), match])
+                return matches
+            all_headers = get_all_headers(include_folders)
+            import sublime
+            return (all_headers,
+                    sublime.INHIBIT_WORD_COMPLETIONS
+                    | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
+            # job = ThreadJob(
+            #     name=ThreadJob.COMPLETE_TAG,
+            #     callback=self.completion_finished,
+            #     function=config_manager.trigger_completion,
+            #     args=[view, completion_request])
+            # EasyClangComplete.thread_pool.new_job(job)
 
         # show default completions for now if allowed
         if settings.hide_default_completions:
