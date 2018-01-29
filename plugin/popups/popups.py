@@ -2,6 +2,7 @@
 
 import sublime
 import mdpopups
+import markupsafe
 import logging
 
 from ..utils.macro_parser import MacroParser
@@ -142,7 +143,7 @@ class Popup:
             declaration_text += " const"
         # Save declaration text.
         popup.__text = DECLARATION_TEMPLATE.format(
-            type_declaration=declaration_text)
+            type_declaration=markupsafe.escape(declaration_text))
         # Doxygen comments
         if cursor.brief_comment:
             popup.__text += BRIEF_DOC_TEMPLATE.format(
