@@ -163,6 +163,7 @@ class Popup:
         # Show type declaration
         if settings.show_type_body and is_type and cursor.extent:
             body = Popup.get_text_by_extent(cursor.extent)
+            body = Popup.prettify_body(body)
             popup.__text += BODY_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="c++", code=body))
         return popup
@@ -274,6 +275,19 @@ class Popup:
                   errors='ignore') as f:
             lines = f.readlines()
             return "".join(lines[extent.start.line - 1:extent.end.line])
+
+    @staticmethod
+    def prettify_body(body):
+        """Format some declaration body for viewing.
+
+        Args:
+            body (str): Body text.
+        """
+        # remove any global indentation
+        import textwrap
+        body = textwrap.dedent(body)
+
+        return body
 
     @staticmethod
     def info_objc(cursor):
