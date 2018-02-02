@@ -158,7 +158,14 @@ class SublBridge:
     @staticmethod
     def show_error_dialog(message):
         """Show an error message dialog."""
-        sublime.error_message(message)
+        log.error(message)
+        view = sublime.active_window().active_view()
+        content = "<strong>\u26A0 Error:</strong><br/><pre>{}</pre>"
+        content = content.format(message)
+        flags = (
+            sublime.COOPERATE_WITH_AUTO_COMPLETE |
+            sublime.HIDE_ON_MOUSE_MOVE)
+        view.show_popup(content, flags)
 
 
 class PosStatus:
