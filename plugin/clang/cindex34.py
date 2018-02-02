@@ -2361,8 +2361,8 @@ class TranslationUnit(ClangObject):
                     print(value)
                 if not isinstance(value, str):
                     raise TypeError('Unexpected unsaved file contents.')
-                unsaved_files_array[i].name = name
-                unsaved_files_array[i].contents = value
+                unsaved_files_array[i].name = name.encode('utf-8')
+                unsaved_files_array[i].contents = value.encode('utf-8')
                 unsaved_files_array[i].length = len(value)
         ptr = conf.lib.clang_reparseTranslationUnit(self, len(unsaved_files),
                 unsaved_files_array, options)
