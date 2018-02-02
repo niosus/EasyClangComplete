@@ -181,6 +181,7 @@ class Popup:
                             max_height=Popup.MAX_POPUP_HEIGHT,
                             wrapper_class=Popup.WRAPPER_CLASS,
                             css=self.CSS,
+                            flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY,
                             location=location,
                             on_navigate=on_navigate)
 
