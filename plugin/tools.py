@@ -325,7 +325,7 @@ class File:
         Returns:
             bool: True if contains str, False if not
         """
-        with open(file_path) as f:
+        with open(file_path, encoding='utf-8') as f:
             for line in f:
                 if line.lower().startswith(query):
                     log.debug("found needed line: '%s'", line)
