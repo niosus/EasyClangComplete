@@ -126,7 +126,11 @@ class Popup:
                 else:
                     args.append(arg_type_link)
             if cursor.kind in [cindex.CursorKind.FUNCTION_DECL,
-                               cindex.CursorKind.CXX_METHOD]:
+                               cindex.CursorKind.CXX_METHOD,
+                               cindex.CursorKind.CONSTRUCTOR,
+                               cindex.CursorKind.DESTRUCTOR,
+                               cindex.CursorKind.CONVERSION_FUNCTION,
+                               cindex.CursorKind.FUNCTION_TEMPLATE]:
                 args_string = '('
                 if len(args):
                     args_string += ', '.join(args)
