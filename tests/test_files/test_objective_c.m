@@ -16,7 +16,7 @@
 @end
 
 @interface Interface : NSObject<Protocol>
-  -(void)interfaceMethodVoidNoParameters;
+  -(void)interfaceMethodVoidNoParameters; ///< Brief comment.
   -(BOOL)interfaceMethodBoolNoParameters;
   -(void)interfaceMethodVoidOneStringParameter:(NSString*)s1;
   -(void)interfaceMethodVoidTwoStringParameters:(NSString*)s1
@@ -31,7 +31,7 @@
 @implementation Interface
   @synthesize protocolPropertyBool;
 
-  -(void)interfaceMethodVoidNoParameters { NSLog(@"VoidMethod"); }
+  -(void)interfaceMethodVoidNoParameters {}
   -(BOOL)interfaceMethodBoolNoParameters { return YES; }
   -(void)interfaceMethodVoidOneStringParameter:(NSString*)s1 {}
   -(void)interfaceMethodVoidTwoStringParameters:(NSString*)s1

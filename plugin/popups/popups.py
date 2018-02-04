@@ -296,7 +296,7 @@ class Popup:
         return body
 
     def info_objc(cursor, cindex):
-        """Provide information about cursor to Objective C message expression.
+        """Provide information about Objective C cursors.
 
         Builds detailed information about cursor when cursor is
         a CursorKind.OBJC_MESSAGE_EXPR. OBJC_MESSAGE_EXPR cursors
@@ -332,6 +332,10 @@ class Popup:
             cursor (Cursor): Current cursor.
         """
         popup = Popup()
+        is_method_decl = cursor.kind in [
+            cindex.CursorKind.OBJC_INSTANCE_METHOD_DECL,
+            cindex.CursorKind.OBJC_CLASS_METHOD_DECL,
+        ]
         popup.__popup_type = 'panel-info "ECC: Info"'
         # Method declaration.
         method_cursor = cursor.referenced
@@ -340,7 +344,10 @@ class Popup:
             declaration_text += "-("
         elif method_cursor.kind == cindex.CursorKind.OBJC_CLASS_METHOD_DECL:
             declaration_text += "+("
-        return_type = cursor.type
+        if is_method_decl:
+            return_type = cursor.result_type
+        else:
+            return_type = cursor.type
         declaration_text += Popup.link_from_location(
             Popup.location_from_type(return_type),
             return_type.spelling or "",
@@ -372,8 +379,13 @@ class Popup:
         popup.__text = DECLARATION_TEMPLATE.format(
             type_declaration=declaration_text)
         # Brief comment.
+        brief_comment = None
         if method_cursor.brief_comment:
+            brief_comment = method_cursor.brief_comment
+        elif is_method_decl and cursor.referenced.brief_comment:
+            brief_comment = cursor.referenced.brief_comment
+        if brief_comment:
             popup.__text += BRIEF_DOC_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="",
-                                             code=method_cursor.brief_comment))
+                                             code=brief_comment))
         return popup
