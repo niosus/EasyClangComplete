@@ -295,8 +295,7 @@ class Popup:
 
         return body
 
-    @staticmethod
-    def info_objc(cursor):
+    def info_objc(cursor, cindex):
         """Provide information about cursor to Objective C message expression.
 
         Builds detailed information about cursor when cursor is
@@ -326,7 +325,7 @@ class Popup:
             cursor.referenced.arguments[1].spelling = 'BOOL'
             cursor.referenced.arguments[1].spelling = 'b2'
           Our goal is to make the tooltip match the method declaration:
-            'void bar:(BOOL)b1 boolParam2:(BOOL):b2'
+            '-(void)bar:(BOOL)b1 boolParam2:(BOOL):b2'
         - Objective C methods also don't need to worry about static/const
 
         Args:
@@ -334,15 +333,19 @@ class Popup:
         """
         popup = Popup()
         popup.__popup_type = 'panel-info "ECC: Info"'
-        # Type declaration.
+        # Method declaration.
+        method_cursor = cursor.referenced
         declaration_text = ""
+        if method_cursor.kind == cindex.CursorKind.OBJC_INSTANCE_METHOD_DECL:
+            declaration_text += "-("
+        elif method_cursor.kind == cindex.CursorKind.OBJC_CLASS_METHOD_DECL:
+            declaration_text += "+("
         return_type = cursor.type
         declaration_text += Popup.link_from_location(
             Popup.location_from_type(return_type),
-            return_type.spelling)
-        declaration_text += ' '
-        # Method declaration.
-        method_cursor = cursor.referenced
+            return_type.spelling or "",
+            trailing_space=False)
+        declaration_text += ')'
         method_and_params = method_cursor.spelling.split(':')
         method_name = method_and_params[0]
         if method_cursor.location:

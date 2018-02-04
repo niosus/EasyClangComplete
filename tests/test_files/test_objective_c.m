@@ -11,6 +11,7 @@
   -(void)protocolMethodVoidOneStringParameter:(NSString*)s1;
   -(void)protocolMethodVoidTwoStringParameters:(NSString*)s1
     stringParam2:(NSString*)s2;
+  +(void)protocolClassMethod;
   @property (assign) BOOL protocolPropertyBool;
 @end
 
@@ -45,6 +46,7 @@
   -(void)protocolMethodVoidOneStringParameter:(NSString*)s1 {}
   -(void)protocolMethodVoidTwoStringParameters:(NSString*)s1
     stringParam2:(NSString*)s2 {}
+  +(void)protocolClassMethod {}
 
 @end
 
@@ -73,6 +75,7 @@ int main(int argc, const char * argv[])
   [interface protocolMethodBoolNoParameters];
   [interface protocolMethodVoidOneStringParameter:nil];
   [interface protocolMethodVoidTwoStringParameters:nil stringParam2:nil];
+  [Interface protocolClassMethod];
   interface.protocolPropertyBool = YES;
 
   [interface categoryMethodVoidNoParameters];

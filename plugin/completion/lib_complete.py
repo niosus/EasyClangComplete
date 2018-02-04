@@ -270,7 +270,7 @@ class Completer(BaseCompleter):
             if not cursor:
                 return empty_info
             if cursor.kind == self.cindex.CursorKind.OBJC_MESSAGE_EXPR:
-                info_popup = Popup.info_objc(cursor)
+                info_popup = Popup.info_objc(cursor, self.cindex)
                 return tooltip_request, info_popup
             if cursor.referenced:
                 info_popup = Popup.info(
