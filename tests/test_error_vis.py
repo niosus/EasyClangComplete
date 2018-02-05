@@ -601,6 +601,135 @@ class TestErrorVis:
         self.tear_down_completer()
         self.tear_down()
 
+    def test_info_objc_protocol_ref(self):
+        """Test that Objective-C info message is generated correctly.
+
+        For a protocol reference.
+        """
+        if not should_run_objc_tests() or not self.use_libclang:
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_objective_c.m')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(17),
+                         "@interface Interface : NSObject<Protocol>")
+        pos = self.view.text_point(17, 34)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        expected_info_msg = """!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [Protocol]({file}:8:11)
+    ### Body: ###
+    ```objective-c++
+    @protocol Protocol
+      -(void)protocolMethodVoidNoParameters; ///< Has a brief comment
+      -(BOOL)protocolMethodBoolNoParameters;
+      -(void)protocolMethodVoidOneStringParameter:(NSString*)s1;
+      -(void)protocolMethodVoidTwoStringParameters:(NSString*)s1
+        stringParam2:(NSString*)s2;
+      +(void)protocolClassMethod;
+      @property (assign) BOOL protocolPropertyBool;
+    @end
+
+    ```
+""".format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_info_objc_category_impl(self):
+        """Test that Objective-C info message is generated correctly.
+
+        For a category implementation.
+        """
+        if not should_run_objc_tests() or not self.use_libclang:
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_objective_c.m')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(52),
+                         "@interface Interface (Category)")
+        pos = self.view.text_point(52, 2)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        expected_info_msg = """!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [Category]({file}:53:12)
+    ### Body: ###
+    ```objective-c++
+    @interface Interface (Category)
+      -(void)categoryMethodVoidNoParameters;
+    @end
+
+    ```
+""".format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_info_objc_implementation_decl(self):
+        """Test that Objective-C info message is generated correctly.
+
+        For an implementation declaration.
+        """
+        if not should_run_objc_tests() or not self.use_libclang:
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_objective_c.m')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(30),
+                         "@implementation Interface")
+        pos = self.view.text_point(30, 18)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        expected_info_msg = """!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [Interface]({file}:18:12)
+    ### Body: ###
+    ```objective-c++
+    @interface Interface : NSObject<Protocol>
+      -(void)interfaceMethodVoidNoParameters; ///< Brief comment.
+      -(BOOL)interfaceMethodBoolNoParameters;
+      -(void)interfaceMethodVoidOneStringParameter:(NSString*)s1;
+      -(void)interfaceMethodVoidTwoStringParameters:(NSString*)s1
+        stringParam2:(NSString*)s2;
+      -(void)interfaceMethodVoidTwoParametersSecondUnnamed:(int)int1
+        :(int)int2;
+      +(Foo*)interfaceClassMethodFooTwoFooParameters:(Foo*)f1
+        fooParam2:(Foo*)f2;
+      @property (assign) NSString* interfacePropertyString;
+    @end
+
+    ```
+""".format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
 
 class TestErrorVisBin(TestErrorVis, GuiTestWrapper):
     """Test class for the binary based completer."""

@@ -259,8 +259,15 @@ class Completer(BaseCompleter):
         """
         objc_types = [
             self.cindex.CursorKind.OBJC_MESSAGE_EXPR,
-            self.cindex.CursorKind.OBJC_INSTANCE_METHOD_DECL,
             self.cindex.CursorKind.OBJC_CLASS_METHOD_DECL,
+            self.cindex.CursorKind.OBJC_INSTANCE_METHOD_DECL,
+            self.cindex.CursorKind.OBJC_CATEGORY_DECL,
+            self.cindex.CursorKind.OBJC_INTERFACE_DECL,
+            self.cindex.CursorKind.OBJC_PROTOCOL_DECL,
+            self.cindex.CursorKind.OBJC_CATEGORY_IMPL_DECL,
+            self.cindex.CursorKind.OBJC_IMPLEMENTATION_DECL,
+            self.cindex.CursorKind.OBJC_CLASS_REF,
+            self.cindex.CursorKind.OBJC_PROTOCOL_REF,
         ]
         empty_info = (tooltip_request, None)
         with Completer.rlock:
@@ -275,7 +282,7 @@ class Completer(BaseCompleter):
             if not cursor:
                 return empty_info
             if cursor.kind in objc_types:
-                info_popup = Popup.info_objc(cursor, self.cindex)
+                info_popup = Popup.info_objc(cursor, self.cindex, settings)
                 return tooltip_request, info_popup
             if cursor.referenced:
                 info_popup = Popup.info(

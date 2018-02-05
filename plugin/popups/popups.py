@@ -295,97 +295,126 @@ class Popup:
 
         return body
 
-    def info_objc(cursor, cindex):
-        """Provide information about Objective C cursors.
-
-        Builds detailed information about cursor when cursor is
-        a CursorKind.OBJC_MESSAGE_EXPR. OBJC_MESSAGE_EXPR cursors
-        behave very differently from other C/C++ cursors in that:
-        - The return type we want to show in the tooltip
-          is stored in the original 'cursor.type' from the cursor the user is
-          hovering over; in C/C++ we only used 'cursor.referenced' but nothing
-          else from the original cursor.
-        - 'cursor.referenced' is still important, as it holds the name and args
-          of the method being called in the message. But
-          'cursor.referenced.spelling' comes in a different format then what
-          For example, if we have this method declaration for 'bar':
-            @interface Foo
-              -(void)bar:(BOOL)b1 boolParam2:(BOOL):b2
-            @end
-          And later, we hover over the text calling bar():
-            Foo* foo = [[Foo alloc] init];
-            [foo bar:YES boolParam2:NO]; // <- Hover over 'bar' here
-          Then we would see:
-            cursor.kind = CursorKind.OBJC_INSTANCE_METHOD_DECL
-            cursor.type.spelling = 'void'
-            cursor.referenced.kind: CursorKind.OBJC_INSTANCE_METHOD_DECL
-            cursor.referenced.spelling = 'bar:boolParam2:'
-            cursor.referenced.arguments[0].type.spelling = 'BOOL'
-            cursor.referenced.arguments[0].spelling = 'b1'
-            cursor.referenced.arguments[1].spelling = 'BOOL'
-            cursor.referenced.arguments[1].spelling = 'b2'
-          Our goal is to make the tooltip match the method declaration:
-            '-(void)bar:(BOOL)b1 boolParam2:(BOOL):b2'
-        - Objective C methods also don't need to worry about static/const
-
-        Args:
-            cursor (Cursor): Current cursor.
-        """
+    def info_objc(cursor, cindex, settings):
+        """Provide information about Objective C cursors."""
         popup = Popup()
-        is_method_decl = cursor.kind in [
-            cindex.CursorKind.OBJC_INSTANCE_METHOD_DECL,
-            cindex.CursorKind.OBJC_CLASS_METHOD_DECL,
-        ]
         popup.__popup_type = 'panel-info "ECC: Info"'
-        # Method declaration.
-        method_cursor = cursor.referenced
-        declaration_text = ""
-        if method_cursor.kind == cindex.CursorKind.OBJC_INSTANCE_METHOD_DECL:
-            declaration_text += "-("
-        elif method_cursor.kind == cindex.CursorKind.OBJC_CLASS_METHOD_DECL:
-            declaration_text += "+("
-        if is_method_decl:
-            return_type = cursor.result_type
-        else:
+        is_message = cursor.kind in [
+            cindex.CursorKind.OBJC_MESSAGE_EXPR,
+        ]
+        is_method_decl = cursor.kind in [
+            cindex.CursorKind.OBJC_CLASS_METHOD_DECL,
+            cindex.CursorKind.OBJC_INSTANCE_METHOD_DECL,
+        ]
+        is_type_decl = cursor.kind in [
+            cindex.CursorKind.OBJC_CATEGORY_DECL,
+            cindex.CursorKind.OBJC_INTERFACE_DECL,
+            cindex.CursorKind.OBJC_PROTOCOL_DECL,
+        ]
+        is_type_impl = cursor.kind in [
+            cindex.CursorKind.OBJC_CATEGORY_IMPL_DECL,
+            cindex.CursorKind.OBJC_IMPLEMENTATION_DECL,
+        ]
+        is_type_ref = cursor.kind in [
+            cindex.CursorKind.OBJC_CLASS_REF,
+            cindex.CursorKind.OBJC_PROTOCOL_REF,
+        ]
+        comment_cursor = None
+        type_body_cursor = None
+        method_cursor = None
+        return_type = None
+        location_cursor = None
+        if is_message:
+            location_cursor = cursor
+            comment_cursor = cursor.referenced
+            method_cursor = cursor.referenced
             return_type = cursor.type
-        declaration_text += Popup.link_from_location(
-            Popup.location_from_type(return_type),
-            return_type.spelling or "",
-            trailing_space=False)
-        declaration_text += ')'
-        method_and_params = method_cursor.spelling.split(':')
-        method_name = method_and_params[0]
-        if method_cursor.location:
-            declaration_text += Popup.link_from_location(
-                method_cursor.location,
-                method_name,
-                trailing_space=False)
+        elif is_method_decl:
+            location_cursor = cursor
+            comment_cursor = cursor.referenced
+            method_cursor = cursor.referenced
+            return_type = cursor.result_type
+        elif is_type_decl:
+            location_cursor = cursor
+            comment_cursor = cursor
+            type_body_cursor = cursor
+        elif is_type_impl:
+            location_cursor = cursor.canonical
+            comment_cursor = cursor.canonical
+            type_body_cursor = cursor.canonical
+        elif is_type_ref:
+            location_cursor = cursor
+            comment_cursor = cursor.referenced
+            type_body_cursor = cursor.referenced
+            location_cursor = cursor.referenced
         else:
-            declaration_text += method_cursor.spelling
-        # Params declaration.
-        method_params_index = 1
-        for arg in method_cursor.get_arguments():
-            arg_type_location = Popup.location_from_type(arg.type)
-            arg_type_link = Popup.link_from_location(arg_type_location,
-                                                     arg.type.spelling,
-                                                     trailing_space=False)
+            assert False, "Unexpected type"
 
-            declaration_text += ":(" + arg_type_link + ")"
-            if arg.spelling:
-                declaration_text += arg.spelling + " "
-            declaration_text += method_and_params[method_params_index]
-            method_params_index += 1
-        # Set the popup text from declaration.
+        declaration_text = ""
+        if method_cursor:
+            # <+ or ->(<return type>)
+            method_kind = method_cursor.kind
+            if method_kind == cindex.CursorKind.OBJC_INSTANCE_METHOD_DECL:
+                declaration_text += "-("
+            elif method_kind == cindex.CursorKind.OBJC_CLASS_METHOD_DECL:
+                declaration_text += "+("
+            declaration_text += Popup.link_from_location(
+                Popup.location_from_type(return_type),
+                return_type.spelling or "",
+                trailing_space=False)
+            declaration_text += ')'
+
+            # <method name>
+            method_and_params = method_cursor.spelling.split(':')
+            method_name = method_and_params[0]
+            if method_cursor.location:
+                declaration_text += Popup.link_from_location(
+                    method_cursor.location,
+                    method_name,
+                    trailing_space=False)
+            else:
+                declaration_text += method_cursor.spelling
+
+            # <args if they exist>
+            method_params_index = 1
+            for arg in method_cursor.get_arguments():
+                arg_type_location = Popup.location_from_type(arg.type)
+                arg_type_link = Popup.link_from_location(arg_type_location,
+                                                         arg.type.spelling,
+                                                         trailing_space=False)
+                declaration_text += ":(" + arg_type_link + ")"
+                if arg.spelling:
+                    declaration_text += arg.spelling + " "
+                declaration_text += method_and_params[method_params_index]
+                method_params_index += 1
+        else:
+            if location_cursor.location:
+                declaration_text += Popup.link_from_location(
+                    location_cursor.location,
+                    location_cursor.spelling)
+            else:
+                declaration_text += location_cursor.spelling
         popup.__text = DECLARATION_TEMPLATE.format(
             type_declaration=declaration_text)
-        # Brief comment.
-        brief_comment = None
-        if method_cursor.brief_comment:
-            brief_comment = method_cursor.brief_comment
-        elif is_method_decl and cursor.referenced.brief_comment:
-            brief_comment = cursor.referenced.brief_comment
-        if brief_comment:
+
+        if comment_cursor and comment_cursor.brief_comment:
             popup.__text += BRIEF_DOC_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="",
-                                             code=brief_comment))
+                                             code=comment_cursor.brief_comment))
+        if comment_cursor and comment_cursor.raw_comment:
+            clean_comment = Popup.cleanup_comment(comment_cursor.raw_comment)
+            clean_comment = clean_comment.strip()
+            if clean_comment:
+                # Only add this if there is a Doxygen comment.
+                popup.__text += FULL_DOC_TEMPLATE.format(
+                    content=CODE_TEMPLATE.format(lang="", code=clean_comment))
+
+        # Show type declaration
+        if type_body_cursor:
+            if settings.show_type_body and type_body_cursor.extent:
+                body = Popup.get_text_by_extent(type_body_cursor.extent)
+                popup.__text += BODY_TEMPLATE.format(
+                    content=CODE_TEMPLATE.format(
+                        lang="objective-c++",
+                        code=body))
         return popup
