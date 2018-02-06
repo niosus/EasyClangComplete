@@ -213,7 +213,7 @@ class ViewConfig(object):
 
         # Perform checks for user's settings.
         if len(lang_std_flag_indices) > 1:
-            std_flags = [source_flags[i] for i in lang_std_flag_indices]
+            std_flags = [lang_flags[i] for i in lang_std_flag_indices]
             error_msg = TOO_MANY_STD_FLAGS_ERROR_MSG.format(
                 which_settings="`lang_flags` settings",
                 std_flags=std_flags)
@@ -223,7 +223,8 @@ class ViewConfig(object):
             error_msg = TOO_MANY_STD_FLAGS_ERROR_MSG.format(
                 which_settings="source generated settings",
                 std_flags=std_flags)
-            SublBridge.show_error_dialog(error_msg)
+            # TODO(igor): Do not show an error here, discussion in issue #417
+            log.error(error_msg)
 
         # Replace default flags with generated ones if needed.
         if source_std_flags_indices and lang_std_flag_indices:
