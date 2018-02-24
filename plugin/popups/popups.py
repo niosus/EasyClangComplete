@@ -52,7 +52,7 @@ class Popup:
         """Initialize a new error popup."""
         popup = Popup()
         popup.__popup_type = 'panel-error "ECC: Error"'
-        popup.__text = text
+        popup.__text = markupsafe.escape(text)
         return popup
 
     @staticmethod
@@ -60,7 +60,7 @@ class Popup:
         """Initialize a new warning popup."""
         popup = Popup()
         popup.__popup_type = 'panel-warning "ECC: Warning"'
-        popup.__text = text
+        popup.__text = markupsafe.escape(text)
         return popup
 
     @staticmethod
