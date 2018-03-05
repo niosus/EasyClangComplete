@@ -1235,7 +1235,7 @@ class Cursor(Structure):
     def result_type(self):
         """Retrieve the Type of the result for this Cursor."""
         if not hasattr(self, '_result_type'):
-            self._result_type = conf.lib.clang_getCursorResultType(self)
+            self._result_type = conf.lib.clang_getResultType(self.type)
 
         return self._result_type
 
@@ -2876,11 +2876,6 @@ functionList = [
   ("clang_getCursorReferenceNameRange",
    [Cursor, c_uint, c_uint],
    SourceRange),
-
-  ("clang_getCursorResultType",
-   [Cursor],
-   Type,
-   Type.from_result),
 
   ("clang_getCursorSemanticParent",
    [Cursor],
