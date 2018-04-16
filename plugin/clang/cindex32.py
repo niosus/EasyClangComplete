@@ -1529,6 +1529,12 @@ class Type(Structure):
 
         return res
 
+    def get_num_template_arguments(self):
+        return conf.lib.clang_Type_getNumTemplateArguments(self)
+
+    def get_template_argument_type(self, num):
+        return conf.lib.clang_Type_getTemplateArgumentAsType(self, num)
+
     def get_canonical(self):
         """
         Return the canonical type for a Type.
@@ -3004,6 +3010,15 @@ functionList = [
    [Cursor, c_uint],
    Cursor,
    Cursor.from_result),
+
+  ("clang_Type_getNumTemplateArguments",
+   [Type],
+   c_int),
+
+  ("clang_Type_getTemplateArgumentAsType",
+   [Type, c_uint],
+   Type,
+   Type.from_result),
 ]
 
 class LibclangError(Exception):
