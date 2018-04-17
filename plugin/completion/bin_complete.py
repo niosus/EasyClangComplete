@@ -15,7 +15,6 @@ from ..tools import SublBridge
 from .base_complete import BaseCompleter
 from .compiler_variant import ClangCompilerVariant
 from .compiler_variant import ClangClCompilerVariant
-from ..settings.settings_storage import SettingsStorage
 
 log = logging.getLogger("ECC")
 
@@ -61,8 +60,8 @@ class Completer(BaseCompleter):
 
     PARAM_TAG = "param"
     TYPE_TAG = "type"
-    PARAM_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}!_\."
-    TYPE_CHARS = "\w\s\*\&\<\>:,\(\)\$\{\}\[\]!"
+    PARAM_CHARS = r"\w\s\*\&\<\>:,\(\)\$\{\}!_\."
+    TYPE_CHARS = r"\w\s\*\&\<\>:,\(\)\$\{\}\[\]!"
     group_params = "(?P<{param_tag}>[{param_chars}]+)".format(
         param_chars=PARAM_CHARS,
         param_tag=PARAM_TAG)
@@ -72,9 +71,9 @@ class Completer(BaseCompleter):
 
     compl_str_mask = "{complete_flag}={file}:{row}:{col}"
 
-    compl_regex = re.compile("COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
+    compl_regex = re.compile(r"COMPLETION:\s(?P<name>.*)\s:\s(?P<content>.*)")
     compl_content_regex = re.compile(
-        "\<#{group_params}#\>|\[#{group_types}#\]".format(
+        r"\<#{group_params}#\>|\[#{group_types}#\]".format(
             group_params=group_params, group_types=group_types))
 
     opts_regex = re.compile("{#|#}")
