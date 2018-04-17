@@ -31,7 +31,7 @@ OSX_CLANG_VERSION_DICT = {
     '5.1': '3.4',
     '6.0': '3.5',
     '6.1': '3.6',
-    '7.0': '3.8',
+    '7.0': '3.7',
     '7.3': '3.8',
     '8.0': '3.8',
     '8.1': '3.9',
@@ -429,7 +429,7 @@ class Tools:
 
     """
 
-    syntax_regex = "/([^/]+).(?:tmLanguage|sublime-syntax)"
+    syntax_regex = re.compile(r"\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx",
                         ".m", ".mm"]
@@ -714,7 +714,7 @@ class Tools:
     @classmethod
     def _get_regular_clang_version_str(cls, output_text):
         # now we have the output, and can extract version from it
-        version_regex = re.compile("\d\.\d\.*\d*")
+        version_regex = re.compile(r"\d\.\d\.*\d*")
         match = version_regex.search(output_text)
         if match:
             version_str = match.group()
@@ -725,7 +725,7 @@ class Tools:
 
     @classmethod
     def _get_apple_clang_version_str(cls, output_text):
-        version_regex = re.compile("\d\.\d\.*\d*")
+        version_regex = re.compile(r"\d\.\d\.*\d*")
         match = version_regex.search(output_text)
         if match:
             version_str = match.group()
