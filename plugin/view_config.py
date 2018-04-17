@@ -329,7 +329,7 @@ class ViewConfig(object):
         Returns:
             Completer: A completer. Can be lib completer or bin completer.
         """
-        error_vis = PopupErrorVis(settings.gutter_style)
+        error_vis = PopupErrorVis(settings)
 
         completer = None
         if settings.use_libclang:

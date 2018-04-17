@@ -162,7 +162,11 @@ class TestErrorVis:
 
     def test_error(self):
         """Test getting text from multiline extent."""
-        error_popup = Popup.error("error_text")
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
+        settings.popup_maximum_width = 1800
+        settings.popup_maximum_height = 800
+        error_popup = Popup.error("error_text", settings)
         md_text = error_popup.as_markdown()
         expected_error = """!!! panel-error "ECC: Error"
     error_text
@@ -171,7 +175,11 @@ class TestErrorVis:
 
     def test_warning(self):
         """Test generating a simple warning."""
-        error_popup = Popup.warning("warning_text")
+        manager = SettingsManager()
+        settings = manager.settings_for_view(self.view)
+        settings.popup_maximum_width = 1800
+        settings.popup_maximum_height = 800
+        error_popup = Popup.warning("warning_text", settings)
         md_text = error_popup.as_markdown()
         expected_error = """!!! panel-warning "ECC: Warning"
     warning_text

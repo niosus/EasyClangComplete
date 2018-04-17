@@ -72,6 +72,8 @@ class SettingsStorage:
         "expand_template_types",
         "flags_sources",
         "gutter_style",
+        "popup_maximum_width",
+        "popup_maximum_height",
         "header_to_source_mapping",
         "hide_default_completions",
         "include_file_folder",

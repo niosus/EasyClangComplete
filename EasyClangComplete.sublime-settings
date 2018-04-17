@@ -61,6 +61,10 @@
   // Possible styles: "color", "mono", "dot", "none"
   "gutter_style": "color",
 
+  // Maximum width and height for popups eg. declaration info.
+  "popup_maximum_width": 1800,
+  "popup_maximum_height": 800,
+
   // Triggers for auto-completion
   "triggers" : [ ".", "->", "::", " ", "	", "(", "[" ],
 

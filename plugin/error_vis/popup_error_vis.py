@@ -27,12 +27,15 @@ class PopupErrorVis:
     _ERROR_FLAGS = sublime.DRAW_EMPTY | sublime.DRAW_NO_FILL
     _ERROR_SCOPE = "invalid.illegal"
 
-    def __init__(self, gutter_style=None):
+    def __init__(self, settings):
         """Initialize error visualization.
 
         Args:
             mark_gutter (bool): add a mark to the gutter for error regions
         """
+        gutter_style = settings.gutter_style
+        self.settings = settings
+
         self.err_regions = {}
         if gutter_style == SettingsStorage.GUTTER_COLOR_STYLE:
             self.gutter_mark = PATH_TO_ICON.format(icon="error_color.png")
@@ -141,9 +144,9 @@ class PopupErrorVis:
             max_severity, error_list = PopupErrorVis._as_msg_list(errors_dict)
             text_to_show = Tools.to_md(error_list)
             if max_severity > 2:
-                popup = Popup.error(text_to_show)
+                popup = Popup.error(text_to_show, self.settings)
             else:
-                popup = Popup.warning(text_to_show)
+                popup = Popup.warning(text_to_show, self.settings)
             popup.show(view)
         else:
             log.debug("no error regions for row: %s", row)
