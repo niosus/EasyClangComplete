@@ -429,7 +429,7 @@ class Tools:
 
     """
 
-    syntax_regex = "\/([^\/]+)\.(?:tmLanguage|sublime-syntax)"
+    syntax_regex = "/([^/]+).(?:tmLanguage|sublime-syntax)"
 
     valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx",
                         ".m", ".mm"]
