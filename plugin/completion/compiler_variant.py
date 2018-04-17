@@ -37,8 +37,8 @@ class ClangCompilerVariant(CompilerVariant):
     """
     include_prefixes = ["-isystem", "-I", "-isysroot"]
     error_regex = re.compile(r"(?P<file>.*)" +
-                             ":(?P<row>\d+):(?P<col>\d+)" +
-                             ":\s*.*error: (?P<error>.*)")
+                             r":(?P<row>\d+):(?P<col>\d+)" +
+                             r":\s*.*error: (?P<error>.*)")
 
     def errors_from_output(self, output):
         """Parse errors received from clang binary output.
@@ -69,8 +69,8 @@ class ClangClCompilerVariant(ClangCompilerVariant):
     need_lang_flags = False
     include_prefixes = ["-I", "/I", "-msvc", "/msvc"]
     error_regex = re.compile(r"(?P<file>.*)" +
-                             "\((?P<row>\d+),(?P<col>\d+)\)\s*" +
-                             ":\s*.*error: (?P<error>.*)")
+                             r"\((?P<row>\d+),(?P<col>\d+)\)\s*" +
+                             r":\s*.*error: (?P<error>.*)")
 
 
 class LibClangCompilerVariant(ClangCompilerVariant):
@@ -81,8 +81,8 @@ class LibClangCompilerVariant(ClangCompilerVariant):
         msg_regex (re): regex to find error message
     """
     pos_regex = re.compile(r"'(?P<file>.+)'.*" +  # file
-                           "line\s(?P<row>\d+), " +  # row
-                           "column\s(?P<col>\d+)")  # col
+                           r"line\s(?P<row>\d+), " +  # row
+                           r"column\s(?P<col>\d+)")  # col
     msg_regex = re.compile(r'[b\"|\"]*(?P<error>[^"]+)\"*')
     SEVERITY_TAG = 'severity'
 
