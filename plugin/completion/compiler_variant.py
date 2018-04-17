@@ -18,8 +18,7 @@ class CompilerVariant(object):
     init_flags = [Flag("-c"), Flag("-fsyntax-only")]
 
     def errors_from_output(self, output):
-        """
-        Parse errors received from the compiler.
+        """Parse errors received from the compiler.
 
         Args:
             output (object): opaque output to be parsed by compiler variant
@@ -37,7 +36,7 @@ class ClangCompilerVariant(CompilerVariant):
         error_regex (re): regex to find contents of an error
     """
     include_prefixes = ["-isystem", "-I", "-isysroot"]
-    error_regex = re.compile("(?P<file>.*)" +
+    error_regex = re.compile(r"(?P<file>.*)" +
                              ":(?P<row>\d+):(?P<col>\d+)" +
                              ":\s*.*error: (?P<error>.*)")
 
@@ -69,7 +68,7 @@ class ClangClCompilerVariant(ClangCompilerVariant):
     """
     need_lang_flags = False
     include_prefixes = ["-I", "/I", "-msvc", "/msvc"]
-    error_regex = re.compile("(?P<file>.*)" +
+    error_regex = re.compile(r"(?P<file>.*)" +
                              "\((?P<row>\d+),(?P<col>\d+)\)\s*" +
                              ":\s*.*error: (?P<error>.*)")
 
@@ -81,10 +80,10 @@ class LibClangCompilerVariant(ClangCompilerVariant):
         pos_regex (re): regex to find position of an error
         msg_regex (re): regex to find error message
     """
-    pos_regex = re.compile("'(?P<file>.+)'.*" +  # file
+    pos_regex = re.compile(r"'(?P<file>.+)'.*" +  # file
                            "line\s(?P<row>\d+), " +  # row
                            "column\s(?P<col>\d+)")  # col
-    msg_regex = re.compile('[b\"|\"]*(?P<error>[^"]+)\"*')
+    msg_regex = re.compile(r'[b\"|\"]*(?P<error>[^"]+)\"*')
     SEVERITY_TAG = 'severity'
 
     def errors_from_output(self, output):

@@ -29,7 +29,7 @@ class CMakeFile(FlagsSource):
     """
     _FILE_NAME = 'CMakeLists.txt'
     _CMAKE_MASK = '{cmake} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {flags} "{path}"'
-    _DEP_REGEX = re.compile('\"(.+\..+)\"')
+    _DEP_REGEX = re.compile(r'\"(.+\..+)\"')
 
     def __init__(self,
                  include_prefixes,

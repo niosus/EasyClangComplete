@@ -87,7 +87,7 @@ class Popup:
         is_type = cursor.kind in type_decl
         if is_macro:
             macro_parser = MacroParser(cursor.spelling, cursor.location)
-            declaration_text += '\#define '
+            declaration_text += r'\#define '
         else:
             if cursor.result_type.spelling:
                 result_type = cursor.result_type
