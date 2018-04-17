@@ -657,9 +657,8 @@ class Tools:
             return PosStatus.COMPLETION_NEEDED
 
         this_line = SublBridge.get_line(view, point)
-        print("THIS LINE", this_line)
         if this_line.startswith('#include'):
-            log.debug("Completing an include")
+            log.debug("completing an include")
             return PosStatus.COMPLETE_INCLUDES
         # if nothing fired we don't need to do anything
         log.debug("no completions needed")

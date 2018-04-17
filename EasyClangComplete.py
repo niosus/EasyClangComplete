@@ -23,6 +23,7 @@ from .plugin.utils import progress_status
 from .plugin.utils import quick_panel_handler
 from .plugin.utils import module_reloader
 from .plugin.utils import singleton
+from .plugin.utils import include_parser
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
@@ -269,17 +270,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             except AttributeError as e:
                 log.debug("cannot clear status, %s", e)
             return
-        settings = EasyClangComplete.settings_manager.settings_for_view(view)
-        if (not Tools.has_valid_syntax(view, settings)) \
-                or Tools.is_ignored(view.file_name(), settings.ignore_list):
-            try:
-                EasyClangComplete.thread_pool.progress_status.erase_status()
-            except AttributeError as e:
-                log.debug("cannot clear status, %s", e)
-            return
-
         EasyClangComplete.thread_pool.progress_status.showing = True
         log.debug("on_activated_async view id %s", view.buffer_id())
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
         # All is taken care of. The view is built if needed.
         job = ThreadJob(
             name=ThreadJob.UPDATE_TAG,
@@ -586,31 +579,13 @@ class EasyClangComplete(sublime_plugin.EventListener):
             config_manager = EasyClangComplete.view_config_manager
             view_config = config_manager.get_from_cache(view)
             include_folders = view_config.include_folders
-
-            def get_all_headers(folders):
-                import fnmatch
-                import os
-                matches = []
-                for folder in folders:
-                    log.debug("Going through: %s", folder)
-                    for root, dirnames, filenames in os.walk(folder):
-                        for filename in fnmatch.filter(filenames, '*.h'):
-                            match = path.join(root, filename)
-                            match = path.relpath(match, folder)
-                            matches.append(
-                                ["{}\tinclude".format(match), match])
-                return matches
-            all_headers = get_all_headers(include_folders)
-            import sublime
-            return (all_headers,
-                    sublime.INHIBIT_WORD_COMPLETIONS
-                    | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
-            # job = ThreadJob(
-            #     name=ThreadJob.COMPLETE_TAG,
-            #     callback=self.completion_finished,
-            #     function=config_manager.trigger_completion,
-            #     args=[view, completion_request])
-            # EasyClangComplete.thread_pool.new_job(job)
+            # submit async completion job for getting headers
+            job = ThreadJob(
+                name=ThreadJob.COMPLETE_INCLUDES_TAG,
+                callback=self.completion_finished,
+                function=include_parser.get_all_headers,
+                args=[include_folders, prefix, completion_request])
+            EasyClangComplete.thread_pool.new_job(job)
 
         # show default completions for now if allowed
         if settings.hide_default_completions:
