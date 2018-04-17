@@ -40,8 +40,9 @@ class Popup:
     """Incapsulate popup creation."""
 
     WRAPPER_CLASS = "ECC"
-    MAX_POPUP_WIDTH = 1800
-    MAX_POPUP_HEIGHT = 800
+
+    # Maximum extent of popup as a fraction of the view extent.
+    MAX_POPUP_PROPORTION = 0.95
 
     def __init__(self):
         """Initialize basic needs."""
@@ -181,9 +182,14 @@ class Popup:
 
     def show(self, view, location=-1, on_navigate=None):
         """Show this popup."""
+        view_width, view_height = view.viewport_extent()
+
+        popup_width  = int(Popup.MAX_POPUP_PROPORTION * view_width)
+        popup_height = int(Popup.MAX_POPUP_PROPORTION * view_height)
+
         mdpopups.show_popup(view, self.as_markdown(),
-                            max_width=Popup.MAX_POPUP_WIDTH,
-                            max_height=Popup.MAX_POPUP_HEIGHT,
+                            max_width=popup_width,
+                            max_height=popup_height,
                             wrapper_class=Popup.WRAPPER_CLASS,
                             css=self.CSS,
                             flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY,
