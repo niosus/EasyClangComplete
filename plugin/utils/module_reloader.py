@@ -43,4 +43,4 @@ class ModuleReloader:
             try_counter += 1
             log.error("Received an error: %s on try %s. Try again.",
                       e, try_counter)
-            ModuleReloader.reload_once(prefix)
+            ModuleReloader.reload_once(prefix, ignore_string)
