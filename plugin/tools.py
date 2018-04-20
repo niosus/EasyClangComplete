@@ -658,12 +658,18 @@ class Tools:
         Returns:
             str: raw command output or default value
         """
+        def list_to_line(cmd_list):
+            """Convert list of commands into a single string."""
+            if sublime.platform() == "windows":
+                return subprocess.list2cmdline(cmd_list)
+            from shlex import quote
+            return " ".join([quote(entry) for entry in cmd_list])
+
         output_text = default
         try:
             startupinfo = None
             if isinstance(command, list):
-                import shlex
-                command = " ".join([shlex.quote(entry) for entry in command])
+                command = list_to_line(command)
                 log.debug("running command: \n%s", command)
             if sublime.platform() == "windows":
                 # Don't let console window pop-up briefly.
