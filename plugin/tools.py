@@ -662,7 +662,8 @@ class Tools:
         try:
             startupinfo = None
             if isinstance(command, list):
-                command = subprocess.list2cmdline(command)
+                import shlex
+                command = " ".join([shlex.quote(entry) for entry in command])
                 log.debug("running command: \n%s", command)
             if sublime.platform() == "windows":
                 # Don't let console window pop-up briefly.
