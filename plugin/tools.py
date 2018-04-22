@@ -662,6 +662,7 @@ class Tools:
             """Convert list of commands into a single string."""
             if sublime.platform() == "windows":
                 return subprocess.list2cmdline(cmd_list)
+            # Make the args POSIX conformant.
             from shlex import quote
             return " ".join([quote(entry) for entry in cmd_list])
 
