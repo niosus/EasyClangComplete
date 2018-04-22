@@ -114,6 +114,7 @@ class CompilationDb(FlagsSource):
         Returns: dict: A dict that stores a list of flags per view and all
             unique entries for 'all' entry.
         """
+        import os
         import json
         from ..utils.compiler_builtins import CompilerBuiltIns
 
@@ -127,13 +128,17 @@ class CompilationDb(FlagsSource):
         parsed_db = {}
         unique_list_of_flags = UniqueList()
         for entry in data:
-            file_path = File.canonical_path(entry['file'],
-                                            database_file.folder())
             argument_list = []
 
-            base_path = database_file.folder()
+            file_path = entry['file']
+
             if 'directory' in entry:
                 base_path = entry['directory']
+            else:
+                base_path = database_file.folder()
+
+            if not os.path.isabs(file_path):
+                file_path = File.canonical_path(entry['file'], base_path)
 
             if 'command' in entry:
                 import shlex
