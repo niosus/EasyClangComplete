@@ -191,7 +191,7 @@ class CompilerBuiltIns:
             args += ["-x", language]
         if std is not None:
             args += ['-std=' + std]
-        args += ['-Wp,-v', '-E', '-']
+        args += ['-Wp', '-v', '-E', '-']
 
         output = Tools.run_command(args, stdin=subprocess.DEVNULL, default="")
         pick = False
