@@ -646,7 +646,7 @@ class Tools:
         return PosStatus.COMPLETION_NOT_NEEDED
 
     @staticmethod
-    def run_command(command, shell=True, cwd=path.curdir, env=environ,
+    def run_command(command, shell=False, cwd=path.curdir, env=environ,
                     stdin=None, default=None):
         """Run a generic command in a subprocess.
 
@@ -658,20 +658,9 @@ class Tools:
         Returns:
             str: raw command output or default value
         """
-        def list_to_line(cmd_list):
-            """Convert list of commands into a single string."""
-            if sublime.platform() == "windows":
-                return subprocess.list2cmdline(cmd_list)
-            # Make the args POSIX conformant.
-            from shlex import quote
-            return " ".join([quote(entry) for entry in cmd_list])
-
         output_text = default
         try:
             startupinfo = None
-            if isinstance(command, list):
-                command = list_to_line(command)
-                log.debug("running command: \n%s", command)
             if sublime.platform() == "windows":
                 # Don't let console window pop-up briefly.
                 startupinfo = subprocess.STARTUPINFO()
@@ -710,9 +699,10 @@ class Tools:
             too important to continue. If this fails the plugin will not work
             at all.
         """
-        check_version_cmd = clang_binary + " -v"
-        log.info("Getting version from command: `%s`", check_version_cmd)
-        output_text = Tools.run_command(check_version_cmd, shell=True)
+        check_version_cmd = [clang_binary, "-v"]
+        log.info("Getting version from command: `%s`",
+                 " ".join(check_version_cmd))
+        output_text = Tools.run_command(check_version_cmd, shell=False)
 
         if "Apple" in output_text:
             return cls._get_apple_clang_version_str(output_text)

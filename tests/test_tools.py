@@ -201,6 +201,13 @@ class test_tools(TestCase):
         self.assertEqual(id(b), id(bb))
         self.assertNotEqual(id(a), id(b))
 
+    def test_get_clang_version(self):
+        """Test getting clang version."""
+        version = Tools.get_clang_version_str('clang++')
+        print("version: ", version)
+        self.assertGreater(len(version), 3)
+        self.assertEquals('3', version[0])
+
 
 class test_file(TestCase):
     """Testing file related stuff."""

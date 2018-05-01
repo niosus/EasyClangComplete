@@ -28,7 +28,7 @@ class TestStyle(TestCase):
     def test_pep8(self):
         """Test conformance to pep8."""
         cmd = PEP8_CMD.format(PLUGIN_SOURCE_FOLDER)
-        output = Tools.run_command(cmd)
+        output = Tools.run_command(cmd, shell=True)
         print(output)
         if LINUX_MISSING_MSG in output or WINDOWS_MISSING_MSG in output:
             print('no pep8 found in path!')
@@ -39,7 +39,7 @@ class TestStyle(TestCase):
         """Test conformance to pep257."""
         cmd = PEP257_CMD.format(PLUGIN_SOURCE_FOLDER, ','.join(PEP_257_IGNORE))
         print(cmd)
-        output = Tools.run_command(cmd)
+        output = Tools.run_command(cmd, shell=True)
         print(output)
         if LINUX_MISSING_MSG in output or WINDOWS_MISSING_MSG in output:
             print('no pep257 found in path!')
