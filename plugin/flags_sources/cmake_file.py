@@ -28,7 +28,6 @@ class CMakeFile(FlagsSource):
             analyzed view path.
     """
     _FILE_NAME = 'CMakeLists.txt'
-    _CMAKE_MASK = '{cmake} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON {flags} "{path}"'
     _DEP_REGEX = re.compile(r'\"(.+\..+)\"')
 
     def __init__(self,
@@ -166,10 +165,9 @@ class CMakeFile(FlagsSource):
             prefix_paths = []
         if not flags:
             flags = []
-        cmake_cmd = CMakeFile._CMAKE_MASK.format(
-            cmake=cmake_binary,
-            flags=" ".join(flags),
-            path=cmake_file.folder())
+
+        cmake_cmd = [cmake_binary, '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'] \
+            + flags + [cmake_file.folder()]
         tempdir = CMakeFile.unique_folder_name(cmake_file.full_path())
         try:
             os.makedirs(tempdir)
@@ -203,8 +201,8 @@ class CMakeFile(FlagsSource):
                 if cpp_compiler is not None:
                     file.write(
                         "set(CMAKE_CPP_COMPILER  {})\n".format(cpp_compiler))
-            cmake_cmd += " -DCMAKE_TOOLCHAIN_FILE={}".format(
-                toolchain_file_path)
+            cmake_cmd += ["-DCMAKE_TOOLCHAIN_FILE={}".format(
+                toolchain_file_path)]
 
         log.debug(' running command: %s', cmake_cmd)
         output_text = Tools.run_command(
