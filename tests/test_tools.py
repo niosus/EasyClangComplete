@@ -205,7 +205,7 @@ class test_tools(TestCase):
         """Test getting clang version."""
         version = Tools.get_clang_version_str('clang++')
         print("version: ", version)
-        self.assertTrue('.' in version)
+        self.assertIn('.', version)
 
 
 class test_file(TestCase):
