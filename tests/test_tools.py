@@ -206,7 +206,6 @@ class test_tools(TestCase):
         version = Tools.get_clang_version_str('clang++')
         print("version: ", version)
         self.assertGreater(len(version), 3)
-        self.assertEquals('3', version[0])
 
 
 class test_file(TestCase):
