@@ -395,7 +395,7 @@ class Popup:
             else:
                 declaration_text += location_cursor.spelling
         popup.__text = DECLARATION_TEMPLATE.format(
-            type_declaration=declaration_text)
+            type_declaration=markupsafe.escape(declaration_text))
 
         if comment_cursor and comment_cursor.brief_comment:
             popup.__text += BRIEF_DOC_TEMPLATE.format(
