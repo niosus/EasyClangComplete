@@ -27,6 +27,7 @@ from .error_vis.popup_error_vis import PopupErrorVis
 
 from .flags_sources.flags_file import FlagsFile
 from .flags_sources.cmake_file import CMakeFile
+from .flags_sources.makefile import Makefile
 from .flags_sources.flags_source import FlagsSource
 from .flags_sources.c_cpp_properties import CCppProperties
 from .flags_sources.CppProperties import CppProperties
@@ -278,6 +279,8 @@ class ViewConfig(object):
                     settings.header_to_source_mapping,
                     settings.use_target_compiler_built_in_flags,
                     settings.target_compilers)
+            elif file_name == "Makefile":
+                flag_source = Makefile(include_prefixes)
             elif file_name == "compile_commands.json":
                 flag_source = CompilationDb(
                     include_prefixes,

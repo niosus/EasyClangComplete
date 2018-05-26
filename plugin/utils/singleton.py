@@ -50,6 +50,12 @@ class CMakeFileCache(dict):
 
 
 @singleton
+class MakefileCache(dict):
+    """Singleton for Makefile file cache."""
+    pass
+
+
+@singleton
 class ComplationDbCache(dict):
     """Singleton for compilation database cache."""
     pass
@@ -74,6 +80,7 @@ class GenericCache:
         """Clear all existing caches."""
         CCppPropertiesCache().clear()
         CMakeFileCache().clear()
+        MakefileCache().clear()
         ComplationDbCache().clear()
         CppPropertiesCache().clear()
         FlagsFileCache().clear()

@@ -37,6 +37,7 @@ class SettingsStorage:
         PREFIXES (str[]): setting prefixes supported by this plugin
     """
     FLAG_SOURCES = ["CMakeLists.txt",
+                    "Makefile",
                     "compile_commands.json",
                     "CppProperties.json",
                     "c_cpp_properties.json",
