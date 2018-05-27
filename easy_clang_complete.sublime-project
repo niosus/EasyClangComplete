@@ -33,6 +33,8 @@
                             "~/Code/catkin_ws/devel",
                             "$project_base_path/catkin_ws/devel" ]
         },
+        // Makefile entry
+        { "file": "Makefile" },
         // .clang_complete entry
         { "file": ".clang_complete" }
       ],

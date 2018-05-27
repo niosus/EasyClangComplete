@@ -176,6 +176,7 @@ class test_tools(TestCase):
             path.join(this_folder, 'cmake_tests'),
             path.join(this_folder, 'compilation_db_files'),
             path.join(this_folder, 'CppProperties_files'),
+            path.join(this_folder, 'makefile_files'),
             path.join(this_folder, 'test_files'),
         ]
         self.assertEqual(len(expanded), len(expected_folders))
