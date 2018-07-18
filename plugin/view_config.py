@@ -207,10 +207,10 @@ class ViewConfig(object):
         """
         lang_std_flag_indices = [
             i for i, flag in enumerate(lang_flags)
-            if flag.body.startswith('-std')]
+            if flag.body.startswith('-std=')]
         source_std_flags_indices = [
             i for i, flag in enumerate(source_flags)
-            if flag.body.startswith('-std')]
+            if flag.body.startswith('-std=')]
 
         # Perform checks for user's settings.
         if len(lang_std_flag_indices) > 1:
