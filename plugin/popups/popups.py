@@ -36,6 +36,84 @@ BODY_TEMPLATE = """### Body: ###
 """
 
 
+def log_location(location, name):
+    """Log info about a cindex.SourceLocation."""
+    if location is None:
+        log.debug("%s: none" % name)
+        return
+    log.debug("%s" % str(location))
+    file_name = "none"
+    if location.file and location.file.name:
+        file_name = location.file.name
+    log.debug("%s: file: %s" % (name, file_name))
+    log.debug("%s: line: %u" % (name, location.line))
+    log.debug("%s: col: %u" % (name, location.column))
+
+
+def log_type(clang_type, name):
+    """Log info about a cindex.Type."""
+    if clang_type is None:
+        log.debug("%s: none" % name)
+        return
+    log.debug("%s" % str(clang_type))
+    log.debug("%s.kind: %s" % (name, clang_type.kind))
+    log_location(Popup.location_from_type(clang_type), "%s.location" % name)
+    log.debug("%s.spelling: %s" % (name, clang_type.spelling or "none"))
+    num_template_arguments = clang_type.get_num_template_arguments()
+    log.debug("%s.get_num_template_arguments(): %i" % (
+        name, num_template_arguments))
+    if num_template_arguments != -1:
+        for arg_index in range(num_template_arguments):
+            templ_type = clang_type.get_template_argument_type(arg_index)
+            log.debug("%s.template_argument[%i].spelling: %s" % (
+                name, arg_index, templ_type.spelling))
+            log_location(Popup.location_from_type(templ_type),
+                         "%s.template_argument[%i].location" % (
+                         name, arg_index))
+    log.debug("%s.get_declaration().get_num_template_arguments(): %i" % (
+        name,
+        clang_type.get_declaration().get_num_template_arguments()))
+    log.debug("%s.get_declaration().spelling: %s" % (
+        name,
+        clang_type.get_declaration().spelling))
+
+
+def log_cursor(cursor, name):
+    """Log info about a cindex.Cursor."""
+    if cursor is None:
+        log.debug("%s: none" % name)
+        return
+    log.debug("%s.kind: %s" % (name, cursor.kind))
+    log.debug("%s.spelling: %s" % (name, cursor.spelling or "none"))
+    log.debug("%s.displayname: %s" % (name, cursor.displayname or "none"))
+    log.debug("%s.get_usr(): %s" % (name, cursor.get_usr() or "none"))
+    log.debug("%s.is_definition(): %s" % (name, cursor.is_definition()))
+    # I've never seen this 'num_template_args' be anything other than -1.
+    num_template_args = cursor.get_num_template_arguments()
+    log.debug("%s.get_num_template_arguments(): %i" % (name, num_template_args))
+    log_type(cursor.type, "%s.type" % name)
+    log_type(cursor.result_type, "%s.result_type" % name)
+    log_location(cursor.location, "%s.location" % name)
+    log.debug("%s.extent: %r" % (name, cursor.extent or "none"))
+
+
+def log_extent(extent, name):
+    """Log info about a cindex.SourceRange."""
+    if extent is None:
+        log.debug("%s: none" % name)
+        return
+    if extent and extent.start and extent.start.file:
+        log.debug("%s.start.file.name: %s" % (name, extent.start.file.name))
+        log.debug("%s.start.line: %i" % (name, extent.start.line))
+        log.debug("%s.end.file.name: %s" % (name, extent.end.file.name))
+        log.debug("%s.start.end.line: %i" % (name, extent.end.line))
+    else:
+        log.debug("%s.start.file.name: none" % name)
+        log.debug("%s.start.line: none" % name)
+        log.debug("%s.end.file.name: none" % name)
+        log.debug("%s.start.end.line: none" % name)
+
+
 class Popup:
     """Incapsulate popup creation."""
 
