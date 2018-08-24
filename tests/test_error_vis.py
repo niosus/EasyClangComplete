@@ -322,7 +322,7 @@ class TestErrorVis:
         self.maxDiff = None
         expected_info_msg = """!!! panel-info "ECC: Info"
     ## Declaration: ##
-    void [foo]({file}:5:8) ([Foo]({file}:1:7) a, [Foo *]({file}:1:7) b)
+    void [foo]({file}:5:8) ([Foo]({file}:1:7) a, [Foo]({file}:1:7) \\* b)
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -754,6 +754,287 @@ class TestErrorVis:
     ## Declaration: ##
     -([MyCovariant&lt;Foo *&gt; *]({file}:3:12))[covariantMethod]({file}:4:22)
 """.format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_template_instance_class_and_builtin_type_and_number_value(self):
+        """Test template instance with class, built-in types, and number types.
+
+        E.g. hover over 'instance' of 'TemplateClass<Foo, int, 123> instance;'
+        should link to Foo and properly display int and 123.
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8),
+                         "  TemplateClass<Foo, int, 123> instanceClassTypeInt;")
+        pos = self.view.text_point(8, 32)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7), int, '
+        fmt += '*ECC: unknown*&gt; [instanceClassTypeInt]({file}:9:32)\n'
+        expected_info_msg = fmt.format(file=file_name)
+
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_template_instance_default_template_params(self):
+        """Test template instance with some template args left empty (default)
+
+        E.g. hover over 'instance' of 'TemplateClass<Foo, int> instance;'
+        where TemplateClass has an option 3rd template argument.
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(9),
+                         "  TemplateClass<Foo> instanceClassAndDefaults;")
+        pos = self.view.text_point(9, 22)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7)&gt; '
+        fmt += '[instanceClassAndDefaults]({file}:10:22)\n'
+        expected_info_msg = fmt.format(file=file_name)
+
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_template_instance_nested_template_parameters(self):
+        """Test instance with template arguments that are themselves templates
+
+        E.g. hover over 'instance' of the line:
+        'std::shared_ptr<std::vector<Foo>>> instance;'
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(10),
+                         "  TemplateClass<TemplateClass<Foo>> instanceNested;")
+        pos = self.view.text_point(10, 37)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    [TemplateClass]({file}:3:7)&lt;[TemplateClass]({file}:3:7)'
+        fmt += '&lt;[Foo]({file}:1:7)&gt;&gt; [instanceNested]({file}:11:37)\n'
+        expected_info_msg = fmt.format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_template_instance_pointer_to_class(self):
+        """Test instance with a pointer template argument.
+
+        E.g. hover over 'instance' of the line:
+        'TemplateClass<Foo*> instance;'
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(11),
+                         "  TemplateClass<Foo*> instancePointer;")
+        pos = self.view.text_point(11, 23)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) \\*&gt; '
+        fmt += '[instancePointer]({file}:12:23)\n'
+        expected_info_msg = fmt.format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_template_instance_ref_to_class(self):
+        """Test instance with a reference template argument.
+
+        E.g. hover over 'instance' of the line:
+        'TemplateClass<Foo&> instance;'
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(12),
+                         "  TemplateClass<Foo&> instanceRef;")
+        pos = self.view.text_point(12, 23)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) &amp;&gt; '
+        fmt += '[instanceRef]({file}:13:23)\n'
+        expected_info_msg = fmt.format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_template_instance_rvalueref_to_class(self):
+        """Test instance with an r-value reference template argument.
+
+        E.g. hover over 'instance' of the line:
+        'TemplateClass<Foo&&> instance;'
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(13),
+                         "  TemplateClass<Foo&&> instanceRValueRef;")
+        pos = self.view.text_point(13, 24)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo &amp;&amp;]'
+        fmt += '({file}:1:7)&gt; [instanceRValueRef]({file}:14:24)\n'
+        expected_info_msg = fmt.format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_template_instance_declaration(self):
+        """Hovering over the template type in a variable declaration.
+
+        E.g. hovering over 'TemplateClass<Foo>' of the line
+        'TemplateClass<Foo> instance;'
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8),
+                         "  TemplateClass<Foo, int, 123> instanceClassTypeInt;")
+        pos = self.view.text_point(8, 3)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        expected_info_msg = """!!! panel-info "ECC: Info"
+    ## Declaration: ##
+    [TemplateClass]({file}:3:7)
+    ### Body: ###
+    ```c++
+    template <class TClass=Foo, typename TType=int, int TInt=12>
+    class TemplateClass
+    {{
+    public:
+      void foo(TemplateClass<TClass, TType, TInt>);
+    }};
+
+    ```
+""".format(file=file_name)
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
+    def test_method_with_template_argument(self):
+        """Hovering over method with argument that is a template type.
+
+        E.g. hovering over 'void foo(TemplateClass<Bar> arg)'
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(14),
+                         "  instanceRValueRef.foo(instanceRValueRef);")
+        pos = self.view.text_point(14, 21)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    void [foo]({file}:6:8) ([TemplateClass]({file}:3:7)&lt;Foo '
+        fmt += '&amp;&amp;, int, *ECC: unknown*&gt;)\n'
+        expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
         actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
