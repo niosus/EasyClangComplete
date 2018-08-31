@@ -113,6 +113,15 @@ pallet. Open it by pressing:
 All the commands of this plugin start with `EasyClangComplete:` and should be
 self explanatory. Open an issue if they are not.
 
+### Key Bindings ###
+EasyClangComplete provides several default key bindings listed
+[here](Default.sublime-keymap). Modify or create your own bindings by editing
+your Sublime Key Binding preferences to run a command listed
+in [this file](Default.sublime-commands). For example, to show a popup with info
+about the currently selected symbol, add this to your key bindings:
+
+`{ "keys": ["ctrl+i"], "command": "ecc_show_popup_info" },`
+
 ## Settings ##
 
 Please see the default settings [file](EasyClangComplete.sublime-settings)
