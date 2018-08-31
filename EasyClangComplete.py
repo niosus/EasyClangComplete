@@ -167,6 +167,15 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
             log.debug("Nothing to clean")
 
 
+class EccShowPopupInfoCommand(sublime_plugin.TextCommand):
+    """Command that shows popup info on current cursor location."""
+
+    def run(self, edit):
+        """Run show popup info command."""
+        position = self.view.sel()[0].begin()
+        EasyClangComplete.begin_show_info_job(self.view, position)
+
+
 class EasyClangComplete(sublime_plugin.EventListener):
     """Base class for this plugin.
 

@@ -21,4 +21,8 @@
         "caption": "EasyClangComplete: Clean current CMake cache",
         "command": "clean_cmake"
     },
+    {
+        "caption": "EasyClangComplete: Show popup info",
+        "command": "ecc_show_popup_info"
+    },
 ]
