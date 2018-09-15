@@ -142,7 +142,7 @@ class Popup:
         return popup
 
     @staticmethod
-    def declaration_for_type(clang_type, cindex):
+    def declaration_for_type(clang_type, cindex, expand_template_types):
         """Get declaration for a cindex.Type.
 
         Includes a hyperlink to the type's definition, and, if type
@@ -151,11 +151,13 @@ class Popup:
         """
         if clang_type.kind == cindex.TypeKind.POINTER:
             pointee_type = clang_type.get_pointee()
-            pointee_text = Popup.declaration_for_type(pointee_type, cindex)
+            pointee_text = Popup.declaration_for_type(pointee_type, cindex,
+                                                      expand_template_types)
             return pointee_text + ' \\*'
         if clang_type.kind == cindex.TypeKind.LVALUEREFERENCE:
             referee_type = clang_type.get_pointee()
-            referee_text = Popup.declaration_for_type(referee_type, cindex)
+            referee_text = Popup.declaration_for_type(referee_type, cindex,
+                                                      expand_template_types)
             return referee_text + ' &'
         if clang_type.spelling is None or clang_type.spelling == "":
             # This happens, for example, when using an integer literal as
@@ -176,7 +178,7 @@ class Popup:
 
         num_template_args = clang_type.get_num_template_arguments()
         declaration_text = ''
-        if num_template_args == -1 or num_template_args == 0:
+        if not expand_template_types or num_template_args <= 0:
             # Just link to the type
             declaration_text += Popup.link_from_location(
                 Popup.location_from_type(clang_type),
@@ -193,8 +195,10 @@ class Popup:
             declaration_text += '<'
             for arg_index in range(num_template_args):
                 templ_type = clang_type.get_template_argument_type(arg_index)
-                declaration_text += Popup.declaration_for_type(templ_type,
-                                                               cindex)
+                declaration_text += Popup.declaration_for_type(
+                    templ_type,
+                    cindex,
+                    expand_template_types)
                 if arg_index + 1 != num_template_args:
                     declaration_text += ", "
             declaration_text += '>'
@@ -243,8 +247,10 @@ class Popup:
             result_type_not_none = result_type is not None
             if result_type_not_none and cursor.spelling != cursor.type.spelling:
                 # Don't show duplicates if the user focuses type, not variable
-                declaration_text += Popup.declaration_for_type(result_type,
-                                                               cindex)
+                declaration_text += Popup.declaration_for_type(
+                    result_type,
+                    cindex,
+                    settings.expand_template_types)
                 declaration_text += " "
         # Link to declaration of item under cursor
         if cursor.location:
@@ -261,7 +267,10 @@ class Popup:
         else:
             args = []
             for arg in cursor.get_arguments():
-                arg_type_decl = Popup.declaration_for_type(arg.type, cindex)
+                arg_type_decl = Popup.declaration_for_type(
+                    arg.type,
+                    cindex,
+                    settings.expand_template_types)
                 if arg.spelling:
                     args.append(arg_type_decl + " " + arg.spelling)
                 else:

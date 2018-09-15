@@ -65,6 +65,7 @@ class SettingsStorage:
         "cmake_binary",
         "common_flags",
         "cpp_flags",
+        "expand_template_types",
         "flags_sources",
         "hide_default_completions",
         "include_file_folder",

@@ -797,6 +797,41 @@ class TestErrorVis:
         self.tear_down_completer()
         self.tear_down()
 
+    def test_template_instance_expand_templates_disabled(self):
+        """Test that changing "expand_template_types" setting to false works.
+
+        E.g. hover over 'instance' of 'TemplateClass<Foo, int, 123> instance;'
+        """
+        if not self.use_libclang:
+            # Ignore this test for binary completer.
+            return
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_templates.cpp')
+        self.set_up_view(file_name)
+        completer, settings = self.set_up_completer()
+        settings.expand_template_types = False
+        # Check the current cursor position is completable.
+        self.assertEqual(self.get_row(8),
+                         "  TemplateClass<Foo, int, 123> instanceClassTypeInt;")
+        pos = self.view.text_point(8, 32)
+        action_request = ActionRequest(self.view, pos)
+        request, info_popup = completer.info(action_request, settings)
+        self.maxDiff = None
+        fmt = '!!! panel-info "ECC: Info"\n'
+        fmt += '    ## Declaration: ##\n'
+        fmt += '    [TemplateClass&lt;Foo, int, 123&gt;]({file}:3:7) '
+        fmt += '[instanceClassTypeInt]({file}:9:32)\n'
+        expected_info_msg = fmt.format(file=file_name)
+
+        # Make sure we remove trailing spaces on the right to comply with how
+        # sublime text handles this.
+        actual_msg = cleanup_trailing_spaces(info_popup.as_markdown())
+        self.assertEqual(actual_msg, expected_info_msg)
+        # cleanup
+        self.tear_down_completer()
+        self.tear_down()
+
     def test_template_instance_default_template_params(self):
         """Test template instance with some template args left empty (default)
 

@@ -184,4 +184,11 @@
   "target_cpp_compiler": null,
   "target_objective_c_compiler": null,
   "target_objective_cpp_compiler": null,
+
+  // Expand template types and add more hyperlinks when showing info on hover.
+  // For example, "std::shared_ptr<Foo> foo" will expand to show hyperlinks
+  // to both std::shared_ptr and the template type, Foo. This may cause
+  // some types and typedefs to be verbose. For example, "std::string foo"
+  // expands to "std::string<char, char_traits<char>, allocator<char>> foo".
+  "expand_template_types": true,
 }
