@@ -270,7 +270,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 log.debug("cannot clear status, %s", e)
             return
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
-        if not Tools.has_valid_syntax(view, settings):
+        if (not Tools.has_valid_syntax(view, settings)) \
+                or Tools.is_ignored(view.file_name(), settings.ignore_list):
             try:
                 EasyClangComplete.thread_pool.progress_status.erase_status()
             except AttributeError as e:
@@ -293,15 +294,21 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        if Tools.is_valid_view(view):
-            (row, _) = SublBridge.cursor_pos(view)
-            view_config = EasyClangComplete.view_config_manager.get_from_cache(
-                view)
-            if not view_config:
-                return
-            if not view_config.completer:
-                return
-            view_config.completer.error_vis.show_popup_if_needed(view, row)
+        if not Tools.is_valid_view(view):
+            return
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if not Tools.has_valid_syntax(view, settings):
+            return
+        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+            return
+        (row, _) = SublBridge.cursor_pos(view)
+        view_config = EasyClangComplete.view_config_manager.get_from_cache(
+            view)
+        if not view_config:
+            return
+        if not view_config.completer:
+            return
+        view_config.completer.error_vis.show_popup_if_needed(view, row)
 
     def on_modified_async(self, view):
         """Call in a worker thread when view is modified.
@@ -329,7 +336,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
-        if not view.file_name():
+        if not Tools.is_valid_view(view):
             return
         if view.file_name().endswith('.sublime-project'):
             if not EasyClangComplete.settings_manager:
@@ -338,16 +345,19 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug("Project file changed. Reloading settings.")
             EasyClangComplete.settings_manager.on_settings_changed()
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
-        if Tools.is_valid_view(view) and Tools.has_valid_syntax(view, settings):
-            log.debug("saving view: %s", view.buffer_id())
-            job = ThreadJob(
-                name=ThreadJob.UPDATE_TAG,
-                callback=EasyClangComplete.config_updated,
-                function=EasyClangComplete.view_config_manager.load_for_view,
-                args=[view, settings])
-            EasyClangComplete.thread_pool.new_job(job)
-            # invalidate current completions
-            self.current_completions = None
+        if not Tools.has_valid_syntax(view, settings):
+            return
+        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+            return
+        log.debug("saving view: %s", view.buffer_id())
+        job = ThreadJob(
+            name=ThreadJob.UPDATE_TAG,
+            callback=EasyClangComplete.config_updated,
+            function=EasyClangComplete.view_config_manager.load_for_view,
+            args=[view, settings])
+        EasyClangComplete.thread_pool.new_job(job)
+        # invalidate current completions
+        self.current_completions = None
 
     def on_close(self, view):
         """Call on closing the view.
@@ -521,6 +531,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
         if not Tools.has_valid_syntax(view, settings):
             log.debug("we don't work with this syntax")
+            return Tools.SHOW_DEFAULT_COMPLETIONS
+
+        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+            log.debug("This file matches 'ignore_list' setting. Ignoring.")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
         log.debug("on_query_completions view id %s", view.buffer_id())

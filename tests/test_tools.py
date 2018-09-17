@@ -208,6 +208,14 @@ class test_tools(TestCase):
         print("version: ", version)
         self.assertIn('.', version)
 
+    def test_ignore(self):
+        """Test ignoring glob patterns."""
+        self.assertTrue(Tools.is_ignored('/tmp/hello', ['/tmp/*']))
+        self.assertTrue(Tools.is_ignored('/tmp/hello', ['/tmp*']))
+        self.assertTrue(Tools.is_ignored('/tmp/hello', ['', '/tmp*']))
+        self.assertTrue(Tools.is_ignored('/tmp/hello', ['', '/tmp/hell*']))
+        self.assertFalse(Tools.is_ignored('/tmp/hello', ['/tmp/c*']))
+
 
 class test_file(TestCase):
     """Testing file related stuff."""

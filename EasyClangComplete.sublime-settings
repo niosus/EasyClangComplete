@@ -75,6 +75,15 @@
     "OBJECTIVE_CPP":  ["Objective-C++"]
   },
 
+  // Do not run the plugin for any files that match these paths. Use
+  // glob/fnmatch shell-style filename expansion. In addition, you can still use
+  // '~' to mark the home directory.
+  "ignore_list": [
+    "~/some_folder/*",
+    "/some/absolute/file.ext",
+    "$project_base_path/some/project/path/*",
+  ],
+
   // Use libclang.
   // If set to false will use clang_binary and parse the output of
   // `clang_binary -Xclang -code-complete-at...` instead.

@@ -538,6 +538,24 @@ class Tools:
         return True
 
     @staticmethod
+    def is_ignored(file_name, glob_ignore_list):
+        """Check if the current view must be ignored.
+
+        Args:
+            file_name (str): current view file name
+            glob_ignore_list (str[]): a list of glob-like ignore patterns
+
+        Returns:
+            bool: True if valid, False otherwise
+        """
+        import fnmatch
+        for ignore_glob in glob_ignore_list:
+            if fnmatch.fnmatch(file_name, ignore_glob):
+                # We have found at least one matching ignore pattern.
+                return True
+        return False
+
+    @staticmethod
     def is_valid_view(view):
         """Check whether the given view is one we can and want to handle.
 

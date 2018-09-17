@@ -63,6 +63,7 @@ class SettingsStorage:
         "clang_binary",
         "cmake_binary",
         "common_flags",
+        "ignore_list",
         "expand_template_types",
         "flags_sources",
         "gutter_style",
@@ -113,17 +114,18 @@ class SettingsStorage:
             view (sublime.View): current view
         """
         try:
-            # init current and parent folders:
+            # Init current and parent folders.
             if not Tools.is_valid_view(view):
                 log.error("no view to populate common flags from")
                 return
             self.__load_vars_from_settings(view.settings(),
                                            project_specific=True)
-            # initialize wildcard values with view
+            # Initialize wildcard values with view.
             self.__update_wildcard_values(view)
-            # replace wildcards
+            # Replace wildcards in various paths.
             self.__populate_common_flags(view.file_name())
             self.__populate_flags_source_paths()
+            self.__update_ignore_list()
             self.libclang_path = self.__replace_wildcard_if_needed(
                 self.libclang_path)
             self.clang_binary = self.__replace_wildcard_if_needed(
@@ -284,6 +286,15 @@ class SettingsStorage:
         file_parent_folder = path.dirname(file_current_folder)
         if self.include_file_parent_folder:
             self.common_flags.append("-I" + file_parent_folder)
+
+    def __update_ignore_list(self):
+        """Populate variables inside flags sources."""
+        if not self.ignore_list:
+            log.critical(" Cannot update paths of ignore list.")
+            return
+        for idx, path_to_ignore in enumerate(self.ignore_list):
+            self.ignore_list[idx] = self.__replace_wildcard_if_needed(
+                path_to_ignore)
 
     def __replace_wildcard_if_needed(self, line):
         """Replace wildcards in a line if they are present there.
