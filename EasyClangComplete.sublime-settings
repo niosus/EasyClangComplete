@@ -60,8 +60,19 @@
   // Possible styles: "color", "mono", "none"
   "gutter_style": "color",
 
-  // triggers for auto-completion
+  // Triggers for auto-completion
   "triggers" : [ ".", "->", "::", " ", "	", "(", "[" ],
+
+  // A structure that defines all syntaxes that the plugin will process. Use the
+  // same names as shown in the bottom right corner of Sublime Text when opening
+  // your file of interest. The values here are good defaults, but feel free to
+  // customize the list to your liking. The languages
+  "valid_syntaxes": [
+    {"lang": "C", "syntaxes": ["C", "C Improved", "C99"]},
+    {"lang": "CPP", "syntaxes": ["C++", "C++11"]},
+    {"lang": "OBJECTIVE_C", "syntaxes": ["Objective-C"]},
+    {"lang": "OBJECTIVE_CPP", "syntaxes": ["Objective-CPP"]},
+  ],
 
   // Use libclang.
   // If set to false will use clang_binary and parse the output of

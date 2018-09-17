@@ -80,6 +80,7 @@ class SettingsStorage:
         "show_errors",
         "show_type_body",
         "triggers",
+        "valid_syntaxes",
         "use_libclang",
         "use_libclang_caching",
         "verbose",
@@ -188,11 +189,22 @@ class SettingsStorage:
                 error_msg = "flag source '{}' is not one of {}".format(
                     source_dict["file"], SettingsStorage.FLAG_SOURCES)
                 return False, error_msg
+        for syntax_dict in self.valid_syntaxes:
+            if Tools.LANG_TAG not in syntax_dict \
+                    or Tools.SYNTAXES_TAG not in syntax_dict:
+                error_msg = "No '{}' or '{}' setting in syntaxes '{}'".format(
+                    Tools.LANG_TAG, Tools.SYNTAXES_TAG, syntax_dict)
+                return False, error_msg
+            if syntax_dict[Tools.LANG_TAG] not in Tools.LANG_TAGS:
+                error_msg = "lang '{}' is not one of {}".format(
+                    syntax_dict[Tools.LANG_TAG],
+                    Tools.LANG_TAGS)
+                return False, error_msg
         return True, ""
 
     @property
     def target_compilers(self):
-        """A dictionary with the target compilers to use."""
+        """Create a dictionary with the target compilers to use."""
         result = dict()
         if hasattr(self, "target_c_compiler"):
             result["c"] = self.target_c_compiler

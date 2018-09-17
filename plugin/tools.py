@@ -426,21 +426,20 @@ class Tools:
             This guarantees that sublime text will show default completions.
         syntax_regex (regex): regex to parse syntax setting
         valid_extensions (list): list of valid extensions for auto-completion
-        valid_syntax (list): list of valid syntaxes for this plugin
 
     """
 
     syntax_regex = re.compile(r"\/([^\/]+)\.(?:tmLanguage|sublime-syntax)")
 
-    valid_extensions = [".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx",
-                        ".m", ".mm"]
+    LANG_TAG = "lang"
+    SYNTAXES_TAG = "syntaxes"
 
-    C_SYNTAX = ["C", "C Improved", "C99"]
-    CPP_SYNTAX = ["C++", "C++11", "C++ (Colorcoded)", "cuda-c++", "deviot"]
-    OBJECTIVE_C_SYNTAX = ["Objective-C"]
-    OBJECTIVE_CPP_SYNTAX = ["Objective-C++"]
-    valid_syntax = C_SYNTAX + CPP_SYNTAX \
-        + OBJECTIVE_C_SYNTAX + OBJECTIVE_CPP_SYNTAX
+    LANG_C_TAG = "C"
+    LANG_CPP_TAG = "CPP"
+    LANG_OBJECTIVE_C_TAG = "OBJECTIVE_C"
+    LANG_OBJECTIVE_CPP_TAG = "OBJECTIVE_CPP"
+    LANG_TAGS = [LANG_C_TAG, LANG_CPP_TAG,
+                 LANG_OBJECTIVE_C_TAG, LANG_OBJECTIVE_CPP_TAG]
 
     SHOW_DEFAULT_COMPLETIONS = None
     HIDE_DEFAULT_COMPLETIONS = ([], sublime.INHIBIT_WORD_COMPLETIONS |
@@ -482,24 +481,21 @@ class Tools:
         return tempdir
 
     @staticmethod
-    def get_view_lang(view):
+    def get_view_lang(view, settings_storage):
         """Get language from view description.
 
         Args:
             view (sublime.View): Current view
+            settings_storage (SettingsStorage): ECC settings for the view
 
         Returns:
-            str: language, "C", "C++", "Objective-C", or "Objective-C++""
+            str: language, one of LANG_TAGS or None if nothing matched
         """
         syntax = Tools.get_view_syntax(view)
-        if syntax in Tools.C_SYNTAX:
-            return "C"
-        if syntax in Tools.CPP_SYNTAX:
-            return "C++"
-        if syntax in Tools.OBJECTIVE_C_SYNTAX:
-            return "Objective-C"
-        if syntax in Tools.OBJECTIVE_CPP_SYNTAX:
-            return "Objective-C++"
+        for syntax_dict in settings_storage.valid_syntaxes:
+            if syntax in syntax_dict[Tools.SYNTAXES_TAG]:
+                return syntax_dict[Tools.LANG_TAG]
+        log.error("Cannot recognize language from syntax: '%s'", syntax)
         return None
 
     @staticmethod
@@ -524,19 +520,22 @@ class Tools:
         return None
 
     @staticmethod
-    def has_valid_syntax(view):
+    def has_valid_syntax(view, settings_storage):
         """Check if syntax is valid for this plugin.
 
         Args:
             view (sublime.View): current view
+            settings_storage (SettingsStorage): ECC settings for this view
 
         Returns:
             bool: True if valid, False otherwise
         """
-        syntax = Tools.get_view_syntax(view)
-        if syntax in Tools.valid_syntax:
-            return True
-        return False
+        lang = Tools.get_view_lang(view, settings_storage)
+        if not lang:
+            # We could not determine the language from syntax. Means the syntax
+            # is not valid for us.
+            return False
+        return True
 
     @staticmethod
     def is_valid_view(view):
@@ -554,10 +553,6 @@ class Tools:
         if not view.file_name():
             log.debug("view file_name is None")
             return False
-        if not Tools.has_valid_syntax(view):
-            log.debug("view has wrong syntax: %s",
-                      Tools.get_view_syntax(view))
-            return False
         if view.is_scratch():
             log.debug("view is scratch view")
             return False
@@ -568,23 +563,6 @@ class Tools:
             log.debug("view file_name does not exist in system")
             return False
         return True
-
-    @staticmethod
-    def has_valid_extension(view):
-        """Test if the current file has a valid extension.
-
-        Args:
-            view (sublime.View): current view
-
-        Returns:
-            bool: extension is valid
-        """
-        if not view or not view.file_name():
-            return False
-        (_, ext) = path.splitext(view.file_name())
-        if ext in Tools.valid_extensions:
-            return True
-        return False
 
     @staticmethod
     def seconds_from_string(time_str):

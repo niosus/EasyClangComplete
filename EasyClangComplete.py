@@ -269,9 +269,16 @@ class EasyClangComplete(sublime_plugin.EventListener):
             except AttributeError as e:
                 log.debug("cannot clear status, %s", e)
             return
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if not Tools.has_valid_syntax(view, settings):
+            try:
+                EasyClangComplete.thread_pool.progress_status.erase_status()
+            except AttributeError as e:
+                log.debug("cannot clear status, %s", e)
+            return
+
         EasyClangComplete.thread_pool.progress_status.showing = True
         log.debug("on_activated_async view id %s", view.buffer_id())
-        settings = EasyClangComplete.settings_manager.settings_for_view(view)
         # All is taken care of. The view is built if needed.
         job = ThreadJob(
             name=ThreadJob.UPDATE_TAG,
@@ -330,10 +337,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 return
             log.debug("Project file changed. Reloading settings.")
             EasyClangComplete.settings_manager.on_settings_changed()
-        if Tools.is_valid_view(view):
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if Tools.is_valid_view(view) and Tools.has_valid_syntax(view, settings):
             log.debug("saving view: %s", view.buffer_id())
-            settings = EasyClangComplete.settings_manager.settings_for_view(
-                view)
             job = ThreadJob(
                 name=ThreadJob.UPDATE_TAG,
                 callback=EasyClangComplete.config_updated,
@@ -479,6 +485,8 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return
 
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if not Tools.has_valid_syntax(view, settings):
+            return
         if not settings.show_type_info:
             return
 
@@ -508,15 +516,19 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug("not a valid view")
             return Tools.SHOW_DEFAULT_COMPLETIONS
 
+        # get settings for this view
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+
+        if not Tools.has_valid_syntax(view, settings):
+            log.debug("we don't work with this syntax")
+            return Tools.SHOW_DEFAULT_COMPLETIONS
+
         log.debug("on_query_completions view id %s", view.buffer_id())
         log.debug("prefix: %s, locations: %s" % (prefix, locations))
         trigger_pos = locations[0] - len(prefix)
         completion_request = tools.ActionRequest(view, trigger_pos)
         current_pos_id = completion_request.get_identifier()
         log.debug("this position has identifier: '%s'", current_pos_id)
-
-        # get settings for this view
-        settings = EasyClangComplete.settings_manager.settings_for_view(view)
 
         current_job_id = EasyClangComplete.current_job_id
         if self.current_completions and current_pos_id == current_job_id:
