@@ -68,9 +68,9 @@
   // your file of interest. The values here are good defaults, but feel free to
   // customize the list to your liking. The languages
   "valid_syntaxes": [
-    {"lang": "C", "syntaxes": ["C", "C Improved", "C99"]},
-    {"lang": "CPP", "syntaxes": ["C++", "C++11"]},
-    {"lang": "OBJECTIVE_C", "syntaxes": ["Objective-C"]},
+    {"lang": "C",             "syntaxes": ["C", "C Improved", "C99"]},
+    {"lang": "CPP",           "syntaxes": ["C++", "C++11"]},
+    {"lang": "OBJECTIVE_C",   "syntaxes": ["Objective-C"]},
     {"lang": "OBJECTIVE_CPP", "syntaxes": ["Objective-CPP"]},
   ],
 
