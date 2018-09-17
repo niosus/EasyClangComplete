@@ -60,36 +60,33 @@ class SettingsStorage:
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
-        "c_flags",
         "clang_binary",
         "cmake_binary",
         "common_flags",
-        "cpp_flags",
         "expand_template_types",
         "flags_sources",
+        "gutter_style",
+        "header_to_source_mapping",
         "hide_default_completions",
         "include_file_folder",
         "include_file_parent_folder",
+        "lang_flags",
         "libclang_path",
-        "gutter_style",
         "max_cache_age",
-        "objective_c_flags",
-        "objective_cpp_flags",
         "progress_style",
-        "show_type_info",
         "show_errors",
         "show_type_body",
-        "triggers",
-        "valid_syntaxes",
-        "use_libclang",
-        "use_libclang_caching",
-        "verbose",
-        "header_to_source_mapping",
-        "use_target_compiler_built_in_flags",
+        "show_type_info",
         "target_c_compiler",
         "target_cpp_compiler",
         "target_objective_c_compiler",
         "target_objective_cpp_compiler",
+        "triggers",
+        "use_libclang",
+        "use_libclang_caching",
+        "use_target_compiler_built_in_flags",
+        "valid_lang_syntaxes",
+        "verbose",
     ]
 
     def __init__(self, settings_handle):
@@ -189,16 +186,15 @@ class SettingsStorage:
                 error_msg = "flag source '{}' is not one of {}".format(
                     source_dict["file"], SettingsStorage.FLAG_SOURCES)
                 return False, error_msg
-        for syntax_dict in self.valid_syntaxes:
-            if Tools.LANG_TAG not in syntax_dict \
-                    or Tools.SYNTAXES_TAG not in syntax_dict:
-                error_msg = "No '{}' or '{}' setting in syntaxes '{}'".format(
-                    Tools.LANG_TAG, Tools.SYNTAXES_TAG, syntax_dict)
+        # Check if all languages are present in language-specific settings.
+        for lang_tag in Tools.LANG_TAGS:
+            if lang_tag not in self.lang_flags.keys():
+                error_msg = "lang '{}' is not in {}".format(
+                    lang_tag, self.lang_flags)
                 return False, error_msg
-            if syntax_dict[Tools.LANG_TAG] not in Tools.LANG_TAGS:
-                error_msg = "lang '{}' is not one of {}".format(
-                    syntax_dict[Tools.LANG_TAG],
-                    Tools.LANG_TAGS)
+            if lang_tag not in self.valid_lang_syntaxes:
+                error_msg = "No '{}' in syntaxes '{}'".format(
+                    lang_tag, self.valid_lang_syntaxes)
                 return False, error_msg
         return True, ""
 

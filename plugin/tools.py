@@ -492,9 +492,9 @@ class Tools:
             str: language, one of LANG_TAGS or None if nothing matched
         """
         syntax = Tools.get_view_syntax(view)
-        for syntax_dict in settings_storage.valid_syntaxes:
-            if syntax in syntax_dict[Tools.SYNTAXES_TAG]:
-                return syntax_dict[Tools.LANG_TAG]
+        for lang, syntaxes in settings_storage.valid_lang_syntaxes.items():
+            if syntax in syntaxes:
+                return lang
         log.error("Cannot recognize language from syntax: '%s'", syntax)
         return None
 

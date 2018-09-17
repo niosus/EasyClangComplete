@@ -364,16 +364,15 @@ class ViewConfig(object):
         lang_args = list()
         if current_lang == Tools.LANG_OBJECTIVE_C_TAG:
             target_lang = "objective-c"
-            lang_args = settings.objective_c_flags
         elif current_lang == Tools.LANG_OBJECTIVE_CPP_TAG:
             target_lang = "objective-c++"
-            lang_args = settings.objective_cpp_flags
         elif current_lang == Tools.LANG_C_TAG:
             target_lang = "c"
-            lang_args = settings.c_flags
-        else:
+        elif current_lang == Tools.LANG_CPP_TAG:
             target_lang = "c++"
-            lang_args = settings.cpp_flags
+        else:
+            log.error("unrecognized language '%s'!", target_lang)
+        lang_args = settings.lang_flags[current_lang]
         if need_lang_flags:
             lang_flags += ["-x", target_lang]
         lang_flags += lang_args

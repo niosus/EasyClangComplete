@@ -30,7 +30,7 @@ class test_settings(GuiTestWrapper):
         self.assertIsNotNone(settings.clang_binary)
         self.assertIsNotNone(settings.flags_sources)
         self.assertIsNotNone(settings.show_errors)
-        self.assertIsNotNone(settings.valid_syntaxes)
+        self.assertIsNotNone(settings.valid_lang_syntaxes)
 
     def test_valid(self):
         """Test validity."""
