@@ -64,16 +64,15 @@
   // Triggers for auto-completion
   "triggers" : [ ".", "->", "::", " ", "	", "(", "[" ],
 
-  // A structure that defines all syntaxes that the plugin will process. Use the
-  // same names as shown in the bottom right corner of Sublime Text when opening
-  // your file of interest. The values here are good defaults, but feel free to
+  // A dictionary that defines a mapping from language to an array of valid
+  // syntaxes for it. The values here are good defaults, but feel free to
   // customize the list to your liking. When modifying this setting make sure
   // that all 4 languages have values.
   "valid_lang_syntaxes": {
     "C":              ["C", "C Improved", "C99"],
     "CPP":            ["C++", "C++11"],
     "OBJECTIVE_C":    ["Objective-C"],
-    "OBJECTIVE_CPP":  ["Objective-CPP"]
+    "OBJECTIVE_CPP":  ["Objective-C++"]
   },
 
   // Use libclang.
