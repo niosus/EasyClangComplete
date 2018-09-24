@@ -305,7 +305,8 @@ class SettingsStorage:
         Returns:
             str: line with replaced wildcards
         """
-        res = sublime.expand_variables(line, self._wildcard_values)
+        res = path.expandvars(line)
+        res = sublime.expand_variables(res, self._wildcard_values)
         if Wildcards.HOME_PATH in res:
             # replace '~' by full home path. Leave everything else intact.
             prefix_idx = res.index(Wildcards.HOME_PATH)
