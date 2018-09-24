@@ -38,6 +38,8 @@ class PopupErrorVis:
             self.gutter_mark = PATH_TO_ICON.format(icon="error_color.png")
         elif gutter_style == SettingsStorage.GUTTER_MONO_STYLE:
             self.gutter_mark = PATH_TO_ICON.format(icon="error_mono.png")
+        elif gutter_style == SettingsStorage.GUTTER_DOT_STYLE:
+            self.gutter_mark = PATH_TO_ICON.format(icon="error_dot.png")
         else:
             self.gutter_mark = ""
 
