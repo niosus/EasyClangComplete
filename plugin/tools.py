@@ -495,7 +495,7 @@ class Tools:
         for lang, syntaxes in settings_storage.valid_lang_syntaxes.items():
             if syntax in syntaxes:
                 return lang
-        log.error("Cannot recognize language from syntax: '%s'", syntax)
+        log.debug("ECC does nothing for language syntax: '%s'", syntax)
         return None
 
     @staticmethod
