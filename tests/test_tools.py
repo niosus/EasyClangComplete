@@ -14,6 +14,7 @@ from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
 from EasyClangComplete.plugin.tools import SublBridge
 from EasyClangComplete.plugin.tools import Tools
 from EasyClangComplete.plugin.tools import File
+from EasyClangComplete.plugin.tools import SearchScope
 from EasyClangComplete.plugin.tools import PosStatus
 from EasyClangComplete.plugin.tools import PKG_NAME
 from EasyClangComplete.plugin.utils.singleton import singleton
@@ -224,13 +225,14 @@ class test_file(TestCase):
         """Test if we can find a file."""
         current_folder = path.dirname(path.abspath(__file__))
         parent_folder = path.dirname(current_folder)
+        search_scope = SearchScope(from_folder=current_folder,
+                                   to_folder=parent_folder)
         file = File.search(
             file_name='README.md',
-            from_folder=current_folder,
-            to_folder=parent_folder)
+            search_scope=search_scope)
         expected = path.join(parent_folder, 'README.md')
         self.assertTrue(file.loaded())
-        self.assertEqual(file.full_path(), expected)
+        self.assertEqual(file.full_path, expected)
 
     def test_canonical_path(self):
         """Test creating canonical path."""

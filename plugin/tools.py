@@ -199,6 +199,7 @@ class File:
         else:
             open(self.__full_path, 'a+').close()
 
+    @property
     def full_path(self):
         """Get full path to file.
 
@@ -207,6 +208,7 @@ class File:
         """
         return self.__full_path
 
+    @property
     def folder(self):
         """Get parent folder to the file.
 
@@ -215,10 +217,27 @@ class File:
         """
         return path.dirname(self.__full_path)
 
+    @property
+    def lines(self):
+        """Return as list of all lines in the file."""
+        if not self.loaded():
+            log.warning("Trying to read file that has not been loaded.")
+            return None
+        with open(self.__full_path, encoding='utf-8') as f:
+            return f.readlines()
+
     def loaded(self):
         """Check if the file is loaded."""
         if self.__full_path:
             return True
+        return False
+
+    def contains(self, query):
+        """Check if file contains a query."""
+        for line in self.lines:
+            if line.lower().startswith(query):
+                log.debug("found needed line: '%s'", line)
+                return True
         return False
 
     @staticmethod
@@ -273,34 +292,31 @@ class File:
         File.__modification_cache[full_path] = mod_time
 
     @staticmethod
-    def search(file_name, from_folder, to_folder, search_content=None):
+    def search(file_name, search_scope, search_content=None):
         """Search for a file up the tree.
 
         Args:
-            file_name (TYPE): Description
-            from_folder (str): path to folder where we start the search
-            to_folder (str): path to folder we should not go beyond
-            search_content (None, optional): Description
+            file_name (TYPE): Search for the file with this name
+            search_scope (SearchScope): scope where to search for file
+            search_content (str, optional): String that the file must contain
 
         Returns:
             File: found file
         """
-        # TODO(igor): should just take a SearchScope as input param
         log.debug("searching '%s' from '%s' to '%s'",
-                  file_name, from_folder, to_folder)
-        current_folder = from_folder
+                  file_name, search_scope.from_folder, search_scope.to_folder)
+        current_folder = search_scope.from_folder
         if not path.exists(current_folder):
-            return File()
-        one_past_stop_folder = path.dirname(to_folder)
+            return None
+        one_past_stop_folder = path.dirname(search_scope.to_folder)
         while current_folder != one_past_stop_folder:
             for file in listdir(current_folder):
                 if file == file_name:
                     found_file = File(path.join(current_folder, file))
                     log.debug("found '%s' file: %s",
-                              file_name, found_file.full_path())
+                              file_name, found_file.full_path)
                     if search_content:
-                        if File.contains(found_file.full_path(),
-                                         search_content):
+                        if found_file.contains(search_content):
                             return found_file
                         else:
                             log.debug("skipping file '%s'. ", found_file)
@@ -312,25 +328,7 @@ class File:
             if current_folder == path.dirname(current_folder):
                 break
             current_folder = path.dirname(current_folder)
-        return File()
-
-    @staticmethod
-    def contains(file_path, query):
-        """Check if file contains a line.
-
-        Args:
-            file_path (str): path to file
-            query (str): string to search
-
-        Returns:
-            bool: True if contains str, False if not
-        """
-        with open(file_path, encoding='utf-8') as f:
-            for line in f:
-                if line.lower().startswith(query):
-                    log.debug("found needed line: '%s'", line)
-                    return True
-        return False
+        return None
 
 
 class SearchScope:

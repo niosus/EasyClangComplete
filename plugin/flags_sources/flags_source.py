@@ -1,7 +1,6 @@
 """Holds an abstract class defining a flags source."""
 from os import path
 
-from ..tools import File
 from ..tools import Tools
 from ..tools import SearchScope
 from ..utils.flag import Flag
@@ -97,18 +96,3 @@ class FlagsSource(object):
         if file_path and file_path in self._cache:
             return self._cache[file_path]
         return None
-
-    def _find_current_in(self, search_scope, search_content=None):
-        """Find current path in a search scope.
-
-        Args:
-            search_scope (SearchScope): Find in a search scope.
-
-        Returns:
-            str: Path to the current flag source path.
-        """
-        return File.search(
-            file_name=self._FILE_NAME,
-            from_folder=search_scope.from_folder,
-            to_folder=search_scope.to_folder,
-            search_content=search_content).full_path()

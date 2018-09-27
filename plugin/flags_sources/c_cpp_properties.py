@@ -10,7 +10,6 @@ from ..tools import File
 from ..utils.singleton import CCppPropertiesCache
 
 from os import path
-import json
 
 import logging
 
@@ -53,7 +52,10 @@ class CCppProperties(FlagsSource):
         log.debug("[c_cpp_properties]:[get]: for file %s", file_path)
         cached_flags_path = self._get_cached_from(file_path)
         log.debug("[c_cpp_properties]:[cached]: '%s'", cached_flags_path)
-        flags_file_path = self._find_current_in(search_scope)
+        flags_file = File.search(self._FILE_NAME, search_scope)
+        if not flags_file:
+            return None
+        flags_file_path = flags_file.full_path
         log.debug("[c_cpp_properties]:[current]: '%s'", flags_file_path)
         if not flags_file_path:
             return None
@@ -88,7 +90,7 @@ class CCppProperties(FlagsSource):
         Returns:
             str[]: List of flags from file.
         """
-        def parse_includes_from_json(json):
+        def parse_includes_from_json(content):
             try:
                 include_paths = content["configurations"][0]["includePath"]
             except Exception:
@@ -97,7 +99,7 @@ class CCppProperties(FlagsSource):
             includes = ["-I{}".format(include) for include in includes]
             return includes
 
-        def parse_defines_from_json(json):
+        def parse_defines_from_json(content):
             try:
                 defines = content["configurations"][0]["defines"]
             except Exception:
@@ -105,7 +107,7 @@ class CCppProperties(FlagsSource):
             defines = ["-D{}".format(define) for define in defines]
             return defines
 
-        if not path.exists(file.full_path()):
+        if not path.exists(file.full_path):
             log.error("File '%s' does not exist yet. No flags present.",
                       CCppProperties._FILE_NAME)
             return []
@@ -114,13 +116,14 @@ class CCppProperties(FlagsSource):
                       CCppProperties._FILE_NAME)
             return []
 
+        import json
         flags = []
-        with open(file.full_path()) as f:
+        with open(file.full_path) as f:
             content = json.load(f)
             includes = parse_includes_from_json(content)
             defines = parse_defines_from_json(content)
 
             content = includes + defines
             flags = FlagsSource.parse_flags(
-                file.folder(), content, self._include_prefixes)
+                file.folder, content, self._include_prefixes)
         return flags

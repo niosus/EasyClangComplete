@@ -46,7 +46,10 @@ class Makefile(FlagsSource):
         """
         search_scope = self._update_search_scope(search_scope, file_path)
         log.debug("[Makefile]:[get]: for file %s", file_path)
-        makefile_path = self._find_current_in(search_scope)
+        makefile = File.search(self._FILE_NAME, search_scope)
+        if not makefile:
+            return None
+        makefile_path = makefile.full_path
         log.debug("[Makefile]:[current]: '%s'", makefile_path)
         if not makefile_path:
             return None
@@ -79,12 +82,12 @@ class Makefile(FlagsSource):
         Returns:
             str[]: List of flags from Makefile.
         """
-        if not path.exists(file.full_path()) or not file.loaded():
+        if not path.exists(file.full_path) or not file.loaded():
             log.error("cannot get flags from Makefile. No file.")
             return []
 
         cmd = [
-            "make", "-s", "-C", file.folder(),
+            "make", "-s", "-C", file.folder,
             "-f", self._FILE_NAME, "-f", "-",
         ]
         makevars = [
@@ -105,5 +108,5 @@ class Makefile(FlagsSource):
         for line in output.split("\n"):
             if line:
                 tokens += shlex.split(line)
-        return FlagsSource.parse_flags(file.folder(), tokens,
+        return FlagsSource.parse_flags(file.folder, tokens,
                                        self._include_prefixes)

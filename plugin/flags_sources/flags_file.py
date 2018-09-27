@@ -50,7 +50,10 @@ class FlagsFile(FlagsSource):
         log.debug("[clang_complete_file]:[get]: for file %s", file_path)
         cached_flags_path = self._get_cached_from(file_path)
         log.debug("[clang_complete_file]:[cached]: '%s'", cached_flags_path)
-        flags_file_path = self._find_current_in(search_scope)
+        flags_file = File.search(self._FILE_NAME, search_scope)
+        if not flags_file:
+            return None
+        flags_file_path = flags_file.full_path
         log.debug("[clang_complete_file]:[current]: '%s'", flags_file_path)
         if not flags_file_path:
             return None
@@ -85,16 +88,12 @@ class FlagsFile(FlagsSource):
         Returns:
             str[]: List of flags from file.
         """
-        if not path.exists(file.full_path()):
+        if not path.exists(file.full_path):
             log.debug(".clang_complete does not exist yet. No flags present.")
             return []
         if not file.loaded():
             log.error("cannot get flags from clang_complete_file. No file.")
             return []
 
-        flags = []
-        with open(file.full_path()) as f:
-            content = f.readlines()
-            flags = FlagsSource.parse_flags(
-                file.folder(), content, self._include_prefixes)
-        return flags
+        return FlagsSource.parse_flags(
+            file.folder, file.lines, self._include_prefixes)

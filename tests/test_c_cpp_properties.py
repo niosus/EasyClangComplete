@@ -33,7 +33,7 @@ class TestCCppProperties(TestCase):
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
     def test_expand_environment_variables(self):
-        """Test environment variables are expanded"""
+        """Test environment variables are expanded."""
         include_prefixes = ['-I']
         db = CCppProperties(include_prefixes)
         environ['TEST_VARIABLE_TO_EXPAND'] = '/lib_include_dir'
@@ -55,7 +55,7 @@ class TestCCppProperties(TestCase):
         self.assertTrue(flags is None)
 
     def test_empty_include_and_defines(self):
-        """Test that empty fields are handled correctly"""
+        """Test that empty fields are handled correctly."""
         include_prefixes = ['-I']
         db = CCppProperties(include_prefixes)
 
