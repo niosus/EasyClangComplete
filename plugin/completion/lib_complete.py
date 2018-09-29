@@ -35,6 +35,7 @@ cindex_dict = {
     '4.0': PKG_NAME + ".plugin.clang.cindex40",
     '5.0': PKG_NAME + ".plugin.clang.cindex50",
     '6.0': PKG_NAME + ".plugin.clang.cindex50",  # FIXME
+    '7.0': PKG_NAME + ".plugin.clang.cindex50",  # FIXME
 }
 
 GLOBAL_TRIGGERS = ["::", "\t", " "]  # Triggers that should show types.
