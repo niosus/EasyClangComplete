@@ -2254,6 +2254,12 @@ class Type(Structure):
 
         return res
 
+    def get_num_template_arguments(self):
+        return conf.lib.clang_Type_getNumTemplateArguments(self)
+
+    def get_template_argument_type(self, num):
+        return conf.lib.clang_Type_getTemplateArgumentAsType(self, num)
+
     def get_canonical(self):
         """
         Return the canonical type for a Type.
@@ -2977,9 +2983,10 @@ class TranslationUnit(ClangObject):
                     print(value)
                 if not isinstance(value, str):
                     raise TypeError('Unexpected unsaved file contents.')
-                unsaved_files_array[i].name = name
-                unsaved_files_array[i].contents = value
-                unsaved_files_array[i].length = len(value)
+                unsaved_files_array[i].name = b(name)
+                unsaved_files_array[i].contents = b(value)
+                unsaved_files_array[i].length = \
+                    len(unsaved_files_array[i].contents)
         ptr = conf.lib.clang_reparseTranslationUnit(self, len(unsaved_files),
                 unsaved_files_array, options)
 

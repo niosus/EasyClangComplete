@@ -58,7 +58,9 @@ class ClangUtils:
             return folder_to_search
         elif platform.system() == "Windows":
             log.debug("architecture: %s", platform.architecture())
-            return path.normpath(output)
+            folder_to_search = path.join(output, '..')
+            log.debug("folder to search: %s", folder_to_search)
+            return path.normpath(folder_to_search)
         elif platform.system() == "Linux":
             return path.normpath(path.dirname(output))
         return None
@@ -120,7 +122,7 @@ class ClangUtils:
                     # [HACK]: wtf??? why does it not find libclang.dylib?
                     get_library_path_cmd = [clang_binary, "-print-file-name="]
                 elif platform.system() == "Windows":
-                    get_library_path_cmd = [clang_binary, "-print-prog-name="]
+                    get_library_path_cmd = [clang_binary, "-print-prog-name=clang"]
                     # Don't let console window pop-up briefly.
                     startupinfo = subprocess.STARTUPINFO()
                     startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -141,12 +143,13 @@ class ClangUtils:
                     libclang_dir = ClangUtils.dir_from_output(output)
                     if path.isdir(libclang_dir):
                         full_libclang_path = path.join(libclang_dir, file)
+                        log.debug("Checking path: %s", full_libclang_path)
                         if path.exists(full_libclang_path):
                             log.info("found libclang library file: '%s'",
                                      full_libclang_path)
                             ClangUtils.libclang_name = file
                             return libclang_dir
-                log.warning(" clang could not find '%s'", file)
+                log.warning("Clang could not find '%s'", file)
         # if we haven't found anything there is nothing to return
         log.error("no libclang found at all")
         return None
