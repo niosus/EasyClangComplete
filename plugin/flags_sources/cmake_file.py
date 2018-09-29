@@ -9,6 +9,7 @@ from ..tools import File
 from ..tools import Tools
 from ..tools import SearchScope
 from ..utils.singleton import CMakeFileCache
+from ..utils.catkinizer import Catkinizer
 
 from os import path
 
@@ -111,11 +112,11 @@ class CMakeFile(FlagsSource):
                     from_folder=path.dirname(db_file_path))
                 return db.get_flags(file_path, db_search_scope)
 
-        # Check if CMakeLists.txt is a catkin project.
-        if current_cmake_file.contains('find_package(catkin'):
-            log.debug("This is a catkin project.")
-            # TODO: handle configuration.
+        # Check if CMakeLists.txt is a catkin project and add needed settings.
+        catkinizer = Catkinizer(current_cmake_file)
+        catkinizer.catkinize_if_needed()
 
+        # Generate a new compilation database file and return flags from it.
         log.debug("[cmake]:[generate new db]")
         db_file = CMakeFile.__compile_cmake(
             cmake_file=File(current_cmake_path),
