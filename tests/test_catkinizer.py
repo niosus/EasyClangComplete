@@ -22,6 +22,15 @@ class BaseTestCatkinizer(object):
         """Prepare the view and store the settings."""
         super(BaseTestCatkinizer, self).setUp()
         self.__project_data_backup = sublime.active_window().project_data()
+        if not sublime.active_window().project_data():
+            # Load a file and put it into current data.
+            project_file = path.join(path.dirname(__file__),
+                                     '..',
+                                     'easy_clang_complete.sublime-project')
+            import json
+            with open(project_file) as f:
+                project_json = json.load(f.read())
+                sublime.active_window().set_project_data(project_json)
 
     def tearDown(self):
         """Restore project settings and close the view."""
