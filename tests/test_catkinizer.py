@@ -60,8 +60,7 @@ class BaseTestCatkinizer(object):
         print(cmake_tests_folder)
         picked = Catkinizer._Catkinizer__get_ros_distro_path(
             cmake_tests_folder + '/*')
-        cmake_file = path.join(cmake_tests_folder, 'CMakeLists.txt')
-        self.assertEqual(picked, cmake_file)
+        self.assertEqual(path.dirname(picked), cmake_tests_folder)
 
     def test_get_cmake_entry(self):
         """Get cmake entry."""
