@@ -111,8 +111,6 @@ class LibClangCompilerVariant(ClangCompilerVariant):
             msg_search = self.msg_regex.search(spelling)
             if not pos_search:
                 # not valid, continue
-                log.debug("regex %s failed to match location: %s",
-                          self.pos_regex.pattern, location)
                 continue
             if not msg_search:
                 # maybe there was no error word, so show everything there is

@@ -13,18 +13,17 @@ class GuiTestWrapper(TestCase):
         view (sublime.View): Current view.
     """
 
-    def set_up(self):
-        """Setup method run before every test."""
+    def setUp(self):
+        """Prepare the view every run."""
         # Ensure we have a window to work with.
         s = sublime.load_settings("Preferences.sublime-settings")
         s.set("close_windows_when_empty", False)
         s = sublime.load_settings(PKG_NAME + ".sublime-settings")
         s.set("verbose", True)
         s.set("cmake_flags_priority", "overwrite")
-
         self.view = None
 
-    def tear_down(self):
+    def tearDown(self):
         """Cleanup method run after every test."""
         # If we have a view, close it.
         if self.view:
@@ -34,7 +33,7 @@ class GuiTestWrapper(TestCase):
             self.view = None
 
     def set_up_view(self, file_path):
-        """Utility method to set up a view for a given file.
+        """Open the view and wait until its open.
 
         Args:
             file_path (str): The path to a file to open in a new view.

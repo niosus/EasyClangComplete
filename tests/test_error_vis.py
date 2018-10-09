@@ -90,7 +90,6 @@ class TestErrorVis:
         self.assertIsNotNone(completer.error_vis)
         self.assertTrue(isinstance(completer.error_vis, PopupErrorVis))
         self.tear_down_completer()
-        self.tear_down()
 
     def test_generate_errors(self):
         """Test that errors get correctly generated and cleared."""
@@ -118,7 +117,6 @@ class TestErrorVis:
 
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_get_text_by_extent_multifile(self):
         """Test getting text from multifile extent."""
@@ -215,7 +213,6 @@ class TestErrorVis:
         self.assertEqual(info_popup.as_markdown(), expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_no_full(self):
         """Test that doxygen comments are generated correctly."""
@@ -263,7 +260,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_full(self):
         """Test that the full info message is generated correctly."""
@@ -302,7 +298,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_arguments_link(self):
         """Test that the info message with arg links is generated correctly."""
@@ -330,7 +325,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_void_method(self):
         """Test that Objective-C info message is generated correctly.
@@ -365,7 +359,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_method_with_unnamed_parameter(self):
         """Test that Objective-C info message is generated correctly.
@@ -400,7 +393,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_class_method_with_return_value_and_parameters(self):
         """Test that Objective-C info message is generated correctly.
@@ -435,7 +427,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_protocol_method_with_doxy_brief(self):
         """Test that Objective-C info message is generated correctly.
@@ -470,7 +461,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_protocol_class_method(self):
         """Test that Objective-C info message is generated correctly.
@@ -501,7 +491,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_category_method(self):
         """Test that Objective-C info message is generated correctly.
@@ -532,7 +521,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_instance_method_decl(self):
         """Test that Objective-C info message is generated correctly.
@@ -568,7 +556,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_class_method_decl(self):
         """Test that Objective-C info message is generated correctly.
@@ -599,7 +586,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_protocol_ref(self):
         """Test that Objective-C info message is generated correctly.
@@ -643,7 +629,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_category_impl(self):
         """Test that Objective-C info message is generated correctly.
@@ -681,7 +666,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_implementation_decl(self):
         """Test that Objective-C info message is generated correctly.
@@ -728,7 +712,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_info_objc_covariant_method(self):
         """Test Objective-C info messages for covariant types.
@@ -760,7 +743,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_template_instance_class_and_builtin_type_and_number_value(self):
         """Test template instance with class, built-in types, and number types.
@@ -795,7 +777,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_template_instance_expand_templates_disabled(self):
         """Test that changing "expand_template_types" setting to false works.
@@ -830,7 +811,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_template_instance_default_template_params(self):
         """Test template instance with some template args left empty (default)
@@ -865,7 +845,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_template_instance_nested_template_parameters(self):
         """Test instance with template arguments that are themselves templates
@@ -899,7 +878,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_template_instance_pointer_to_class(self):
         """Test instance with a pointer template argument.
@@ -933,7 +911,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_template_instance_ref_to_class(self):
         """Test instance with a reference template argument.
@@ -966,7 +943,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_template_instance_rvalueref_to_class(self):
         """Test instance with an r-value reference template argument.
@@ -1000,7 +976,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_template_instance_declaration(self):
         """Hovering over the template type in a variable declaration.
@@ -1043,7 +1018,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
     def test_method_with_template_argument(self):
         """Hovering over method with argument that is a template type.
@@ -1076,7 +1050,6 @@ class TestErrorVis:
         self.assertEqual(actual_msg, expected_info_msg)
         # cleanup
         self.tear_down_completer()
-        self.tear_down()
 
 
 class TestErrorVisBin(TestErrorVis, GuiTestWrapper):

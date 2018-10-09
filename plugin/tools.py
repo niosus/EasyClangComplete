@@ -236,7 +236,7 @@ class File:
         """Check if file contains a query."""
         for line in self.lines:
             if line.lower().startswith(query):
-                log.debug("found needed line: '%s'", line)
+                log.debug("found needed line: '%s'", line.strip())
                 return True
         return False
 

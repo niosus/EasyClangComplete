@@ -1,42 +1,47 @@
 {
-  "build_systems":
-  [
-    {
-      "file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
-      "name": "Anaconda Python Builder",
-      "selector": "source.python",
-      "shell_cmd": "\"python\" -u \"$file\""
-    }
-  ],
-  "folders":
-  [
-    {
-      "path": "."
-    }
-  ],
-  "settings":
-  {
-      // use "ecc_<setting>" or "easy_clang_complete_<setting>" to override
-      // any "<setting>" from the plugin preferences project-wide.
-
-      // override "use_libclang" setting in this project.
-      "ecc_use_libclang": true,
-      // override "verbose" setting in this project.
-      "easy_clang_complete_verbose": true,
-      // override "flags_sources" setting in this project.
-      "ecc_flags_sources": [
-        // cmake entry
-        {
-          "file": "CMakeLists.txt",
-          "flags": ["-DCMAKE_BUILD_TYPE=Release", "-D XXXX=ON"],
-          "prefix_paths": [ "/opt/ros/indigo",
-                            "~/Code/catkin_ws/devel",
-                            "$project_base_path/catkin_ws/devel" ]
-        },
-        // Makefile entry
-        { "file": "Makefile" },
-        // .clang_complete entry
-        { "file": ".clang_complete" }
-      ],
-  }
+	"build_systems":
+	[
+		{
+			"file_regex": "^[ ]*File \"(...*?)\", line ([0-9]*)",
+			"name": "Anaconda Python Builder",
+			"selector": "source.python",
+			"shell_cmd": "\"python\" -u \"$file\""
+		}
+	],
+	"folders":
+	[
+		{
+			"path": "."
+		}
+	],
+	"settings":
+	{
+		"easy_clang_complete_verbose": true,
+		"ecc_flags_sources":
+		[
+			{
+				"file": "CMakeLists.txt",
+				"flags":
+				[
+					"-DCMAKE_BUILD_TYPE=Release",
+					"-D XXXX=ON"
+				],
+				"prefix_paths":
+				[
+					"/opt/ros/indigo",
+					"~/Code/catkin_ws/devel",
+					"$project_base_path/catkin_ws/devel",
+					"/opt/ros/melodic",
+					"~/.config/sublime-text-3/Packages/EasyClangComplete/tests/catkin_tests/catkin_ws/devel"
+				]
+			},
+			{
+				"file": "Makefile"
+			},
+			{
+				"file": ".clang_complete"
+			}
+		],
+		"ecc_use_libclang": true
+	}
 }

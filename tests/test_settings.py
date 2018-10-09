@@ -16,7 +16,6 @@ class test_settings(GuiTestWrapper):
                               'test_files',
                               'test.cpp')
         self.check_view(file_name)
-        self.tear_down()
 
     def test_init(self):
         """Test that settings are correctly initialized."""
@@ -61,7 +60,6 @@ class test_settings(GuiTestWrapper):
             if "common_flags" in user:
                 # The user modified the default common flags, just skip the
                 # next few tests.
-                self.tear_down()
                 return
 
         initial_common_flags = list(settings.common_flags)
@@ -75,4 +73,3 @@ class test_settings(GuiTestWrapper):
         self.assertFalse(initial_common_flags[1] in dirs)
         self.assertTrue(("-I" + current_folder) in dirs)
         self.assertTrue(("-I" + parent_folder) in dirs)
-        self.tear_down()
