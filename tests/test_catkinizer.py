@@ -29,7 +29,7 @@ class BaseTestCatkinizer(object):
                                      'easy_clang_complete.sublime-project')
             import json
             with open(project_file) as f:
-                project_json = json.load(f.read())
+                project_json = json.load(f)
                 sublime.active_window().set_project_data(project_json)
 
     def tearDown(self):
