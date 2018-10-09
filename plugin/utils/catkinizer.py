@@ -1,6 +1,5 @@
 """Catkinize the project if needed."""
 
-import re
 import logging
 from os import path
 
@@ -13,7 +12,6 @@ class Catkinizer:
     This is done by adding the appropriate entries to the project settings that
     ensure that 'prefix_paths' get forwarded to CMakeLists.txt properly.
     """
-    _ROS_DISTRO_REGEX = re.compile(r'/opt/ros/(.+)/setup\.sh')
     _SETTINGS_TAG = 'settings'
     _FLAGS_SOURCES_TAG = 'ecc_flags_sources'
 
@@ -23,13 +21,17 @@ class Catkinizer:
 
     def catkinize_if_needed(self):
         """Add prefix_paths setting to the project file if needed."""
+        import platform
+        if platform.system() != 'Linux':
+            log.debug("Auto-catkinize supports only Linux currently.")
+            return False
         if not self.__cmake_file.contains('find_package(catkin'):
             log.debug("Not a catkin project.")
             return False
 
         project_data = Catkinizer.__get_sublime_project_data()
         if not project_data:
-            log.debug("You should be in sublime project to auto-catkinize.")
+            log.debug("Cannot auto-catkinize: not using sublime project.")
             return False
 
         # Check if setting exists in the project.
