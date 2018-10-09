@@ -174,6 +174,7 @@ class test_tools(TestCase):
         expanded = Tools.expand_star_wildcard(this_folder_with_star)
         expected_folders = [
             path.join(this_folder, 'c_cpp_properties_files'),
+            path.join(this_folder, 'catkin_tests'),
             path.join(this_folder, 'cmake_tests'),
             path.join(this_folder, 'compilation_db_files'),
             path.join(this_folder, 'CppProperties_files'),

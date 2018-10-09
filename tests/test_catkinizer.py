@@ -1,6 +1,7 @@
 """Test compilation database flags generation."""
 import imp
 import sublime
+import platform
 
 from os import path
 
@@ -14,18 +15,18 @@ Catkinizer = catkinizer.Catkinizer
 File = tools.File
 
 
-class TestCatkinizer(GuiTestWrapper):
+class BaseTestCatkinizer(object):
     """Test unique list."""
 
     def setUp(self):
         """Prepare the view and store the settings."""
-        super(TestCatkinizer, self).setUp()
+        super(BaseTestCatkinizer, self).setUp()
         self.__project_data_backup = sublime.active_window().project_data()
 
     def tearDown(self):
         """Restore project settings and close the view."""
         sublime.active_window().set_project_data(self.__project_data_backup)
-        super(TestCatkinizer, self).tearDown()
+        super(BaseTestCatkinizer, self).tearDown()
 
     def test_init(self):
         """Test initialization."""
@@ -70,7 +71,7 @@ class TestCatkinizer(GuiTestWrapper):
                 [
                     "/opt/ros/indigo",
                     "~/Code/catkin_ws/devel",
-                    "$project_base_path/catkin_ws/devel"
+                    "$project_base_path/catkin_ws/devel",
                 ]
         }
         self.assertEqual(cmake_entry, expected_entry)
@@ -90,3 +91,10 @@ class TestCatkinizer(GuiTestWrapper):
                               'catkin_tests', 'catkin_ws', 'devel')
         catkin_ws = catkin_ws.replace(path.expanduser('~'), '~', 1)
         self.assertEqual(ws_path, catkin_ws)
+
+
+print(platform.system())
+if platform.system() is not 'Windows':
+    class TestCatkinizer(BaseTestCatkinizer, GuiTestWrapper):
+        """Test class for the binary based completer."""
+        pass
