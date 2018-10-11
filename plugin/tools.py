@@ -233,7 +233,7 @@ class File:
         return False
 
     def contains(self, query):
-        """Check if file contains a query."""
+        """Check if file contains a query (only lowercase)."""
         for line in self.lines:
             if line.lower().startswith(query):
                 log.debug("found needed line: '%s'", line.strip())
@@ -296,7 +296,7 @@ class File:
         """Search for a file up the tree.
 
         Args:
-            file_name (TYPE): Search for the file with this name
+            file_name (str): Search for the file with this name
             search_scope (SearchScope): scope where to search for file
             search_content (str, optional): String that the file must contain
 
@@ -315,16 +315,19 @@ class File:
                     found_file = File(path.join(current_folder, file))
                     log.debug("found '%s' file: %s",
                               file_name, found_file.full_path)
-                    if search_content:
+                    if not search_content:
+                        log.debug("Nothing to search for in file so its ok.")
+                        return found_file
+                    if isinstance(search_content, list):
+                        for search_query in search_content:
+                            if found_file.contains(search_query):
+                                return found_file
+                    elif isinstance(search_content, str):
                         if found_file.contains(search_content):
                             return found_file
-                        else:
-                            log.debug("skipping file '%s'. ", found_file)
-                            log.debug("no line starts with: '%s'",
-                                      search_content)
-                            continue
-                    # this is reached only if we don't search any content
-                    return found_file
+                    log.debug("skipping file '%s'. ", found_file)
+                    log.debug("no line starts with: '%s'", search_content)
+                    continue
             if current_folder == path.dirname(current_folder):
                 break
             current_folder = path.dirname(current_folder)

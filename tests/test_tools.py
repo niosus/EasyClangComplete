@@ -6,18 +6,28 @@ Attributes:
 """
 import sublime
 import time
+import imp
 import platform
 from os import path
 from unittest import TestCase
 
-from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
-from EasyClangComplete.plugin.tools import SublBridge
-from EasyClangComplete.plugin.tools import Tools
-from EasyClangComplete.plugin.tools import File
-from EasyClangComplete.plugin.tools import SearchScope
-from EasyClangComplete.plugin.tools import PosStatus
-from EasyClangComplete.plugin.tools import PKG_NAME
-from EasyClangComplete.plugin.utils.singleton import singleton
+from EasyClangComplete.plugin import tools
+from EasyClangComplete.plugin.settings import settings_manager
+from EasyClangComplete.plugin.utils import singleton
+
+imp.reload(tools)
+imp.reload(settings_manager)
+imp.reload(singleton)
+
+singleton = singleton.singleton
+SettingsManager = settings_manager.SettingsManager
+
+SublBridge = tools.SublBridge
+Tools = tools.Tools
+File = tools.File
+SearchScope = tools.SearchScope
+PosStatus = tools.PosStatus
+PKG_NAME = tools.PKG_NAME
 
 
 class test_tools_command(TestCase):
@@ -234,6 +244,46 @@ class test_file(TestCase):
         expected = path.join(parent_folder, 'README.md')
         self.assertTrue(file.loaded())
         self.assertEqual(file.full_path, expected)
+
+    def test_find_file_content_string(self):
+        """Test if we can find a file."""
+        current_folder = path.dirname(path.abspath(__file__))
+        parent_folder = path.dirname(current_folder)
+        search_scope = SearchScope(from_folder=current_folder,
+                                   to_folder=parent_folder)
+        file = File.search(
+            file_name='README.md',
+            search_scope=search_scope,
+            search_content='plugin')
+        self.assertIsNotNone(file)
+        self.assertTrue(file.loaded())
+        expected = path.join(parent_folder, 'README.md')
+        self.assertEqual(file.full_path, expected)
+        file_fail = File.search(
+            file_name='README.md',
+            search_scope=search_scope,
+            search_content='text that is not in the file')
+        self.assertIsNone(file_fail)
+
+    def test_find_file_content_list(self):
+        """Test if we can find a file."""
+        current_folder = path.dirname(path.abspath(__file__))
+        parent_folder = path.dirname(current_folder)
+        search_scope = SearchScope(from_folder=current_folder,
+                                   to_folder=parent_folder)
+        file = File.search(
+            file_name='README.md',
+            search_scope=search_scope,
+            search_content=['non existing text', 'plugin'])
+        self.assertIsNotNone(file)
+        self.assertTrue(file.loaded())
+        expected = path.join(parent_folder, 'README.md')
+        self.assertEqual(file.full_path, expected)
+        file_fail = File.search(
+            file_name='README.md',
+            search_scope=search_scope,
+            search_content=['non existing text'])
+        self.assertIsNone(file_fail)
 
     def test_canonical_path(self):
         """Test creating canonical path."""
