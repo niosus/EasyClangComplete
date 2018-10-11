@@ -1,0 +1,6 @@
+site_name: EasyClangComplete
+pages:
+    - Home: index.md
+    - Settings: settings.md
+    - Getting Correct Flags: configs.md
+    - About: about.md
