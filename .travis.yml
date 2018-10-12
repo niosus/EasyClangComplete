@@ -27,7 +27,7 @@ before_install:
             sudo apt-get install -y clang;
             sudo pip install --upgrade pycodestyle pep257;
             sudo pip install coverage codacy-coverage;
-            sudo pip install mkdocs
+            sudo pip install mkdocs;
       fi
 
 install:
