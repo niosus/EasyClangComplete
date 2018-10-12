@@ -28,8 +28,9 @@ before_install:
             sh -e /etc/init.d/xvfb start;
             sudo apt-get update -yqq;
             sudo apt-get install -y clang;
-            sudo pip install --upgrade pycodestyle pep257;
-            sudo pip install coverage codacy-coverage;
+            sudo pip install -r requirements.txt;
+            sudo pip install --upgrade pip pycodestyle pep257;
+            sudo pip install --upgrade coverage codacy-coverage;
             sudo pip install --upgrade mkdocs==1.0.4 mkdocs-material;
       fi
 
