@@ -1,5 +1,5 @@
 site_name: EasyClangComplete
-pages:
+nav:
     - Getting started: index.md
     - Configure compiler flags: configs.md
     - Full settings guide: settings.md
