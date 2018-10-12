@@ -14,16 +14,11 @@ C, C++, Objective-C, and Objective-C++.
 [![Donate][img-paypal]][donate-paypal]
 [![Bountysource][img-bountysource]][bountysource-link]
 
-# Jump right in! #
-You are just three simple steps away!
+# Simple start in just 3 steps! #
 
 ## 1. Install this plugin ##
-- Best is to use [Package Control](https://packagecontrol.io/installation)
-  + <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and install
-    `EasyClangComplete`
-- If you don't have Package Control (you should)
-  + download one of the releases from
-    [here](https://github.com/niosus/EasyClangComplete/releases) and restart Sublime Text after unpacking.
+- In Sublime Text press <kbd>CTRL</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> and
+  install **EasyClangComplete** using [Package Control](https://packagecontrol.io/installation).
 
 ## 2. Install clang ##
 - **Ubuntu**        : `sudo apt-get install clang`
@@ -32,139 +27,35 @@ You are just three simple steps away!
 - **Other Systems** : use your package manager or install from clang website.
 - clang website: http://llvm.org/releases/download.html
 
-## 3. Configure your includes ##
+## 3. Configure your compiler flags and include folders ##
 
-### Using CMake? ###
-Plugin will run cmake on a proper `CMakeLists.txt` in your project folder and
-will use information from it to complete your code out of the box.
+#### Do you use CMake?
+You're in luck! The plugin will run cmake on a proper `CMakeLists.txt` in your
+project folder and will use information from it to complete your code out of
+the box! For more details, read the plugin
+[docs](https://niosus.github.io/EasyClangComplete/configs/#using-cmake-recommended)
+about CMake.
 
-### Have a compilation database? ###
-Plugin will search for a compilation database `compile_commands.json` in the
-project folder and will load it to complete your code. If you want to specify a custom path to a comilation database you can do it in settings:
-```json
-"flags_sources": [
-    {"file": "compile_commands.json", "search_in": "<YOUR_PATH>"},
-  ],
-```
+#### Don't like CMake?
+Don't worry! There are plenty of ways to configure the plugin! Read the
+[related documentation](https://niosus.github.io/EasyClangComplete/configs/)
+for more info!
 
-### None of the above? ###
-You will need a little bit of manual setup for now. `Clang` will automatically
-search for headers in the folder that contains the file you are working on and
-its parent. If you have a more sophisticated project you will need to help
-`clang` just a little bit. There are three ways to do it.
+## Extensive documentation
+There are so many things I want to tell you! There is so much the plugin is
+capable of! Read the [docs](https://niosus.github.io/EasyClangComplete/) to get
+started!
 
-Pick *ANY* of the following:
 
-- Set include dirs in `"common_flags"` setting in `User Settings`:
-  + See default [settings](EasyClangComplete.sublime-settings) to get started.
-    These flags will be included in every project you run.
-- Add `.clang_complete` file to the root of your project folder.
-  + This file should contain all includes and macroses you want to use.
-  + Example file contents:
-  ```
-  -Isrc
-  -I/usr/include
-  ```
-- Override `"common_flags"` setting in your project file! Just define the same
-  setting in project specific settings with either one of two prefixes:
-  `"ecc_"` or `"easy_clang_complete_"`. See the project file in this repo for a
-  working example. Minimal example for clarity:
+## Contribute to the project
+This project exists thanks to all the people who contribute. Feel free to open
+an issue if something is not clear or a PR if you want to implement some
+missing functionality or fix a bug. Check out the contribution
+[guide](.github/CONTRIBUTING.md) for that.
 
-  ```json
-  {
-    "settings":
-    {
-      "ecc_common_flags": ["-Isrc", "-I/usr/include"],
-      "easy_clang_complete_verbose": true
-    }
-  }
-  ```
+## [Support this project!](https://niosus.github.io/EasyClangComplete/support/)
 
-These settings are prioritized in a configurable way. Check out the settings to
-learn more about it.
-
-## That's it! You're ready to use the plugin! ##
-
-# More on the plugin #
-All the essential information to make the plugin run is written above. If you
-are still interested in more details - please read on.
-
-## General info ##
-The plugin uses `libclang` with its python bindings. This method fully utilizes
-caching from `libclang` that makes your completions blazingly fast. It is unit
-tested to complete STL functions on Linux, OSX and Windows platforms.
-
-There is also a fallback mode if something is wrong with the `libclang` one
-that parses the output from `clang -Xclang -code-completion-at` which is called
-from the command line.
-
-This plugin is intended to be easy to use. It should autocomplete STL out of
-the box and is capable of working with multiple flag storages, such as a
-compilation database or a `.clang_complete` file. If you experience problems -
-create an issue. I will try to respond as soon as possible.
-
-## Commands ##
-Here are some highlights for the commands. You can see all commands in command
-pallet. Open it by pressing:
-
-- Windows/Linux: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
-- OSX: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>
-
-All the commands of this plugin start with `EasyClangComplete:` and should be
-self explanatory. Open an issue if they are not.
-
-### Key Bindings ###
-EasyClangComplete provides several default key bindings listed
-[here](Default.sublime-keymap). Modify or create your own bindings by editing
-your Sublime Key Binding preferences to run a command listed
-in [this file](Default.sublime-commands). For example, to show a popup with info
-about the currently selected symbol, add this to your key bindings:
-
-`{ "keys": ["ctrl+i"], "command": "ecc_show_popup_info" },`
-
-## Settings ##
-
-Please see the default settings [file](EasyClangComplete.sublime-settings)
-shipped with the plugin for explanations and sane default values.
-
-## Credits ##
-The whole work seen here was originally a fork of another repository:
-[ClangAutoComplete](https://github.com/pl-ca/ClangAutoComplete)
-
-However, with time this plugin has grown quite different from its origin and
-this is why you see it as a separate package now. Anyway, feel free to check
-out what `ClangAutoComplete` has to offer and come back if you still like this
-plugin more.
-
-The trick with multiple `clang.cindex` files is inspired by this repo:
-[clangHelper](https://github.com/griebd/clangHelper). Thanks for inspiration!
-
-The progress indicator idea is from
-[ColorSublime](https://github.com/Colorsublime/Colorsublime-Plugin) plugin.
-
-Some functionality is there only because of the awesome contributors to this
-project. To see their names plese check out the contributors page.
-
-# Support it! #
-[![Donate][img-paypal]][donate-paypal]
-[![Flattr this git repo][img-flattr]][donate-flattr]
-[![Bountysource][img-bountysource]][bountysource-link]
-[![Beerpay][img-beerpay]][beerpay]
-
-Current sponsor of this project is my sleep.
-Please buy me a cup of tea if you appreciate the effort.
-
-Also, pull requests are welcome! And don't forget to tell people about this
-plugin! The more people use it - the merrier.
-
-### Contributing
-
-This project exists thanks to all the people who contribute. [[Contribute](.github/CONTRIBUTING.md)].
 <a href="graphs/contributors"><img src="https://opencollective.com/EasyClangComplete/contributors.svg?width=890&button=false" /></a><a href="https://opencollective.com/EasyClangComplete#backers" target="_blank"><img src="https://opencollective.com/EasyClangComplete/backers.svg?width=890"></a>
-
-### Sponsors
-
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/EasyClangComplete#sponsor)]
 
 <a href="https://opencollective.com/EasyClangComplete/sponsor/0/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/EasyClangComplete/sponsor/1/website" target="_blank"><img src="https://opencollective.com/EasyClangComplete/sponsor/1/avatar.svg"></a>
