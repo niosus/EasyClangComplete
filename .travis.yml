@@ -30,10 +30,6 @@ before_install:
             sudo apt-get install -y clang;
       fi
 
-stages:
-  - name: deploy
-    if: $DISTRO = "Ubuntu"
-
 install:
     - sh travis.sh bootstrap
     - if [ "$PCINSTALL" == true ]; then sh travis.sh install_package_control; fi
@@ -56,6 +52,7 @@ deploy:
  local_dir: site
  on:
     branch: documentation
+    condition: $DISTRO = Ubuntu
 
 notifications:
     email: false
