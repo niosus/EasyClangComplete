@@ -1,41 +1,106 @@
-# Get correct flags #
+# Geting correct compiler flags
 There are multiple options to configure the plugin in such a way that
-everything works without major pain. This document outlines all these ways. It should answer all your questions
+everything works without major pain. This document outlines all these ways.
 
-# Using CMake #
+## All flag sources <small>from settings and external</small>
+There are two major sources for flags:
 
-## This is the recommended method ##
+1. Flags defined in settings of ECC
+2. Flags generated from a flag source defined in `flag_sources` [settings](../settings/#flags_sources-external-sources-of-compilation-flags)
+
+!!! tip
+    The flags defined in settings are **always** used when compiling a new translation unit. They are **appended** to the ones generated from the external sources. Note, that the settings follow a hierarchy described in detail [here](../settings/#settings-hierarchy).
+
+## Flags defined in settings
+If you want to set the flag sources manually you can do it using the settings.
+However, I strongly suggest to **NOT** do this and use a proper build system
+instead. It will save you enormous amounts of time configuring the needed
+include flags. However, if you know what you're doing, the main sources of
+flags in settings:
+
+- flags defined in the `common_flags`
+  [setting](../settings/#common_flags-flags-added-to-each-compilation) - flags
+  added to **each** compilation of every file. See the link for an example.
+- flags defined in the `lang_flags`
+  [setting](../settings/#lang_flags-language-specific-flags) - flags added to
+  each compilation in addition to the `common_flags` but only for a specific
+  language.
+
+## Flags defined in external flags sources
+
+### Using CMake <small> (recommended) </small>
+
 EasyClangComplete can search for `CMakeLists.txt` and generate a
 `compile_commands.json` file from it. See next
 [section](#using-compile_commandsjson) for details on how this file is parsed.
 
 To use `CMake` way of generating flags, make sure you set the `"flags_sources"`
 in your settings. See how to set this setting correctly
-[here](settings.md#flags_sources).
+[here](../settings/#flags_sources-external-sources-of-compilation-flags).
 
-## Using catkin ##
-For those using `catkin` (e.g. when developing with ROS) there is a special
-step that needs to be taken. By default when running Sublime Text from GUI it
-knows nothing about the paths set in `.bashrc` of your system. So we need to
-manually update the `CMAKE_PREFIX_PATH` to be able to find `catkin`:
+??? note "Catkin setup"
+    
+    #### Catkin configuration
 
-```json
-"flags_sources": [
-    {
-      "file": "CMakeLists.txt",
-      "prefix_paths": [ "/opt/ros/indigo",
-                        "~/catkin_ws/devel",
-                        "$project_base_path/catkin_ws/devel" ]
-    },
-]
-```
+    For those using `catkin` (e.g. when developing with ROS) the plugin will
+    configure the needed settings automatically if you are using Sublime Text
+    projects. Here is a summary of what the plugin does for you. By default
+    when running Sublime Text from GUI it knows nothing about the paths set in
+    `.bashrc` of your system. So the plugin needs to update the
+    `CMAKE_PREFIX_PATH` to be able to find `catkin`. Your `*.sublime-project` will look something like this after the configuration:
 
-# Using compile_commands.json #
+    ```json tab="*.sublime-project"
+    "ecc_flags_sources": [
+        {
+          "file": "CMakeLists.txt",
+          "prefix_paths": [ "/opt/ros/indigo",
+                            "~/catkin_ws/devel" ]
+        },
+    ]
+    ```
+
+    !!! warning
+        This will only work if you are using Sublime Text projects with your code. Otherwise no configuration will take place and the proper compiler flags will **NOT** be generated.
+
+### Using a compilation database <small>`compile_commands.json`</small>
 This file defines the flags per target (read more about it
 [here](https://clang.llvm.org/docs/JSONCompilationDatabase.html)). When this
-file is found EasyClangComplete reads it and finds appropriate target given
+file is found, EasyClangComplete reads it and finds appropriate target given
 the file which is currently opened by the user.
 
-When not using `CMake` make sure you set the `"flags_sources"` in your settings
-to look for the `compile_commands.json` file. See how to set this setting
-correctly [here](settings.md#flags_sources).
+??? example "Example `compile_commands.json` file"
+    ```json
+    [
+        {
+          "directory": "/main_dir",
+          "command": "/usr/bin/c++    -I/lib_include_dir    -o CMakeFiles/main_obj.o -c /home/user/dummy_main.cpp",
+          "file": "/home/user/dummy_main.cpp"
+        },
+        {
+          "directory": "/lib_dir",
+          "command": "/usr/bin/c++   -Dlib_EXPORTS  -fPIC   -o CMakeFiles/lib_obj.o -c /home/user/dummy_lib.cpp",
+          "file": "/home/user/dummy_lib.cpp"
+        }
+    ]
+    ```
+
+!!! hint 
+    The `compile_commands.json` does not contain header files. To complete
+    header files we need to map them to an appropriate source file. By default,
+    the plugin will try to search for the source file with matching name in the
+    same folder as the header file. If this is not enough, use the setting
+    `header_to_source_mapping`
+    ([details](../settings/#header_to_source_mapping-how-to-find-source-files))
+    in order to define a better mapping from header files to source ones.
+
+### Using `.clang_complete` file
+This is a simple text file where each line defines a single flag. Don't forget, that you must specify the flags fully here. The paths that are not absolute will be expanded from the location of the `.clang_complete` file. The same wildcards as in [settings](../settings/#common-path-wildcards) can be used here too.
+
+??? example "Example `.clang_complete` file"
+    ```
+    -I~.config/sublime-text-3/Packages/EasyClangComplete/src blah
+    -I~.config/sublime-text-3/Packages/EasyClangComplete
+    -Ilocal_folder
+    -Wabi
+    -std=c++14
+    ```

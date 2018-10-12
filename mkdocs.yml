@@ -1,6 +1,44 @@
 site_name: EasyClangComplete
 pages:
-    - Home: index.md
+    - Getting started: index.md
+    - Configure compiler flags: configs.md
     - Settings: settings.md
-    - Getting Correct Flags: configs.md
-    - About: about.md
+    - Support the project: support.md
+    - About me: about.md
+theme:
+  name: 'material'
+  palette:
+    primary: 'blue'
+    accent: 'blue'
+  logo: 'img/ecc.png'
+  favicon: 'img/favicon.ico'
+extra:
+  social:
+    - type: 'github'
+      link: 'https://github.com/niosus'
+    - type: 'linkedin'
+      link: 'https://www.linkedin.com/in/igor-bogoslavskyi-72650b43/'
+
+copyright: 'Copyright &copy; 2015 - 2018 Igor Bogoslavskyi'
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - toc:
+      permalink: true
