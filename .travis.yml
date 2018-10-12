@@ -7,6 +7,9 @@ env:
 language:
     - python
 
+python:
+    - "3.6"
+
 matrix:
     include:
     - os: linux
@@ -27,7 +30,7 @@ before_install:
             sudo apt-get install -y clang;
             sudo pip install --upgrade pycodestyle pep257;
             sudo pip install coverage codacy-coverage;
-            sudo pip install mkdocs mkdocs-material;
+            sudo pip install --upgrade mkdocs mkdocs-material;
       fi
 
 install:
