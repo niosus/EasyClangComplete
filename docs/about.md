@@ -4,6 +4,6 @@
 
 I am currently a PhD student at the University of Bonn, doing Robotics,
 Computer Vision and Photogrammetry. This plugin was written because of my
-obsesstion with Sublime Text and the need (and will) to code in C++ every day.
+obsession with Sublime Text and the need (and will) to code in C++ every day.
 
 ## [Support the development of this plugin](support.md)
