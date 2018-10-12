@@ -39,7 +39,7 @@ script:
     - sh travis.sh run_tests --coverage
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             coverage xml -o coverage.xml;
-            mkdocs build --verbose --clean --strict
+            mkdocs build --verbose --clean --strict;
       fi
 
 after_success:
