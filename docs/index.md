@@ -56,12 +56,15 @@ There are numerous settings available for this plugin. You can find a
 comprehensive review of all those settings and how to properly use them in the
 [Full settings guide](settings.md) menu on the left of this page.
 
+### Explore available commands
+There is a number of commands that can be invoked from the command panel. See the full list in the [Available commands](commands.md) section.
+
 ## It's not you, it's me!
 If this documentation cannot answer your question, or you have suggestions on
 how to improve it, do not hesitate to fire up an
 [issue](https://github.com/niosus/EasyClangComplete/issues).
 
-## [Support the project](support.md)
+## [Support this project!](support.md)
 
 
 
