@@ -23,12 +23,11 @@ before_install:
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             export DISPLAY=:99.0;
             sh -e /etc/init.d/xvfb start;
-            pip install -r requirements.txt;
             pip install --upgrade pip pycodestyle pep257;
             pip install --upgrade coverage codacy-coverage;
             pip install --upgrade mkdocs==1.0.4 mkdocs-material;
-            apt-get update -yqq;
-            apt-get install -y clang;
+            sudo apt-get update -yqq;
+            sudo apt-get install -y clang;
       fi
 
 install:
