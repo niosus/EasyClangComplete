@@ -27,6 +27,7 @@ before_install:
             sudo apt-get install -y clang;
             sudo pip install --upgrade pycodestyle pep257;
             sudo pip install coverage codacy-coverage;
+            sudo pip install mkdocs
       fi
 
 install:
@@ -38,10 +39,17 @@ script:
     - sh travis.sh run_tests --coverage
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             coverage xml -o coverage.xml;
+            mkdocs build --verbose --clean --strict
       fi
 
 after_success:
     - python-codacy-coverage -r coverage.xml
+
+deploy:
+ provider: pages
+ skip_cleanup: true
+ github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+ local_dir: site
 
 notifications:
     email: false

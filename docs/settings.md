@@ -1,17 +1,13 @@
-# Settings for EasyClangComplete
-The settings for this plugin can be separated into three categories:
-
-- Default settings
-- Global user settings
-- Project settings <small> (defined in a [`.sublime-project`][subl-proj] file)
+# Three levels of settings for EasyClangComplete
+- Default settings <small>(shipped with the plugin)</small>
+- Global user settings <small>(defined globally for the whole plugin)</small>
+- Project settings <small> (defined in a [`.sublime-project`][subl-proj] file for a specific project)
   </small>
 
 ## Settings hierarchy
-The settings are read in a hierarchical way:
-
-1. If no settings are defined the default ones are used
-2. User settings have precedence over the default ones
-3. Project settings have precedence over the user ones
+1. If no settings are defined the **Default** ones are used
+2. **User** settings have precedence over the **Default** ones
+3. **Project** settings have precedence over the **User** and **Default** ones
 
 ## Common path wildcards
 Every path variable in settings can contain wildcards:
@@ -39,7 +35,7 @@ variables:
 ## How to define project settings
 The project-specific settings are only available when the code is within a Sublime Text project defined by a `*.sublime-project` file. They must be stored under the `"settings"` tab in the project file with either of the two prefixes: `ecc_` or `easy_clang_complete_`. See example below for more clarifications.
 
-!!! example
+!!! example "Example of setting `verbose` and `use_libclang` project-specific settings"
     ```json tab="my_project.sublime-project"
     {
         "settings": {
@@ -48,20 +44,23 @@ The project-specific settings are only available when the code is within a Subli
         }
     }
     ```
+    
+    Note that for `verbose` setting a prefix `easy_clang_complete_` is used,
+    while for `use_libclang` we use `ecc_` prefix.
 
-!!! note
-    The settings defined in the `*.sublime-project` file override User and Default settings. Keep that in mind when specifying them!
+!!! note "Project settings override User and Default settings"
+    The settings defined in the `*.sublime-project` file override User and Default settings. Keep that in mind when specifying them! They are **not appended**, they **override** these settings.
 
-## Complete settings guide
+## Complete settings list
 This is a complete guide over all settings. Here we look at every setting in
 detail, explain where they are used and what are their default values.
 
-### `common_flags`: <small> flags added to each compilation </small>
-Specify common flags that will be passed to clang for EVERY compilation. These
+### **`common_flags`**
+Specify common flags that are passed to clang for **every** compilation. These
 usually include common include paths that are needed for finding STL etc. Below
 are typical defaults for Linux.
 
-!!! example
+!!! example "Default value"
     ```json  
     "common_flags" : [
       // some example includes
@@ -72,10 +71,10 @@ are typical defaults for Linux.
     ],
     ```
 
-### `lang_flags`: <small> Language-specific flags </small> 
+### **`lang_flags`**
 These flags are language-specific. They prepend `common_flags` when compiling files of a particular language. This is a good place to define flags for a standard library etc.
 
-!!! example
+!!! example "Default value"
     ```json
     "lang_flags": {
       "C": ["-std=c11"],
@@ -89,15 +88,15 @@ These flags are language-specific. They prepend `common_flags` when compiling fi
     When specifying this setting in your user or project settings make sure to
     keep ALL language keys.
 
-### `flags_sources`: <small>external sources of compilation flags</small>
-If you have a build system <small>(e.g. CMake)</small> in place or have an
-external file that defines all the compilation flags for your project
-<small>(e.g. a compilation database `compile_commands.json`)</small>, you can
-load the flags directly from there. For more details on differences between the
-flag sources refer to [this page](../configs/#geting-correct-compiler-flags) of
-the documentation.
+### **`flags_sources`**
+This setting defines external sources for the compilation flags. If you have a
+build system <small>(e.g. CMake)</small> in place or have an external file that
+defines all the compilation flags for your project <small>(e.g. a compilation
+database `compile_commands.json`)</small>, you can load the flags directly from
+there. For more details on differences between the flag sources refer to [this
+page](../configs/#geting-correct-compiler-flags) of the documentation.
 
-!!! tip
+!!! tip "`common_flags` and `lang_flags` are never overridden by external flag sources"
     The flags from [`common_flags`](#common_flags-flags-added-to-each-compilation) and from [`lang_flags`](#lang_flags-language-specific-flags) are **ALWAYS** present in the compilation. The flags loaded from the flag sources are appended to those and **DO NOT OVERRIDE** them.
 
 #### Possible options
@@ -119,14 +118,14 @@ CMake is handled in a special way and there are additional settings that can be 
 - `"flags": [<flags>]` <small>OPTIONAL</small> - defines a list of flags that can be passed to the `cmake` program upon calling it
 - `"prefix_paths": [<paths>]` <small>OPTIONAL</small> - defines a list of paths that will be set as prefix paths when running `cmake`
 
-#### Order of searching for flag sources
+#### Search order
 The flag sources are searched in a strictly hierarchical order from top to
 bottom. First the top-most `"file"` is searched for. If this search fails, the
 second `"file"` is searched. This continues until either one of the flag
 sources is found or the list has finished. See example below for more
 explanations.
 
-??? example
+??? example "Example flag sources <small>(click to expand)</small>"
     In this example we define a number of flag sources with some additional options:
     ```json
     "flags_sources": [
@@ -154,15 +153,17 @@ explanations.
 
     If the `CMakeLists.txt` file cannot be found, the plugin continues to search for a `Makefile` and if that fails - for a `.clang_complete` file
 
-### `show_errors`: <small>show compilation errors</small>
+### **`show_errors`**
+
 When this option is `true` the errors will be highlighted upon every file save.
 
-!!! example
+!!! example "Default value"
     ```json
     "show_errors": true,
     ```
 
-### `gutter_style`: <small>style of errors on the side pane</small>
+### **`gutter_style`**
+
 Defines the style of the gutter icon shown on the sidebar.
 
 #### Possible values
@@ -171,26 +172,28 @@ Defines the style of the gutter icon shown on the sidebar.
 - ![image](img/error_dot.png): `"dot"` 
 - `"none"`
 
-!!! example
+!!! example "Default value"
     ```json
     "gutter_style": "color",
     ```
 
-### `triggers`: <small>what triggers auto-completion</small>
+### **`triggers`**
+
 Defines all characters that trigger auto-completion. The default value is:
 
-!!! example
+!!! example "Default value"
     ```json
     "triggers" : [ ".", "->", "::", " ", "  ", "(", "[" ],
     ```
 
-### `valid_lang_syntaxes`: <small>custom syntaxes to run ECC on</small>
+### **`valid_lang_syntaxes`**
+
 A dictionary that defines a mapping from language to an array of valid
 syntaxes for it. The values here are good defaults, but feel free to
 customize the list to your liking. When modifying this setting make sure
 that all 4 languages have values.
 
-!!! example
+!!! example "Default value"
     ```json
     "valid_lang_syntaxes": {
     "C":              ["C", "C Improved", "C99"],
@@ -204,12 +207,12 @@ that all 4 languages have values.
     When specifying this setting in your user or project settings make sure to
     keep ALL language keys.
 
-### `ignore_list`: <small>don't run ECC for files that match these</small>
+### **`ignore_list`**
 Do not run the plugin for any files that match these paths. Use
 `glob/fnmatch` shell-style filename expansion. In addition, you can still use
 `'~'` to mark the home directory.
 
-!!! example
+!!! example "Default value"
     ```json
     "ignore_list": [
         "~/some_folder/*",
@@ -218,52 +221,58 @@ Do not run the plugin for any files that match these paths. Use
     ],
     ```
 
-### `use_libclang`: <small>use `libclang` for auto-completion</small>
+### **`use_libclang`**
+
 If set to `true` will use `libclang` through python bindings. This offers much better performance generally, but can be buggy on some systems. When set to `false` will use clang_binary and parse the output of `clang -Xclang -code-complete-at <some_file>` instead.
 
-!!! example
+!!! example "Default value"
     ```json
     "use_libclang" : true,
     ```
 
-### `verbose`: <small>make plugin verbose</small>
+### **`verbose`**
+
 Output lots of additional information in the console. Useful for debugging. Off by default.
 
-!!! example
+!!! example "Default value"
     ```json
     "verbose" : false,
     ```
 
-### `include_file_folder`: <small>include folder containing current file</small>
+### **`include_file_folder`**
+
 Add the folder with current file with `-I` flag.
 
-!!! example
+!!! example "Default value"
     ```json
     "include_file_folder" : true,
     ```
 
-### `include_file_parent_folder`: <small>same as above but for parent folder</small>
+### **`include_file_parent_folder`**
+
 Add the parent folder of the current file's one with `-I` flag
 
-!!! example
+!!! example "Default value"
     ```json
     "include_file_parent_folder" : true,
     ```
 
-### `clang_binary`: <small>path to clang binary</small>
+### **`clang_binary`**
+
 
 Pick the clang binary used by the plugin. This is used to determine the
-version of the plugin and pick correct libclang bindings or for code completion when the setting [`use_libclang`](#use_libclang-use-libclang-for-auto-completion) is set to `false`.
+version of the plugin and pick correct libclang bindings or for code completion when the setting [`use_libclang`](#use_libclang) is set to `false`.
 
-!!! example
+!!! example "Default value"
     ```json
     "clang_binary" : "clang++",
     ```
 
-### `cmake_binary`: <small>path to cmake binary</small>
+### **`cmake_binary`**
+
 Pick the binary used for `cmake`. 
 
-!!! example    
+!!! example "Default value"
     ```json
     "cmake_binary" : "cmake",
     ```
@@ -271,10 +280,11 @@ Pick the binary used for `cmake`.
 !!! warning
     Please make sure the binary you provide is accessible from the command line on your system.
 
-### `autocomplete_all`: <small>always complete</small>
+### **`autocomplete_all`**
+
 Ignore triggers and try to complete after each character
 
-!!! example
+!!! example "Default value"
     ```json
     "autocomplete_all" : false,
     ```
@@ -282,15 +292,17 @@ Ignore triggers and try to complete after each character
 !!! danger
     Can be very slow! Enable only if you know what you are doing!
 
-### `hide_default_completions`: <small>only show ECC completions</small>
+### **`hide_default_completions`**
+
 Hide the completions generated by Sublime Text and other plugins.
 
-!!! example
+!!! example "Default value"
     ```json
     "hide_default_completions": false,
     ```
 
-### `max_cache_age`: <small>when to remove TUs</small>
+### **`max_cache_age`**
+
 Plugin uses smart caching to not load the data for the translation units (TUs)
 more times than needed. To save space we want to clear the unused data, so we
 remove cache data older than specified time.
@@ -299,62 +311,68 @@ remove cache data older than specified time.
     - Minimum value is 30 seconds.
     - Format: `<hours>:<minutes>:<seconds>: "HH:MM:SS"`.
 
-!!! example
+!!! example "Default value"
     ```json
     "max_cache_age": "00:30:00",
     ```
 
-### `show_type_info`: <small>show type on hover</small>
+### **`show_type_info`**
+
 Show additional information on hover over function call/variable etc.
 This replaces default sublime on hover behavior.
 
-!!! example
+!!! example "Default value"
     ```json
     "show_type_info": true,
     ```
 
-### `show_type_body`: <small>show full type body on hover</small>
+### **`show_type_body`**
+
 Show body of struct/class/typedef declaration in a tooltip invoked by calling
 info enabled by the setting
-[`show_type_info`](/#show_type_info-show-type-on-hover).
+[`show_type_info`](/#show_type_info).
 
-!!! example
+!!! example "Default value"
     ```json
     "show_type_body" : true,
     ```
 
-### `libclang_path`: <small>manually define path to `libclang`</small>
+### **`libclang_path`**
+
 On some esoteric systems we cannot find `libclang` properly.
 If you know where your `libclang` is - set the full path here. This setting generally should not be needed.
 
-!!! example
+!!! example "Default value"
     ```json
     "libclang_path": "<some_path_here>",
     ```
 
-### `progress_style`: <small>pick the style of the progress notification</small>
+### **`progress_style`**
+
 Pick the progress style. There are currently these styles available:
 
-- "ColorSublime" : '⣾⣽⣻⢿⡿⣟⣯⣷'
-- "Moon"         : '🌑🌒🌓🌔🌕🌖🌗🌘'
-- "None"
+- `ColorSublime` : ⣾⣽⣻⢿⡿⣟⣯⣷
+- `Moon`         : 🌑🌒🌓🌔🌕🌖🌗🌘
+- `None`
 
-!!! example
+!!! example "Default value"
     ```json
     "progress_style": "Moon",
     ```
 
-### `use_libclang_caching`: <small>decide if we cache the TUs</small>
-Controls if `libclang` will cache the results. This works faster, but in rare
-cases can generate wrong completions. Usually it works just fine, so it is
-`true` by default.
+### **`use_libclang_caching`**
 
-!!! example
+Controls if `libclang` caches the results. This works faster, but in rare cases
+can generate wrong completions. Usually it works just fine, so it is `true` by
+default.
+
+!!! example "Default value"
     ```json
     "use_libclang_caching": true,
     ```
 
-### `header_to_source_mapping`: <small>how to find source files</small>
+### **`header_to_source_mapping`**
+
 Templates to find source files for headers in case we use a compilation
 database: Such a DB does not contain the required compile flags for header
 files. In order to find a best matching source file instead, you can use
@@ -371,7 +389,7 @@ are of the form `'{placeholdername}'`. The following placeholders can be used:
 - `stamp:`     Like `"basename"`, but with the file name extension removed.
 - `ext:`       The file name extension of the header file.
 
-??? example
+??? example "Default header - source mappings <small>(click to expand)</small>"
     ```json
     "header_to_source_mapping": [
         // Look for related files in the header's directory:
@@ -393,7 +411,8 @@ are of the form `'{placeholdername}'`. The following placeholders can be used:
     ],
     ```
 
-### `use_target_compiler_built_in_flags`: <small>better toolchain support</small>
+### **`use_target_compiler_built_in_flags`**
+
 Controls if we try to retrieve built-in flags from the target compiler. This
 option is used when we use a `compile_commands.json` file either directly or
 indirectly e.g. via CMake. If set to true, we try to ask the compiler for the
@@ -403,11 +422,13 @@ should improve the quality of the completions, however, in some corner cases it
 might cause completions to fails entirely. In this case, try to set this option
 to false.
 
-!!! example
+!!! example "Default value"
     ```json
     "use_target_compiler_built_in_flags": true,
     ```
-### Target compilers
+
+### **`target_xxx_compiler`**
+ <small>(xxx - is a language)</small>
 The below options allow to set the actual target compilers (i.e. the one you
 use in your build chain). If they are set, we will ask the compilers for their
 built in flags (defines and include paths) and pass them to the clang compiler
@@ -418,7 +439,7 @@ are only used if the target compiler cannot be retrieved otherwise, e.g. from a
 `compile_commands.json` file. Note: The set compilers will also be passed to
 CMake if you use it as source.
 
-!!! example
+!!! example "Default value"
     ```json
     "target_c_compiler": null,
     "target_cpp_compiler": null,
@@ -426,14 +447,15 @@ CMake if you use it as source.
     "target_objective_cpp_compiler": null,
     ```
 
-### `expand_template_types`: <small>expand templates</small>
+### **`expand_template_types`**
+
 Expand template types and add more hyperlinks when showing info on hover. For
 example, `std::shared_ptr<Foo> foo` will expand to show hyperlinks to both
 `std::shared_ptr` and the template type, `Foo`. This may cause some types and
 typedefs to be verbose. For example, `std::string foo` expands to
 `std::string<char, char_traits<char>, allocator<char>> foo`.
   
-!!! example
+!!! example "Default value"
     ```json
     "expand_template_types": true,
     ```

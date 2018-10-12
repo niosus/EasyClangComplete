@@ -2,8 +2,8 @@ site_name: EasyClangComplete
 pages:
     - Getting started: index.md
     - Configure compiler flags: configs.md
-    - Settings: settings.md
-    - Support the project: support.md
+    - Full settings guide: settings.md
+    - Support project: support.md
     - About me: about.md
 theme:
   name: 'material'

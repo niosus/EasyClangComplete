@@ -2,11 +2,15 @@
 There are multiple options to configure the plugin in such a way that
 everything works without major pain. This document outlines all these ways.
 
+!!! tip "Prefer CMake and Sublime Text projects"
+    The preferred way is to use Sublime Text project to organize your code and to use CMake as your build system. This way the plugin should work out of the box. See details [below](#using-cmake-recommended).
+
 ## All flag sources <small>from settings and external</small>
 There are two major sources for flags:
 
-1. Flags defined in settings of ECC
-2. Flags generated from a flag source defined in `flag_sources` [settings](../settings/#flags_sources-external-sources-of-compilation-flags)
+1. Flags defined in settings of ECC.
+2. Flags generated from a flag source defined in `flag_sources`
+   [settings](../settings/#flags_sources).
 
 !!! tip
     The flags defined in settings are **always** used when compiling a new translation unit. They are **appended** to the ones generated from the external sources. Note, that the settings follow a hierarchy described in detail [here](../settings/#settings-hierarchy).
@@ -18,13 +22,12 @@ instead. It will save you enormous amounts of time configuring the needed
 include flags. However, if you know what you're doing, the main sources of
 flags in settings:
 
-- flags defined in the `common_flags`
-  [setting](../settings/#common_flags-flags-added-to-each-compilation) - flags
-  added to **each** compilation of every file. See the link for an example.
-- flags defined in the `lang_flags`
-  [setting](../settings/#lang_flags-language-specific-flags) - flags added to
-  each compilation in addition to the `common_flags` but only for a specific
-  language.
+- Flags defined in the `common_flags` [setting](../settings/#common_flags) -
+  flags added to **each** compilation of every file. See the link for an
+  example.
+- Flags defined in the `lang_flags` [setting](../settings/#lang_flags) - flags
+  added to each compilation in addition to the `common_flags` but only for a
+  specific language.
 
 ## Flags defined in external flags sources
 
@@ -32,13 +35,14 @@ flags in settings:
 
 EasyClangComplete can search for `CMakeLists.txt` and generate a
 `compile_commands.json` file from it. See next
-[section](#using-compile_commandsjson) for details on how this file is parsed.
+[section](#using-a-compilation-database-compile_commandsjson) for details on
+how this file is parsed.
 
 To use `CMake` way of generating flags, make sure you set the `"flags_sources"`
 in your settings. See how to set this setting correctly
-[here](../settings/#flags_sources-external-sources-of-compilation-flags).
+[here](../settings/#flags_sources).
 
-??? note "Catkin setup"
+??? note "Catkin setup <small>(click to expand)</small>"
     
     #### Catkin configuration
 
@@ -68,8 +72,8 @@ This file defines the flags per target (read more about it
 file is found, EasyClangComplete reads it and finds appropriate target given
 the file which is currently opened by the user.
 
-??? example "Example `compile_commands.json` file"
-    ```json
+??? example "Example `compile_commands.json` file <small>(click to expand)</small>"
+    ```json tab="compile_commands.json"
     [
         {
           "directory": "/main_dir",
@@ -90,17 +94,21 @@ the file which is currently opened by the user.
     the plugin will try to search for the source file with matching name in the
     same folder as the header file. If this is not enough, use the setting
     `header_to_source_mapping`
-    ([details](../settings/#header_to_source_mapping-how-to-find-source-files))
+    ([details](../settings/#header_to_source_mapping))
     in order to define a better mapping from header files to source ones.
 
 ### Using `.clang_complete` file
 This is a simple text file where each line defines a single flag. Don't forget, that you must specify the flags fully here. The paths that are not absolute will be expanded from the location of the `.clang_complete` file. The same wildcards as in [settings](../settings/#common-path-wildcards) can be used here too.
 
-??? example "Example `.clang_complete` file"
-    ```
-    -I~.config/sublime-text-3/Packages/EasyClangComplete/src blah
+??? example "Example `.clang_complete` file <small>(click to expand)</small>"
+    ``` tab=".clang_complete"
+    -I~.config/sublime-text-3/Packages/EasyClangComplete/src
     -I~.config/sublime-text-3/Packages/EasyClangComplete
     -Ilocal_folder
     -Wabi
     -std=c++14
     ```
+
+    The first two lines will have `~` expanded to your home directory,
+    `local_folder` will be appended to the location of the `.clang_complete`
+    file, other flags will be keps intact.
