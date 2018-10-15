@@ -122,7 +122,8 @@ class ClangUtils:
                     # [HACK]: wtf??? why does it not find libclang.dylib?
                     get_library_path_cmd = [clang_binary, "-print-file-name="]
                 elif platform.system() == "Windows":
-                    get_library_path_cmd = [clang_binary, "-print-prog-name=clang"]
+                    get_library_path_cmd = [clang_binary,
+                                            "-print-prog-name=clang"]
                     # Don't let console window pop-up briefly.
                     startupinfo = subprocess.STARTUPINFO()
                     startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
