@@ -183,9 +183,8 @@
   // clang compiler which is used to generate the code completion.
   // Usually, this option should improve the quality of the
   // completions, however, in some corner cases it might cause
-  // completions to fails entirely. In this case, try to
-  // set this option to false.
-  "use_target_compiler_built_in_flags": true,
+  // completions to fails entirely.
+  "use_target_compiler_built_in_flags": false,
 
   // Target compilers.
   // The below options allow to set the actual target compilers (i.e.

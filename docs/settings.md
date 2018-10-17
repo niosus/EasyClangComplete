@@ -426,14 +426,14 @@ Controls if we try to retrieve built-in flags from the target compiler. This
 option is used when we use a `compile_commands.json` file either directly or
 indirectly e.g. via CMake. If set to true, we try to ask the compiler for the
 defines and include paths it sets implicitly and pass them to the clang
-compiler which is used to generate the code completion. Usually, this option
-should improve the quality of the completions, however, in some corner cases it
-might cause completions to fails entirely. In this case, try to set this option
-to false.
+compiler which is used to generate the code completion.If your completions
+require the knowledge about the toolchain, this option should improve the
+quality of the completions, however, in some corner cases it might cause
+completions to fails entirely.
 
 !!! example "Default value"
     ```json
-    "use_target_compiler_built_in_flags": true,
+    "use_target_compiler_built_in_flags": false,
     ```
 
 ### **`target_xxx_compiler`**
