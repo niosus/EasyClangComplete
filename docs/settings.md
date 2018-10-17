@@ -4,6 +4,11 @@
 - Project settings <small> (defined in a [`.sublime-project`][subl-proj] file for a specific project)
   </small>
 
+!!! warning 
+    Project-related settings will only work when your code has a
+    `.sublime-project` file related to it. For documentation on using the
+    Sublime Text projects please refer [here][subl-proj].
+
 ## Settings hierarchy
 1. If no settings are defined the **Default** ones are used
 2. **User** settings have precedence over the **Default** ones
@@ -19,11 +24,6 @@ Every path variable in settings can contain wildcards:
 - `~` is replaced by the path to user home directory.
 - `*` when put at the end of folder path expands to all folders in that
   folder. Not recursive.
-
-!!! warning 
-    Project-related settings will only work when your code has a
-    `.sublime-project` file related to it. For documentation on using the
-    Sublime Text projects please refer [here][subl-proj].
 
 ## Using environmental variables
 In addition to the variables described above, you can use your environment

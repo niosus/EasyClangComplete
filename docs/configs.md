@@ -42,30 +42,6 @@ To use `CMake` way of generating flags, make sure you set the `"flags_sources"`
 in your settings. See how to set this setting correctly
 [here](../settings/#flags_sources).
 
-??? note "Catkin setup <small>(click to expand)</small>"
-    
-    #### Catkin configuration
-
-    For those using `catkin` (e.g. when developing with ROS) the plugin will
-    configure the needed settings automatically if you are using Sublime Text
-    projects. Here is a summary of what the plugin does for you. By default
-    when running Sublime Text from GUI it knows nothing about the paths set in
-    `.bashrc` of your system. So the plugin needs to update the
-    `CMAKE_PREFIX_PATH` to be able to find `catkin`. Your `*.sublime-project` will look something like this after the configuration:
-
-    ```json tab="*.sublime-project"
-    "ecc_flags_sources": [
-        {
-          "file": "CMakeLists.txt",
-          "prefix_paths": [ "/opt/ros/indigo",
-                            "~/catkin_ws/devel" ]
-        },
-    ]
-    ```
-
-    !!! warning
-        This will only work if you are using Sublime Text projects with your code. Otherwise no configuration will take place and the proper compiler flags will **NOT** be generated.
-
 ### Using a compilation database <small>`compile_commands.json`</small>
 This file defines the flags per target (read more about it
 [here](https://clang.llvm.org/docs/JSONCompilationDatabase.html)). When this
@@ -112,3 +88,105 @@ This is a simple text file where each line defines a single flag. Don't forget, 
     The first two lines will have `~` expanded to your home directory,
     `local_folder` will be appended to the location of the `.clang_complete`
     file, other flags will be keps intact.
+
+## Configurations that require manual actions
+Some configurations cannot be configured without the knowledge that only the end user has. These usually include cases when the code generates files that must be included for proper code completions or when additional paths need to be provided to CMake when it is used as part of some other tool.
+
+Below we will provide a list of the ones most commonly used.
+
+??? note "Catkin setup <small>(click to expand)</small>"
+    
+    ### Catkin configuration
+
+    For those using Catkin (e.g. when developing with
+    [ROS](http://www.ros.org)) the plugin will configure the needed settings
+    automatically if you are using Sublime Text projects. Here is a summary of
+    what the plugin does for you. By default when running Sublime Text from GUI
+    it knows nothing about the paths set in `.bashrc` of your system and
+    therefore it cannot source your `devel` workspaces for you. Essentially
+    sourcing the workspaces extends paths that Catkin uses to pass to CMake. So
+    the plugin needs to update the `CMAKE_PREFIX_PATH` manually to be able to
+    find `catkin`. Your `*.sublime-project` will look something like this after
+    the configuration:
+
+    ```json tab="*.sublime-project"
+    "ecc_flags_sources": [
+        {
+          "file": "CMakeLists.txt",
+          "prefix_paths": [ "/opt/ros/indigo",
+                            "~/catkin_ws/devel" ]
+        },
+    ]
+    ```
+
+    !!! warning
+
+        This will only work if you are using Sublime Text projects with your
+        code. Otherwise no configuration will take place and the proper
+        compiler flags will **NOT** be generated. You can set these settings
+        also in yout **User** settings dropping the `ecc_` prefix, but this is
+        not a recommended.
+
+??? note "Qt setup <small>(click to expand)</small>"
+    
+    ### Qt configuration
+
+    If you use Sublime Text for your Qt development and you use MOC files, you
+    will need some additional setup. MOC generates header and source files from
+    your `*.ui` files. These files are generated in the build folder of your
+    project. As ECC uses a custom temporary location for your projects' CMake
+    configuration it does not know about the real build location for your code
+    (we might change this in the future, but this is the state for now). You
+    will need to provide the build folder location in your flags.
+
+    The best way to do this is to modify the `ecc_common_flags` setting in your
+    Sublime Text project file (`*.sublime-project`). You will need to add a new
+    include flag with the path to your build folder.
+
+    !!! example
+
+        For the sake of example let's consider that your project `my_project`
+        gets built in a folder `~/YourBuildFolder/my_project`. Also, your code
+        lies in `src` folder within the project. Then you will want to add the
+        following include to your settings:
+
+        ```json
+        {
+            "settings":
+            {
+                "ecc_common_flags":
+                [
+                    // Don't forget your other includes!
+                    "-I~/YourBuildFolder/$project_name/src"
+                ],
+            }
+        }
+        ```
+
+        This way ECC will add this path as an include path when compiling your
+        code and will be able to find the header files generated by the MOC
+        system.
+
+    !!! tip "Tip: use wildcards!"
+
+        Configuration is much easier if you use the available wildcards such as
+        the `$project_name` seen in the example above. For a full list of
+        available wildcards, see the
+        [wildcards](../settings/#common-path-wildcards) section on the settings
+        page.
+
+    !!! tip "Tip: clean project after changing this setting"
+
+        If changing the setting does not work, make use of the Clear CMake
+        cache [command](../commands/#clear-cmake-cache) as ECC might still be
+        using a cached version of the flags.
+
+    !!! warning
+
+        In my experience, the setting
+        `ecc_use_target_compiler_built_in_flags` sometimes interferes with
+        properly building Qt projects. So I recommend setting it to false:
+        
+        ```json
+        "ecc_use_target_compiler_built_in_flags": false,
+        ```
