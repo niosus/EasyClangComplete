@@ -1,5 +1,6 @@
 """Incapsulate popup creation."""
 
+import os
 import sublime
 import mdpopups
 import markupsafe
@@ -406,7 +407,7 @@ class Popup:
         result = ""
         if location and location.file and location.file.name:
             result += "[" + text + "]"
-            result += "(" + location.file.name
+            result += "(" + os.path.abspath(location.file.name)
             result += ":" + str(location.line)
             result += ":" + str(location.column)
             result += ")"
