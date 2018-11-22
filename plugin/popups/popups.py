@@ -11,7 +11,11 @@ POPUP_CSS_FILE = "Packages/EasyClangComplete/plugin/popups/popup.css"
 
 log = logging.getLogger("ECC")
 
-MD_TEMPLATE = """!!! {type}
+MD_TEMPLATE = """\
+---
+allow_code_wrap: true
+---
+!!! {type}
     {contents}
 """
 
