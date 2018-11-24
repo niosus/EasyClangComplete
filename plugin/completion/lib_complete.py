@@ -39,7 +39,10 @@ cindex_dict = {
     '8.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
 }
 
-GLOBAL_TRIGGERS = ["::", "\t", " "]  # Triggers that should show types.
+# Triggers that should show types.
+GLOBAL_TRIGGERS = [":", "\t", " "]
+# All symbols that can be part of a valid trigger.
+ALLOWED_TRIGGER_SYMBOLS = [":", " ", "\t", ".", "-", ">"]
 
 
 class Completer(BaseCompleter):
@@ -235,7 +238,12 @@ class Completer(BaseCompleter):
         else:
             point = completion_request.get_trigger_position()
             trigger = view.substr(point - 2) + view.substr(point - 1)
-            if trigger not in GLOBAL_TRIGGERS:
+            log.debug("Current trigger: '%s'", trigger)
+            # We clean trigger from all symbols that cannot be part of one.
+            sanitized_trigger = ''.join(
+                [c for c in trigger if c in ALLOWED_TRIGGER_SYMBOLS])
+            log.debug("Current sanitized_trigger: '%s'", sanitized_trigger)
+            if sanitized_trigger not in GLOBAL_TRIGGERS:
                 excluded = self.bigger_ignore_list
             else:
                 excluded = self.default_ignore_list
