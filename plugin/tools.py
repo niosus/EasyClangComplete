@@ -298,7 +298,7 @@ class File:
         Args:
             file_name (str): Search for the file with this name
             search_scope (SearchScope): scope where to search for file
-            search_content (str, optional): String that the file must contain
+            search_content (str, list, optional): the file must contain these
 
         Returns:
             File: found file
