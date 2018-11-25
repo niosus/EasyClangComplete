@@ -270,9 +270,17 @@ class EasyClangComplete(sublime_plugin.EventListener):
             except AttributeError as e:
                 log.debug("cannot clear status, %s", e)
             return
+
+        settings = EasyClangComplete.settings_manager.settings_for_view(view)
+        if (not Tools.has_valid_syntax(view, settings)) \
+                or Tools.is_ignored(view.file_name(), settings.ignore_list):
+            try:
+                EasyClangComplete.thread_pool.progress_status.erase_status()
+            except AttributeError as e:
+                log.debug("cannot clear status, %s", e)
+            return
         EasyClangComplete.thread_pool.progress_status.showing = True
         log.debug("on_activated_async view id %s", view.buffer_id())
-        settings = EasyClangComplete.settings_manager.settings_for_view(view)
         # All is taken care of. The view is built if needed.
         job = ThreadJob(
             name=ThreadJob.UPDATE_TAG,
