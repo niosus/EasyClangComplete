@@ -42,7 +42,7 @@ class SettingsStorage:
                     "CppProperties.json",
                     "c_cpp_properties.json",
                     ".clang_complete"]
-    FLAG_SOURCES_ENTRIES_WITH_PATHS = ["search_in", "prefix_paths"]
+    FLAG_SOURCES_ENTRIES_WITH_PATHS = ["search_in", "prefix_paths", "flags"]
 
     PREFIXES = ["ecc_", "easy_clang_complete_"]
 
