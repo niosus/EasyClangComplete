@@ -53,6 +53,7 @@ class TestViewConfig(GuiTestWrapper):
         self.set_up_view(file_name)
         manager = SettingsManager()
         settings = manager.settings_for_view(self.view)
+        settings.use_default_includes = True
         view_config = ViewConfig(self.view, settings)
 
         self.assertIsNotNone(view_config.completer)
@@ -68,7 +69,7 @@ class TestViewConfig(GuiTestWrapper):
                 return
         completer = view_config.completer
         print(completer.clang_flags)
-        self.assertEqual(len(completer.clang_flags), 20)
+        self.assertEqual(len(completer.clang_flags), 14)
         # test from the start
         self.assertEqual(completer.clang_flags[0], '-c')
         self.assertEqual(completer.clang_flags[1], '-fsyntax-only')
@@ -79,7 +80,7 @@ class TestViewConfig(GuiTestWrapper):
         expected = path.join(path.dirname(
             path.dirname(__file__)), 'local_folder')
         # test include folders
-        self.assertEqual(len(view_config.include_folders), 14)
+        self.assertEqual(len(view_config.include_folders), 8)
         self.assertTrue(expected in view_config.include_folders)
 
         # test include flag

@@ -421,7 +421,8 @@ class ViewConfig(object):
         lang_flags += lang_args
 
         # Get the default settings from the default clang compiler.
-        lang_flags += ViewConfig.__get_default_includes(settings)
+        if settings.use_default_includes:
+            lang_flags += ViewConfig.__get_default_includes(settings)
 
         # If the user provided explicit target compilers, retrieve their
         # default flags and append them to the list:

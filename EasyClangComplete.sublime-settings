@@ -89,6 +89,10 @@
   // `clang_binary -Xclang -code-complete-at...` instead.
   "use_libclang" : true,
 
+  // Use default includes that we get from running the command:
+  // `clang_binary -c /tmp/test.cc -v`
+  "use_default_includes": true,
+
   // make plugin verbose
   "verbose" : false,
 
