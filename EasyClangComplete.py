@@ -543,6 +543,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         trigger_pos = locations[0] - len(prefix)
         completion_request = tools.ActionRequest(view, trigger_pos)
         current_pos_id = completion_request.get_identifier()
+        pos_status = Tools.get_pos_status(trigger_pos, view, settings)
         log.debug("this position has identifier: '%s'", current_pos_id)
 
         current_job_id = EasyClangComplete.current_job_id
@@ -553,7 +554,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 settings.hide_default_completions)
 
         # Verify that character under the cursor is one allowed trigger
-        pos_status = Tools.get_pos_status(trigger_pos, view, settings)
         if pos_status == PosStatus.WRONG_TRIGGER:
             # we are at a wrong trigger, remove all completions from the list
             log.debug("wrong trigger")
