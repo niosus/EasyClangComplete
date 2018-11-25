@@ -2,6 +2,7 @@ site_name: EasyClangComplete
 nav:
     - Getting started: index.md
     - Configure compiler flags: configs.md
+    - Complete includes: includes_completion.md
     - Full settings guide: settings.md
     - Available commands: commands.md
     - Support project: support.md

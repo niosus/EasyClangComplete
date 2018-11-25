@@ -6,11 +6,12 @@ everything works without major pain. This document outlines all these ways.
     The preferred way is to use Sublime Text project to organize your code and to use CMake as your build system. This way the plugin should work out of the box. See details [below](#using-cmake-recommended).
 
 ## All flag sources <small>from settings and external</small>
-There are two major sources for flags:
+There are three major sources for flags:
 
 1. Flags defined in settings of ECC.
-2. Flags generated from a flag source defined in `flag_sources`
+2. Flags generated from a flag source defined in `flags_sources`
    [settings](../settings/#flags_sources).
+3. Flags generated from the compiler.
 
 !!! tip
     The flags defined in settings are **always** used when compiling a new translation unit. They are **appended** to the ones generated from the external sources. Note, that the settings follow a hierarchy described in detail [here](../settings/#settings-hierarchy).
@@ -88,6 +89,10 @@ This is a simple text file where each line defines a single flag. Don't forget, 
     The first two lines will have `~` expanded to your home directory,
     `local_folder` will be appended to the location of the `.clang_complete`
     file, other flags will be keps intact.
+
+## Flags generated from the compiler
+
+Some flags can be generated from the compiler. These are mainly governed by two settings: [`use_default_includes`](../settings/#use-default-includes) and [`use_target_compiler_built_in_flags`](../settings/#use-target-compiler-built-in-flags). These will run some command over a chosen compiler and will append these flags to the other ones. Click on the setting names above to read more about them.
 
 ## Configurations that require manual actions
 Some configurations cannot be configured without the knowledge that only the end user has. These usually include cases when the code generates files that must be included for proper code completions or when additional paths need to be provided to CMake when it is used as part of some other tool.

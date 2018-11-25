@@ -239,6 +239,21 @@ If set to `true` will use `libclang` through python bindings. This offers much b
     "use_libclang" : true,
     ```
 
+### **`use_default_includes`**
+
+If set to `true` there will be default includes added to the `"common_flags"`. We generate these includes from running the following command on some empty temp file `test.cc`:
+
+```bash
+<clang_binary> -c test.cc -v 
+```
+
+See [`clang_binary`](#clang_binary) setting for more details on what clang binary will be in use.
+
+!!! example "Default value"
+    ```json
+    "use_default_includes" : true,
+    ```
+
 ### **`verbose`**
 
 Output lots of additional information in the console. Useful for debugging. Off by default.
