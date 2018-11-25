@@ -182,7 +182,7 @@ class ViewConfig(object):
         prefixes = completer.compiler_variant.include_prefixes
 
         init_flags = completer.compiler_variant.init_flags
-        lang_flags = ViewConfig.__get_lang_flags(
+        lang_flags = ViewConfig.__get_default_flags(
             view, settings, completer.compiler_variant.need_lang_flags)
         common_flags = ViewConfig.__get_common_flags(prefixes, settings)
         source_flags = ViewConfig.__load_source_flags(view, settings, prefixes)
@@ -388,7 +388,7 @@ class ViewConfig(object):
         return get_includes_from_clang(output)
 
     @staticmethod
-    def __get_lang_flags(view, settings, need_lang_flags):
+    def __get_default_flags(view, settings, need_lang_flags):
         """Get language flags.
 
         Args:
