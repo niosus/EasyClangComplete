@@ -364,6 +364,30 @@ class ViewConfig(object):
         return completer
 
     @staticmethod
+    def __get_default_includes(settings):
+        temp_dir = Tools.get_temp_dir()
+        temp_file_name = path.join(temp_dir, 'temp.cc')
+        File(temp_file_name)  # Creates the file on disk.
+        clang_cmd = [settings.clang_binary, '-c', 'temp.cc', '-v']
+        output = Tools.run_command(clang_cmd, cwd=temp_dir)
+
+        def get_includes_from_clang(clang_output):
+            lines = clang_output.split('\n')
+            start_idx = 0
+            end_idx = 0
+            for idx, line in enumerate(lines):
+                if line.startswith('#include <...>'):
+                    start_idx = idx + 1
+                elif line.startswith('End of search'):
+                    end_idx = idx
+            includes = []
+            for idx in range(start_idx, end_idx):
+                includes.append('-I' + path.normpath(lines[idx].strip()))
+            return includes
+
+        return get_includes_from_clang(output)
+
+    @staticmethod
     def __get_lang_flags(view, settings, need_lang_flags):
         """Get language flags.
 
@@ -395,6 +419,9 @@ class ViewConfig(object):
         if need_lang_flags:
             lang_flags += ["-x", target_lang]
         lang_flags += lang_args
+
+        # Get the default settings from the default clang compiler.
+        lang_flags += ViewConfig.__get_default_includes(settings)
 
         # If the user provided explicit target compilers, retrieve their
         # default flags and append them to the list:
