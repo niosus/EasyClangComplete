@@ -17,15 +17,6 @@
 	"settings":
 	{
 		"easy_clang_complete_verbose": true,
-		"ecc_common_flags": [
-			"-I/usr/include/c++/7.3.0",
-			"-I/usr/include/x86_64-linux-gnu/c++/7.3.0",
-			"-I/usr/include/c++/7.3.0/backward",
-			"-I/usr/include/clang/6.0.0/include",
-			"-I/usr/local/include",
-			"-I/usr/include/x86_64-linux-gnu",
-			"-I/usr/include",
-		],
 		"ecc_flags_sources":
 		[
 			{
