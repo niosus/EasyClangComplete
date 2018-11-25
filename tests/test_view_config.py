@@ -53,7 +53,7 @@ class TestViewConfig(GuiTestWrapper):
         self.set_up_view(file_name)
         manager = SettingsManager()
         settings = manager.settings_for_view(self.view)
-        settings.use_default_includes = True
+        settings.use_default_includes = False
         view_config = ViewConfig(self.view, settings)
 
         self.assertIsNotNone(view_config.completer)
