@@ -92,7 +92,7 @@ This is a simple text file where each line defines a single flag. Don't forget, 
 
 ## Flags generated from the compiler
 
-Some flags can be generated from the compiler. These are mainly governed by two settings: [`use_default_includes`](../settings/#use-default-includes) and [`use_target_compiler_built_in_flags`](../settings/#use-target-compiler-built-in-flags). These will run some command over a chosen compiler and will append these flags to the other ones. Click on the setting names above to read more about them.
+Some flags can be generated from the compiler. These are mainly governed by two settings: [use_default_includes](../settings/#use_default_includes) and [use_target_compiler_built_in_flags](../settings/#use_target_compiler_built_in_flags). These will run some command over a chosen compiler and will append these flags to the other ones. Click on the setting names above to read more about them.
 
 ## Configurations that require manual actions
 Some configurations cannot be configured without the knowledge that only the end user has. These usually include cases when the code generates files that must be included for proper code completions or when additional paths need to be provided to CMake when it is used as part of some other tool.
