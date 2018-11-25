@@ -79,7 +79,7 @@ class TestViewConfig(GuiTestWrapper):
         expected = path.join(path.dirname(
             path.dirname(__file__)), 'local_folder')
         # test include folders
-        self.assertEqual(len(view_config.include_folders), 8)
+        self.assertEqual(len(view_config.include_folders), 14)
         self.assertTrue(expected in view_config.include_folders)
 
         # test include flag
