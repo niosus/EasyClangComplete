@@ -133,7 +133,9 @@ class Popup:
     @staticmethod
     def error(text, settings):
         """Initialize a new error popup."""
-        popup = Popup((settings.popup_maximum_width, settings.popup_maximum_height))
+        popup = Popup((
+            settings.popup_maximum_width, settings.popup_maximum_height
+        ))
         popup.__popup_type = 'panel-error "ECC: Error"'
         popup.__text = markupsafe.escape(text)
         return popup
@@ -141,7 +143,9 @@ class Popup:
     @staticmethod
     def warning(text, settings):
         """Initialize a new warning popup."""
-        popup = Popup((settings.popup_maximum_width, settings.popup_maximum_height))
+        popup = Popup((
+            settings.popup_maximum_width, settings.popup_maximum_height
+        ))
         popup.__popup_type = 'panel-warning "ECC: Warning"'
         popup.__text = markupsafe.escape(text)
         return popup
@@ -212,7 +216,9 @@ class Popup:
     @staticmethod
     def info(cursor, cindex, settings):
         """Initialize a new warning popup."""
-        popup = Popup((settings.popup_maximum_width, settings.popup_maximum_height))
+        popup = Popup((
+            settings.popup_maximum_width, settings.popup_maximum_height
+        ))
         popup.__popup_type = 'panel-info "ECC: Info"'
         is_type_decl = cursor.kind in [
             cindex.CursorKind.STRUCT_DECL,
@@ -451,7 +457,9 @@ class Popup:
 
     def info_objc(cursor, cindex, settings):
         """Provide information about Objective C cursors."""
-        popup = Popup((settings.popup_maximum_width, settings.popup_maximum_height))
+        popup = Popup((
+            settings.popup_maximum_width, settings.popup_maximum_height
+        ))
         popup.__popup_type = 'panel-info "ECC: Info"'
         is_message = cursor.kind in [
             cindex.CursorKind.OBJC_MESSAGE_EXPR,

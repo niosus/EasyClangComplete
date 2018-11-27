@@ -429,7 +429,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    -(void)[interfaceMethodVoidTwoParametersSecondUnnamed]({file}:24:10):(int)int1 :(int)int2"""
+    -(void)[interfaceMethodVoidTwoParametersSecondUnnamed]\
+({file}:24:10):(int)int1 :(int)int2"""
         expected_info_msg = fmt.format(file=file_name)
 
         # Make sure we remove trailing spaces on the right to comply with how
@@ -466,7 +467,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    +([Foo *]({file}:6:8))[interfaceClassMethodFooTwoFooParameters]({file}:26:10):([Foo *]({file}:6:8))f1 fooParam2:([Foo *]({file}:6:8))f2"""
+    +([Foo *]({file}:6:8))[interfaceClassMethodFooTwoFooParameters]\
+({file}:26:10):([Foo *]({file}:6:8))f1 fooParam2:([Foo *]({file}:6:8))f2"""
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -854,7 +856,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7), int, *ECC: unknown*&gt; [instanceClassTypeInt]({file}:9:32)
+    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7), int, \
+*ECC: unknown*&gt; [instanceClassTypeInt]({file}:9:32)
 """
         expected_info_msg = fmt.format(file=file_name)
 
@@ -892,7 +895,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    [TemplateClass&lt;Foo, int, 123&gt;]({file}:3:7) [instanceClassTypeInt]({file}:9:32)
+    [TemplateClass&lt;Foo, int, 123&gt;]({file}:3:7) \
+[instanceClassTypeInt]({file}:9:32)
 """
         expected_info_msg = fmt.format(file=file_name)
 
@@ -930,7 +934,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7)&gt; [instanceClassAndDefaults]({file}:10:22)
+    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7)&gt; \
+[instanceClassAndDefaults]({file}:10:22)
 """
         expected_info_msg = fmt.format(file=file_name)
 
@@ -968,7 +973,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    [TemplateClass]({file}:3:7)&lt;[TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7)&gt;&gt; [instanceNested]({file}:11:37)
+    [TemplateClass]({file}:3:7)&lt;[TemplateClass]({file}:3:7)&lt;\
+[Foo]({file}:1:7)&gt;&gt; [instanceNested]({file}:11:37)
 """
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -1005,7 +1011,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) \\*&gt; [instancePointer]({file}:12:23)
+    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) \\*&gt; \
+[instancePointer]({file}:12:23)
 """
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -1041,7 +1048,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) &amp;&gt; [instanceRef]({file}:13:23)
+    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) &amp;&gt; \
+[instanceRef]({file}:13:23)
 """
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -1078,7 +1086,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    [TemplateClass]({file}:3:7)&lt;[Foo &amp;&amp;]({file}:1:7)&gt; [instanceRValueRef]({file}:14:24)
+    [TemplateClass]({file}:3:7)&lt;[Foo &amp;&amp;]({file}:1:7)&gt; \
+[instanceRValueRef]({file}:14:24)
 """
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -1160,7 +1169,8 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    void [foo]({file}:6:8) ([TemplateClass]({file}:3:7)&lt;Foo &amp;&amp;, int, *ECC: unknown*&gt;)
+    void [foo]({file}:6:8) \
+([TemplateClass]({file}:3:7)&lt;Foo &amp;&amp;, int, *ECC: unknown*&gt;)
 """
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
