@@ -124,9 +124,10 @@ class Popup:
     WRAPPER_CLASS = "ECC"
 
     def __init__(self, max_dimensions):
-        """ Initialize basic needs. 'max_dimensions' is a tuple of
-        (maximum_width, maximum_height) in pixels.
-        """
+        """Initialize basic needs.
+
+        'max_dimensions' is a tuple of (maximum_width, maximum_height) in
+        pixels."""
         self.CSS = sublime.load_resource(POPUP_CSS_FILE)
         self.max_width, self.max_height = max_dimensions
 
