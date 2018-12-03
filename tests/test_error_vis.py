@@ -430,7 +430,8 @@ allow_code_wrap: true
 !!! panel-info "ECC: Info"
     ## Declaration: ##
     -(void)[interfaceMethodVoidTwoParametersSecondUnnamed]\
-({file}:24:10):(int)int1 :(int)int2"""
+({file}:24:10):(int)int1 :(int)int2
+"""
         expected_info_msg = fmt.format(file=file_name)
 
         # Make sure we remove trailing spaces on the right to comply with how
@@ -468,7 +469,8 @@ allow_code_wrap: true
 !!! panel-info "ECC: Info"
     ## Declaration: ##
     +([Foo *]({file}:6:8))[interfaceClassMethodFooTwoFooParameters]\
-({file}:26:10):([Foo *]({file}:6:8))f1 fooParam2:([Foo *]({file}:6:8))f2"""
+({file}:26:10):([Foo *]({file}:6:8))f1 fooParam2:([Foo *]({file}:6:8))f2
+"""
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
