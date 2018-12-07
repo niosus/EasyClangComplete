@@ -471,17 +471,4 @@ CMake if you use it as source.
     "target_objective_cpp_compiler": null,
     ```
 
-### **`expand_template_types`**
-
-Expand template types and add more hyperlinks when showing info on hover. For
-example, `std::shared_ptr<Foo> foo` will expand to show hyperlinks to both
-`std::shared_ptr` and the template type, `Foo`. This may cause some types and
-typedefs to be verbose. For example, `std::string foo` expands to
-`std::string<char, char_traits<char>, allocator<char>> foo`.
-  
-!!! example "Default value"
-    ```json
-    "expand_template_types": true,
-    ```
-
 [subl-proj]: https://www.sublimetext.com/docs/3/projects.html

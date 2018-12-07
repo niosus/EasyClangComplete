@@ -4,6 +4,7 @@ import sublime
 import mdpopups
 import markupsafe
 import logging
+import re
 
 from ..utils.macro_parser import MacroParser
 
@@ -142,22 +143,23 @@ class Popup:
         return popup
 
     @staticmethod
-    def declaration_for_type(clang_type, cindex, expand_template_types):
+    def declaration_for_type(clang_type,
+                             cindex,
+                             default_spelling=None):
         """Get declaration for a cindex.Type.
 
         Includes a hyperlink to the type's definition, and, if type
         has template parameters, to the the definitions of each
         template paremeter's type too.
         """
+        log.debug("SPELLING: %s", clang_type.spelling)
         if clang_type.kind == cindex.TypeKind.POINTER:
             pointee_type = clang_type.get_pointee()
-            pointee_text = Popup.declaration_for_type(pointee_type, cindex,
-                                                      expand_template_types)
+            pointee_text = Popup.declaration_for_type(pointee_type, cindex)
             return pointee_text + ' \\*'
         if clang_type.kind == cindex.TypeKind.LVALUEREFERENCE:
             referee_type = clang_type.get_pointee()
-            referee_text = Popup.declaration_for_type(referee_type, cindex,
-                                                      expand_template_types)
+            referee_text = Popup.declaration_for_type(referee_type, cindex)
             return referee_text + ' &'
         if clang_type.spelling is None or clang_type.spelling == "":
             # This happens, for example, when using an integer literal as
@@ -165,48 +167,74 @@ class Popup:
             # when hovering over fooArray, we iterate through
             # fooArray's template arguments, but the argument for '5' has
             # None for spelling.
-            # For now, just show a placeholder 'unknown' message because
-            # we can't easily determine what to show here.
-            # @todo: In the future, we could find a way to parse this and
-            # correctly show '5' instead of 'unknown'.
-            # cursor.spelling for 'fooArray' is the text 'std::array<Foo, 5>'.
-            # We generally ignore cursor.spelling here because iterating
-            # through template types lets us put a hyperlink to Foo's
-            # definition. With more effort, we could parse the '5' out of
-            # cursor.spelling and insert that here.
-            return "*ECC: unknown*"  # in italics
+            # We show a default spelling here.
+            return default_spelling
 
         num_template_args = clang_type.get_num_template_arguments()
         declaration_text = ''
-        if not expand_template_types or num_template_args <= 0:
+        if num_template_args < 1:
             # Just link to the type
+            log.debug('Number of template args is too low.')
             declaration_text += Popup.link_from_location(
                 Popup.location_from_type(clang_type),
                 clang_type.spelling,
                 trailing_space=False)
-        else:
-            # Link-ify the class and all the class's template parameters.
-            # e.g. 'link to std::shared_ptr'<'link to Foo'>
-            spelling_without_template = clang_type.spelling.split('<')[0]
+            return declaration_text
+
+        def parse_template_type_spelling(clang_type_spelling):
+            type_name = clang_type_spelling.split('<')[0]
+            args_match = re.search(r'<(.*)>', clang_type_spelling)
+            if not args_match:
+                log.debug('Cannot find template arguments in spelling.')
+                return None, None
+            arg_list = []
+            args_str = args_match.group(1)
+            regex = re.compile(r"(<[^<>]*>)")
+            all_changes = []
+            num_changes = 100
+            # Remove parameters within template brackets: <...> until there are
+            # no left. This is going to be the actual type we want to split at
+            # this step.
+            # For example: "<int, A<int, float>>" will become ["int", "AX"]
+            # It's ok to have wrong names here as they will be dealt with later.
+            while num_changes > 0:
+                all_changes.append(args_str)
+                args_str, num_changes = re.subn(regex, r'X', args_str)
+            arg_list += all_changes[-1].split(',')
+            return type_name, arg_list
+
+        # Link-ify the class and all the class's template parameters.
+        # e.g. 'link to std::shared_ptr'<'link to Foo'>
+        type_name, arg_list = parse_template_type_spelling(clang_type.spelling)
+        if not type_name or len(arg_list) != num_template_args:
+            log.debug('Wrong number of template args: len(%s) vs %s',
+                      arg_list, num_template_args)
             declaration_text += Popup.link_from_location(
                 Popup.location_from_type(clang_type),
-                spelling_without_template,
+                clang_type.spelling,
                 trailing_space=False)
-            declaration_text += '<'
-            for arg_index in range(num_template_args):
-                templ_type = clang_type.get_template_argument_type(arg_index)
-                declaration_text += Popup.declaration_for_type(
-                    templ_type,
-                    cindex,
-                    expand_template_types)
-                if arg_index + 1 != num_template_args:
-                    declaration_text += ", "
-            declaration_text += '>'
+            return declaration_text
+
+        declaration_text += Popup.link_from_location(
+            Popup.location_from_type(clang_type),
+            type_name,
+            trailing_space=False)
+        declaration_text += '<'
+        for arg_index in range(num_template_args):
+            templ_type = clang_type.get_template_argument_type(arg_index)
+            declaration_text += Popup.declaration_for_type(
+                templ_type,
+                cindex,
+                default_spelling=arg_list[arg_index].strip())
+            if arg_index + 1 < num_template_args:
+                declaration_text += ", "
+        declaration_text += '>'
         return declaration_text
 
     @staticmethod
     def info(cursor, cindex, settings):
         """Initialize a new warning popup."""
+        log.debug("CURSOR NUM: %s", cursor.get_num_template_arguments())
         popup = Popup()
         popup.__popup_type = 'panel-info "ECC: Info"'
         is_type_decl = cursor.kind in [
@@ -247,10 +275,8 @@ class Popup:
             result_type_not_none = result_type is not None
             if result_type_not_none and cursor.spelling != cursor.type.spelling:
                 # Don't show duplicates if the user focuses type, not variable
-                declaration_text += Popup.declaration_for_type(
-                    result_type,
-                    cindex,
-                    settings.expand_template_types)
+                declaration_text += Popup.declaration_for_type(result_type,
+                                                               cindex)
                 declaration_text += " "
         # Link to declaration of item under cursor
         if cursor.location:
@@ -267,10 +293,8 @@ class Popup:
         else:
             args = []
             for arg in cursor.get_arguments():
-                arg_type_decl = Popup.declaration_for_type(
-                    arg.type,
-                    cindex,
-                    settings.expand_template_types)
+                arg_type_decl = Popup.declaration_for_type(arg.type,
+                                                           cindex)
                 if arg.spelling:
                     args.append(arg_type_decl + " " + arg.spelling)
                 else:

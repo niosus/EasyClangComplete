@@ -68,7 +68,6 @@ class SettingsStorage:
         "clang_binary",
         "cmake_binary",
         "common_flags",
-        "expand_template_types",
         "flags_sources",
         "gutter_style",
         "header_to_source_mapping",

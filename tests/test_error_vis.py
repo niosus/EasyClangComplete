@@ -768,7 +768,7 @@ class TestErrorVis:
         fmt = '!!! panel-info "ECC: Info"\n'
         fmt += '    ## Declaration: ##\n'
         fmt += '    [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7), int, '
-        fmt += '*ECC: unknown*&gt; [instanceClassTypeInt]({file}:9:32)\n'
+        fmt += '123&gt; [instanceClassTypeInt]({file}:9:32)\n'
         expected_info_msg = fmt.format(file=file_name)
 
         # Make sure we remove trailing spaces on the right to comply with how
@@ -778,8 +778,8 @@ class TestErrorVis:
         # cleanup
         self.tear_down_completer()
 
-    def test_template_instance_expand_templates_disabled(self):
-        """Test that changing "expand_template_types" setting to false works.
+    def test_template_instance_expand_templates(self):
+        """Test simple types in expansion.
 
         E.g. hover over 'instance' of 'TemplateClass<Foo, int, 123> instance;'
         """
@@ -791,7 +791,6 @@ class TestErrorVis:
                               'test_templates.cpp')
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
-        settings.expand_template_types = False
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(8),
                          "  TemplateClass<Foo, int, 123> instanceClassTypeInt;")
@@ -801,7 +800,8 @@ class TestErrorVis:
         self.maxDiff = None
         fmt = '!!! panel-info "ECC: Info"\n'
         fmt += '    ## Declaration: ##\n'
-        fmt += '    [TemplateClass&lt;Foo, int, 123&gt;]({file}:3:7) '
+        fmt += '    [TemplateClass]({file}:3:7)'
+        fmt += '&lt;[Foo]({file}:1:7), int, 123&gt; '
         fmt += '[instanceClassTypeInt]({file}:9:32)\n'
         expected_info_msg = fmt.format(file=file_name)
 
@@ -813,7 +813,7 @@ class TestErrorVis:
         self.tear_down_completer()
 
     def test_template_instance_default_template_params(self):
-        """Test template instance with some template args left empty (default)
+        """Test template instance with some template args left empty.
 
         E.g. hover over 'instance' of 'TemplateClass<Foo, int> instance;'
         where TemplateClass has an option 3rd template argument.
@@ -847,7 +847,7 @@ class TestErrorVis:
         self.tear_down_completer()
 
     def test_template_instance_nested_template_parameters(self):
-        """Test instance with template arguments that are themselves templates
+        """Test instance with template arguments that are themselves templates.
 
         E.g. hover over 'instance' of the line:
         'std::shared_ptr<std::vector<Foo>>> instance;'
@@ -1042,7 +1042,7 @@ class TestErrorVis:
         fmt = '!!! panel-info "ECC: Info"\n'
         fmt += '    ## Declaration: ##\n'
         fmt += '    void [foo]({file}:6:8) ([TemplateClass]({file}:3:7)&lt;Foo '
-        fmt += '&amp;&amp;, int, *ECC: unknown*&gt;)\n'
+        fmt += '&amp;&amp;, int, 12&gt;)\n'
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
