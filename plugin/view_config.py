@@ -66,7 +66,8 @@ class ViewConfig(object):
         self.__last_usage_time = time.time()
 
         # set up a proper object
-        completer, flags = ViewConfig.__generate_essentials(view, settings)
+        completer, flags, include_folders = ViewConfig.__generate_essentials(
+            view, settings)
         if not completer:
             log.warning(" could not generate completer for view %s",
                         view.buffer_id())
@@ -75,6 +76,7 @@ class ViewConfig(object):
         self.completer = completer
         self.completer.clang_flags = flags
         self.completer.update(view, settings)
+        self.include_folders = include_folders
 
     def update_if_needed(self, view, settings):
         """Check if the view config has changed.
@@ -89,12 +91,14 @@ class ViewConfig(object):
         # update usage time
         self.touch()
         # update if needed
-        completer, flags = ViewConfig.__generate_essentials(view, settings)
+        completer, flags, include_folders = ViewConfig.__generate_essentials(
+            view, settings)
         if self.needs_update(completer, flags):
             log.debug("config needs new completer.")
             self.completer = completer
             self.completer.clang_flags = flags
             self.completer.update(view, settings)
+            self.include_folders = include_folders
             File.update_mod_time(view.file_name())
             return self
         if ViewConfig.needs_reparse(view):
@@ -178,7 +182,7 @@ class ViewConfig(object):
         prefixes = completer.compiler_variant.include_prefixes
 
         init_flags = completer.compiler_variant.init_flags
-        lang_flags = ViewConfig.__get_lang_flags(
+        lang_flags = ViewConfig.__get_default_flags(
             view, settings, completer.compiler_variant.need_lang_flags)
         common_flags = ViewConfig.__get_common_flags(prefixes, settings)
         source_flags = ViewConfig.__load_source_flags(view, settings, prefixes)
@@ -188,7 +192,22 @@ class ViewConfig(object):
         flags_as_str_list = []
         for flag in flags:
             flags_as_str_list += flag.as_list()
-        return (completer, flags_as_str_list)
+
+        include_folders = ViewConfig.__get_include_folders(prefixes, flags)
+        return completer, flags_as_str_list, include_folders
+
+    @staticmethod
+    def __get_include_folders(include_prefixes, all_flags):
+        include_folders = []
+        for flag in all_flags:
+            for prefix in include_prefixes:
+                if flag.prefix.startswith(prefix):
+                    include_folders.append(flag.body)
+                    continue
+                if flag.body.startswith(prefix):
+                    include_folders.append(flag.body[len(prefix):])
+                    continue
+        return include_folders
 
     @staticmethod
     def __merge_flags(init_flags, lang_flags, common_flags, source_flags):
@@ -345,7 +364,31 @@ class ViewConfig(object):
         return completer
 
     @staticmethod
-    def __get_lang_flags(view, settings, need_lang_flags):
+    def __get_default_includes(settings):
+        temp_dir = Tools.get_temp_dir()
+        temp_file_name = path.join(temp_dir, 'temp.cc')
+        File(temp_file_name)  # Creates the file on disk.
+        clang_cmd = [settings.clang_binary, '-c', 'temp.cc', '-v']
+        output = Tools.run_command(clang_cmd, cwd=temp_dir)
+
+        def get_includes_from_clang(clang_output):
+            lines = clang_output.split('\n')
+            start_idx = 0
+            end_idx = 0
+            for idx, line in enumerate(lines):
+                if line.startswith('#include <...>'):
+                    start_idx = idx + 1
+                elif line.startswith('End of search'):
+                    end_idx = idx
+            includes = []
+            for idx in range(start_idx, end_idx):
+                includes.append('-I' + path.normpath(lines[idx].strip()))
+            return includes
+
+        return get_includes_from_clang(output)
+
+    @staticmethod
+    def __get_default_flags(view, settings, need_lang_flags):
         """Get language flags.
 
         Args:
@@ -376,6 +419,10 @@ class ViewConfig(object):
         if need_lang_flags:
             lang_flags += ["-x", target_lang]
         lang_flags += lang_args
+
+        # Get the default settings from the default clang compiler.
+        if settings.use_default_includes:
+            lang_flags += ViewConfig.__get_default_includes(settings)
 
         # If the user provided explicit target compilers, retrieve their
         # default flags and append them to the list:

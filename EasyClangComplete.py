@@ -23,6 +23,7 @@ from .plugin.utils import progress_status
 from .plugin.utils import quick_panel_handler
 from .plugin.utils import module_reloader
 from .plugin.utils import singleton
+from .plugin.utils import include_parser
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
@@ -269,6 +270,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             except AttributeError as e:
                 log.debug("cannot clear status, %s", e)
             return
+
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
         if (not Tools.has_valid_syntax(view, settings)) \
                 or Tools.is_ignored(view.file_name(), settings.ignore_list):
@@ -277,7 +279,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
             except AttributeError as e:
                 log.debug("cannot clear status, %s", e)
             return
-
         EasyClangComplete.thread_pool.progress_status.showing = True
         log.debug("on_activated_async view id %s", view.buffer_id())
         # All is taken care of. The view is built if needed.
@@ -542,6 +543,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         trigger_pos = locations[0] - len(prefix)
         completion_request = tools.ActionRequest(view, trigger_pos)
         current_pos_id = completion_request.get_identifier()
+        pos_status = Tools.get_pos_status(trigger_pos, view, settings)
         log.debug("this position has identifier: '%s'", current_pos_id)
 
         current_job_id = EasyClangComplete.current_job_id
@@ -552,7 +554,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 settings.hide_default_completions)
 
         # Verify that character under the cursor is one allowed trigger
-        pos_status = Tools.get_pos_status(trigger_pos, view, settings)
         if pos_status == PosStatus.WRONG_TRIGGER:
             # we are at a wrong trigger, remove all completions from the list
             log.debug("wrong trigger")
@@ -571,13 +572,28 @@ class EasyClangComplete(sublime_plugin.EventListener):
         log.debug("starting async auto_complete with id: %s",
                   EasyClangComplete.current_job_id)
 
-        # submit async completion job
-        job = ThreadJob(
-            name=ThreadJob.COMPLETE_TAG,
-            callback=self.completion_finished,
-            function=EasyClangComplete.view_config_manager.trigger_completion,
-            args=[view, completion_request])
-        EasyClangComplete.thread_pool.new_job(job)
+        if pos_status == PosStatus.COMPLETION_NEEDED:
+            # submit async completion job
+            config_manager = EasyClangComplete.view_config_manager
+            job = ThreadJob(
+                name=ThreadJob.COMPLETE_TAG,
+                callback=self.completion_finished,
+                function=config_manager.trigger_completion,
+                args=[view, completion_request])
+            EasyClangComplete.thread_pool.new_job(job)
+        elif pos_status == PosStatus.COMPLETE_INCLUDES:
+            log.debug("Completing includes")
+            # submit async completion job
+            config_manager = EasyClangComplete.view_config_manager
+            view_config = config_manager.get_from_cache(view)
+            include_folders = view_config.include_folders
+            # submit async completion job for getting headers
+            job = ThreadJob(
+                name=ThreadJob.COMPLETE_INCLUDES_TAG,
+                callback=self.completion_finished,
+                function=include_parser.get_all_headers,
+                args=[include_folders, prefix, completion_request])
+            EasyClangComplete.thread_pool.new_job(job)
 
         # show default completions for now if allowed
         if settings.hide_default_completions:

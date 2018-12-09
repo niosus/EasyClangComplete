@@ -239,6 +239,21 @@ If set to `true` will use `libclang` through python bindings. This offers much b
     "use_libclang" : true,
     ```
 
+### **`use_default_includes`**
+
+If set to `true` there will be default includes added to the `"common_flags"`. We generate these includes from running the following command on some empty temp file `test.cc`:
+
+```bash
+<clang_binary> -c test.cc -v 
+```
+
+See [`clang_binary`](#clang_binary) setting for more details on what clang binary will be in use.
+
+!!! example "Default value"
+    ```json
+    "use_default_includes" : true,
+    ```
+
 ### **`verbose`**
 
 Output lots of additional information in the console. Useful for debugging. Off by default.
@@ -454,19 +469,6 @@ CMake if you use it as source.
     "target_cpp_compiler": null,
     "target_objective_c_compiler": null,
     "target_objective_cpp_compiler": null,
-    ```
-
-### **`expand_template_types`**
-
-Expand template types and add more hyperlinks when showing info on hover. For
-example, `std::shared_ptr<Foo> foo` will expand to show hyperlinks to both
-`std::shared_ptr` and the template type, `Foo`. This may cause some types and
-typedefs to be verbose. For example, `std::string foo` expands to
-`std::string<char, char_traits<char>, allocator<char>> foo`.
-  
-!!! example "Default value"
-    ```json
-    "expand_template_types": true,
     ```
 
 [subl-proj]: https://www.sublimetext.com/docs/3/projects.html

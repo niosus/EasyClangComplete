@@ -42,7 +42,7 @@ class SettingsStorage:
                     "CppProperties.json",
                     "c_cpp_properties.json",
                     ".clang_complete"]
-    FLAG_SOURCES_ENTRIES_WITH_PATHS = ["search_in", "prefix_paths"]
+    FLAG_SOURCES_ENTRIES_WITH_PATHS = ["search_in", "prefix_paths", "flags"]
 
     PREFIXES = ["ecc_", "easy_clang_complete_"]
 
@@ -68,14 +68,13 @@ class SettingsStorage:
         "clang_binary",
         "cmake_binary",
         "common_flags",
-        "ignore_list",
-        "expand_template_types",
         "flags_sources",
         "gutter_style",
         "popup_maximum_width",
         "popup_maximum_height",
         "header_to_source_mapping",
         "hide_default_completions",
+        "ignore_list",
         "include_file_folder",
         "include_file_parent_folder",
         "lang_flags",
@@ -90,6 +89,7 @@ class SettingsStorage:
         "target_objective_c_compiler",
         "target_objective_cpp_compiler",
         "triggers",
+        "use_default_includes",
         "use_libclang",
         "use_libclang_caching",
         "use_target_compiler_built_in_flags",

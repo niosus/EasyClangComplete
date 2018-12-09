@@ -79,7 +79,7 @@ class CMakeFile(FlagsSource):
         current_cmake_file = File.search(
             file_name=self._FILE_NAME,
             search_scope=search_scope,
-            search_content='project(')
+            search_content=['project(', 'project ('])
         if not current_cmake_file:
             log.debug("No CMakeLists.txt file with 'project' in it found.")
             return None

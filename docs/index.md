@@ -24,6 +24,9 @@
 - **Other Systems** : use your package manager or install from clang website.
 - clang website: http://llvm.org/releases/download.html
 
+!!! tip
+    Make sure `clang` is available in your `PATH` or that the setting [clang binary](settings/#clang_binary) is set to the full path to your `clang` binary.
+
 ### **3. Configure your compiler flags and include folders**
 
 #### CMake and .sublime-project
@@ -33,7 +36,10 @@
 
 You're in luck! The plugin will run cmake on a proper `CMakeLists.txt` in your
 project folder and will use information from it to complete your code out of
-the box! For more details, read [here](../configs/#using-cmake-recommended).
+the box! For more details, read [here](configs/#using-cmake-recommended).
+
+!!! tip
+    Make sure `cmake` is available in your `PATH` or that the setting [cmake binary](settings/#cmake_binary) is set to the full path to your `clang` binary.
 
 #### Other options
 If you cannot use `CMake` in your project there are multiple ways to configure

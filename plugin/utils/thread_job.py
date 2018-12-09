@@ -22,6 +22,7 @@ class ThreadJob:
     UPDATE_TAG = "update"
     CLEAR_TAG = "clear"
     COMPLETE_TAG = "complete"
+    COMPLETE_INCLUDES_TAG = "complete_includes"
     INFO_TAG = "info"
 
     def __init__(self, name, callback, function, args):
@@ -51,7 +52,7 @@ class ThreadJob:
         return "job: '{name}'".format(name=self.name)
 
     def overrides(self, other):
-        """Define if one job is higher priority than the other."""
+        """Define if one job overrides another."""
         if self.is_same_type_as(other):
             return True
         if self.__is_high_priority() and not other.__is_high_priority():

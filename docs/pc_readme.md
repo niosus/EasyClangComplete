@@ -29,7 +29,7 @@ Don't worry! There are plenty of ways to configure the plugin! Read the related
 documentation [page](https://niosus.github.io/EasyClangComplete/configs/) for
 more info!
 
-## Extensive documentation
+## [Extensive documentation](https://niosus.github.io/EasyClangComplete/)
 There are so many things I want to tell you! There is so much the plugin is
 capable of! Read the [docs](https://niosus.github.io/EasyClangComplete/) to get
 started!
