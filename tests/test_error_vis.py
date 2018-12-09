@@ -896,7 +896,7 @@ allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
     ## Declaration: ##
-    [TemplateClass]({file}:3:7) \
+    [TemplateClass]({file}:3:7)\
 &lt;[Foo]({file}:1:7), int, 123&gt; \
 [instanceClassTypeInt]({file}:9:32)
 """
