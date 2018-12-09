@@ -5,6 +5,7 @@ Improvements and fixes:
 -----------------------
 - Add a way to configure maximum popup window size, thanks @detly
 - Add correct parsing of all template types in info popup
+- Clarify the docs on the need to have clang and cmake binaries in PATH
 
 Support the development!
 ------------------------
