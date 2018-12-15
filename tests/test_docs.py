@@ -10,7 +10,6 @@ def parse_code_headers(md_file_path):
     with open(md_file_path) as f:
         contents = f.read()
         matches = all_settings_headers_regex.findall(contents)
-        print(matches)
         return matches
 
 
@@ -21,7 +20,6 @@ def parse_settings(json_file_path):
     with open(json_file_path) as f:
         contents = f.read()
         matches = all_settings_regex.findall(contents)
-        print(matches)
         return matches
 
 

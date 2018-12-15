@@ -13,6 +13,7 @@ class TestFlag(TestCase):
     """Test getting built in flags from a target compiler."""
 
     def test_empty(self):
+        """Test empty."""
         builtIns = CompilerBuiltIns([], None)
         self.assertEqual(len(builtIns.include_paths), 0)
         self.assertEqual(len(builtIns.defines), 0)
@@ -21,8 +22,7 @@ class TestFlag(TestCase):
         self.assertEqual(builtIns.language, None)
 
     def test_plain(self):
-        """
-        Test retrieval of built ins when we are uncertain about the language.
+        """Test retrieval of built ins when we are uncertain about the language.
 
         In this test we check retrieval of built ins when we cannot be sure
         about the target language. Input is a command line with the call to the
@@ -38,8 +38,7 @@ class TestFlag(TestCase):
         self.assertEqual(builtIns.language, None)
 
     def test_c(self):
-        """
-        Test retrieval of flags for a C compiler.
+        """Test retrieval of flags for a C compiler.
 
         In this test we have in addition to the compiler an explicit hint to the
         target language in use. Hence, the correct language (and also standard)
@@ -58,8 +57,7 @@ class TestFlag(TestCase):
         # self.assertIn("-D__STDC__=1", builtIns.flags)
 
     def test_cxx(self):
-        """
-        Test retrieval of flags for a C++ compiler.
+        """Test retrieval of flags for a C++ compiler.
 
         We check if we can get flags for a C++ compiler. The language
         can be derived from either the compiler name, an explicit
@@ -115,8 +113,7 @@ class TestFlag(TestCase):
             self.assertTrue(is_cpp)
 
     def test_objc(self):
-        """
-        Test retrieval of flags for an Objective-C compiler.
+        """Test retrieval of flags for an Objective-C compiler.
 
         We check if we can get flags for an Objective-C compiler.
         For this, we make sure we recognize if a compilation is for Objective-C
@@ -148,8 +145,7 @@ class TestFlag(TestCase):
             self.assertIn("-D__OBJC__=1", builtIns.flags)
 
     def test_objcpp(self):
-        """
-        Test retrieval of flags for an Objective-C++ compiler.
+        """Test retrieval of flags for an Objective-C++ compiler.
 
         We check if we can get flags for an Objective-C++ compiler.
         For this, we look if we can find an explicit language flag in the

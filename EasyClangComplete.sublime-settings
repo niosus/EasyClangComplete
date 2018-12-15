@@ -187,7 +187,9 @@
     // "{stamp}.mycustomext
   ],
 
-  // Controls if we try to retrieve built-in flags from the target compiler.
+  // Target compilers.
+  //
+  //  Controls if we try to retrieve built-in flags from the target compiler.
   // This option is used when we use a `compile_commands.json` file
   // either directly or indirectly e.g. via CMake.
   // If set to true, we try to ask the compiler for the defines and
@@ -196,9 +198,7 @@
   // Usually, this option should improve the quality of the
   // completions, however, in some corner cases it might cause
   // completions to fails entirely.
-  "use_target_compiler_built_in_flags": false,
-
-  // Target compilers.
+  //
   // The below options allow to set the actual target compilers (i.e.
   // the one you use in your build chain). If they are set, we will
   // ask the compilers for their built in flags (defines and include
@@ -212,8 +212,10 @@
   // file.
   // Note: The set compilers will also be passed to CMake if you use
   // it as source.
-  "target_c_compiler": null,
-  "target_cpp_compiler": null,
-  "target_objective_c_compiler": null,
-  "target_objective_cpp_compiler": null,
+  "target_compilers": {
+    "C":              null,
+    "CPP":            null,
+    "OBJECTIVE_C":    null,
+    "OBJECTIVE_CPP":  null
+  },
 }

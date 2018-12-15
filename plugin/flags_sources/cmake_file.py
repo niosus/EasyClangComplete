@@ -37,7 +37,6 @@ class CMakeFile(FlagsSource):
                  flags,
                  cmake_binary,
                  header_to_source_mapping,
-                 use_target_compiler_builtins,
                  target_compilers):
         """Initialize a cmake-based flag storage.
 
@@ -53,7 +52,6 @@ class CMakeFile(FlagsSource):
         self.__cmake_flags = flags
         self.__cmake_binary = cmake_binary
         self.__header_to_source_mapping = header_to_source_mapping
-        self.__use_target_compiler_builtins = use_target_compiler_builtins
         self.__target_compilers = target_compilers
 
     def get_flags(self, file_path=None, search_scope=None):
@@ -106,7 +104,6 @@ class CMakeFile(FlagsSource):
                 db = CompilationDb(
                     self._include_prefixes,
                     self.__header_to_source_mapping,
-                    self.__use_target_compiler_builtins
                 )
                 db_search_scope = SearchScope(
                     from_folder=path.dirname(db_file_path))
@@ -133,8 +130,7 @@ class CMakeFile(FlagsSource):
             File.update_mod_time(current_cmake_path)
         db = CompilationDb(
             self._include_prefixes,
-            self.__header_to_source_mapping,
-            self.__use_target_compiler_builtins)
+            self.__header_to_source_mapping)
         db_search_scope = SearchScope(from_folder=db_file.folder)
         flags = db.get_flags(file_path, db_search_scope)
         return flags
@@ -200,8 +196,8 @@ class CMakeFile(FlagsSource):
 
         # If target compilers are set, create a toolchain file to force
         # cmake using them:
-        c_compiler = target_compilers.get("c", None)
-        cpp_compiler = target_compilers.get("c++", None)
+        c_compiler = target_compilers.get(Tools.LANG_C_TAG, None)
+        cpp_compiler = target_compilers.get(Tools.LANG_CPP_TAG, None)
         # Note: CMake does not let us explicitly set Objective-C/C++ compilers.
         #       Hence, we only set ones for C/C++ and let it derive the rest.
         if c_compiler is not None or cpp_compiler is not None:

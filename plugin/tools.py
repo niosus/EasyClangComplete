@@ -459,6 +459,13 @@ class Tools:
     LANG_TAGS = [LANG_C_TAG, LANG_CPP_TAG,
                  LANG_OBJECTIVE_C_TAG, LANG_OBJECTIVE_CPP_TAG]
 
+    LANG_NAMES = {
+        LANG_C_TAG: 'c',
+        LANG_CPP_TAG: 'c++',
+        LANG_OBJECTIVE_CPP_TAG: 'objective-c++',
+        LANG_OBJECTIVE_C_TAG: 'objective-c'
+    }
+
     SHOW_DEFAULT_COMPLETIONS = None
     HIDE_DEFAULT_COMPLETIONS = ([], sublime.INHIBIT_WORD_COMPLETIONS |
                                 sublime.INHIBIT_EXPLICIT_COMPLETIONS)

@@ -42,7 +42,6 @@ class TestCmakeFile(object):
             flags=None,
             cmake_binary="cmake",
             header_to_source_mapping=[],
-            use_target_compiler_builtins=False,
             target_compilers={}
         )
         expected_lib = path.join(path_to_cmake_proj, 'lib')
@@ -67,15 +66,12 @@ class TestCmakeFile(object):
             flags=None,
             cmake_binary="cmake",
             header_to_source_mapping=[],
-            use_target_compiler_builtins=False,
             target_compilers={}
         )
         flags = cmake_file.get_flags(test_file_path)
         db = CompilationDb(
             ['-I', '-isystem'],
-            header_to_source_map=[],
-            use_target_compiler_builtins=False
-        )
+            header_to_source_map=[],)
         self.assertEqual(flags[0], Flag('-Dliba_EXPORTS'))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
@@ -98,7 +94,6 @@ class TestCmakeFile(object):
             flags=None,
             cmake_binary="cmake",
             header_to_source_mapping=[],
-            use_target_compiler_builtins=False,
             target_compilers={}
         )
         wrong_scope = SearchScope(from_folder=folder_with_no_cmake)

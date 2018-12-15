@@ -24,8 +24,7 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[],
-            use_target_compiler_builtins=False
+            header_to_source_map=[]
         )
 
         expected = [Flag('-I' + path.normpath('/lib_include_dir')),
@@ -55,8 +54,7 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[],
-            use_target_compiler_builtins=False
+            header_to_source_map=[]
         )
 
         expected = [Flag('-I' + path.normpath('/lib_include_dir')),
@@ -73,8 +71,7 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[],
-            use_target_compiler_builtins=False
+            header_to_source_map=[]
         )
 
         expected_lib = [Flag('-Dlib_EXPORTS'), Flag('-fPIC')]
@@ -110,8 +107,7 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[],
-            use_target_compiler_builtins=False
+            header_to_source_map=[]
         )
 
         flags = db.get_flags(path.normpath('/home/user/dummy_main.cpp'))
@@ -122,8 +118,7 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[],
-            use_target_compiler_builtins=False
+            header_to_source_map=[]
         )
 
         expected_lib = [Flag('-Dlib_EXPORTS'), Flag('-fPIC')]
@@ -148,8 +143,7 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I', '-isystem']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[],
-            use_target_compiler_builtins=False
+            header_to_source_map=[]
         )
 
         expected = [Flag('-I' + path.normpath('/usr/local/foo')),
@@ -168,8 +162,7 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[],
-            use_target_compiler_builtins=False
+            header_to_source_map=[]
         )
 
         main_file_path = path.normpath('/home/blah.c')

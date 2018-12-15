@@ -26,20 +26,16 @@ class CompilationDb(FlagsSource):
     _FILE_NAME = "compile_commands.json"
 
     def __init__(self, include_prefixes,
-                 header_to_source_map,
-                 use_target_compiler_builtins):
+                 header_to_source_map):
         """Initialize a compilation database.
 
         Args:
             include_prefixes (str[]): A List of valid include prefixes.
             header_to_source_map (str[]): Templates to map header to sources.
-            use_target_compiler_builtins (bool): Retrieve target compiler built
-                                                 ins.
         """
         super().__init__(include_prefixes)
         self._cache = ComplationDbCache()
         self._header_to_source_map = header_to_source_map
-        self._use_target_compiler_builtins = use_target_compiler_builtins
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -118,7 +114,6 @@ class CompilationDb(FlagsSource):
             unique entries for 'all' entry.
         """
         import json
-        from ..utils.compiler_builtins import CompilerBuiltIns
 
         data = None
 
@@ -147,22 +142,6 @@ class CompilationDb(FlagsSource):
                 # TODO(igor): maybe show message to the user instead here
                 log.critical(" compilation database has unsupported format")
                 return None
-
-            # If enabled, try to retrieve default flags for the compiler
-            # and language combination:
-            if self._use_target_compiler_builtins:
-                # Note: Calling the CompilerBuiltIns constructor shells out to
-                # calling the compiler; however, for every
-                # compiler/standard/language
-                # combination, the results are cached by the class internally.
-                builtins = CompilerBuiltIns(argument_list, file_path)
-
-                # Append built-in flags to the end of the list:
-                # Note: We keep the last argument as last, as it
-                # usually is the file name.
-                argument_list = (
-                    argument_list[:-1] + builtins.flags +
-                    argument_list[-1:])
 
             argument_list = CompilationDb.filter_bad_arguments(argument_list)
             flags = FlagsSource.parse_flags(base_path,
