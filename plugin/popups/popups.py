@@ -7,6 +7,7 @@ import logging
 import re
 
 from ..utils.macro_parser import MacroParser
+from ..utils.index_location import IndexLocation
 
 POPUP_CSS_FILE = "Packages/EasyClangComplete/plugin/popups/popup.css"
 
@@ -24,19 +25,24 @@ CODE_TEMPLATE = """```{lang}
 {code}
 ```"""
 
-DECLARATION_TEMPLATE = """## Declaration: ##
+DECLARATION_TEMPLATE = """## Declaration:
 {type_declaration}
 """
 
-BRIEF_DOC_TEMPLATE = """### Brief documentation: ###
+REFERENCES_TEMPLATE = \
+    """## References: <small><small>(from sublime index)</small></small>
+{type_references}
+"""
+
+BRIEF_DOC_TEMPLATE = """### Brief documentation:
 {content}
 """
 
-FULL_DOC_TEMPLATE = """### Full doxygen comment: ###
+FULL_DOC_TEMPLATE = """### Full doxygen comment:
 {content}
 """
 
-BODY_TEMPLATE = """### Body: ###
+BODY_TEMPLATE = """### Body:
 {content}
 """
 
@@ -73,95 +79,6 @@ class Popup:
         popup.__popup_type = 'panel-warning "ECC: Warning"'
         popup.__text = markupsafe.escape(text)
         return popup
-
-    @staticmethod
-    def declaration_for_type(clang_type,
-                             cindex,
-                             default_spelling=None):
-        """Get declaration for a cindex.Type.
-
-        Includes a hyperlink to the type's definition, and, if type
-        has template parameters, to the the definitions of each
-        template paremeter's type too.
-        """
-        log.debug("SPELLING: %s", clang_type.spelling)
-        if clang_type.kind == cindex.TypeKind.POINTER:
-            pointee_type = clang_type.get_pointee()
-            pointee_text = Popup.declaration_for_type(pointee_type, cindex)
-            return pointee_text + ' \\*'
-        if clang_type.kind == cindex.TypeKind.LVALUEREFERENCE:
-            referee_type = clang_type.get_pointee()
-            referee_text = Popup.declaration_for_type(referee_type, cindex)
-            return referee_text + ' &'
-        if clang_type.spelling is None or clang_type.spelling == "":
-            # This happens, for example, when using an integer literal as
-            # a template parameter, e.g. in 'std::array<Foo, 5> fooArray;',
-            # when hovering over fooArray, we iterate through
-            # fooArray's template arguments, but the argument for '5' has
-            # None for spelling.
-            # We show a default spelling here.
-            return default_spelling
-
-        num_template_args = clang_type.get_num_template_arguments()
-        declaration_text = ''
-        if num_template_args < 1:
-            # Just link to the type
-            log.debug('Number of template args is too low.')
-            declaration_text += Popup.link_from_location(
-                Popup.location_from_type(clang_type),
-                clang_type.spelling,
-                trailing_space=False)
-            return declaration_text
-
-        def parse_template_type_spelling(clang_type_spelling):
-            type_name = clang_type_spelling.split('<')[0]
-            args_match = re.search(r'<(.*)>', clang_type_spelling)
-            if not args_match:
-                log.debug('Cannot find template arguments in spelling.')
-                return None, None
-            arg_list = []
-            args_str = args_match.group(1)
-            regex = re.compile(r"(<[^<>]*>)")
-            all_changes = []
-            num_changes = 100
-            # Remove parameters within template brackets: <...> until there are
-            # no left. This is going to be the actual type we want to split at
-            # this step.
-            # For example: "<int, A<int, float>>" will become ["int", "AX"]
-            # It's ok to have wrong names here as they will be dealt with later.
-            while num_changes > 0:
-                all_changes.append(args_str)
-                args_str, num_changes = re.subn(regex, r'X', args_str)
-            arg_list += all_changes[-1].split(',')
-            return type_name, arg_list
-
-        # Link-ify the class and all the class's template parameters.
-        # e.g. 'link to std::shared_ptr'<'link to Foo'>
-        type_name, arg_list = parse_template_type_spelling(clang_type.spelling)
-        if not type_name or len(arg_list) != num_template_args:
-            log.debug('Wrong number of template args: len(%s) vs %s',
-                      arg_list, num_template_args)
-            declaration_text += Popup.link_from_location(
-                Popup.location_from_type(clang_type),
-                clang_type.spelling,
-                trailing_space=False)
-            return declaration_text
-
-        declaration_text += Popup.link_from_location(
-            Popup.location_from_type(clang_type),
-            type_name,
-            trailing_space=False)
-        declaration_text += '<'
-        for arg_index in range(num_template_args):
-            templ_type = clang_type.get_template_argument_type(arg_index)
-            declaration_text += Popup.declaration_for_type(
-                templ_type,
-                cindex,
-                default_spelling=arg_list[arg_index].strip())
-            if arg_index + 1 < num_template_args:
-                declaration_text += ", "
-        declaration_text += '>'
-        return declaration_text
 
     @staticmethod
     def info(cursor, cindex, settings):
@@ -208,8 +125,8 @@ class Popup:
             result_type_not_none = result_type is not None
             if result_type_not_none and cursor.spelling != cursor.type.spelling:
                 # Don't show duplicates if the user focuses type, not variable
-                declaration_text += Popup.declaration_for_type(result_type,
-                                                               cindex)
+                declaration_text += Popup._declaration_for_type(result_type,
+                                                                cindex)
                 declaration_text += " "
         # Link to declaration of item under cursor
         if cursor.location:
@@ -226,8 +143,8 @@ class Popup:
         else:
             args = []
             for arg in cursor.get_arguments():
-                arg_type_decl = Popup.declaration_for_type(arg.type,
-                                                           cindex)
+                arg_type_decl = Popup._declaration_for_type(arg.type,
+                                                            cindex)
                 if arg.spelling:
                     args.append(arg_type_decl + " " + arg.spelling)
                 else:
@@ -254,6 +171,22 @@ class Popup:
         # Save declaration text.
         popup.__text = DECLARATION_TEMPLATE.format(
             type_declaration=markupsafe.escape(declaration_text))
+
+        index = sublime.active_window().lookup_symbol_in_index(cursor.spelling)
+        index_references = []
+        for location_tuple in index:
+            location = IndexLocation(filename=location_tuple[0],
+                                     line=location_tuple[2][0],
+                                     column=location_tuple[2][1])
+            index_references.append("{reference}: `{file}`".format(
+                reference=Popup.link_from_location(location, cursor.spelling),
+                file=location.file.short_name))
+        log.debug("references from index: %s", index_references)
+        if index_references:
+            popup.__text += REFERENCES_TEMPLATE.format(
+                type_references=markupsafe.escape(
+                    "\n".join(index_references)))
+
         # Doxygen comments
         if cursor.brief_comment:
             popup.__text += BRIEF_DOC_TEMPLATE.format(
@@ -278,128 +211,6 @@ class Popup:
             popup.__text += BODY_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="c++", code=body))
         return popup
-
-    def as_markdown(self):
-        """Represent all the text as markdown."""
-        tabbed_text = "\n    ".join(self.__text.split('\n')).strip()
-        return MD_TEMPLATE.format(type=self.__popup_type,
-                                  contents=tabbed_text)
-
-    def show(self, view, location=-1, on_navigate=None):
-        """Show this popup."""
-        mdpopups.show_popup(view, self.as_markdown(),
-                            max_width=self.max_width,
-                            max_height=self.max_height,
-                            wrapper_class=Popup.WRAPPER_CLASS,
-                            css=self.CSS,
-                            flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY,
-                            location=location,
-                            on_navigate=on_navigate)
-
-    @staticmethod
-    def cleanup_comment(raw_comment):
-        """Cleanup raw doxygen comment."""
-        def pop_prepending_empty_lines(lines):
-            first_non_empty_line_idx = 0
-            for line in lines:
-                if line == '':
-                    first_non_empty_line_idx += 1
-                else:
-                    break
-            return lines[first_non_empty_line_idx:]
-
-        import string
-        lines = raw_comment.split('\n')
-        chars_to_strip = '/' + '*' + string.whitespace
-        lines = [line.lstrip(chars_to_strip) for line in lines]
-        lines = pop_prepending_empty_lines(lines)
-        clean_lines = []
-        is_brief_comment = True
-        for line in lines:
-            if line == '' and is_brief_comment:
-                # Skip lines that belong to brief comment.
-                is_brief_comment = False
-                continue
-            if is_brief_comment:
-                continue
-            clean_lines.append(line)
-        return '\n'.join(clean_lines)
-
-    @staticmethod
-    def location_from_type(clang_type):
-        """Return location from type.
-
-        Return proper location from type.
-        Remove all inderactions like pointers etc.
-
-        Args:
-            clang_type (cindex.Type): clang type.
-
-        """
-        cursor = clang_type.get_declaration()
-        if cursor and cursor.location and cursor.location.file:
-            return cursor.location
-
-        cursor = clang_type.get_pointee().get_declaration()
-        if cursor and cursor.location and cursor.location.file:
-            return cursor.location
-
-        return None
-
-    @staticmethod
-    def link_from_location(location, text, trailing_space=True):
-        """Provide link to given cursor.
-
-        Transforms SourceLocation object into markdown string.
-
-        Args:
-            location (Cursor.location): Current location.
-            text (str): Text to be added as info.
-            trailing_space (bool): Whether to add a trailing space
-                For C/C++ method & argument names, this would normally be true,
-                but ObjC methods/arguments are usually presented without
-                this space.
-        """
-        result = ""
-        if location and location.file and location.file.name:
-            result += "[" + text + "]"
-            result += "(" + location.file.name
-            result += ":" + str(location.line)
-            result += ":" + str(location.column)
-            result += ")"
-        else:
-            result += text
-        if trailing_space:
-            result += " "
-        return result
-
-    @staticmethod
-    def get_text_by_extent(extent):
-        """Load lines of code in range, pointed by extent.
-
-        Args:
-            extent (Cursor.extent): Ranges of source file.
-        """
-        if extent.start.file.name != extent.end.file.name:
-            return None
-
-        with open(extent.start.file.name, 'r', encoding='utf-8',
-                  errors='ignore') as f:
-            lines = f.readlines()
-            return "".join(lines[extent.start.line - 1:extent.end.line])
-
-    @staticmethod
-    def prettify_body(body):
-        """Format some declaration body for viewing.
-
-        Args:
-            body (str): Body text.
-        """
-        # remove any global indentation
-        import textwrap
-        body = textwrap.dedent(body)
-
-        return body
 
     def info_objc(cursor, cindex, settings):
         """Provide information about Objective C cursors."""
@@ -526,3 +337,213 @@ class Popup:
                         lang="objective-c++",
                         code=body))
         return popup
+
+    @staticmethod
+    def _declaration_for_type(clang_type,
+                              cindex,
+                              default_spelling=None):
+        """Get declaration for a cindex.Type.
+
+        Includes a hyperlink to the type's definition, and, if type
+        has template parameters, to the the definitions of each
+        template paremeter's type too.
+        """
+        if clang_type.kind == cindex.TypeKind.POINTER:
+            pointee_type = clang_type.get_pointee()
+            pointee_text = Popup._declaration_for_type(pointee_type, cindex)
+            return pointee_text + ' \\*'
+        if clang_type.kind == cindex.TypeKind.LVALUEREFERENCE:
+            referee_type = clang_type.get_pointee()
+            referee_text = Popup._declaration_for_type(referee_type, cindex)
+            return referee_text + ' &'
+        if clang_type.spelling is None or clang_type.spelling == "":
+            # This happens, for example, when using an integer literal as
+            # a template parameter, e.g. in 'std::array<Foo, 5> fooArray;',
+            # when hovering over fooArray, we iterate through
+            # fooArray's template arguments, but the argument for '5' has
+            # None for spelling.
+            # We show a default spelling here.
+            return default_spelling
+
+        num_template_args = clang_type.get_num_template_arguments()
+        declaration_text = ''
+        if num_template_args < 1:
+            # Just link to the type
+            log.debug('Number of template args is too low.')
+            declaration_text += Popup.link_from_location(
+                Popup.location_from_type(clang_type),
+                clang_type.spelling,
+                trailing_space=False)
+            return declaration_text
+
+        def parse_template_type_spelling(clang_type_spelling):
+            type_name = clang_type_spelling.split('<')[0]
+            args_match = re.search(r'<(.*)>', clang_type_spelling)
+            if not args_match:
+                log.debug('Cannot find template arguments in spelling.')
+                return None, None
+            arg_list = []
+            args_str = args_match.group(1)
+            regex = re.compile(r"(<[^<>]*>)")
+            all_changes = []
+            num_changes = 100
+            # Remove parameters within template brackets: <...> until there are
+            # no left. This is going to be the actual type we want to split at
+            # this step.
+            # For example: "<int, A<int, float>>" will become ["int", "AX"]
+            # It's ok to have wrong names here as they will be dealt with later.
+            while num_changes > 0:
+                all_changes.append(args_str)
+                args_str, num_changes = re.subn(regex, r'X', args_str)
+            arg_list += all_changes[-1].split(',')
+            return type_name, arg_list
+
+        # Link-ify the class and all the class's template parameters.
+        # e.g. 'link to std::shared_ptr'<'link to Foo'>
+        type_name, arg_list = parse_template_type_spelling(clang_type.spelling)
+        if not type_name or len(arg_list) != num_template_args:
+            log.debug('Wrong number of template args: len(%s) vs %s',
+                      arg_list, num_template_args)
+            declaration_text += Popup.link_from_location(
+                Popup.location_from_type(clang_type),
+                clang_type.spelling,
+                trailing_space=False)
+            return declaration_text
+
+        declaration_text += Popup.link_from_location(
+            Popup.location_from_type(clang_type),
+            type_name,
+            trailing_space=False)
+        declaration_text += '<'
+        for arg_index in range(num_template_args):
+            templ_type = clang_type.get_template_argument_type(arg_index)
+            declaration_text += Popup._declaration_for_type(
+                templ_type,
+                cindex,
+                default_spelling=arg_list[arg_index].strip())
+            if arg_index + 1 < num_template_args:
+                declaration_text += ", "
+        declaration_text += '>'
+        return declaration_text
+
+    def as_markdown(self):
+        """Represent all the text as markdown."""
+        tabbed_text = "\n    ".join(self.__text.split('\n')).strip()
+        return MD_TEMPLATE.format(type=self.__popup_type,
+                                  contents=tabbed_text)
+
+    def show(self, view, location=-1, on_navigate=None):
+        """Show this popup."""
+        mdpopups.show_popup(view, self.as_markdown(),
+                            max_width=self.max_width,
+                            max_height=self.max_height,
+                            wrapper_class=Popup.WRAPPER_CLASS,
+                            css=self.CSS,
+                            flags=sublime.HIDE_ON_MOUSE_MOVE_AWAY,
+                            location=location,
+                            on_navigate=on_navigate)
+
+    @staticmethod
+    def cleanup_comment(raw_comment):
+        """Cleanup raw doxygen comment."""
+        def pop_prepending_empty_lines(lines):
+            first_non_empty_line_idx = 0
+            for line in lines:
+                if line == '':
+                    first_non_empty_line_idx += 1
+                else:
+                    break
+            return lines[first_non_empty_line_idx:]
+
+        import string
+        lines = raw_comment.split('\n')
+        chars_to_strip = '/' + '*' + string.whitespace
+        lines = [line.lstrip(chars_to_strip) for line in lines]
+        lines = pop_prepending_empty_lines(lines)
+        clean_lines = []
+        is_brief_comment = True
+        for line in lines:
+            if line == '' and is_brief_comment:
+                # Skip lines that belong to brief comment.
+                is_brief_comment = False
+                continue
+            if is_brief_comment:
+                continue
+            clean_lines.append(line)
+        return '\n'.join(clean_lines)
+
+    @staticmethod
+    def location_from_type(clang_type):
+        """Return location from type.
+
+        Return proper location from type.
+        Remove all inderactions like pointers etc.
+
+        Args:
+            clang_type (cindex.Type): clang type.
+
+        """
+        cursor = clang_type.get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        cursor = clang_type.get_pointee().get_declaration()
+        if cursor and cursor.location and cursor.location.file:
+            return cursor.location
+
+        return None
+
+    @staticmethod
+    def link_from_location(location, text, trailing_space=True):
+        """Provide link to given cursor.
+
+        Transforms SourceLocation object into markdown string.
+
+        Args:
+            location (Cursor.location): Current location.
+            text (str): Text to be added as info.
+            trailing_space (bool): Whether to add a trailing space
+                For C/C++ method & argument names, this would normally be true,
+                but ObjC methods/arguments are usually presented without
+                this space.
+        """
+        result = ""
+        if location and location.file and location.file.name:
+            result += "[" + text + "]"
+            result += "(" + location.file.name
+            result += ":" + str(location.line)
+            result += ":" + str(location.column)
+            result += ")"
+        else:
+            result += text
+        if trailing_space:
+            result += " "
+        return result
+
+    @staticmethod
+    def get_text_by_extent(extent):
+        """Load lines of code in range, pointed by extent.
+
+        Args:
+            extent (Cursor.extent): Ranges of source file.
+        """
+        if extent.start.file.name != extent.end.file.name:
+            return None
+
+        with open(extent.start.file.name, 'r', encoding='utf-8',
+                  errors='ignore') as f:
+            lines = f.readlines()
+            return "".join(lines[extent.start.line - 1:extent.end.line])
+
+    @staticmethod
+    def prettify_body(body):
+        """Format some declaration body for viewing.
+
+        Args:
+            body (str): Body text.
+        """
+        # remove any global indentation
+        import textwrap
+        body = textwrap.dedent(body)
+
+        return body
