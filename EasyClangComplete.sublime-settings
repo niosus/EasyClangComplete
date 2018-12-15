@@ -187,7 +187,7 @@
     // "{stamp}.mycustomext
   ],
 
-//  Controls if we try to retrieve built-in flags from a target compiler. This
+// Controls if we try to retrieve built-in flags from a target compiler. This
 // option is used when we use a `compile_commands.json` file either directly or
 // indirectly e.g. via CMake. If a compiler is not `null`, we try to ask it for
 // the defines and include paths it sets implicitly and pass them to the clang
