@@ -187,31 +187,14 @@
     // "{stamp}.mycustomext
   ],
 
-  // Target compilers.
-  //
-  //  Controls if we try to retrieve built-in flags from the target compiler.
-  // This option is used when we use a `compile_commands.json` file
-  // either directly or indirectly e.g. via CMake.
-  // If set to true, we try to ask the compiler for the defines and
-  // include paths it sets implicitly and pass them to the
-  // clang compiler which is used to generate the code completion.
-  // Usually, this option should improve the quality of the
-  // completions, however, in some corner cases it might cause
-  // completions to fails entirely.
-  //
-  // The below options allow to set the actual target compilers (i.e.
-  // the one you use in your build chain). If they are set, we will
-  // ask the compilers for their built in flags (defines and include
-  // paths) and pass them to the clang compiler to generate code
-  // completions. This is especially useful when working with
-  // non-host tool chains, where the compilers might set additional
-  // target specific defines which are now seen by the (host) clang
-  // compiler.
-  // Note: These settings are only used if the target compiler
-  // cannot be retrieved otherwise, e.g. from a `compile_commands.json`
-  // file.
-  // Note: The set compilers will also be passed to CMake if you use
-  // it as source.
+//  Controls if we try to retrieve built-in flags from a target compiler. This
+// option is used when we use a `compile_commands.json` file either directly or
+// indirectly e.g. via CMake. If a compiler is not `null`, we try to ask it for
+// the defines and include paths it sets implicitly and pass them to the clang
+// compiler which is used to generate the code completion. If your completions
+// require the knowledge about the toolchain, this option should improve the
+// quality of the completions, however, in some corner cases it might cause
+// completions to fail entirely.
   "target_compilers": {
     "C":              null,
     "CPP":            null,
