@@ -361,6 +361,16 @@ info enabled by the setting
     "show_type_body" : true,
     ```
 
+### **`show_index_references`**
+
+We only can get declarations from clang AST. This can show references to the
+symbol under cursor taking them from Sublime Text index.
+
+!!! example "Default value"
+    ```json
+    "show_index_references": true,
+    ```
+
 ### **`libclang_path`**
 
 On some esoteric systems we cannot find `libclang` properly.
