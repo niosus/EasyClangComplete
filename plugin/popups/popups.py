@@ -30,7 +30,7 @@ DECLARATION_TEMPLATE = """## Declaration:
 """
 
 REFERENCES_TEMPLATE = \
-    """## References: <small><small>(from sublime index)</small></small>
+    """### References: <small><small>(from sublime index)</small></small>
 {type_references}
 """
 
@@ -172,20 +172,23 @@ class Popup:
         popup.__text = DECLARATION_TEMPLATE.format(
             type_declaration=markupsafe.escape(declaration_text))
 
-        index = sublime.active_window().lookup_symbol_in_index(cursor.spelling)
-        index_references = []
-        for location_tuple in index:
-            location = IndexLocation(filename=location_tuple[0],
-                                     line=location_tuple[2][0],
-                                     column=location_tuple[2][1])
-            index_references.append("{reference}: `{file}`".format(
-                reference=Popup.link_from_location(location, cursor.spelling),
-                file=location.file.short_name))
-        log.debug("references from index: %s", index_references)
-        if index_references:
-            popup.__text += REFERENCES_TEMPLATE.format(
-                type_references=markupsafe.escape(
-                    "\n".join(index_references)))
+        if settings.show_index_references:
+            index = sublime.active_window().lookup_symbol_in_index(
+                cursor.spelling)
+            index_references = []
+            for location_tuple in index:
+                location = IndexLocation(filename=location_tuple[0],
+                                         line=location_tuple[2][0],
+                                         column=location_tuple[2][1])
+                index_references.append("{reference}: `{file}`".format(
+                    reference=Popup.link_from_location(
+                        location, cursor.spelling),
+                    file=location.file.short_name))
+            log.debug("references from index: %s", index_references)
+            if index_references:
+                popup.__text += REFERENCES_TEMPLATE.format(
+                    type_references=markupsafe.escape(
+                        "\n".join(index_references)))
 
         # Doxygen comments
         if cursor.brief_comment:

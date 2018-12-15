@@ -222,6 +222,7 @@ allow_code_wrap: true
                               'test.cpp')
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
+        settings.show_index_references = False
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(6),
                          "int main(int argc, char const *argv[]) {")
@@ -233,7 +234,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     int [main]({file}:7:5) (int argc, const char *[] argv)
 """.format(file=file_name)
         self.assertEqual(info_popup.as_markdown(), expected_info_msg)
@@ -250,6 +251,7 @@ allow_code_wrap: true
                               'test_info.cpp')
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
+        settings.show_index_references = False
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(17), "  MyCoolClass cool_class;")
         pos = self.view.text_point(17, 7)
@@ -261,13 +263,13 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [MyCoolClass]({file}:4:7)
-    ### Brief documentation: ###
+    ### Brief documentation:
     ```
     Class for my cool class.
     ```
-    ### Body: ###
+    ### Body:
     ```c++
     class MyCoolClass {{
      public:
@@ -301,6 +303,7 @@ allow_code_wrap: true
                               'test_info.cpp')
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
+        settings.show_index_references = False
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(18), "  cool_class.foo(2, 2);")
         pos = self.view.text_point(18, 15)
@@ -312,13 +315,13 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     void [foo]({file}:14:8) (int a, int b)
-    ### Brief documentation: ###
+    ### Brief documentation:
     ```
     This is short.
     ```
-    ### Full doxygen comment: ###
+    ### Full doxygen comment:
     ```
     And this is a full comment.
 
@@ -343,6 +346,7 @@ allow_code_wrap: true
                               'test_info_arguments_link.cpp')
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
+        settings.show_index_references = False
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(9), "  cool_class.foo(Foo(), nullptr);")
         pos = self.view.text_point(9, 15)
@@ -354,7 +358,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     void [foo]({file}:5:8) ([Foo]({file}:1:7) a, [Foo]({file}:1:7) \\* b)
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -388,9 +392,9 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     -(void)[interfaceMethodVoidNoParameters]({file}:19:10)
-    ### Brief documentation: ###
+    ### Brief documentation:
     ```
     Brief comment.
     ```
@@ -428,7 +432,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     -(void)[interfaceMethodVoidTwoParametersSecondUnnamed]\
 ({file}:24:10):(int)int1 :(int)int2
 """
@@ -467,7 +471,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     +([Foo *]({file}:6:8))[interfaceClassMethodFooTwoFooParameters]\
 ({file}:26:10):([Foo *]({file}:6:8))f1 fooParam2:([Foo *]({file}:6:8))f2
 """
@@ -503,9 +507,9 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     -(void)[protocolMethodVoidNoParameters]({file}:9:10)
-    ### Brief documentation: ###
+    ### Brief documentation:
     ```
     Has a brief comment
     ```
@@ -541,7 +545,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     +(void)[protocolClassMethod]({file}:14:10)
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -575,7 +579,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     -(void)[categoryMethodVoidNoParameters]({file}:54:10)
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -610,9 +614,9 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     -(void)[interfaceMethodVoidNoParameters]({file}:34:10)
-    ### Brief documentation: ###
+    ### Brief documentation:
     ```
     Brief comment.
     ```
@@ -648,7 +652,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     +(void)[protocolClassMethod]({file}:14:10)
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -682,9 +686,9 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [Protocol]({file}:8:11)
-    ### Body: ###
+    ### Body:
     ```objective-c++
     @protocol Protocol
       -(void)protocolMethodVoidNoParameters; ///< Has a brief comment
@@ -729,9 +733,9 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [Category]({file}:53:12)
-    ### Body: ###
+    ### Body:
     ```objective-c++
     @interface Interface (Category)
       -(void)categoryMethodVoidNoParameters;
@@ -770,9 +774,9 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [Interface]({file}:18:12)
-    ### Body: ###
+    ### Body:
     ```objective-c++
     @interface Interface : NSObject<Protocol>
       -(void)interfaceMethodVoidNoParameters; ///< Brief comment.
@@ -821,7 +825,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     -([MyCovariant&lt;Foo *&gt; *]({file}:3:12))[covariantMethod]({file}:4:22)
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
@@ -857,7 +861,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7), int, \
 123&gt; [instanceClassTypeInt]({file}:9:32)
 """
@@ -895,7 +899,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [TemplateClass]({file}:3:7)\
 &lt;[Foo]({file}:1:7), int, 123&gt; \
 [instanceClassTypeInt]({file}:9:32)
@@ -935,7 +939,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7)&gt; \
 [instanceClassAndDefaults]({file}:10:22)
 """
@@ -974,7 +978,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [TemplateClass]({file}:3:7)&lt;[TemplateClass]({file}:3:7)&lt;\
 [Foo]({file}:1:7)&gt;&gt; [instanceNested]({file}:11:37)
 """
@@ -1012,7 +1016,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) \\*&gt; \
 [instancePointer]({file}:12:23)
 """
@@ -1049,7 +1053,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [TemplateClass]({file}:3:7)&lt;[Foo]({file}:1:7) &amp;&gt; \
 [instanceRef]({file}:13:23)
 """
@@ -1087,7 +1091,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [TemplateClass]({file}:3:7)&lt;[Foo &amp;&amp;]({file}:1:7)&gt; \
 [instanceRValueRef]({file}:14:24)
 """
@@ -1113,6 +1117,7 @@ allow_code_wrap: true
                               'test_templates.cpp')
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
+        settings.show_index_references = False
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(8),
                          "  TemplateClass<Foo, int, 123> instanceClassTypeInt;")
@@ -1125,9 +1130,9 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     [TemplateClass]({file}:3:7)
-    ### Body: ###
+    ### Body:
     ```c++
     template <class TClass=Foo, typename TType=int, int TInt=12>
     class TemplateClass
@@ -1158,6 +1163,7 @@ allow_code_wrap: true
                               'test_templates.cpp')
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
+        settings.show_index_references = False
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(14),
                          "  instanceRValueRef.foo(instanceRValueRef);")
@@ -1170,7 +1176,7 @@ allow_code_wrap: true
 allow_code_wrap: true
 ---
 !!! panel-info "ECC: Info"
-    ## Declaration: ##
+    ## Declaration:
     void [foo]({file}:6:8) ([TemplateClass]({file}:3:7)&lt;Foo \
 &amp;&amp;, int, 12&gt;)
 """

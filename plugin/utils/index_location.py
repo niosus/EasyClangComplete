@@ -11,6 +11,8 @@ class IndexLocation:
 
         def __init__(self, name):
             """Initialize file name."""
+            # 'name' is a bad name for a variable, but we need it to be this way
+            # to conform with cursor.location.
             self.name = name
             self.extension = path.splitext(name)[1]
             self.short_name = path.basename(name)

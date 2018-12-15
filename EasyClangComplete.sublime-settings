@@ -133,6 +133,10 @@
   // Show body of struct/class/typedef declaration.
   "show_type_body" : true,
 
+  // We only can get declarations from clang AST. This will show references to
+  // the symbol under cursor taking them from Sublime Text index.
+  "show_index_references": true,
+
   // On some esoteric systems we cannot find libclang properly.
   // If you know where your libclang is - set the full path here.
   "libclang_path": "<some_path_here>",
