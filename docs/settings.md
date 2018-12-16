@@ -465,14 +465,12 @@ are of the form `'{placeholdername}'`. The following placeholders can be used:
 
 ### **`target_compilers`**
 
-Controls if we try to retrieve built-in flags from a target compiler. This
-option is used when we use a `compile_commands.json` file either directly or
-indirectly e.g. via CMake. If a compiler is not `null`, we try to ask it for
-the defines and include paths it sets implicitly and pass them to the clang
-compiler which is used to generate the code completion. If your completions
-require the knowledge about the toolchain, this option should improve the
-quality of the completions, however, in some corner cases it might cause
-completions to fail entirely.
+Controls if we try to retrieve built-in flags from a target compiler. If a
+compiler is not `null`, we try to ask it for the defines and include paths it
+sets implicitly and pass them to the clang compiler which is used to generate
+the code completion. If your completions require the knowledge about the
+toolchain, this option should improve the quality of the completions, however,
+in some corner cases it might cause completions to fail entirely.
 
 !!! example "Default value"
     ```json
