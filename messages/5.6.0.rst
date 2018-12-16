@@ -1,0 +1,36 @@
+Version 5.6.0
+=============
+
+Deprecated settings:
+--------------------
+- `use_target_compiler_built_in_flags` removed
+- `target_<xxx>_compiler` replaced by `target_compilers` setting
+
+Improvements and fixes:
+-----------------------
+- New setting: `target_compilers` that replaces old `target_<xxx>_compiler` to
+  streamline flag configuration
+- New setting: `show_index_references` set by default to `true` used to enable
+  showing symbol references when showing an info popup
+- Add suffix used on Fedora to search for libclang, thanks @KingKili
+- [dev] Add a test to ensure that all settings are covered in the documentation
+
+Support the development!
+------------------------
+💜 this plugin? Please consider buying me a 🍵
+https://github.com/niosus/EasyClangComplete#support-it
+
+Thanks to all the awesome contributors!
+If you add bounties to Bountysource you can support them too!
+https://www.bountysource.com/teams/easyclangcomplete
+
+Become a backer on Open Collective!
+https://opencollective.com/EasyClangComplete#backers
+
+I you use this plugin in a company, push to become a sponsor!
+https://opencollective.com/EasyClangComplete#sponsor
+
+This plugin took a significant amount of effort. It is available and will always
+be available for free, both as freedom and as beer.
+
+If you appreciate it - support it. How much would you say it is worth to you?
