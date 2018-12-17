@@ -24,7 +24,7 @@ class ClangUtils:
     libclang_name = None
 
     windows_suffixes = ['.dll', '.lib']
-    linux_suffixes = ['.so', '.so.1', 'so.7']
+    linux_suffixes = ['.so', '.so.1', '.so.7']
     osx_suffixes = ['.dylib']
 
     suffixes = {
