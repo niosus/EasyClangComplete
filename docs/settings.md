@@ -391,12 +391,11 @@ symbol under cursor taking them from Sublime Text index.
 
 ### **`libclang_path`**
 
-On some esoteric systems we cannot find `libclang` properly.
-If you know where your `libclang` is - set the full path here. This setting generally should not be needed.
+EasyClangComplete tries to auto-detect where `libclang` is installed. If this fails, you can specify the full path to the binary file.
 
 !!! example "Default value"
     ```json
-    "libclang_path": "<some_path_here>",
+    "libclang_path": "D:\\Program Files\\LLVM\\bin\\libclang.dll",
     ```
 
 ### **`progress_style`**
