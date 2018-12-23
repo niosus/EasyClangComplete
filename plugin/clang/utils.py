@@ -66,7 +66,7 @@ class ClangUtils:
         return None
 
     @staticmethod
-    def try_load_from_user_hint(libclang_path):
+    def get_folder_and_name(libclang_path):
         """Load library hinted by the user.
 
         Args:
@@ -75,12 +75,61 @@ class ClangUtils:
         Returns:
             str: folder of the libclang library or None if not found.
         """
-        if path.exists(libclang_path):
-            return path.dirname(libclang_path)
+        if not path.exists(libclang_path):
+            log.debug("User provided wrong libclang path: '%s'", libclang_path)
+            return None, None
+        if path.isdir(libclang_path):
+            log.debug("User provided folder for libclang: '%s'", libclang_path)
+            return libclang_path, None
+        # The user has provided a file. We will anyway search for the proper
+        # file in the folder that contains this file.
+        log.debug("User provided full libclang path: '%s'", libclang_path)
+        return path.dirname(libclang_path), path.basename(libclang_path)
 
     @staticmethod
-    def find_libclang_dir(clang_binary, libclang_path, version_str):
+    def prepare_search_libclang_cmd(clang_binary, lib_file_name):
+        """Prepare a command that we use to search for libclang paths."""
+        stdin = None
+        stdout = None
+        stderr = None
+        startupinfo = None
+        # let's find the library
+        if platform.system() == "Darwin":
+            # [HACK]: wtf??? why does it not find libclang.dylib?
+            get_library_path_cmd = [clang_binary, "-print-file-name="]
+        elif platform.system() == "Windows":
+            get_library_path_cmd = [clang_binary,
+                                    "-print-prog-name=clang"]
+            # Don't let console window pop-up briefly.
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
+            stdin = subprocess.PIPE
+            stderr = subprocess.PIPE
+        elif platform.system() == "Linux":
+            get_library_path_cmd = [
+                clang_binary, "-print-file-name={}".format(lib_file_name)]
+        return get_library_path_cmd, stdin, stdout, stderr, startupinfo
+
+    @staticmethod
+    def get_all_possible_filenames(version_str):
+        """Get a list of all filename on this system."""
+        current_system = platform.system()
+        possible_filenames = []
+        for suffix in ClangUtils.suffixes[current_system]:
+            for name in ClangUtils.possible_filenames[current_system]:
+                if platform.system() == "Linux":
+                    name = name.replace("$version", version_str)
+                possible_filenames.append(
+                    "{name}{suffix}".format(name=name, suffix=suffix))
+        return possible_filenames
+
+    @staticmethod
+    def find_libclang(clang_binary, libclang_path, version_str):
         """Find directory with libclang.
+
+        We only need the directory here as the filename is set to
+        ClangUtils.libclang_name and is read from cindex files.
 
         Args:
             clang_binary (str): clang binary to call
@@ -89,68 +138,63 @@ class ClangUtils:
             version_str(str): version of libclang to be used in format 3.8.0
         Returns:
             str: folder with libclang
+            str: full path to libclang library
         """
-        stdin = None
-        stderr = None
-        log.debug("platform: %s", platform.architecture())
-        log.debug("python version: %s", platform.python_version())
+        log.debug("Platform: %s, %s", platform.system(),
+                  platform.architecture())
+        log.debug("Python version: %s", platform.python_version())
+        log.debug("User provided libclang_path: '%s'", libclang_path)
+
         current_system = platform.system()
-        log.debug("we are on '%s'", platform.system())
-        log.debug("user provided libclang_path: %s", libclang_path)
-        # Get version string for help finding the proper libclang library on
-        # Linux
+        if current_system == "Linux":
+            # We only care about first two digits on Linux.
+            version_str = version_str[0:3]
+
         if libclang_path:
             # User thinks he knows better. Let him try his luck.
-            libclang_dir = ClangUtils.try_load_from_user_hint(libclang_path)
-            if libclang_dir:
+            user_libclang_dir, libclang_file = ClangUtils.get_folder_and_name(
+                libclang_path)
+            if user_libclang_dir and libclang_file:
                 # It was found! No need to search any further!
-                ClangUtils.libclang_name = path.basename(libclang_path)
-                log.info("using user-provided libclang: '%s'", libclang_path)
-                return libclang_dir
+                log.info("Using user-provided libclang: '%s'", libclang_path)
+                return user_libclang_dir, path.join(
+                    user_libclang_dir, libclang_file)
+
         # If the user hint did not work, we look for it normally
-        if current_system == "Linux":
-            # we only care about first two digits
-            version_str = version_str[0:3]
-        for suffix in ClangUtils.suffixes[current_system]:
-            # pick a name for a file
-            for name in ClangUtils.possible_filenames[current_system]:
-                file = "{name}{suffix}".format(name=name, suffix=suffix)
-                log.debug("searching for: '%s'", file)
-                startupinfo = None
-                # let's find the library
-                if platform.system() == "Darwin":
-                    # [HACK]: wtf??? why does it not find libclang.dylib?
-                    get_library_path_cmd = [clang_binary, "-print-file-name="]
-                elif platform.system() == "Windows":
-                    get_library_path_cmd = [clang_binary,
-                                            "-print-prog-name=clang"]
-                    # Don't let console window pop-up briefly.
-                    startupinfo = subprocess.STARTUPINFO()
-                    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                    startupinfo.wShowWindow = subprocess.SW_HIDE
-                    stdin = subprocess.PIPE
-                    stderr = subprocess.PIPE
-                elif platform.system() == "Linux":
-                    file = file.replace("$version", version_str)
-                    get_library_path_cmd = [
-                        clang_binary, "-print-file-name={}".format(file)]
-                output = subprocess.check_output(
-                    get_library_path_cmd,
-                    stdin=stdin,
-                    stderr=stderr,
-                    startupinfo=startupinfo).decode('utf8').strip()
-                log.debug("libclang search output = '%s'", output)
-                if output:
-                    libclang_dir = ClangUtils.dir_from_output(output)
-                    if path.isdir(libclang_dir):
-                        full_libclang_path = path.join(libclang_dir, file)
-                        log.debug("Checking path: %s", full_libclang_path)
-                        if path.exists(full_libclang_path):
-                            log.info("found libclang library file: '%s'",
-                                     full_libclang_path)
-                            ClangUtils.libclang_name = file
-                            return libclang_dir
-                log.warning("Clang could not find '%s'", file)
+        possible_filenames = ClangUtils.get_all_possible_filenames(version_str)
+        for libclang_filename in possible_filenames:
+            log.debug("Searching for: '%s'", libclang_filename)
+            if user_libclang_dir:
+                log.debug("Searching in user provided folder: '%s'",
+                          user_libclang_dir)
+                # User has provided a folder. First search in it.
+                user_hinted_file = path.join(
+                    user_libclang_dir, libclang_filename)
+                if path.exists(user_hinted_file):
+                    # Found valid file in the folder that the user provided.
+                    return user_libclang_dir, user_hinted_file
+
+            log.debug("Generating search folder")
+            get_library_path_cmd, stdin, stdout, stderr, startupinfo = \
+                ClangUtils.prepare_search_libclang_cmd(
+                    clang_binary, libclang_filename)
+            output = subprocess.check_output(
+                get_library_path_cmd,
+                stdin=stdin,
+                stderr=stderr,
+                startupinfo=startupinfo).decode('utf8').strip()
+            log.debug("Libclang search output = '%s'", output)
+            if output:
+                libclang_dir = ClangUtils.dir_from_output(output)
+                if path.isdir(libclang_dir):
+                    full_libclang_path = path.join(
+                        libclang_dir, libclang_filename)
+                    log.debug("Checking path: %s", full_libclang_path)
+                    if path.exists(full_libclang_path):
+                        log.info("Found libclang library file: '%s'",
+                                 full_libclang_path)
+                        return libclang_dir, full_libclang_path
+                log.debug("Clang could not find '%s'", full_libclang_path)
         # if we haven't found anything there is nothing to return
-        log.error("no libclang found at all")
-        return None
+        log.error("No libclang found!")
+        return None, None
