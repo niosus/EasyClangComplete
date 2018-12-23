@@ -84,7 +84,7 @@ class TestViewConfig(GuiTestWrapper):
         self.assertTrue(expected in view_config.include_folders)
 
         # test include flag
-        self.assertEqual(completer.clang_flags[11], '-I' + expected)
+        self.assertEqual(completer.clang_flags[9], '-I' + expected)
 
     def test_unsaved_views(self):
         """Test that we gracefully handle unsaved views."""
