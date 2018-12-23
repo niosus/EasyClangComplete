@@ -73,8 +73,6 @@ class SettingsStorage:
         "header_to_source_mapping",
         "hide_default_completions",
         "ignore_list",
-        "include_file_folder",
-        "include_file_parent_folder",
         "lang_flags",
         "libclang_path",
         "max_cache_age",
@@ -127,7 +125,7 @@ class SettingsStorage:
             # Initialize wildcard values with view.
             self.__update_wildcard_values(view)
             # Replace wildcards in various paths.
-            self.__populate_common_flags(view.file_name())
+            self.__populate_common_flags()
             self.__populate_flags_source_paths()
             self.__update_ignore_list()
             self.libclang_path = self.__replace_wildcard_if_needed(
@@ -263,23 +261,11 @@ class SettingsStorage:
                         self.flags_sources[idx][option][i] =\
                             self.__replace_wildcard_if_needed(entry)
 
-    def __populate_common_flags(self, current_file_name):
-        """Populate the variables inside common_flags with real values.
-
-        Args:
-            current_file_name (str): current view file name
-        """
-        # populate variables to real values
+    def __populate_common_flags(self):
+        """Populate the variables inside common_flags with real values."""
         log.debug("populating common_flags with current variables.")
         for idx, flag in enumerate(self.common_flags):
             self.common_flags[idx] = self.__replace_wildcard_if_needed(flag)
-
-        file_current_folder = path.dirname(current_file_name)
-        if self.include_file_folder:
-            self.common_flags.append("-I" + file_current_folder)
-        file_parent_folder = path.dirname(file_current_folder)
-        if self.include_file_parent_folder:
-            self.common_flags.append("-I" + file_parent_folder)
 
     def __update_ignore_list(self):
         """Populate variables inside flags sources."""

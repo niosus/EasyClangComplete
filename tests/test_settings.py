@@ -22,8 +22,6 @@ class test_settings(GuiTestWrapper):
         manager = SettingsManager()
         settings = manager.user_settings()
         self.assertIsNotNone(settings.verbose)
-        self.assertIsNotNone(settings.include_file_folder)
-        self.assertIsNotNone(settings.include_file_parent_folder)
         self.assertIsNotNone(settings.triggers)
         self.assertIsNotNone(settings.common_flags)
         self.assertIsNotNone(settings.clang_binary)

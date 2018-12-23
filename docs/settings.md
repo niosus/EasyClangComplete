@@ -292,24 +292,6 @@ Output lots of additional information in the console. Useful for debugging. Off 
     "verbose" : false,
     ```
 
-### **`include_file_folder`**
-
-Add the folder with current file with `-I` flag.
-
-!!! example "Default value"
-    ```json
-    "include_file_folder" : true,
-    ```
-
-### **`include_file_parent_folder`**
-
-Add the parent folder of the current file's one with `-I` flag
-
-!!! example "Default value"
-    ```json
-    "include_file_parent_folder" : true,
-    ```
-
 ### **`clang_binary`**
 
 
