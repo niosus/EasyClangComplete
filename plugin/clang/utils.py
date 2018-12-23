@@ -16,13 +16,10 @@ class ClangUtils:
     """Utils to help handling libclang, e.g. searching for it.
 
     Attributes:
-        libclang_name (str): name of the libclang library file
         linux_suffixes (list): suffixes for linux
         osx_suffixes (list): suffixes for osx
         windows_suffixes (list): suffixes for windows
     """
-    libclang_name = None
-
     windows_suffixes = ['.dll', '.lib']
     linux_suffixes = ['.so', '.so.1', '.so.7']
     osx_suffixes = ['.dylib']
@@ -126,10 +123,11 @@ class ClangUtils:
 
     @staticmethod
     def find_libclang(clang_binary, libclang_path, version_str):
-        """Find directory with libclang.
+        """Find libclang.
 
-        We only need the directory here as the filename is set to
-        ClangUtils.libclang_name and is read from cindex files.
+        We either use a user-provided directory/file for libclang or search for
+        one by calling clang_binary with specific parameters. We return both the
+        folder and full path to the found library.
 
         Args:
             clang_binary (str): clang binary to call
@@ -167,7 +165,6 @@ class ClangUtils:
             if user_libclang_dir:
                 log.debug("Searching in user provided folder: '%s'",
                           user_libclang_dir)
-                # User has provided a folder. First search in it.
                 user_hinted_file = path.join(
                     user_libclang_dir, libclang_filename)
                 if path.exists(user_hinted_file):
