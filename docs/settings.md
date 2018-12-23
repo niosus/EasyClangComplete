@@ -60,13 +60,24 @@ Specify common flags that are passed to clang for **every** compilation. These
 usually include common include paths that are needed for finding STL etc. Below
 are typical defaults for Linux.
 
-??? example "Good defaults for Linux & MacOS <small>(click to expand)</small>"
+??? example "Good defaults for Linux <small>(click to expand)</small>"
     ```json  
     "common_flags" : [
-      "-I/usr/include",
-      "-I$project_base_path/src",
-      // this is needed to include the correct headers for clang
-      "-I/usr/lib/clang/$clang_version/include",
+        "-I/usr/include",
+        "-I$project_base_path/src",
+        // this is needed to include the correct headers for clang
+        "-I/usr/lib/clang/$clang_version/include",
+    ],
+    ```
+
+??? example "Good defaults MacOS <small>(click to expand)</small>"
+    ```json  
+    "common_flags" : [
+        // some example includes
+        "-I/usr/include/",
+        "-I/usr/local/include",
+        "-I/Library/Developer/CommandLineTools/usr/lib/clang/$clang_version",
+        "-I/Library/Developer/CommandLineTools/usr/include/c++/v1",       
     ],
     ```
 
@@ -391,8 +402,11 @@ symbol under cursor taking them from Sublime Text index.
 
 ### **`libclang_path`**
 
-On some esoteric systems we cannot find `libclang` properly.
-If you know where your `libclang` is - set the full path here. This setting generally should not be needed.
+If the libclang library cannot be found in standard places, the user can
+provide a path to `libclang`. This path can either be a full path to the
+libclang library, e.g. `/usr/lib/libclang.so` or a folder that contains
+libclang library, e.g. `/usr/lib/`. This setting generally should not be
+needed.
 
 !!! example "Default value"
     ```json

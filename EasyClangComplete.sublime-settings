@@ -106,12 +106,15 @@
   // add parent folder of the current file's one with `-I` flag
   "include_file_parent_folder" : true,
 
-  // pick the clang binary used by the plugin. This is used to determine the
-  // version of the plugin and pick correct libclang bindings.
+  // Pick the clang binary used by the plugin. This is used to determine the
+  // version of the plugin and pick correct libclang bindings. Note that this
+  // should either be a full path to the binary or it should be available in
+  // your PATH.
   "clang_binary" : "clang++",
 
   // pick the binary used for cmake. Please make sure the binary you provide is
-  // accessible from the command line on your system.
+  // accessible from the command line on your system. Note that this should
+  // either be a full path to the binary or it should be available in your PATH.
   "cmake_binary" : "cmake",
 
   // ignore triggers and try to complete after each character
@@ -137,8 +140,11 @@
   // the symbol under cursor taking them from Sublime Text index.
   "show_index_references": true,
 
-  // On some esoteric systems we cannot find libclang properly.
-  // If you know where your libclang is - set the full path here.
+  // If the libclang library cannot be found in standard places, the user can
+  // provide a path to `libclang`. This path can either be a full path to the
+  // libclang library, e.g. `/usr/lib/libclang.so` or a folder that contains
+  // libclang library, e.g. `/usr/lib/`. This setting generally should not be
+  // needed.
   "libclang_path": "<some_path_here>",
 
   // Pick the progress style. There are currently these styles available:
