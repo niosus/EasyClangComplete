@@ -8,6 +8,7 @@ Attributes:
 from .flags_source import FlagsSource
 from ..tools import File
 from ..utils.singleton import CppPropertiesCache
+from ..utils.flag import Flag
 
 import os
 import re
@@ -128,6 +129,5 @@ class CppProperties(FlagsSource):
             defines = parse_defines_from_json(content)
 
             content = includes + defines
-            flags = FlagsSource.parse_flags(
-                file.folder, content, self._include_prefixes)
+            flags = Flag.tokenize_list(content, file.folder)
         return flags

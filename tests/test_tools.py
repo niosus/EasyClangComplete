@@ -180,7 +180,6 @@ class test_tools(TestCase):
         """Check that expanding a star at the end of folder works."""
         this_folder = path.dirname(__file__)
         this_folder_with_star = path.join(this_folder, '*')
-        print(this_folder_with_star)
         expanded = Tools.expand_star_wildcard(this_folder_with_star)
         expected_folders = [
             path.join(this_folder, 'c_cpp_properties_files'),

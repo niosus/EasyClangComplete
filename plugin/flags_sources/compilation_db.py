@@ -7,6 +7,7 @@ from .flags_source import FlagsSource
 from ..tools import File
 from ..utils.unique_list import UniqueList
 from ..utils.singleton import ComplationDbCache
+from ..utils.flag import Flag
 
 from os import path
 from fnmatch import fnmatch
@@ -144,9 +145,7 @@ class CompilationDb(FlagsSource):
                 return None
 
             argument_list = CompilationDb.filter_bad_arguments(argument_list)
-            flags = FlagsSource.parse_flags(base_path,
-                                            argument_list,
-                                            self._include_prefixes)
+            flags = Flag.tokenize_list(argument_list, base_path)
             # set these flags for current file
             parsed_db[file_path] = flags
             # also maintain merged flags

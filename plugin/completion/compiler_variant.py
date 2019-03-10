@@ -15,7 +15,8 @@ class CompilerVariant(object):
     """Encapsulation of a compiler specific options."""
 
     need_lang_flags = True
-    init_flags = [Flag("-c"), Flag("-fsyntax-only")]
+    init_flags = [Flag(prefix="", body="-c"),
+                  Flag(prefix="", body="-fsyntax-only")]
 
     def errors_from_output(self, output):
         """Parse errors received from the compiler.

@@ -4,11 +4,10 @@ Attributes:
     log (logging.Logger): logger for this module
 """
 import logging
-import sublime
-
-from os import path
 
 from ..tools import Tools
+from ..tools import File
+from ..utils.flag import Flag
 
 log = logging.getLogger("ECC")
 
@@ -129,11 +128,11 @@ class SettingsStorage:
             self.__populate_flags_source_paths()
             self.__update_ignore_list()
             self.libclang_path = self.__replace_wildcard_if_needed(
-                self.libclang_path)
+                self.libclang_path)[0]
             self.clang_binary = self.__replace_wildcard_if_needed(
-                self.clang_binary)
+                self.clang_binary)[0]
             self.cmake_binary = self.__replace_wildcard_if_needed(
-                self.cmake_binary)
+                self.cmake_binary)[0]
         except AttributeError as e:
             log.error("view became None. Do not continue.")
             log.error("original error: %s", e)
@@ -253,50 +252,32 @@ class SettingsStorage:
                     continue
                 if not source_dict[option]:
                     continue
-                if isinstance(source_dict[option], str):
-                    self.flags_sources[idx][option] =\
-                        self.__replace_wildcard_if_needed(source_dict[option])
-                elif isinstance(source_dict[option], list):
-                    for i, entry in enumerate(source_dict[option]):
-                        self.flags_sources[idx][option][i] =\
-                            self.__replace_wildcard_if_needed(entry)
+                source_dict[option] = self.__replace_wildcard_if_needed(
+                    source_dict[option])
 
     def __populate_common_flags(self):
         """Populate the variables inside common_flags with real values."""
         log.debug("populating common_flags with current variables.")
-        for idx, flag in enumerate(self.common_flags):
-            self.common_flags[idx] = self.__replace_wildcard_if_needed(flag)
+        new_common_flags = []
+        for flag in self.common_flags:
+            new_common_flags += Flag.create(flag)
 
     def __update_ignore_list(self):
-        """Populate variables inside flags sources."""
+        """Populate variables inside of the ignore list."""
         if not self.ignore_list:
             log.critical(" Cannot update paths of ignore list.")
             return
-        for idx, path_to_ignore in enumerate(self.ignore_list):
-            self.ignore_list[idx] = self.__replace_wildcard_if_needed(
-                path_to_ignore)
+        self.ignore_list = self.__replace_wildcard_if_needed(self.ignore_list)
 
-    def __replace_wildcard_if_needed(self, line):
-        """Replace wildcards in a line if they are present there.
-
-        Args:
-            line (str): line possibly with wildcards in it
-
-        Returns:
-            str: line with replaced wildcards
-        """
-        res = path.expandvars(line)
-        res = sublime.expand_variables(res, self._wildcard_values)
-        if Wildcards.HOME_PATH in res:
-            # replace '~' by full home path. Leave everything else intact.
-            prefix_idx = res.index(Wildcards.HOME_PATH)
-            prefix = res[:prefix_idx]
-            home_path = path.expanduser(res[prefix_idx:prefix_idx + 1])
-            res = prefix + home_path + res[prefix_idx + 1:]
-
-        if res != line:
-            log.debug("populated '%s' to '%s'", line, res)
-        return res
+    def __replace_wildcard_if_needed(self, query):
+        if isinstance(query, str):
+            return self.__replace_wildcard_if_needed([query])
+        if not isinstance(query, list):
+            log.critical("We can only update wildcards in a list!")
+        result = []
+        for query_path in query:
+            result += File.expand_all(query_path, self._wildcard_values)
+        return result
 
     def __update_wildcard_values(self, view):
         """Update values for wildcard variables."""

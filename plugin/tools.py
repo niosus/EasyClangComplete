@@ -57,13 +57,13 @@ class SublBridge:
     @staticmethod
     def set_status(message):
         """Set status message for the current view."""
-        view = sublime.active_window().active_view()
+        view = SublBridge.active_view()
         view.set_status("000_ECC", message)
 
     @staticmethod
     def erase_status():
         """Erase status message for the current view."""
-        view = sublime.active_window().active_view()
+        view = SublBridge.active_view()
         if not view:
             # do nothing if there is no view
             return
@@ -72,8 +72,16 @@ class SublBridge:
     @staticmethod
     def erase_phantoms(tag):
         """Erase phantoms for the current view."""
-        view = sublime.active_window().active_view()
-        view.erase_phantoms(tag)
+        SublBridge.active_view().erase_phantoms(tag)
+
+    @staticmethod
+    def active_view():
+        """Get the active view.
+
+        Returns:
+            View: Active view
+        """
+        return sublime.active_window().active_view()
 
     @staticmethod
     def active_view_id():
@@ -82,7 +90,7 @@ class SublBridge:
         Returns:
             int: buffer id of the active view
         """
-        return sublime.active_window().active_view().buffer_id()
+        return SublBridge.active_view().buffer_id()
 
     @staticmethod
     def cursor_pos(view, pos=None):
@@ -293,9 +301,26 @@ class File:
         """
         if not input_path:
             return None
+        input_path = path.expanduser(input_path)
         if not path.isabs(input_path):
             input_path = path.join(folder, input_path)
         return path.normcase(path.normpath(input_path))
+
+    @staticmethod
+    def expand_all(input_path, wildcard_values={}, current_folder=''):
+        """Expand everything in this path.
+
+        This returns a list of canonical paths.
+        """
+        expanded_path = path.expandvars(input_path)
+        expanded_path = sublime.expand_variables(expanded_path, wildcard_values)
+        expanded_path = File.canonical_path(expanded_path, current_folder)
+        from glob import glob
+        all_paths = glob(expanded_path)
+        if len(all_paths) > 0 and all_paths[0] != input_path:
+            log.debug("Populated '%s' to '%s'", input_path, all_paths)
+            return all_paths
+        return [expanded_path]
 
     @staticmethod
     def update_mod_time(full_path):
@@ -473,16 +498,15 @@ class Tools:
     @staticmethod
     def expand_star_wildcard(input_path):
         """Expand a path like /some/path/* to a list of all folders."""
-        expanded = []
         if not input_path.endswith('*'):
-            expanded.append(input_path)
-            return expanded
+            return [input_path]
         log.debug("Expanding entry: %s", input_path)
+        expanded = []
         base_folder = path.abspath(input_path[:-1])
         for child in listdir(base_folder):
             child = path.join(base_folder, child)
             if path.isdir(child):
-                log.debug("Found folder: %s", child)
+                log.debug("  Found folder: %s", child)
                 expanded.append(child)
         return expanded
 

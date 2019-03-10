@@ -184,8 +184,11 @@ class ViewConfig(object):
         init_flags = completer.compiler_variant.init_flags
         lang_flags = ViewConfig.__get_default_flags(
             view, settings, completer.compiler_variant.need_lang_flags)
+        log.debug("Common")
         common_flags = ViewConfig.__get_common_flags(prefixes, settings)
+        log.debug("Source")
         source_flags = ViewConfig.__load_source_flags(view, settings, prefixes)
+        log.debug("Merge")
         flags = ViewConfig.__merge_flags(
             init_flags, lang_flags, common_flags, source_flags)
 
@@ -224,6 +227,7 @@ class ViewConfig(object):
         Returns:
             TYPE: Description
         """
+        log.debug("lang flags: %s", lang_flags)
         lang_std_flag_indices = [
             i for i, flag in enumerate(lang_flags)
             if flag.body.startswith('-std=')]
@@ -332,9 +336,7 @@ class ViewConfig(object):
             Flag[]: Common flags.
         """
         home_folder = path.expanduser('~')
-        return FlagsSource.parse_flags(home_folder,
-                                       settings.common_flags,
-                                       include_prefixes)
+        return Flag.tokenize_list(settings.common_flags, home_folder)
 
     @staticmethod
     def __init_completer(settings):
@@ -426,7 +428,7 @@ class ViewConfig(object):
                 # if flags appear multiple times.
                 if builtin_flag not in lang_flags:
                     lang_flags.append(builtin_flag)
-
+        log.debug("Tokeninzing default flags")
         return Flag.tokenize_list(lang_flags)
 
 

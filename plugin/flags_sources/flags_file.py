@@ -6,6 +6,7 @@ Attributes:
 from .flags_source import FlagsSource
 from ..tools import File
 from ..utils.singleton import FlagsFileCache
+from ..utils.flag import Flag
 
 from os import path
 
@@ -95,5 +96,4 @@ class FlagsFile(FlagsSource):
             log.error("cannot get flags from clang_complete_file. No file.")
             return []
 
-        return FlagsSource.parse_flags(
-            file.folder, file.lines, self._include_prefixes)
+        return Flag.tokenize_list(file.lines, file.folder)
