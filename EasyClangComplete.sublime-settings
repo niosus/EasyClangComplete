@@ -48,7 +48,7 @@
   //                                  cmake is run.
   //
   // "makefile" entry has an additional option:
-  //  - "makevars": [<makevars>] <-- Name of the make
+  //  - "makevars": [<makevars>] <-- Names of the make variables to lookup
   "flags_sources": [
     {"file": "CMakeLists.txt"},
     {"file": "compile_commands.json"},
