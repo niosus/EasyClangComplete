@@ -46,12 +46,18 @@
   //  - "prefix_paths": [<paths>] <-- array of folders that should be
   //                                  appended to CMAKE_PREFIX_PATHS before
   //                                  cmake is run.
+  //
+  // "makefile" entry has an additional option:
+  //  - "makevars": [<makevars>] <-- Name of the make
   "flags_sources": [
     {"file": "CMakeLists.txt"},
     {"file": "compile_commands.json"},
+    {"file": "Makefile"},
     {"file": "CppProperties.json"},
     {"file": "c_cpp_properties.json"},
     {"file": ".clang_complete"},
+
+    {"makevars": [ "INCLUDES", "CPPFLAGS", "CFLAGS", "CXXFLAGS" ]},
   ],
 
   // Show compile errors on file save or not.
