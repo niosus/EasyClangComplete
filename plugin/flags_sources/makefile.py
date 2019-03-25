@@ -24,7 +24,7 @@ class Makefile(FlagsSource):
     """
     _FILE_NAME = "Makefile"
 
-    def __init__(self, include_prefixes):
+    def __init__(self, include_prefixes, makevars):
         """Initialize a flag file storage.
 
         Args:
@@ -32,6 +32,7 @@ class Makefile(FlagsSource):
         """
         super().__init__(include_prefixes)
         self._cache = MakefileCache()
+        self._makevars = makevars
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -90,15 +91,8 @@ class Makefile(FlagsSource):
             "make", "-s", "-C", file.folder,
             "-f", self._FILE_NAME, "-f", "-",
         ]
-        makevars = [
-            "DEFAULT_INCLUDES",
-            "INCLUDES",
-            "AM_CPPFLAGS",
-            "CPPFLAGS",
-            "AM_CFLAGS",
-            "CFLAGS",
-        ]
-        for makevar in makevars:
+
+        for makevar in self._makevars:
             cmd.append("print-" + makevar)
         pipe = subprocess.PIPE
         make = subprocess.Popen(cmd, stdout=pipe, stdin=pipe, stderr=pipe)

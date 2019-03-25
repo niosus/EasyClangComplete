@@ -298,7 +298,10 @@ class ViewConfig(object):
                     settings.header_to_source_mapping,
                     settings.target_compilers)
             elif file_name == "Makefile":
-                flag_source = Makefile(include_prefixes)
+                makevars = source_dict.get("makevars", None)
+                flag_source = Makefile(
+                    include_prefixes, makevars
+                )
             elif file_name == "compile_commands.json":
                 flag_source = CompilationDb(
                     include_prefixes,
