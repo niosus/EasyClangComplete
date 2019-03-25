@@ -29,6 +29,7 @@ class Makefile(FlagsSource):
 
         Args:
             include_prefixes (str[]): A List of valid include prefixes.
+            makevars (str[]): A List of make variables.
         """
         super().__init__(include_prefixes)
         self._cache = MakefileCache()
