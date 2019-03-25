@@ -50,7 +50,10 @@ class TestMakefile(object):
         """Test finding and parsing root Makefile."""
         test_path = path.join(self._get_project_root(), 'main.c')
 
-        mfile = Makefile(['-I', '-isystem'])
+        mfile = Makefile(
+            ['-I', '-isystem'],
+            ['INCLUDES', 'CPPFLAGS', 'CFLAGS', 'CPPFLAGS']
+        )
         flags = mfile.get_flags(test_path)
         self._check_include(flags, "inc")
         self._check_define(flags, "REQUIRED_DEFINE")
@@ -60,7 +63,10 @@ class TestMakefile(object):
         """Test finding and parsing library Makefile."""
         test_path = path.join(self._get_project_root(), 'lib', 'bar.c')
 
-        mfile = Makefile(['-I', '-isystem'])
+        mfile = Makefile(
+            ['-I', '-isystem'],
+            ['INCLUDES', 'CPPFLAGS', 'CFLAGS', 'CPPFLAGS']
+        )
         flags = mfile.get_flags(test_path)
         self._check_include(flags, path.join("lib", "foo"))
         self._check_makefile(mfile._cache, flags, test_path,
@@ -70,7 +76,10 @@ class TestMakefile(object):
         """Test finding and parsing Makefile for library subdir."""
         test_path = path.join(self._get_project_root(), 'lib', 'foo', 'foo.c')
 
-        mfile = Makefile(['-I', '-isystem'])
+        mfile = Makefile(
+            ['-I', '-isystem'],
+            ['INCLUDES', 'CPPFLAGS', 'CFLAGS', 'CPPFLAGS']
+        )
         flags = mfile.get_flags(test_path)
         self._check_include(flags, path.join("lib", "foo"))
         self._check_makefile(mfile._cache, flags, test_path,
@@ -80,7 +89,10 @@ class TestMakefile(object):
         """Test behavior when no Makefile found."""
         test_path = path.join(path.dirname(__file__), 'test_files', 'test.cpp')
 
-        mfile = Makefile(['-I', '-isystem'])
+        mfile = Makefile(
+            ['-I', '-isystem'],
+            ['INCLUDES', 'CPPFLAGS', 'CFLAGS', 'CPPFLAGS']
+        )
         flags = mfile.get_flags(test_path)
         self.assertTrue(flags is None)
 
