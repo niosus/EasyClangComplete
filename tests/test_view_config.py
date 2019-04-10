@@ -69,7 +69,7 @@ class TestViewConfig(GuiTestWrapper):
                 return
         completer = view_config.completer
         print(completer.clang_flags)
-        self.expectEqual(len(completer.clang_flags), 18)
+        self.assertEqual(len(completer.clang_flags), 18)
         # test from the start
         self.assertEqual(completer.clang_flags[0], '-c')
         self.assertEqual(completer.clang_flags[1], '-fsyntax-only')
@@ -84,7 +84,9 @@ class TestViewConfig(GuiTestWrapper):
         self.assertTrue(expected in view_config.include_folders)
 
         # test include flag
-        self.assertEqual(completer.clang_flags[9], '-I' + expected)
+        self.assertEqual(
+            completer.clang_flags[-4] + completer.clang_flags[-3],
+            '-I' + expected)
 
     def test_unsaved_views(self):
         """Test that we gracefully handle unsaved views."""

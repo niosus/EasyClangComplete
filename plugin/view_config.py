@@ -324,19 +324,8 @@ class ViewConfig(object):
 
     @staticmethod
     def __get_common_flags(include_prefixes, settings):
-        """Get common flags as list of flags.
-
-        Additionally expands local paths into global ones based on folder.
-
-        Args:
-            include_prefixes (str[]): List of valid include prefixes.
-            settings (SettingsStorage): Current settings.
-
-        Returns:
-            Flag[]: Common flags.
-        """
-        home_folder = path.expanduser('~')
-        return Flag.tokenize_list(settings.common_flags, home_folder)
+        """Get common flags as list of flags."""
+        return settings.common_flags
 
     @staticmethod
     def __init_completer(settings):
