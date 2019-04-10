@@ -144,6 +144,8 @@ class Flag:
 
         def build(self):
             """Create a flag."""
+            if self.__prefix in Flag.PREFIXES_WITH_PATHS:
+                self.__body = File.canonical_path(self.__body)
             return Flag(self.__prefix, self.__body)
 
     # All prefixes that denote includes.
