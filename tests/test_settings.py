@@ -71,5 +71,5 @@ class test_settings(GuiTestWrapper):
         dirs = settings.common_flags
 
         self.assertTrue(len(initial_common_flags) <= len(dirs))
-        self.assertTrue(initial_common_flags[0] in dirs)
-        self.assertFalse(initial_common_flags[1] in dirs)
+        self.assertIn(initial_common_flags[0], dirs)
+        self.assertNotIn(initial_common_flags[1], dirs)
