@@ -36,6 +36,7 @@ cindex_dict = {
     '5.0': PKG_NAME + ".plugin.clang.cindex50",
     '6.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
     '7.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
+    '7.1': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
     '8.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
 }
 
