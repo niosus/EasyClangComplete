@@ -262,6 +262,7 @@ class SettingsStorage:
         for raw_flag_str in self.common_flags:
             new_common_flags += Flag.Builder()\
                 .from_unparsed_string(raw_flag_str).build_with_expansion()
+        self.common_flags = new_common_flags
 
     def __update_ignore_list(self):
         """Populate variables inside of the ignore list."""
