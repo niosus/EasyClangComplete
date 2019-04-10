@@ -32,10 +32,10 @@ class TestMakefile(object):
 
     def _check_include(self, flags, include):
         expected = path.join(self._get_project_root(), include)
-        self.assertIn(Flag('-I' + expected), flags)
+        self.assertIn(Flag('-I', expected), flags)
 
     def _check_define(self, flags, define):
-        self.assertIn(Flag('-D' + define), flags)
+        self.assertIn(Flag('', '-D' + define), flags)
 
     def _check_makefile(self, cache, flags, test_path, makefile_path):
         expected = path.join(self._get_project_root(), makefile_path)

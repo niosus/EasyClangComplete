@@ -24,8 +24,8 @@ class TestCCppProperties(TestCase):
         include_prefixes = ['-I']
         db = CCppProperties(include_prefixes)
 
-        expected = [Flag('-I' + path.normpath('/lib_include_dir')),
-                    Flag('-Dlib_EXPORTS')]
+        expected = [Flag('-I', path.normpath('/lib_include_dir')),
+                    Flag('', '-Dlib_EXPORTS')]
         path_to_db = path.join(path.dirname(__file__),
                                'c_cpp_properties_files',
                                'simple')
@@ -38,8 +38,8 @@ class TestCCppProperties(TestCase):
         db = CCppProperties(include_prefixes)
         environ['TEST_VARIABLE_TO_EXPAND'] = '/lib_include_dir'
 
-        expected = [Flag('-I' + path.normpath('/lib_include_dir')),
-                    Flag('-Dlib_EXPORTS')]
+        expected = [Flag('-I', path.normpath('/lib_include_dir')),
+                    Flag('', '-Dlib_EXPORTS')]
         path_to_db = path.join(path.dirname(__file__),
                                'c_cpp_properties_files',
                                'environment')

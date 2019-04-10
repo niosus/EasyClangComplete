@@ -27,9 +27,9 @@ class TestCompilationDb(TestCase):
             header_to_source_map=[]
         )
 
-        expected = [Flag('-I' + path.normpath('/lib_include_dir')),
-                    Flag('-Dlib_EXPORTS'),
-                    Flag('-fPIC')]
+        expected = [Flag('-I', path.normpath('/lib_include_dir')),
+                    Flag('', '-Dlib_EXPORTS'),
+                    Flag('', '-fPIC')]
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
                                'command')
@@ -57,9 +57,9 @@ class TestCompilationDb(TestCase):
             header_to_source_map=[]
         )
 
-        expected = [Flag('-I' + path.normpath('/lib_include_dir')),
-                    Flag('-Dlib_EXPORTS'),
-                    Flag('-fPIC')]
+        expected = [Flag('-I', path.normpath('/lib_include_dir')),
+                    Flag('', '-Dlib_EXPORTS'),
+                    Flag('', '-fPIC')]
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
                                'arguments')
@@ -74,8 +74,8 @@ class TestCompilationDb(TestCase):
             header_to_source_map=[]
         )
 
-        expected_lib = [Flag('-Dlib_EXPORTS'), Flag('-fPIC')]
-        expected_main = [Flag('-I' + path.normpath('/lib_include_dir'))]
+        expected_lib = [Flag('', '-Dlib_EXPORTS'), Flag('', '-fPIC')]
+        expected_main = [Flag('-I', path.normpath('/lib_include_dir'))]
         lib_file_path = path.normpath('/home/user/dummy_lib.cpp')
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
         # also try to test a header
@@ -121,8 +121,8 @@ class TestCompilationDb(TestCase):
             header_to_source_map=[]
         )
 
-        expected_lib = [Flag('-Dlib_EXPORTS'), Flag('-fPIC')]
-        expected_main = [Flag('-I' + path.normpath('/lib_include_dir'))]
+        expected_lib = [Flag('', '-Dlib_EXPORTS'), Flag('', '-fPIC')]
+        expected_main = [Flag('-I', path.normpath('/lib_include_dir'))]
         lib_file_path = path.normpath('/home/user/dummy_lib.cpp')
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
         path_to_db = path.join(path.dirname(__file__),
@@ -146,9 +146,9 @@ class TestCompilationDb(TestCase):
             header_to_source_map=[]
         )
 
-        expected = [Flag('-I' + path.normpath('/usr/local/foo')),
-                    Flag('-I' + path.normpath('/foo/bar/test/include')),
-                    Flag('-I' + path.normpath('/foo/include')),
+        expected = [Flag('-I', path.normpath('/usr/local/foo')),
+                    Flag('-I', path.normpath('/foo/bar/test/include')),
+                    Flag('-I', path.normpath('/foo/include')),
                     Flag('-isystem', path.normpath('/foo/bar/matilda'))]
 
         path_to_db = path.join(path.dirname(__file__),
@@ -172,7 +172,9 @@ class TestCompilationDb(TestCase):
                                'command_c')
         scope = SearchScope(from_folder=path_to_db)
         flags = db.get_flags(main_file_path, scope)
-        self.assertNotIn(Flag('-c'), flags)
-        self.assertNotIn(Flag('-o'), flags)
-        self.assertIn(Flag('-Wno-poison-system-directories'), flags)
-        self.assertIn(Flag('-march=armv7-a'), flags)
+        self.assertNotIn(Flag('-c', ''), flags)
+        self.assertNotIn(Flag('', '-c'), flags)
+        self.assertNotIn(Flag('-o', ''), flags)
+        self.assertNotIn(Flag('', '-o'), flags)
+        self.assertIn(Flag('', '-Wno-poison-system-directories'), flags)
+        self.assertIn(Flag('', '-march=armv7-a'), flags)

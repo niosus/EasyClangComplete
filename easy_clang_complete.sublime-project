@@ -16,15 +16,6 @@
 	],
 	"settings":
 	{
-		"ecc_common_flags" : [
-      // some example includes
-      "-I/usr/include",
-      "-I$project_base_path/*",
-      // this is needed to include the correct headers for clang
-      "-I/usr/lib/clang/$clang_version/include",
-      "-Wall"
-    ],
-		"easy_clang_complete_verbose": true,
 		"ecc_flags_sources":
 		[
 			{
@@ -37,7 +28,6 @@
 				"prefix_paths":
 				[
 					"/opt/ros/indigo",
-					"~/Code/catkin_ws/devel/*",
 					"~/Code/catkin_ws/devel",
 					"$project_base_path/catkin_ws/devel"
 				]

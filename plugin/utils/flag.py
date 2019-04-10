@@ -16,6 +16,54 @@ class Flag:
                                     second part as an input.
     """
 
+    class Builder:
+        """Builder for flags."""
+
+        def __init__(self):
+            """Initialize the empty internal flag."""
+            self.__prefix = ''
+            self.__body = ''
+
+        def from_unparsed_string(self, chunk):
+            """Parse an unknown string into body and prefix."""
+            chunk = chunk.strip()
+            for prefix in Flag.SEPARABLE_PREFIXES:
+                if chunk.startswith(prefix):
+                    self.__prefix = prefix
+                    self.__body = chunk[len(prefix):]
+                    break
+            # We did not find any separable prefix, so it's all body.
+            if not self.__body:
+                self.__body = chunk
+            return self
+
+        def with_body(self, body):
+            """Set the body to the internal flag."""
+            self.__body = body.strip()
+            return self
+
+        def with_prefix(self, prefix):
+            """Set the prefix to the internal flag."""
+            self.__prefix = prefix.strip()
+            if self.__prefix not in Flag.SEPARABLE_PREFIXES:
+                log.warning("Unexpected flag prefix: '%s'", self.__prefix)
+            return self
+
+        def build_with_expansion(self, current_folder=''):
+            """Expand all expandable entries and return a resulting list."""
+            if self.__prefix in Flag.PREFIXES_WITH_PATHS:
+                all_flags = []
+                for expanded_body in File.expand_all(
+                        self.__body, current_folder=current_folder):
+                    all_flags.append(Flag(self.__prefix, expanded_body))
+                return all_flags
+            # This does not hold a path. Therefore we don't need to expand it.
+            return [Flag(prefix=self.__prefix, body=self.__body)]
+
+        def build(self):
+            """Create a flag."""
+            return Flag(self.__prefix, self.__body)
+
     def __init__(self, prefix, body):
         """Initialize a flag with two parts.
 
@@ -24,49 +72,8 @@ class Flag:
             body (str): The body of the flag that combined with the prefix
                 creates the full flag.
         """
-        self.__prefix = prefix
         self.__body = body
-
-    @staticmethod
-    def create(part_1, part_2=None, current_folder=''):
-        """Initialize a flag with two parts.
-
-        There is a number of sutuations that can happen here. It can be that
-        part_1 holds a separable prefix and part_2 the actual flag. Another
-        alternative is that part_2 is empty and part_1 holds a separable prefix
-        merged with the body of the flag. If non of these happen, then part_1
-        holds a non-separable flag.
-
-        Args:
-            part_1 (str): First (or only) part of the flag.
-            part_2 (str, optional): Second part if present.
-
-        Returns:
-           (Flag[]): A list of flags in canonical form.
-        """
-        def expand_paths(prefix, body):
-            """Return all expanded flags from given unexpanded body."""
-            if prefix in Flag.PREFIXES_WITH_PATHS:
-                all_flags = []
-                for expanded_body in File.expand_all(
-                        body, current_folder=current_folder):
-                    all_flags.append(Flag(prefix, expanded_body))
-                return all_flags
-            # This does not hold a path. Therefore we don't need to expand it.
-            return [Flag(prefix, body)]
-
-        part_1 = part_1.strip()
-        if part_2:
-            # We have been provided a prefix.
-            part_2 = part_2.strip()
-            if part_1 not in Flag.SEPARABLE_PREFIXES:
-                log.warning("Unexpected flag prefix: '%s'", part_1)
-            return expand_paths(prefix=part_1, body=part_2)
-        for prefix in Flag.SEPARABLE_PREFIXES:
-            if part_1.startswith(prefix):
-                body = part_1.split(prefix)[1].strip()
-                return expand_paths(prefix, body)
-        return expand_paths(prefix="", body=part_1)
+        self.__prefix = prefix
 
     @property
     def prefix(self):
@@ -116,89 +123,92 @@ class Flag:
         Returns (Flag[]): A list of flags containing two parts if needed.
         """
         flags = []
-        skip = False
+        skip_next_entry = False
         log.debug("Tokenizing: %s", all_split_line)
         for i, entry in enumerate(all_split_line):
             if entry.startswith("#"):
                 continue
-            if skip:
-                skip = False
+            if skip_next_entry:
+                skip_next_entry = False
                 continue
             if entry in Flag.SEPARABLE_PREFIXES:
                 # add both this and next part to a flag
                 if (i + 1) < len(all_split_line):
-                    flags += Flag.create(all_split_line[i],
-                                         all_split_line[i + 1],
-                                         current_folder)
-                    skip = True
+                    flags += Flag.Builder()\
+                        .with_prefix(all_split_line[i])\
+                        .with_body(all_split_line[i + 1])\
+                        .build_with_expansion(current_folder)
+                    skip_next_entry = True
                     continue
-            flags += Flag.create(entry, current_folder=current_folder)
+            flags += Flag.Builder()\
+                .from_unparsed_string(entry)\
+                .build_with_expansion(current_folder)
         return flags
 
     # All prefixes that denote includes.
-    PREFIXES_WITH_PATHS = ["-isystem",
-                           "-I",
-                           "-isysroot",
-                           "/I",
-                           "-msvc",
-                           "/msvc",
-                           "-B",
-                           "--cuda-path",
-                           "-fmodules-cache-path",
-                           "-fmodules-user-build-path",
-                           "-fplugin",
-                           "-fprebuilt-module-path"
-                           "-fprofile-use",
-                           "-F",
-                           "-idirafter",
-                           "-iframework",
-                           "-iquote",
-                           "-iwithprefix",
-                           "-L",
-                           "-objcmt-whitelist-dir-path",
-                           "--ptxas-path"]
+    PREFIXES_WITH_PATHS = set(["-isystem",
+                               "-I",
+                               "-isysroot",
+                               "/I",
+                               "-msvc",
+                               "/msvc",
+                               "-B",
+                               "--cuda-path",
+                               "-fmodules-cache-path",
+                               "-fmodules-user-build-path",
+                               "-fplugin",
+                               "-fprebuilt-module-path"
+                               "-fprofile-use",
+                               "-F",
+                               "-idirafter",
+                               "-iframework",
+                               "-iquote",
+                               "-iwithprefix",
+                               "-L",
+                               "-objcmt-whitelist-dir-path",
+                               "--ptxas-path"])
 
     # Generated from `clang -help` with regex: ([-/][\w-]+)\s\<\w+\>\s
-    SEPARABLE_PREFIXES = ["-arcmt-migrate-report-output",
-                          "-cxx-isystem",
-                          "-dependency-dot",
-                          "-dependency-file",
-                          "-fmodules-user-build-path",
-                          "-F",
-                          "-idirafter",
-                          "-iframework",
-                          "-imacros",
-                          "-include-pch",
-                          "-include",
-                          "-iprefix",
-                          "-iquote",
-                          "-isysroot",
-                          "-isystem",
-                          "-ivfsoverlay",
-                          "-iwithprefixbefore",
-                          "-iwithprefix",
-                          "-iwithsysroot",
-                          "-I",
-                          "-meabi",
-                          "-MF",
-                          "-mllvm",
-                          "-Xclang",
-                          "-module-dependency-dir",
-                          "-MQ",
-                          "-mthread-model",
-                          "-MT",
-                          "-o",
-                          "-serialize-diagnostics",
-                          "-working-directory",
-                          "-Xanalyzer",
-                          "-Xassembler",
-                          "-Xlinker",
-                          "-Xpreprocessor",
-                          "-x",
-                          "-z",
-                          "/FI",
-                          "/I",
-                          "/link",
-                          "/Tc",
-                          "/Tp",
-                          "/U"]
+    SEPARABLE_PREFIXES = set(["-arcmt-migrate-report-output",
+                              "-cxx-isystem",
+                              "-dependency-dot",
+                              "-dependency-file",
+                              "-fmodules-user-build-path",
+                              "-F",
+                              "-idirafter",
+                              "-iframework",
+                              "-imacros",
+                              "-include-pch",
+                              "-include",
+                              "-iprefix",
+                              "-iquote",
+                              "-isysroot",
+                              "-isystem",
+                              "-ivfsoverlay",
+                              "-iwithprefixbefore",
+                              "-iwithprefix",
+                              "-iwithsysroot",
+                              "-I",
+                              "-meabi",
+                              "-MF",
+                              "-mllvm",
+                              "-Xclang",
+                              "-module-dependency-dir",
+                              "-MQ",
+                              "-mthread-model",
+                              "-MT",
+                              "-o",
+                              "-serialize-diagnostics",
+                              "-working-directory",
+                              "-Xanalyzer",
+                              "-Xassembler",
+                              "-Xlinker",
+                              "-Xpreprocessor",
+                              "-x",
+                              "-z",
+                              "/FI",
+                              "/I",
+                              "/link",
+                              "/Tc",
+                              "/Tp",
+                              "/U"])

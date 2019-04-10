@@ -14,7 +14,7 @@ class TestFlag(TestCase):
 
     def test_init(self):
         """Initialization test."""
-        flag = Flag("hello")
+        flag = Flag.Builder().from_unparsed_string("hello").build()
         self.assertEqual(flag.as_list(), ["hello"])
         self.assertEqual(flag.prefix, "")
         self.assertEqual(flag.body, "hello")
@@ -36,8 +36,8 @@ class TestFlag(TestCase):
     def test_put_into_container(self):
         """Test adding to hashed container."""
         flags_set = set()
-        flag1 = Flag("hello")
-        flag2 = Flag("world")
+        flag1 = Flag("", "hello")
+        flag2 = Flag("", "world")
         flag3 = Flag("hello", "world")
         flag4 = Flag("world", "hello")
         flags_set.add(flag1)
@@ -54,5 +54,14 @@ class TestFlag(TestCase):
         list_of_flags = Flag.tokenize_list(split_str)
         self.assertTrue(len(list_of_flags), 3)
         self.assertIn(Flag("-I", "hello"), list_of_flags)
-        self.assertIn(Flag("-Iblah"), list_of_flags)
+        self.assertIn(Flag("-I", "blah"), list_of_flags)
         self.assertIn(Flag("-isystem", "world"), list_of_flags)
+
+    def test_builder(self):
+        """Test tokenizing a list of all split flags."""
+        flag1 = Flag.Builder().with_prefix('hello').with_body('world').build()
+        self.assertEqual(Flag("hello", "world"), flag1)
+        flag2 = Flag.Builder().from_unparsed_string('hello world').build()
+        self.assertEqual(Flag("", "hello world"), flag2)
+        flag3 = Flag.Builder().from_unparsed_string('-Iworld').build()
+        self.assertEqual(Flag("-I", "world"), flag3)

@@ -29,21 +29,21 @@ class TestCppProperties(TestCase):
         db = CppProperties(include_prefixes)
 
         expected = [
-            Flag('-I' + path.normpath('/folder/include/path')),
-            Flag('-I' + path.normpath('/another/file/path')),
+            Flag('-I', path.normpath('/folder/include/path')),
+            Flag('-I', path.normpath('/another/file/path')),
         ]
 
         scope = SearchScope(from_folder=_get_test_folder('simple'))
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
     def test_expand_environment_variables(self):
-        """Test environment variables are expanded"""
+        """Test environment variables are expanded."""
         include_prefixes = ['-I']
         db = CppProperties(include_prefixes)
         environ['TEST_VARIABLE_TO_EXPAND'] = '/lib_include_dir'
 
         expected = [
-            Flag('-I' + path.normpath('/lib_include_dir')),
+            Flag('-I', path.normpath('/lib_include_dir')),
         ]
 
         scope = SearchScope(from_folder=_get_test_folder('environment'))

@@ -43,7 +43,7 @@ class TestFlagsFile(TestCase):
         flags = flags_file.get_flags(test_file_path)
         # This flag only exists in .clang_complete to help us test that
         # we can read the flag.
-        self.assertIn(Flag('-Wabi'), flags)
+        self.assertIn(Flag('', '-Wabi'), flags)
 
     def test_fail_to_find(self):
         """Test failing to find a .clang_complete file."""

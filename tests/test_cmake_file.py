@@ -46,7 +46,7 @@ class TestCmakeFile(object):
         )
         expected_lib = path.join(path_to_cmake_proj, 'lib')
         flags = cmake_file.get_flags(test_file_path)
-        self.assertEqual(flags[0], Flag('-I' + expected_lib))
+        self.assertEqual(flags[0], Flag('-I', expected_lib))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
             path_to_cmake_proj, CMakeFile._FILE_NAME)
@@ -59,7 +59,7 @@ class TestCmakeFile(object):
             path.dirname(__file__), 'cmake_tests', 'lib', 'a.h')
 
         path_to_file_folder = path.dirname(test_file_path)
-        expected_lib_include = Flag('-I' + path_to_file_folder)
+        expected_lib_include = Flag('-I', path_to_file_folder)
         cmake_file = CMakeFile(
             ['-I', '-isystem'],
             prefix_paths=None,
@@ -72,7 +72,7 @@ class TestCmakeFile(object):
         db = CompilationDb(
             ['-I', '-isystem'],
             header_to_source_map=[],)
-        self.assertEqual(flags[0], Flag('-Dliba_EXPORTS'))
+        self.assertEqual(flags[0], Flag('', '-Dliba_EXPORTS'))
         self.assertIn(test_file_path, cmake_file._cache)
         expected_cmake_file = path.join(
             path.dirname(path_to_file_folder), CMakeFile._FILE_NAME)
