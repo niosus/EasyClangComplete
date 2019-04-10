@@ -73,8 +73,13 @@ class test_settings(GuiTestWrapper):
         settings = manager.settings_for_view(self.view)
         dirs = settings.common_flags
 
+        reference_flag_0 = Flag.Builder().from_unparsed_string(
+            initial_common_flags[0]).build()
+        reference_flag_0.__Flag_body = path.normpath(reference_flag_0.body)
         self.assertTrue(len(initial_common_flags) <= len(dirs))
-        self.assertIn(Flag.Builder().from_unparsed_string(
-            initial_common_flags[0]).build(), dirs)
-        self.assertNotIn(Flag.Builder().from_unparsed_string(
-            initial_common_flags[1]).build(), dirs)
+        self.assertIn(reference_flag_0, dirs)
+
+        reference_flag_1 = Flag.Builder().from_unparsed_string(
+            initial_common_flags[1]).build()
+        reference_flag_1.__Flag_body = path.normpath(reference_flag_0.body)
+        self.assertNotIn(reference_flag_1, dirs)
