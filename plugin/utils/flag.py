@@ -16,55 +16,7 @@ class Flag:
                                     second part as an input.
     """
 
-    class Builder:
-        """Builder for flags."""
-
-        def __init__(self):
-            """Initialize the empty internal flag."""
-            self.__prefix = ''
-            self.__body = ''
-
-        def from_unparsed_string(self, chunk):
-            """Parse an unknown string into body and prefix."""
-            chunk = chunk.strip()
-            for prefix in Flag.SEPARABLE_PREFIXES:
-                if chunk.startswith(prefix):
-                    self.__prefix = prefix
-                    self.__body = chunk[len(prefix):]
-                    break
-            # We did not find any separable prefix, so it's all body.
-            if not self.__body:
-                self.__body = chunk
-            return self
-
-        def with_body(self, body):
-            """Set the body to the internal flag."""
-            self.__body = body.strip()
-            return self
-
-        def with_prefix(self, prefix):
-            """Set the prefix to the internal flag."""
-            self.__prefix = prefix.strip()
-            if self.__prefix not in Flag.SEPARABLE_PREFIXES:
-                log.warning("Unexpected flag prefix: '%s'", self.__prefix)
-            return self
-
-        def build_with_expansion(self, current_folder=''):
-            """Expand all expandable entries and return a resulting list."""
-            if self.__prefix in Flag.PREFIXES_WITH_PATHS:
-                all_flags = []
-                for expanded_body in File.expand_all(
-                        self.__body, current_folder=current_folder):
-                    all_flags.append(Flag(self.__prefix, expanded_body))
-                return all_flags
-            # This does not hold a path. Therefore we don't need to expand it.
-            return [Flag(prefix=self.__prefix, body=self.__body)]
-
-        def build(self):
-            """Create a flag."""
-            return Flag(self.__prefix, self.__body)
-
-    def __init__(self, prefix, body):
+    def __init__(self, prefix, body, separator=' '):
         """Initialize a flag with two parts.
 
         Args:
@@ -74,6 +26,7 @@ class Flag:
         """
         self.__body = body
         self.__prefix = prefix
+        self.__separator = separator
 
     @property
     def prefix(self):
@@ -94,7 +47,7 @@ class Flag:
     def __str__(self):
         """Return flag as a string."""
         if self.__prefix:
-            return self.__prefix + " " + self.__body
+            return self.__prefix + self.__separator + self.__body
         return self.__body
 
     def __repr__(self):
@@ -144,6 +97,54 @@ class Flag:
                 .from_unparsed_string(entry)\
                 .build_with_expansion(current_folder)
         return flags
+
+    class Builder:
+        """Builder for flags providing a nicer interface."""
+
+        def __init__(self):
+            """Initialize the empty internal flag."""
+            self.__prefix = ''
+            self.__body = ''
+
+        def from_unparsed_string(self, chunk):
+            """Parse an unknown string into body and prefix."""
+            chunk = chunk.strip()
+            for prefix in Flag.SEPARABLE_PREFIXES:
+                if chunk.startswith(prefix):
+                    self.__prefix = prefix
+                    self.__body = chunk[len(prefix):]
+                    break
+            # We did not find any separable prefix, so it's all body.
+            if not self.__body:
+                self.__body = chunk
+            return self
+
+        def with_body(self, body):
+            """Set the body to the internal flag."""
+            self.__body = body.strip()
+            return self
+
+        def with_prefix(self, prefix):
+            """Set the prefix to the internal flag."""
+            self.__prefix = prefix.strip()
+            if self.__prefix not in Flag.SEPARABLE_PREFIXES:
+                log.warning("Unexpected flag prefix: '%s'", self.__prefix)
+            return self
+
+        def build_with_expansion(self, current_folder=''):
+            """Expand all expandable entries and return a resulting list."""
+            if self.__prefix in Flag.PREFIXES_WITH_PATHS:
+                all_flags = []
+                for expanded_body in File.expand_all(
+                        self.__body, current_folder=current_folder):
+                    all_flags.append(Flag(self.__prefix, expanded_body))
+                return all_flags
+            # This does not hold a path. Therefore we don't need to expand it.
+            return [Flag(prefix=self.__prefix, body=self.__body)]
+
+        def build(self):
+            """Create a flag."""
+            return Flag(self.__prefix, self.__body)
 
     # All prefixes that denote includes.
     PREFIXES_WITH_PATHS = set(["-isystem",
