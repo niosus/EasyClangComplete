@@ -304,7 +304,7 @@ class File:
         input_path = path.expanduser(input_path)
         if not path.isabs(input_path):
             input_path = path.join(folder, input_path)
-        return path.normcase(path.normpath(input_path))
+        return path.normpath(input_path)
 
     @staticmethod
     def expand_all(input_path, wildcard_values={}, current_folder=''):
