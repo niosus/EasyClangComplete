@@ -290,7 +290,7 @@ class test_file(TestCase):
             original_path = "../hello/world.txt"
             folder = "D:\\folder"
             res = File.canonical_path(original_path, folder)
-            self.assertEqual(res, "d:\\hello\\world.txt")
+            self.assertEqual(res, "D:\\hello\\world.txt")
         else:
             original_path = "../hello/world.txt"
             folder = "/folder"
@@ -302,7 +302,7 @@ class test_file(TestCase):
         if platform.system() == "Windows":
             original_path = "D:\\hello\\world.txt"
             res = File.canonical_path(original_path)
-            self.assertEqual(res, "d:\\hello\\world.txt")
+            self.assertEqual(res, "D:\\hello\\world.txt")
         else:
             original_path = "/hello/world.txt"
             res = File.canonical_path(original_path)
