@@ -7,13 +7,15 @@ log = logging.getLogger("ECC")
 
 def get_all_headers(folders,
                     prefix,
-                    platform_specific_includes,
+                    force_unix_includes,
                     completion_request):
     """Parse all the folders and return all headers."""
     def get_match(filename, root, base_folder):
         """Get formated match as a relative path to the base_folder."""
         match = path.join(root, filename)
         match = path.relpath(match, base_folder)
+        if force_unix_includes:
+            match = match.replace(path.sep, '/')
         return "{}\t{}".format(match, base_folder), match
 
     def is_root_duplicate(root, query_folder, folders, start_idx):
@@ -40,7 +42,7 @@ def get_all_headers(folders,
     import fnmatch
     matches = []
     folders.sort(key=len)
-    if platform_specific_includes:
+    if force_unix_includes:
         folders = to_platform_specific_paths(folders)
     for idx, folder in enumerate(folders):
         log.debug("Going through: %s", folder)

@@ -594,7 +594,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 function=include_parser.get_all_headers,
                 args=[include_folders,
                       prefix,
-                      settings.platform_specific_includes,
+                      settings.force_unix_includes,
                       completion_request])
             EasyClangComplete.thread_pool.new_job(job)
 

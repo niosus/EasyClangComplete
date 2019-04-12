@@ -17,7 +17,7 @@ class TestIncludeParser(TestCase):
         _, res = include_parser.get_all_headers(
             folders=[base_folder],
             prefix='',
-            platform_specific_includes=False,
+            force_unix_includes=False,
             completion_request=None)
         self.assertEqual(len(res), 5)
         local_file_path = path.normpath('cmake_tests/lib/a.h')
@@ -36,10 +36,24 @@ class TestIncludeParser(TestCase):
         _, res = include_parser.get_all_headers(
             folders=[base_folder],
             prefix='cmake_',
-            platform_specific_includes=False,
+            force_unix_includes=False,
             completion_request=None)
         self.assertEqual(len(res), 1)
         local_file_path = path.normpath('cmake_tests/lib/a.h')
+        expected_completion = [
+            '{}\t{}'.format(local_file_path, base_folder), local_file_path]
+        self.assertIn(expected_completion, res)
+
+    def test_get_specific_includes_force_unix(self):
+        """Test getting only specific includes."""
+        base_folder = path.dirname(__file__)
+        _, res = include_parser.get_all_headers(
+            folders=[base_folder],
+            prefix='cmake_',
+            force_unix_includes=True,
+            completion_request=None)
+        self.assertEqual(len(res), 1)
+        local_file_path = 'cmake_tests/lib/a.h'
         expected_completion = [
             '{}\t{}'.format(local_file_path, base_folder), local_file_path]
         self.assertIn(expected_completion, res)
