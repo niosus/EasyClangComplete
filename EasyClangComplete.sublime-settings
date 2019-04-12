@@ -16,11 +16,11 @@
   // Specify common flags that will be passed to clang for EVERY build.
   "common_flags" : [
     // some example includes
-    "-I$file_path",
     "-I/usr/include",
     "-I$project_base_path/src",
     // this is needed to include the correct headers for clang
     "-I/usr/lib/clang/$clang_version/include",
+    "-I$file_path",
   ],
 
   // Language-specific flags. Prepend common_flags for files of given language.
