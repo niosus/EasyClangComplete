@@ -592,7 +592,10 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 name=ThreadJob.COMPLETE_INCLUDES_TAG,
                 callback=self.completion_finished,
                 function=include_parser.get_all_headers,
-                args=[include_folders, prefix, completion_request])
+                args=[include_folders,
+                      prefix,
+                      settings.platform_specific_includes,
+                      completion_request])
             EasyClangComplete.thread_pool.new_job(job)
 
         # show default completions for now if allowed

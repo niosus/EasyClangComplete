@@ -201,4 +201,7 @@
     "OBJECTIVE_C":    null,
     "OBJECTIVE_CPP":  null
   },
+
+  // If true, on Windows, the paths will have a '\' instead of '/' in them.
+  "platform_specific_includes": true,
 }

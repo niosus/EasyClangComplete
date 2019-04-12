@@ -5,7 +5,10 @@ import logging
 log = logging.getLogger("ECC")
 
 
-def get_all_headers(folders, prefix, completion_request):
+def get_all_headers(folders,
+                    prefix,
+                    platform_specific_includes,
+                    completion_request):
     """Parse all the folders and return all headers."""
     def get_match(filename, root, base_folder):
         """Get formated match as a relative path to the base_folder."""
@@ -27,10 +30,18 @@ def get_all_headers(folders, prefix, completion_request):
                 return True
         return False
 
+    def to_platform_specific_paths(folders):
+        """We might want to have back slashes intead of slashes."""
+        for idx, folder in enumerate(folders):
+            folders[idx] = path.normpath(folder)
+        return folders
+
     import os
     import fnmatch
     matches = []
     folders.sort(key=len)
+    if platform_specific_includes:
+        folders = to_platform_specific_paths(folders)
     for idx, folder in enumerate(folders):
         log.debug("Going through: %s", folder)
         for root, _, filenames in os.walk(folder):

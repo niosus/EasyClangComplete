@@ -492,4 +492,13 @@ in some corner cases it might cause completions to fail entirely.
         },
         ```
 
+### **`platform_specific_includes`**
+
+Controls if the paths that we generate while completing the includes will have a `/` or a `\` in them. Former for Unix-based systems, latter for Windows.
+
+!!! example "Default value"
+    ```json
+    "platform_specific_includes": true,
+    ```
+
 [subl-proj]: https://www.sublimetext.com/docs/3/projects.html
