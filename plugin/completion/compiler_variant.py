@@ -77,13 +77,11 @@ class LibClangCompilerVariant(ClangCompilerVariant):
     """Encapsulation of libclang specific options.
 
     Attributes:
-        pos_regex (re): regex to find position of an error
-        msg_regex (re): regex to find error message
+        POS_REGEX (re): regex to find position of an error
     """
-    pos_regex = re.compile(r"'(?P<file>.+)'.*" +  # file
+    POS_REGEX = re.compile(r"'(?P<file>.+)'.*" +  # file
                            r"line\s(?P<row>\d+), " +  # row
                            r"column\s(?P<col>\d+)")  # col
-    msg_regex = re.compile(r'[b\"|\"]*(?P<error>[^"]+)\"*')
     SEVERITY_TAG = 'severity'
 
     def errors_from_output(self, output):
@@ -107,18 +105,12 @@ class LibClangCompilerVariant(ClangCompilerVariant):
             if "#pragma once" in spelling:
                 log.debug("explicitly omit warning about pragma once.")
                 continue
-            pos_search = self.pos_regex.search(location)
-            msg_search = self.msg_regex.search(spelling)
+            pos_search = self.POS_REGEX.search(location)
             if not pos_search:
                 # not valid, continue
                 continue
-            if not msg_search:
-                # maybe there was no error word, so show everything there is
-                log.debug("regex %s failed to match error: %s",
-                          self.msg_regex.pattern, spelling)
-                continue
             error_dict = pos_search.groupdict()
-            error_dict.update(msg_search.groupdict())
+            error_dict.update({'error': spelling})
             error_dict[LibClangCompilerVariant.SEVERITY_TAG] = severity
             errors.append(error_dict)
         return errors
