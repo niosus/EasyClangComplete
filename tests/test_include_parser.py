@@ -20,12 +20,12 @@ class TestIncludeParser(TestCase):
             platform_specific_includes=False,
             completion_request=None)
         self.assertEqual(len(res), 5)
-        local_file_path = 'cmake_tests/lib/a.h'
+        local_file_path = path.normpath('cmake_tests/lib/a.h')
         expected_completion = [
             '{}\t{}'.format(local_file_path, base_folder), local_file_path]
         self.assertIn(expected_completion, res)
 
-        local_file_path = 'makefile_files/inc/bar.h'
+        local_file_path = path.normpath('makefile_files/inc/bar.h')
         expected_completion = [
             '{}\t{}'.format(local_file_path, base_folder), local_file_path]
         self.assertIn(expected_completion, res)
@@ -37,20 +37,6 @@ class TestIncludeParser(TestCase):
             folders=[base_folder],
             prefix='cmake_',
             platform_specific_includes=False,
-            completion_request=None)
-        self.assertEqual(len(res), 1)
-        local_file_path = 'cmake_tests/lib/a.h'
-        expected_completion = [
-            '{}\t{}'.format(local_file_path, base_folder), local_file_path]
-        self.assertIn(expected_completion, res)
-
-    def test_get_includes_with_adaptation(self):
-        """Test getting includes adapting paths to platform."""
-        base_folder = path.dirname(__file__)
-        _, res = include_parser.get_all_headers(
-            folders=[base_folder],
-            prefix='cmake_',
-            platform_specific_includes=True,
             completion_request=None)
         self.assertEqual(len(res), 1)
         local_file_path = path.normpath('cmake_tests/lib/a.h')
