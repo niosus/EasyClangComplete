@@ -320,6 +320,8 @@ class File:
         if len(all_paths) > 0 and all_paths[0] != input_path:
             log.debug("Populated '%s' to '%s'", input_path, all_paths)
             return all_paths
+        elif expanded_path != input_path:
+            log.debug("Populated '%s' to '%s'", input_path, expanded_path)
         return [expanded_path]
 
     @staticmethod

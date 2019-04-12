@@ -258,11 +258,13 @@ class SettingsStorage:
 
     def __populate_common_flags(self):
         """Populate the variables inside common_flags with real values."""
-        log.debug("populating common_flags with current variables.")
+        log.debug("Populating common_flags with current variables.")
         new_common_flags = []
         for raw_flag_str in self.common_flags:
             new_common_flags += Flag.Builder()\
-                .from_unparsed_string(raw_flag_str).build_with_expansion()
+                .from_unparsed_string(raw_flag_str).build_with_expansion(
+                    wildcard_values=self._wildcard_values,
+                    current_folder=self.project_folder)
         self.common_flags = new_common_flags
 
     def __update_ignore_list(self):

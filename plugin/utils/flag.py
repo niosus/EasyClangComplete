@@ -131,12 +131,14 @@ class Flag:
                 log.warning("Unexpected flag prefix: '%s'", self.__prefix)
             return self
 
-        def build_with_expansion(self, current_folder=''):
+        def build_with_expansion(self, current_folder='', wildcard_values={}):
             """Expand all expandable entries and return a resulting list."""
             if self.__prefix in Flag.PREFIXES_WITH_PATHS:
                 all_flags = []
                 for expanded_body in File.expand_all(
-                        self.__body, current_folder=current_folder):
+                        input_path=self.__body,
+                        wildcard_values=wildcard_values,
+                        current_folder=current_folder):
                     all_flags.append(Flag(self.__prefix, expanded_body))
                 return all_flags
             # This does not hold a path. Therefore we don't need to expand it.

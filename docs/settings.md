@@ -22,8 +22,7 @@ Every path variable in settings can contain wildcards:
 - `$project_name` is replaced by the name of the current project.
 - `$clang_version` is replaced by the numeric version of used clang.
 - `~` is replaced by the path to user home directory.
-- `*` when put at the end of folder path expands to all folders in that
-  folder. Not recursive.
+- `*` and other glob wildcards can be used everywhere.
 
 ## Using environmental variables
 In addition to the variables described above, you can use your environment
