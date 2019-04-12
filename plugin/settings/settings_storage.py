@@ -75,7 +75,7 @@ class SettingsStorage:
         "lang_flags",
         "libclang_path",
         "max_cache_age",
-        "platform_specific_includes"
+        "platform_specific_includes",
         "popup_maximum_height",
         "popup_maximum_width",
         "progress_style",
