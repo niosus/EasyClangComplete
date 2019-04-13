@@ -1,25 +1,30 @@
 {
   // SETTINGS FOR EASY_CLANG_COMPLETE.
 
-  // Every path variable in settings can contain wildcards (without the ""):
-  //  - "$project_base_path"  <-- replaced by the full path to the project to
+  // Every path variable in settings can contain wildcards (without the "").
+  // Most commonly used:
+  //  - "$project_path"       <-- replaced by the full path to the project to
   //                              which the currently opened view belongs.
   //  - "$project_name"       <-- replaced by the name of the current project.
   //  - "$clang_version"      <-- replaced by the numeric version of used clang.
   //  - "~"                   <-- replaced by the path to user home directory.
   //  - "*"                   <-- and other glob wildcards available everywhere.
   //
-  //  In addition to these, you can use your environment variables:
+  // In addition to these, you can use your environment variables:
   //  - OSX and Linux:  $variable_name or ${variable_name}
   //  - Windows:        $variable_name or ${variable_name} or %variable_name%
+  //
+  // Last but not least, you can use *any* Sublime Text variables defined here:
+  // https://www.sublimetext.com/docs/3/build_systems.html#variables
 
   // Specify common flags that will be passed to clang for EVERY build.
   "common_flags" : [
     // some example includes
     "-I/usr/include",
-    "-I$project_base_path/src",
+    "-I$project_path/src",
     // this is needed to include the correct headers for clang
     "-I/usr/lib/clang/$clang_version/include",
+    // For simple projects, you can add a folder where your current file is
     "-I$file_path",
   ],
 
@@ -85,7 +90,7 @@
   "ignore_list": [
     "~/some_folder/*",
     "/some/absolute/file.ext",
-    "$project_base_path/some/project/path/*",
+    "$project_path/some/project/path/*",
   ],
 
   // Use libclang.

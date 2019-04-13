@@ -1,8 +1,7 @@
 # Three levels of settings for EasyClangComplete
-- Default settings <small>(shipped with the plugin)</small>
-- Global user settings <small>(defined globally for the whole plugin)</small>
-- Project settings <small> (defined in a [`.sublime-project`][subl-proj] file for a specific project)
-  </small>
+1. Project settings <small> (defined in a [`.sublime-project`][subl-proj] file for a specific project) </small>
+2. Global user settings <small>(defined globally for the whole plugin)</small>
+3. Default settings <small>(shipped with the plugin)</small>
 
 !!! warning 
     Project-related settings will only work when your code has a
@@ -17,9 +16,10 @@
 ## Common path wildcards
 Every path variable in settings can contain wildcards:
 
-- `$project_base_path` is replaced by the full path to the project to which
-  the currently opened view belongs.
-- `$project_name` is replaced by the name of the current project.
+- Any of [Sublime Text variables](https://www.sublimetext.com/docs/3/build_systems.html#variables). Most common ones:
+    + `$project_path` is replaced by the full path to the folder of the project
+      to which the currently opened view belongs.
+    + `$project_name` is replaced by the name of the current project.
 - `$clang_version` is replaced by the numeric version of used clang.
 - `~` is replaced by the path to user home directory.
 - `*` and other glob wildcards can be used everywhere.
