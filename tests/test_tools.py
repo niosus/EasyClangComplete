@@ -239,13 +239,10 @@ class test_file(TestCase):
         parent_folder = path.dirname(current_folder)
         search_scope = SearchScope(from_folder=current_folder,
                                    to_folder=parent_folder)
-        print(search_scope)
         file = File.search(
             file_name='README.md',
             search_scope=search_scope)
         expected = path.join(parent_folder, 'README.md')
-        print(expected)
-        print(file)
         self.assertIsNotNone(file)
         self.assertTrue(file.loaded())
         self.assertEqual(file.full_path, expected)
