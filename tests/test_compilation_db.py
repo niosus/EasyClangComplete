@@ -86,7 +86,6 @@ class TestCompilationDb(TestCase):
                                'compilation_db_files',
                                'command')
         scope = SearchScope(from_folder=path_to_db)
-        print(scope)
         self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
         self.assertEqual(expected_lib, db.get_flags(lib_file_path_h, scope))
         self.assertEqual(expected_main, db.get_flags(main_file_path, scope))

@@ -42,6 +42,7 @@ class TreeSearchScope:
 
     def __iter__(self):
         """Make this an iterator."""
+        self._current_folder = self._from_folder
         return self
 
     def __next__(self):
@@ -85,6 +86,7 @@ class ListSearchScope:
 
     def __iter__(self):
         """Make this an iterator."""
+        self._iter = iter(self._folders)
         return self._iter
 
     def __next__(self):
