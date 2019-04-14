@@ -44,7 +44,7 @@
   //  - ".clang_complete"
   //
   // Every entry has an option:
-  //  - "search_in": <path>  <-- a path to the folder containing the file.
+  //  - "search_in": <path>  <-- a path to the folder[s] containing the file.
   //
   // "cmake" entry has additional options:
   //  - "flags": [<flags>]        <-- Additional flags to pass to cmake.
