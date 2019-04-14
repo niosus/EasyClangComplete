@@ -46,7 +46,8 @@ class FlagsFile(FlagsSource):
             str[]: Return a list of flags in this .clang_complete file
         """
         # prepare search scope
-        search_scope = self._update_search_scope(search_scope, file_path)
+        search_scope = self._update_search_scope_if_needed(
+            search_scope, file_path)
         # check if we have a hashed version
         log.debug("[clang_complete_file]:[get]: for file %s", file_path)
         cached_flags_path = self._get_cached_from(file_path)

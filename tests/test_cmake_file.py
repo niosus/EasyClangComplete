@@ -7,17 +7,19 @@ from unittest import TestCase
 from EasyClangComplete.plugin.flags_sources import cmake_file
 from EasyClangComplete.plugin.flags_sources import compilation_db
 from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import search_scope
 from EasyClangComplete.plugin import tools
 
 imp.reload(cmake_file)
 imp.reload(compilation_db)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(search_scope)
 
 CMakeFile = cmake_file.CMakeFile
 CompilationDb = compilation_db.CompilationDb
 
-SearchScope = tools.SearchScope
+SearchScope = search_scope.TreeSearchScope
 PKG_NAME = tools.PKG_NAME
 
 Flag = flag.Flag

@@ -7,9 +7,9 @@ from .flags_source import FlagsSource
 from .compilation_db import CompilationDb
 from ..tools import File
 from ..tools import Tools
-from ..tools import SearchScope
 from ..utils.singleton import CMakeFileCache
 from ..utils.catkinizer import Catkinizer
+from ..utils.search_scope import TreeSearchScope
 
 from os import path
 
@@ -68,7 +68,8 @@ class CMakeFile(FlagsSource):
                 view path is not found in the generated compilation db.
         """
         # prepare search scope
-        search_scope = self._update_search_scope(search_scope, file_path)
+        search_scope = self._update_search_scope_if_needed(
+            search_scope, file_path)
         # TODO(igor): probably can be simplified. Why do we need to load
         # cached? should we just test if currently found one is in cache?
         log.debug("[cmake]:[get]: for file %s", file_path)
@@ -105,7 +106,7 @@ class CMakeFile(FlagsSource):
                     self._include_prefixes,
                     self.__header_to_source_mapping,
                 )
-                db_search_scope = SearchScope(
+                db_search_scope = TreeSearchScope(
                     from_folder=path.dirname(db_file_path))
                 return db.get_flags(file_path, db_search_scope)
 
@@ -131,7 +132,7 @@ class CMakeFile(FlagsSource):
         db = CompilationDb(
             self._include_prefixes,
             self.__header_to_source_mapping)
-        db_search_scope = SearchScope(from_folder=db_file.folder)
+        db_search_scope = TreeSearchScope(from_folder=db_file.folder)
         flags = db.get_flags(file_path, db_search_scope)
         return flags
 

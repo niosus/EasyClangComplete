@@ -6,13 +6,15 @@ from unittest import TestCase
 from EasyClangComplete.plugin.flags_sources import compilation_db
 from EasyClangComplete.plugin import tools
 from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import search_scope
 
 imp.reload(compilation_db)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(search_scope)
 
 CompilationDb = compilation_db.CompilationDb
-SearchScope = tools.SearchScope
+SearchScope = search_scope.TreeSearchScope
 Flag = flag.Flag
 
 
@@ -84,6 +86,7 @@ class TestCompilationDb(TestCase):
                                'compilation_db_files',
                                'command')
         scope = SearchScope(from_folder=path_to_db)
+        print(scope)
         self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
         self.assertEqual(expected_lib, db.get_flags(lib_file_path_h, scope))
         self.assertEqual(expected_main, db.get_flags(main_file_path, scope))

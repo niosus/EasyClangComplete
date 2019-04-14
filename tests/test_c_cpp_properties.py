@@ -6,13 +6,16 @@ from unittest import TestCase
 from EasyClangComplete.plugin.flags_sources import c_cpp_properties
 from EasyClangComplete.plugin import tools
 from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import search_scope
+
 
 imp.reload(c_cpp_properties)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(search_scope)
 
 CCppProperties = c_cpp_properties.CCppProperties
-SearchScope = tools.SearchScope
+SearchScope = search_scope.TreeSearchScope
 Flag = flag.Flag
 
 
@@ -44,6 +47,7 @@ class TestCCppProperties(TestCase):
                                'c_cpp_properties_files',
                                'environment')
         scope = SearchScope(from_folder=path_to_db)
+        print(scope)
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
     def test_no_db_in_folder(self):

@@ -14,10 +14,12 @@ from unittest import TestCase
 from EasyClangComplete.plugin import tools
 from EasyClangComplete.plugin.settings import settings_manager
 from EasyClangComplete.plugin.utils import singleton
+from EasyClangComplete.plugin.utils import search_scope
 
 imp.reload(tools)
 imp.reload(settings_manager)
 imp.reload(singleton)
+imp.reload(search_scope)
 
 singleton = singleton.singleton
 SettingsManager = settings_manager.SettingsManager
@@ -25,9 +27,9 @@ SettingsManager = settings_manager.SettingsManager
 SublBridge = tools.SublBridge
 Tools = tools.Tools
 File = tools.File
-SearchScope = tools.SearchScope
 PosStatus = tools.PosStatus
 PKG_NAME = tools.PKG_NAME
+SearchScope = search_scope.TreeSearchScope
 
 
 class test_tools_command(TestCase):
@@ -237,10 +239,14 @@ class test_file(TestCase):
         parent_folder = path.dirname(current_folder)
         search_scope = SearchScope(from_folder=current_folder,
                                    to_folder=parent_folder)
+        print(search_scope)
         file = File.search(
             file_name='README.md',
             search_scope=search_scope)
         expected = path.join(parent_folder, 'README.md')
+        print(expected)
+        print(file)
+        self.assertIsNotNone(file)
         self.assertTrue(file.loaded())
         self.assertEqual(file.full_path, expected)
 

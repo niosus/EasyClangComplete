@@ -48,7 +48,8 @@ class CCppProperties(FlagsSource):
             str[]: Return a list of flags in this c_cpp_properties.json file
         """
         # prepare search scope
-        search_scope = self._update_search_scope(search_scope, file_path)
+        search_scope = self._update_search_scope_if_needed(
+            search_scope, file_path)
         # check if we have a hashed version
         log.debug("[c_cpp_properties]:[get]: for file %s", file_path)
         cached_flags_path = self._get_cached_from(file_path)

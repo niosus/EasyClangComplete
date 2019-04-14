@@ -4,15 +4,17 @@ import platform
 from os import path
 from unittest import TestCase
 
-from EasyClangComplete.plugin.flags_sources import makefile
-from EasyClangComplete.plugin.utils import flag
 from EasyClangComplete.plugin import tools
+from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import search_scope
+from EasyClangComplete.plugin.flags_sources import makefile
 
 imp.reload(makefile)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(search_scope)
 
-SearchScope = tools.SearchScope
+SearchScope = search_scope.TreeSearchScope
 PKG_NAME = tools.PKG_NAME
 
 Makefile = makefile.Makefile

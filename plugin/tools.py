@@ -347,17 +347,16 @@ class File:
         Returns:
             File: found file
         """
-        log.debug("searching '%s' from '%s' to '%s'",
-                  file_name, search_scope.from_folder, search_scope.to_folder)
-        current_folder = search_scope.from_folder
-        if not path.exists(current_folder):
-            return None
-        one_past_stop_folder = path.dirname(search_scope.to_folder)
-        while current_folder != one_past_stop_folder:
+        log.debug("Searching '%s' file in: %s",
+                  file_name, search_scope)
+        for current_folder in search_scope:
+            import os
+            if not os.access(current_folder, os.R_OK):
+                continue
             for file in listdir(current_folder):
                 if file == file_name:
                     found_file = File(path.join(current_folder, file))
-                    log.debug("found '%s' file: %s",
+                    log.debug("Found '%s' file: %s",
                               file_name, found_file.full_path)
                     if not search_content:
                         log.debug("Nothing to search for in file so its ok.")
@@ -369,45 +368,10 @@ class File:
                     elif isinstance(search_content, str):
                         if found_file.contains(search_content):
                             return found_file
-                    log.debug("skipping file '%s'. ", found_file)
-                    log.debug("no line starts with: '%s'", search_content)
+                    log.debug("Skipping file '%s'. ", found_file)
+                    log.debug("No line starts with: '%s'", search_content)
                     continue
-            if current_folder == path.dirname(current_folder):
-                break
-            current_folder = path.dirname(current_folder)
         return None
-
-
-class SearchScope:
-    """Encapsulation of a search scope for code cleanness."""
-    from_folder = None
-    to_folder = None
-
-    def __init__(self, from_folder=None, to_folder=None):
-        """Initialize the search scope.
-
-        If any of the folders in None, set it to root
-
-        Args:
-            from_folder (str, optional): search from this folder
-            to_folder (str, optional): search up to this folder
-        """
-        self.from_folder = from_folder
-        self.to_folder = to_folder
-        if not self.to_folder:
-            self.to_folder = path.abspath('/')
-        if not self.from_folder:
-            self.from_folder = path.abspath('/')
-
-    def valid(self):
-        """Check if the search scope valid.
-
-        Returns:
-            bool: True if valid, False otherwise
-        """
-        if self.from_folder and self.to_folder:
-            return True
-        return False
 
 
 class ActionRequest(object):

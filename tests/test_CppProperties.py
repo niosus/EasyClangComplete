@@ -6,13 +6,15 @@ from unittest import TestCase
 from EasyClangComplete.plugin.flags_sources import CppProperties
 from EasyClangComplete.plugin import tools
 from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import search_scope
 
 imp.reload(CppProperties)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(search_scope)
 
 CppProperties = CppProperties.CppProperties
-SearchScope = tools.SearchScope
+SearchScope = search_scope.TreeSearchScope
 Flag = flag.Flag
 
 
@@ -60,7 +62,7 @@ class TestCppProperties(TestCase):
             path.normpath('/home/user/dummy_main.cpp')))
 
     def test_empty_include_and_defines(self):
-        """Test that empty fields are handled correctly"""
+        """Test that empty fields are handled correctly."""
         include_prefixes = ['-I']
         db = CppProperties(include_prefixes)
 

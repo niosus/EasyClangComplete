@@ -45,7 +45,8 @@ class Makefile(FlagsSource):
         Returns:
             str[]: Return a list of flags in this Makefile
         """
-        search_scope = self._update_search_scope(search_scope, file_path)
+        search_scope = self._update_search_scope_if_needed(
+            search_scope, file_path)
         log.debug("[Makefile]:[get]: for file %s", file_path)
         makefile = File.search(self._FILE_NAME, search_scope)
         if not makefile:

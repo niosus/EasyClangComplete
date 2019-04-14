@@ -52,7 +52,8 @@ class CompilationDb(FlagsSource):
             database
         """
         # prepare search scope
-        search_scope = self._update_search_scope(search_scope, file_path)
+        search_scope = self._update_search_scope_if_needed(
+            search_scope, file_path)
         # make sure the file name conforms to standard
         file_path = File.canonical_path(file_path)
         # initialize search scope if not initialized before

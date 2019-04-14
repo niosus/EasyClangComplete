@@ -13,12 +13,13 @@ from threading import Timer
 from .tools import File
 from .tools import Tools
 from .tools import SublBridge
-from .tools import SearchScope
 
 from .utils.flag import Flag
-from .utils.unique_list import UniqueList
 from .utils.singleton import ViewConfigCache
 from .utils.singleton import ThreadCache
+from .utils.unique_list import UniqueList
+from .utils.search_scope import ListSearchScope
+from .utils.search_scope import TreeSearchScope
 
 from .completion import lib_complete
 from .completion import bin_complete
@@ -28,10 +29,10 @@ from .error_vis.popup_error_vis import PopupErrorVis
 from .flags_sources.flags_file import FlagsFile
 from .flags_sources.cmake_file import CMakeFile
 from .flags_sources.makefile import Makefile
-from .flags_sources.flags_source import FlagsSource
 from .flags_sources.c_cpp_properties import CCppProperties
 from .flags_sources.CppProperties import CppProperties
 from .flags_sources.compilation_db import CompilationDb
+from .settings.settings_storage import SettingsStorage
 
 log = logging.getLogger("ECC")
 
@@ -276,24 +277,24 @@ class ViewConfig(object):
             Flag[]: flags generated from a flags source.
         """
         current_dir = path.dirname(view.file_name())
-        search_scope = SearchScope(
+        default_search_scope = TreeSearchScope(
             from_folder=current_dir,
             to_folder=settings.project_folder)
         for source_dict in settings.flags_sources:
             if "file" not in source_dict:
                 log.critical(" flag source %s has not 'file'", source_dict)
                 continue
+            search_scope = default_search_scope
             file_name = source_dict["file"]
-            search_folder = None
-            if "search_in" in source_dict:
-                # the user knows where to search for the flags source
-                search_folder = source_dict["search_in"]
-                if search_folder:
-                    search_scope = SearchScope(
-                        from_folder=path.normpath(search_folder))
+            search_folders = []
+            if SettingsStorage.SEARCH_IN_TAG in source_dict:
+                # The user knows where to search for the flags source.
+                search_folders = source_dict[SettingsStorage.SEARCH_IN_TAG]
+                search_scope = ListSearchScope(search_folders)
             if file_name == "CMakeLists.txt":
-                prefix_paths = source_dict.get("prefix_paths", None)
-                cmake_flags = source_dict.get("flags", None)
+                prefix_paths = source_dict.get(
+                    SettingsStorage.PREFIX_PATHS_TAG, None)
+                cmake_flags = source_dict.get(SettingsStorage.FLAGS_TAG, None)
                 flag_source = CMakeFile(
                     include_prefixes,
                     prefix_paths,
