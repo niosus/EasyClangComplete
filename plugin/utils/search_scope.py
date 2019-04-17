@@ -81,8 +81,8 @@ class ListSearchScope:
         self._iter = iter(self._folders)
 
     def __bool__(self):
-        """Check if the search scope is empty."""
-        return len(self._folders) < 1
+        """Check if the search scope is not empty."""
+        return len(self._folders) > 0
 
     def __iter__(self):
         """Make this an iterator."""
