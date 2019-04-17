@@ -45,6 +45,7 @@ class SettingsStorage:
     SEARCH_IN_TAG = "search_in"
     PREFIX_PATHS_TAG = "prefix_paths"
     FLAGS_TAG = "flags"
+    FILE_TAG = "file"
     FLAG_SOURCES_ENTRIES_WITH_PATHS = [SEARCH_IN_TAG,
                                        PREFIX_PATHS_TAG,
                                        FLAGS_TAG]
@@ -188,13 +189,16 @@ class SettingsStorage:
                 self.gutter_style, SettingsStorage.GUTTER_STYLES)
             return False, error_msg
         for source_dict in self.flags_sources:
-            if "file" not in source_dict:
-                error_msg = "No 'file' setting in a flags source '{}'".format(
+            if SettingsStorage.FILE_TAG not in source_dict:
+                error_msg = "No '%s' setting in a flags source '{}'".format(
+                    SettingsStorage.FILE_TAG,
                     source_dict)
                 return False, error_msg
-            if source_dict["file"] not in SettingsStorage.FLAG_SOURCES:
+            if source_dict[SettingsStorage.FILE_TAG] not in \
+                    SettingsStorage.FLAG_SOURCES:
                 error_msg = "flag source '{}' is not one of {}".format(
-                    source_dict["file"], SettingsStorage.FLAG_SOURCES)
+                    source_dict[SettingsStorage.FILE_TAG],
+                    SettingsStorage.FLAG_SOURCES)
                 return False, error_msg
         # Check if all languages are present in language-specific settings.
         for lang_tag in Tools.LANG_TAGS:

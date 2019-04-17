@@ -281,11 +281,12 @@ class ViewConfig(object):
             from_folder=current_dir,
             to_folder=settings.project_folder)
         for source_dict in settings.flags_sources:
-            if "file" not in source_dict:
-                log.critical(" flag source %s has not 'file'", source_dict)
+            if SettingsStorage.FILE_TAG not in source_dict:
+                log.critical("Flag source %s has no '%s' entry",
+                             source_dict, SettingsStorage.FILE_TAG)
                 continue
             search_scope = default_search_scope
-            file_name = source_dict["file"]
+            file_name = source_dict[SettingsStorage.FILE_TAG]
             search_folders = []
             if SettingsStorage.SEARCH_IN_TAG in source_dict:
                 # The user knows where to search for the flags source.
