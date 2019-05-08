@@ -79,12 +79,13 @@ class Flag:
         skip_next_entry = False
         log.debug("Tokenizing: %s", all_split_line)
         for i, entry in enumerate(all_split_line):
-            if entry.startswith("#"):
+            sentry = entry.strip()
+            if sentry.startswith("#"):
                 continue
             if skip_next_entry:
                 skip_next_entry = False
                 continue
-            if entry in Flag.SEPARABLE_PREFIXES:
+            if sentry in Flag.SEPARABLE_PREFIXES:
                 # add both this and next part to a flag
                 if (i + 1) < len(all_split_line):
                     flags += Flag.Builder()\
@@ -94,7 +95,7 @@ class Flag:
                     skip_next_entry = True
                     continue
             flags += Flag.Builder()\
-                .from_unparsed_string(entry)\
+                .from_unparsed_string(sentry)\
                 .build_with_expansion(current_folder)
         return flags
 
