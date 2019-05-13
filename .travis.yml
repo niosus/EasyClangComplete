@@ -1,14 +1,11 @@
 env:
     global:
-        # Your package name
         - PACKAGE="EasyClangComplete"
-        - SUBLIME_TEXT_VERSION="3" PCINSTALL=true
+        - SUBLIME_TEXT_VERSION="3"
 
 sudo: false
 language: python
 python: "3.6"
-services:
-  - xvfb
 
 matrix:
     include:
@@ -16,13 +13,14 @@ matrix:
       dist: xenial
       env: DISTRO="Ubuntu"
       sudo: required
+      services:
+      - xvfb
     - os: osx
       env: DISTRO="OSX"
       language: generic
 
 before_install:
     - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh
-    # enable gui, see https://docs.travis-ci.com/user/gui-and-headless-browsers
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             pip install --upgrade pip pycodestyle pep257;
             pip install --upgrade coverage codacy-coverage;
@@ -33,7 +31,7 @@ before_install:
 
 install:
     - sh travis.sh bootstrap
-    - if [ "$PCINSTALL" == true ]; then sh travis.sh install_package_control; fi
+    - sh travis.sh install_package_control
 
 script:
     - ls
