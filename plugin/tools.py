@@ -277,6 +277,8 @@ class File:
         """
         if not file_path:
             return False
+        if not path.exists(file_path):
+            return False
         actual_mod_time = path.getmtime(file_path)
         if file_path not in File.__modification_cache:
             log.debug("never seen file '%s' before. Updating.", file_path)
@@ -304,7 +306,10 @@ class File:
         input_path = path.expanduser(input_path)
         if not path.isabs(input_path):
             input_path = path.join(folder, input_path)
-        return path.normpath(input_path)
+        normpath = path.normpath(input_path)
+        if path.exists(normpath):
+            return path.realpath(normpath)
+        return normpath
 
     @staticmethod
     def expand_all(input_path, wildcard_values={}, current_folder=''):

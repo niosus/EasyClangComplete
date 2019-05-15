@@ -26,7 +26,8 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[]
+            header_to_source_map=[],
+            lazy_flag_parsing=False
         )
 
         expected = [Flag('-I', path.normpath('/lib_include_dir')),
@@ -56,7 +57,8 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[]
+            header_to_source_map=[],
+            lazy_flag_parsing=False
         )
 
         expected = [Flag('-I', path.normpath('/lib_include_dir')),
@@ -73,7 +75,8 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[]
+            header_to_source_map=[],
+            lazy_flag_parsing=False
         )
 
         expected_lib = [Flag('', '-Dlib_EXPORTS'), Flag('', '-fPIC')]
@@ -105,11 +108,12 @@ class TestCompilationDb(TestCase):
         self.assertIn(expected_lib[1], db._cache[path_to_db]['all'])
 
     def test_no_db_in_folder(self):
-        """Test if compilation db is found."""
+        """Test that a non-existing file is not found in db."""
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[]
+            header_to_source_map=[],
+            lazy_flag_parsing=False
         )
 
         flags = db.get_flags(path.normpath('/home/user/dummy_main.cpp'))
@@ -120,7 +124,8 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[]
+            header_to_source_map=[],
+            lazy_flag_parsing=False
         )
 
         expected_lib = [Flag('', '-Dlib_EXPORTS'), Flag('', '-fPIC')]
@@ -145,7 +150,8 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I', '-isystem']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[]
+            header_to_source_map=[],
+            lazy_flag_parsing=False
         )
 
         expected = [Flag('-I', path.normpath('/usr/local/foo')),
@@ -164,7 +170,8 @@ class TestCompilationDb(TestCase):
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
-            header_to_source_map=[]
+            header_to_source_map=[],
+            lazy_flag_parsing=False
         )
 
         main_file_path = path.normpath('/home/blah.c')

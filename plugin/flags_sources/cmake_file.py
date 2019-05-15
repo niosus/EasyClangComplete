@@ -37,7 +37,8 @@ class CMakeFile(FlagsSource):
                  flags,
                  cmake_binary,
                  header_to_source_mapping,
-                 target_compilers):
+                 target_compilers,
+                 lazy_flag_parsing):
         """Initialize a cmake-based flag storage.
 
         Args:
@@ -53,6 +54,7 @@ class CMakeFile(FlagsSource):
         self.__cmake_binary = cmake_binary
         self.__header_to_source_mapping = header_to_source_mapping
         self.__target_compilers = target_compilers
+        self.__lazy_flag_parsing = lazy_flag_parsing
 
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
@@ -105,7 +107,7 @@ class CMakeFile(FlagsSource):
                 db = CompilationDb(
                     self._include_prefixes,
                     self.__header_to_source_mapping,
-                )
+                    self.__lazy_flag_parsing)
                 db_search_scope = TreeSearchScope(
                     from_folder=path.dirname(db_file_path))
                 return db.get_flags(file_path, db_search_scope)
@@ -131,7 +133,8 @@ class CMakeFile(FlagsSource):
             File.update_mod_time(current_cmake_path)
         db = CompilationDb(
             self._include_prefixes,
-            self.__header_to_source_mapping)
+            self.__header_to_source_mapping,
+            self.__lazy_flag_parsing)
         db_search_scope = TreeSearchScope(from_folder=db_file.folder)
         flags = db.get_flags(file_path, db_search_scope)
         return flags

@@ -302,13 +302,15 @@ class ViewConfig(object):
                     cmake_flags,
                     settings.cmake_binary,
                     settings.header_to_source_mapping,
-                    settings.target_compilers)
+                    settings.target_compilers,
+                    settings.lazy_flag_parsing)
             elif file_name == "Makefile":
                 flag_source = Makefile(include_prefixes)
             elif file_name == "compile_commands.json":
                 flag_source = CompilationDb(
                     include_prefixes,
                     settings.header_to_source_mapping,
+                    settings.lazy_flag_parsing
                 )
             elif file_name == ".clang_complete":
                 flag_source = FlagsFile(include_prefixes)

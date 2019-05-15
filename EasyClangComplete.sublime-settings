@@ -59,6 +59,13 @@
     {"file": ".clang_complete"},
   ],
 
+  // When getting flags from a compile_commands.json file defer parsing these
+  // flags to the time when they are actually needed. This enables much faster
+  // database loading and allows to work with huge compilation database files.
+  // The downside is that there is no fallback option, so if your file is not in
+  // the compilation database it will have no flags.
+  "lazy_flag_parsing": true,
+
   // Show compile errors on file save or not.
   "show_errors": true,
 

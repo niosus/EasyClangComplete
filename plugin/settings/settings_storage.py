@@ -81,6 +81,7 @@ class SettingsStorage:
         "hide_default_completions",
         "ignore_list",
         "lang_flags",
+        "lazy_flag_parsing",
         "libclang_path",
         "max_cache_age",
         "popup_maximum_height",
