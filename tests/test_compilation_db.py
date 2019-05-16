@@ -154,10 +154,10 @@ class TestCompilationDb(TestCase):
             lazy_flag_parsing=False
         )
 
-        expected = [Flag('-I', path.normpath('/usr/local/foo')),
-                    Flag('-I', path.normpath('/foo/bar/test/include')),
-                    Flag('-I', path.normpath('/foo/include')),
-                    Flag('-isystem', path.normpath('/foo/bar/matilda'), ' ')]
+        expected = [Flag('-I', path.realpath('/usr/local/foo')),
+                    Flag('-I', path.realpath('/foo/bar/test/include')),
+                    Flag('-I', path.realpath('/foo/include')),
+                    Flag('-isystem', path.realpath('/foo/bar/matilda'), ' ')]
 
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
