@@ -164,7 +164,10 @@ class TestCompilationDb(TestCase):
                       'compilation_db_files',
                       'directory'))
         scope = SearchScope(from_folder=path_to_db)
-        self.assertEqual(expected, db.get_flags(search_scope=scope))
+        print("expected: ", expected)
+        got_flags = db.get_flags(search_scope=scope)
+        print("got_flags: ", got_flags)
+        self.assertEqual(expected, got_flags)
 
     def test_get_c_flags(self):
         """Test argument filtering for c language."""
