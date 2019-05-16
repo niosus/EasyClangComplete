@@ -2,7 +2,6 @@
 {
   "arguments": [
     "/usr/bin/c++",
-    "-I/usr/local/foo",
     "-I./include",
     "-I../../include",
     "-isystem",

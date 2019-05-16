@@ -154,8 +154,7 @@ class TestCompilationDb(TestCase):
             lazy_flag_parsing=False
         )
 
-        expected = [Flag('-I', path.realpath('/usr/local/foo')),
-                    Flag('-I', path.realpath('/foo/bar/test/include')),
+        expected = [Flag('-I', path.realpath('/foo/bar/test/include')),
                     Flag('-I', path.realpath('/foo/include')),
                     Flag('-isystem', path.realpath('/foo/bar/matilda'), ' ')]
 
@@ -164,9 +163,7 @@ class TestCompilationDb(TestCase):
                       'compilation_db_files',
                       'directory'))
         scope = SearchScope(from_folder=path_to_db)
-        print("expected: ", expected)
         got_flags = db.get_flags(search_scope=scope)
-        print("got_flags: ", got_flags)
         self.assertEqual(expected, got_flags)
 
     def test_get_c_flags(self):
