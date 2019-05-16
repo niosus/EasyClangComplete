@@ -159,9 +159,10 @@ class TestCompilationDb(TestCase):
                     Flag('-I', path.realpath('/foo/include')),
                     Flag('-isystem', path.realpath('/foo/bar/matilda'), ' ')]
 
-        path_to_db = path.join(path.dirname(__file__),
-                               'compilation_db_files',
-                               'directory')
+        path_to_db = path.realpath(
+            path.join(path.dirname(__file__),
+                      'compilation_db_files',
+                      'directory'))
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
