@@ -172,6 +172,21 @@ explanations.
 
     If the `CMakeLists.txt` file cannot be found, the plugin continues to search for a `Makefile` and if that fails - for a `.clang_complete` file
 
+### **`lazy_flag_parsing`**
+
+When getting flags from a `compile_commands.json` file defer parsing these
+flags to the time when they are actually needed. This enables much faster
+database loading and allows to work with huge compilation database files. The
+downside is that there is no fallback option, so if your file is not in the
+compilation database it will have no flags.
+
+If this flag is false, the database will be parsed upon loading and there will be an entry with the key `"all"`, which merges all flags from all other entries upon parsing. This is a costly operation and is clearly a heuristic. But it can work in practice for small to moderately big projects.
+
+!!! example "Default value"
+    ```json
+    "lazy_flag_parsing": true,
+    ```
+
 ### **`show_errors`**
 
 When this option is `true` the errors will be highlighted upon every file save.
