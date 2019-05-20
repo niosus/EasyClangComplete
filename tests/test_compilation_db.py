@@ -77,8 +77,7 @@ class TestCompilationDb(object):
         if self.lazy_parsing:
             expected = [Flag('', '-Dlib_EXPORTS'),
                         Flag('', '-fPIC')]
-            file_path = path.realpath(
-                path.join("/lib_dir", "/home/user/dummy_lib.cpp"))
+            file_path = path.realpath("/home/user/dummy_lib.cpp")
             self.assertEqual(expected, db.get_flags(file_path=file_path,
                                                     search_scope=scope))
             # Check that we don't get the 'all' entry.
@@ -87,8 +86,6 @@ class TestCompilationDb(object):
             expected = [Flag('-I', path.normpath('/lib_include_dir')),
                         Flag('', '-Dlib_EXPORTS'),
                         Flag('', '-fPIC')]
-            print("ComplationDbCache: ", db.get_flags(search_scope=scope))
-            print("ComplationDbCache: ", ComplationDbCache())
             self.assertEqual(expected, db.get_flags(search_scope=scope))
 
     def test_get_flags_for_path(self):
@@ -196,6 +193,8 @@ class TestCompilationDb(object):
             # Check that we don't get the 'all' entry.
             self.assertIsNone(db.get_flags(search_scope=scope))
         else:
+            db.get_flags(search_scope=scope)
+            print("ComplationDbCache: ", ComplationDbCache())
             self.assertEqual(expected, db.get_flags(search_scope=scope))
 
     def test_get_c_flags(self):
