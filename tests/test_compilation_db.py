@@ -27,10 +27,6 @@ class TestCompilationDb(object):
         """Prepare the database."""
         ComplationDbCache().clear()
 
-    def tearDown(self):
-        """Clear the database cache."""
-        ComplationDbCache().clear()
-
     def test_get_all_flags(self):
         """Test if compilation db is found."""
         include_prefixes = ['-I']
@@ -83,6 +79,7 @@ class TestCompilationDb(object):
                         Flag('', '-fPIC')]
             file_path = path.realpath(
                 path.join("/lib_dir", "/home/user/dummy_lib.cpp"))
+            print(ComplationDbCache())
             self.assertEqual(expected, db.get_flags(file_path=file_path,
                                                     search_scope=scope))
             # Check that we don't get the 'all' entry.
