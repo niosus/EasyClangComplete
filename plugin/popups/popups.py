@@ -511,9 +511,10 @@ class Popup:
                 this space.
         """
         result = ""
+        from os import path
         if location and location.file and location.file.name:
             result += "[" + text + "]"
-            result += "(" + location.file.name
+            result += "(" + path.realpath(location.file.name)
             result += ":" + str(location.line)
             result += ":" + str(location.column)
             result += ")"
