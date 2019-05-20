@@ -74,13 +74,14 @@ class TestCompilationDb(object):
                                'compilation_db_files',
                                'arguments')
         scope = SearchScope(from_folder=path_to_db)
-        import sublime
-        if self.lazy_parsing and sublime.platform() != 'windows':
-            expected = [Flag('', '-Dlib_EXPORTS'),
-                        Flag('', '-fPIC')]
-            file_path = path.realpath("/home/user/dummy_lib.cpp")
-            self.assertEqual(expected, db.get_flags(file_path=file_path,
-                                                    search_scope=scope))
+        if self.lazy_parsing:
+            import sublime
+            if sublime.platform() != 'windows':
+                expected = [Flag('', '-Dlib_EXPORTS'),
+                            Flag('', '-fPIC')]
+                file_path = path.realpath("/home/user/dummy_lib.cpp")
+                self.assertEqual(expected, db.get_flags(file_path=file_path,
+                                                        search_scope=scope))
             # Check that we don't get the 'all' entry.
             self.assertIsNone(db.get_flags(search_scope=scope))
         else:
@@ -187,11 +188,13 @@ class TestCompilationDb(object):
                       'compilation_db_files',
                       'directory'))
         scope = SearchScope(from_folder=path_to_db)
-        import sublime
-        if self.lazy_parsing and sublime.platform() != 'windows':
-            file_path = path.realpath(path.join("/foo/bar/test", "test.cpp"))
-            self.assertEqual(expected, db.get_flags(file_path=file_path,
-                                                    search_scope=scope))
+        if self.lazy_parsing:
+            import sublime
+            if sublime.platform() != 'windows':
+                file_path = path.realpath(
+                    path.join("/foo/bar/test", "test.cpp"))
+                self.assertEqual(expected, db.get_flags(file_path=file_path,
+                                                        search_scope=scope))
             # Check that we don't get the 'all' entry.
             self.assertIsNone(db.get_flags(search_scope=scope))
         else:
