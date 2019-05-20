@@ -79,9 +79,9 @@ class TestCompilationDb(object):
                         Flag('', '-fPIC')]
             file_path = path.realpath(
                 path.join("/lib_dir", "/home/user/dummy_lib.cpp"))
-            print(ComplationDbCache())
             self.assertEqual(expected, db.get_flags(file_path=file_path,
                                                     search_scope=scope))
+            print("ComplationDbCache: ", ComplationDbCache())
             # Check that we don't get the 'all' entry.
             self.assertIsNone(db.get_flags(search_scope=scope))
         else:
