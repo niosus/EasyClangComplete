@@ -188,6 +188,7 @@ class TestCompilationDb(object):
         scope = SearchScope(from_folder=path_to_db)
         if self.lazy_parsing:
             file_path = path.realpath(path.join("/foo/bar/test", "test.cpp"))
+            print("file_path: ", file_path)
             self.assertEqual(expected, db.get_flags(file_path=file_path,
                                                     search_scope=scope))
             # Check that we don't get the 'all' entry.
