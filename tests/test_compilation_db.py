@@ -88,6 +88,7 @@ class TestCompilationDb(object):
                         Flag('', '-Dlib_EXPORTS'),
                         Flag('', '-fPIC')]
             print("ComplationDbCache: ", db.get_flags(search_scope=scope))
+            print("ComplationDbCache: ", ComplationDbCache())
             self.assertEqual(expected, db.get_flags(search_scope=scope))
 
     def test_get_flags_for_path(self):
