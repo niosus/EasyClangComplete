@@ -27,6 +27,10 @@ class TestCompilationDb(object):
         """Prepare the database."""
         ComplationDbCache().clear()
 
+    def tearDown(self):
+        """Clear the database cache."""
+        ComplationDbCache().clear()
+
     def test_get_all_flags(self):
         """Test if compilation db is found."""
         include_prefixes = ['-I']
