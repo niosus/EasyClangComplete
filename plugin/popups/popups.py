@@ -180,10 +180,13 @@ class Popup:
                 location = IndexLocation(filename=location_tuple[0],
                                          line=location_tuple[2][0],
                                          column=location_tuple[2][1])
-                index_references.append("{reference}: `{file}`".format(
-                    reference=Popup.link_from_location(
-                        location, cursor.spelling),
-                    file=location.file.short_name))
+                index_references.append(
+                    "{reference}: `{file}:{line}:{col}`".format(
+                        reference=Popup.link_from_location(location,
+                                                           cursor.spelling),
+                        file=location.file.short_name,
+                        line=location.line,
+                        col=location.column))
             log.debug("references from index: %s", index_references)
             if index_references:
                 popup.__text += REFERENCES_TEMPLATE.format(
