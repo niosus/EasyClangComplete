@@ -57,7 +57,7 @@ class BaseTestCompleter(object):
         view_config_manager = ViewConfigManager()
         view_config = view_config_manager.load_for_view(self.view, settings)
         completer = view_config.completer
-        return completer
+        return completer, settings
 
     def tear_down_completer(self):
         """Tear down completer for the current view.
@@ -81,7 +81,7 @@ class BaseTestCompleter(object):
                               'test_files',
                               'test.cpp')
         self.set_up_view(file_name)
-        completer = self.set_up_completer()
+        completer, _ = self.set_up_completer()
 
         self.assertIsNotNone(completer.version_str)
         self.tear_down_completer()
@@ -93,7 +93,7 @@ class BaseTestCompleter(object):
                               'test.cpp')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(8), "  a.")
@@ -103,7 +103,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -119,7 +119,7 @@ class BaseTestCompleter(object):
                               'test.cpp')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(8), "  a.")
@@ -129,7 +129,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -147,7 +147,7 @@ class BaseTestCompleter(object):
                               'test.cpp')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(8), "  a.")
@@ -157,7 +157,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -175,7 +175,7 @@ class BaseTestCompleter(object):
                               'test_vector.cpp')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(3), "  vec.")
@@ -185,7 +185,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -202,7 +202,7 @@ class BaseTestCompleter(object):
                               'test_property.m')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(6), "  foo.")
@@ -212,7 +212,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -229,7 +229,7 @@ class BaseTestCompleter(object):
                               'test_void_method.m')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(6), "  [foo ")
@@ -239,7 +239,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -256,7 +256,7 @@ class BaseTestCompleter(object):
                               'test_method_one_parameter.m')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(6), "  [foo ")
@@ -266,7 +266,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -284,7 +284,7 @@ class BaseTestCompleter(object):
                               'test_method_two_parameters.m')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(6), "  [foo ")
@@ -294,7 +294,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -314,7 +314,7 @@ class BaseTestCompleter(object):
                               'test_objective_cpp.mm')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, settings = self.set_up_completer()
 
         # Check the current cursor position is completable.
         self.assertEqual(self.get_row(3), "  str.")
@@ -324,7 +324,7 @@ class BaseTestCompleter(object):
 
         # Load the completions.
         request = ActionRequest(self.view, pos)
-        (_, completions) = completer.complete(request)
+        (_, completions) = completer.complete(request, settings)
 
         # Verify that we got the expected completions back.
         self.assertIsNotNone(completions)
@@ -375,7 +375,7 @@ class BaseTestCompleter(object):
                               'test_location.cpp')
         self.set_up_view(file_name)
 
-        completer = self.set_up_completer()
+        completer, _ = self.set_up_completer()
 
         # Check the current cursor position is completable.
         row = 9
