@@ -21,7 +21,7 @@ class ClangUtils:
         windows_suffixes (list): suffixes for windows
     """
     windows_suffixes = ['.dll', '.lib']
-    linux_suffixes = ['.so', '.so.1', '.so.7']
+    linux_suffixes = ['.so', '.so.1', '.so.7', '.so.8']
     osx_suffixes = ['.dylib']
 
     suffixes = {
