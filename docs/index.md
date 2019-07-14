@@ -28,6 +28,32 @@
 !!! tip
     Make sure `clang` is available in your `PATH` or that the setting [clang binary](settings/#clang_binary) is set to the full path to your `clang` binary.
 
+    On Windows, you can also use the `clang` binaries provided by
+    [MSYS2](https://www.msys2.org/) with some additional configuration of the
+    Sublime Text environment. The most convenient way to do this is to install
+    the [Environment Settings](https://packagecontrol.io/packages/Environment%20Settings)
+    package and configure it with settings similar to the following:
+
+    ```json
+    {
+      "env": {
+        "Windows": {
+          "PATH": "C:\\msys64\\mingw64\\bin;C:\\msys64\\usr\\bin;%PATH%",
+          "MSYSTEM": "MINGW64",
+          "CHERE_INVOKING": "enabled_from_arguments"
+        }
+      }
+    }
+    ```
+
+    This assumes MSYS2 is installed in the default location `C:\msys64`,
+    otherwise adjust the `PATH` variable accordingly. After a restart of Sublime
+    Text, this will both make `clang` available by manipulating `PATH` and add
+    some additional variables to set the MSYS2 environment.
+
+    By changing `PATH` and `MSYSTEM`, it is also possible to switch between the
+    different MSYS2 environments.
+
 ### **3. Configure your compiler flags and include folders**
 
 #### CMake and .sublime-project
