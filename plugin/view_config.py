@@ -261,7 +261,7 @@ class ViewConfig(object):
 
         # Combine all flags into a unique list and return it.
         flags = UniqueList()
-        flags += init_flags + source_flags + lang_flags + common_flags
+        flags += init_flags + lang_flags + source_flags + common_flags
         return flags
 
     @staticmethod

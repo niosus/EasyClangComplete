@@ -70,11 +70,11 @@ class TestViewConfig(GuiTestWrapper):
         completer = view_config.completer
         self.assertEqual(len(completer.clang_flags), 20)
         # test from the start
-        self.assertEqual(completer.clang_flags[0], '-c')
-        self.assertEqual(completer.clang_flags[1], '-fsyntax-only')
-        self.assertEqual(completer.clang_flags[2], '-x')
-        self.assertEqual(completer.clang_flags[3], 'c++')
-        self.assertEqual(completer.clang_flags[-1], '-std=c++14')
+        self.assertIn('-c', completer.clang_flags)
+        self.assertIn('-fsyntax-only', completer.clang_flags)
+        self.assertIn('-x', completer.clang_flags)
+        self.assertIn('c++', completer.clang_flags)
+        self.assertIn('-std=c++14', completer.clang_flags)
 
         expected = path.join(path.dirname(
             path.dirname(__file__)), 'local_folder')
@@ -84,7 +84,7 @@ class TestViewConfig(GuiTestWrapper):
 
         # test include flag
         self.assertEqual(
-            completer.clang_flags[-4] + completer.clang_flags[-3],
+            completer.clang_flags[8] + completer.clang_flags[9],
             '-I' + expected)
 
     def test_unsaved_views(self):
