@@ -322,6 +322,8 @@ class File:
         expanded_path = sublime.expand_variables(
             expanded_path, wildcard_values)
         expanded_path = File.canonical_path(expanded_path, current_folder)
+        if not expanded_path:
+            return []
         from glob import glob
         all_paths = glob(expanded_path)
         if len(all_paths) > 0 and all_paths[0] != input_path:
