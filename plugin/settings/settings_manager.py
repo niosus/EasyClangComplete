@@ -8,6 +8,7 @@ import logging
 import copy
 
 from ..tools import PKG_NAME
+from ..tools import SublBridge
 
 from .settings_storage import SettingsStorage
 
@@ -139,10 +140,8 @@ class SettingsManager:
         valid, error_msg = self.__default_settings.is_valid()
         if not valid:
             error_dialog_msg = """
-EasyClangComplete:
-
 An error has occurred while parsing settings:
 {}
 """.format(error_msg)
-            sublime.error_message(error_dialog_msg)
+            SublBridge.show_error_dialog(error_dialog_msg)
             raise RuntimeError("Settings could not be loaded.")

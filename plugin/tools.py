@@ -182,7 +182,7 @@ class SublBridge:
     @staticmethod
     def show_error_dialog(message):
         """Show an error message dialog."""
-        sublime.error_message(message)
+        sublime.error_message("EasyClangComplete:\n\n" + message)
 
 
 class PosStatus:
@@ -318,7 +318,8 @@ class File:
         This returns a list of canonical paths.
         """
         expanded_path = path.expandvars(input_path)
-        expanded_path = sublime.expand_variables(expanded_path, wildcard_values)
+        expanded_path = sublime.expand_variables(
+            expanded_path, wildcard_values)
         expanded_path = File.canonical_path(expanded_path, current_folder)
         from glob import glob
         all_paths = glob(expanded_path)
@@ -755,9 +756,10 @@ class Tools:
                 # https://gist.github.com/yamaya/2924292
                 version_str = OSX_CLANG_VERSION_DICT[osx_version]
             except Exception as e:
-                sublime.error_message("Version '{}' of AppleClang is not "
-                                      "supported yet. Please open an issue "
-                                      "for it".format(osx_version))
+                SublBridge.show_error_dialog(
+                    "Version '{}' of AppleClang is not "
+                    "supported yet. Please open an issue "
+                    "for it".format(osx_version))
                 raise e
             log.warning("OSX version %s reported. Reducing it to %s.",
                         osx_version,
