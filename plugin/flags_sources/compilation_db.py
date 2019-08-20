@@ -194,6 +194,11 @@ class CompilationDb(FlagsSource):
             if i == 0:
                 # ignore first element as it is always the program to run,
                 # something like 'c++'
+
+                if argument == 'ccache':
+                    # if it is ccache, we might need to skip the second as well
+                    skip_next = True
+
                 continue
             if i == len(argument_list) - 1:
                 # ignore the last element as it is a file to compile, something
