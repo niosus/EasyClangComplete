@@ -224,6 +224,61 @@ class TestCompilationDb(object):
         self.assertIn(Flag('', '-Wno-poison-system-directories'), flags)
         self.assertIn(Flag('', '-march=armv7-a'), flags)
 
+    def test_get_c_flags_ccache(self):
+        """Test argument filtering when ccache is used."""
+        include_prefixes = ['-I']
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            lazy_flag_parsing=self.lazy_parsing
+        )
+
+        main_file_path = path.normpath('/home/blah.c')
+        # also try to test a header
+        path_to_db = path.join(path.dirname(__file__),
+                               'compilation_db_files',
+                               'command_c_ccache')
+        scope = SearchScope(from_folder=path_to_db)
+        flags = db.get_flags(main_file_path, scope)
+        self.assertNotIn(Flag('ccache', ''), flags)
+        self.assertNotIn(Flag('', 'ccache'), flags)
+        self.assertNotIn(Flag('cc', ''), flags)
+        self.assertNotIn(Flag('', 'cc'), flags)
+        self.assertNotIn(Flag('-c', ''), flags)
+        self.assertNotIn(Flag('', '-c'), flags)
+        self.assertNotIn(Flag('-o', ''), flags)
+        self.assertNotIn(Flag('', '-o'), flags)
+        self.assertIn(Flag('', '-Wno-poison-system-directories'), flags)
+        self.assertIn(Flag('', '-march=armv7-a'), flags)
+
+    def test_get_c_flags_ccache_irrelevant(self):
+        """Test argument filtering when ccache string is present, but not the
+           first argument (e.g. strangely named source file)"""
+        include_prefixes = ['-I']
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            lazy_flag_parsing=self.lazy_parsing
+        )
+
+        main_file_path = path.normpath('ccache')
+        # also try to test a header
+        path_to_db = path.join(path.dirname(__file__),
+                               'compilation_db_files',
+                               'command_c_ccache_irrelevant')
+        scope = SearchScope(from_folder=path_to_db)
+        flags = db.get_flags(main_file_path, scope)
+        self.assertNotIn(Flag('ccache', ''), flags)
+        self.assertNotIn(Flag('', 'ccache'), flags)
+        self.assertNotIn(Flag('cc', ''), flags)
+        self.assertNotIn(Flag('', 'cc'), flags)
+        self.assertNotIn(Flag('-c', ''), flags)
+        self.assertNotIn(Flag('', '-c'), flags)
+        self.assertNotIn(Flag('-o', ''), flags)
+        self.assertNotIn(Flag('', '-o'), flags)
+        self.assertIn(Flag('', '-Wno-poison-system-directories'), flags)
+        self.assertIn(Flag('', '-march=armv7-a'), flags)
+
 
 class LazyParsing(TestCompilationDb, TestCase):
     """Test that we can parse DB with lazy parsing."""
