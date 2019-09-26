@@ -38,6 +38,7 @@ cindex_dict = {
     '7.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
     '7.1': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
     '8.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
+    '9.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
 }
 
 # Triggers that should show types.
