@@ -56,7 +56,7 @@ class CompilerBuiltIns:
                               lang_flags=lang_flags)
 
     def __generate_flags(self, compiler, filename, working_dir, lang_flags):
-        cmd = [compiler] + lang_flags + ['-c', filename, '-dM', '-v']
+        cmd = [compiler] + lang_flags + ['-c', filename, '-dM', '-v', '-E']
         cmd_str = ' '.join(cmd)
         if cmd_str in CompilerBuiltIns.__cache:
             _log.debug("Using cached default flags.")
@@ -92,6 +92,7 @@ class CompilerBuiltIns:
             return includes
 
         def get_defines(clang_output):
+            _log.debug("!!!!!!!!!!!! %s", clang_output)
             import re
             defines = []
             for line in output.splitlines():
@@ -102,6 +103,7 @@ class CompilerBuiltIns:
                     m = re.search(r'#define (\w+)', line)
                     if m is not None:
                         defines.append("-D{}".format(m.group(1)))
+            _log.debug("Got defines: %s", defines)
             return defines
 
         self.__includes = get_includes(output)
