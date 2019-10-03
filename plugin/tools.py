@@ -516,11 +516,11 @@ class Tools:
             str: language, one of LANG_TAGS or None if nothing matched
         """
         syntax = Tools.get_view_syntax(view)
-        for lang, syntaxes in settings_storage.valid_lang_syntaxes.items():
-            if syntax in syntaxes:
-                return lang
+        for lang_tag, syntaxes in settings_storage.valid_lang_syntaxes.items():
+            if syntax in syntaxes and lang_tag in Tools.LANG_NAMES:
+                return lang_tag, Tools.LANG_NAMES[lang_tag]
         log.debug("ECC does nothing for language syntax: '%s'", syntax)
-        return None
+        return None, None
 
     @staticmethod
     def get_view_syntax(view):
@@ -554,7 +554,7 @@ class Tools:
         Returns:
             bool: True if valid, False otherwise
         """
-        lang = Tools.get_view_lang(view, settings_storage)
+        lang_tag, lang = Tools.get_view_lang(view, settings_storage)
         if not lang:
             # We could not determine the language from syntax. Means the syntax
             # is not valid for us.
