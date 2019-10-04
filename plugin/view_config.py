@@ -368,7 +368,7 @@ class ViewConfig(object):
         Returns:
             Flag[]: A list of language-specific flags.
         """
-        from .utils.compiler_builtins import CompilerBuiltIns
+        from .flags_sources.compiler_builtins import CompilerBuiltIns
         lang_tag, lang = Tools.get_view_lang(view, settings)
         lang_flags = []
         if need_lang_flags:

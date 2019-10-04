@@ -2,7 +2,7 @@
 import imp
 from unittest import TestCase
 
-from EasyClangComplete.plugin.utils import compiler_builtins
+from EasyClangComplete.plugin.flags_sources import compiler_builtins
 
 imp.reload(compiler_builtins)
 
@@ -85,27 +85,15 @@ class TestFlag(TestCase):
         """
         test_data = [
             {
-                "args": ["clang", "-x", "objective-c"],
+                "args": ["-x", "objective-c"],
                 "filename": None,
                 "compiler": "clang"
-            },
-            {
-                "args": ["clang"],
-                "filename": "myfile.m",
-                "compiler": "clang"
-            },
-            {
-                "args": ["clang"],
-                "filename": "myfile.mm",
-                "compiler": "clang"
-            },
+            }
         ]
         for test_set in test_data:
             print("Testing using test set: {}".format(test_set))
             built_ins = CompilerBuiltIns(
-                test_set["args"], test_set["filename"])
-            self.assertEqual(built_ins.compiler, test_set["compiler"])
-            self.assertEqual(built_ins.language, "objective-c")
+                test_set["compiler"], test_set["args"], test_set["filename"])
             self.assertIn("-D__OBJC__=1", built_ins.flags)
 
     def test_objcpp(self):
@@ -117,7 +105,7 @@ class TestFlag(TestCase):
         """
         test_data = [
             {
-                "args": ["clang", "-x", "objective-c++"],
+                "args": ["-x", "objective-c++"],
                 "filename": None,
                 "compiler": "clang"
             }
@@ -125,7 +113,7 @@ class TestFlag(TestCase):
         for test_set in test_data:
             print("Testing using test set: {}".format(test_set))
             built_ins = CompilerBuiltIns(
-                test_set["args"], test_set["filename"])
+                test_set["compiler"], test_set["args"], test_set["filename"])
             self.assertIn("-D__OBJC__=1", built_ins.flags)
             is_cpp = False
             for define in built_ins.defines:
