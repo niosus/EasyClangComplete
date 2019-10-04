@@ -56,6 +56,10 @@ class CompilerBuiltIns:
                               lang_flags=lang_flags)
 
     def __generate_flags(self, compiler, filename, working_dir, lang_flags):
+        if not lang_flags:
+            lang_flags = []
+        if not compiler:
+            return
         cmd = [compiler] + lang_flags + ['-c', filename, '-dM', '-v', '-E']
         cmd_str = ' '.join(cmd)
         if cmd_str in CompilerBuiltIns.__cache:
@@ -64,6 +68,9 @@ class CompilerBuiltIns:
             return
         _log.debug("Generating new default flags with cmd: '%s'", cmd)
         output = Tools.run_command(cmd, cwd=working_dir)
+        if not output:
+            _log.warning("No output from cmd to get default flags: %s", cmd)
+            return
 
         def get_includes(clang_output):
             lines = clang_output.split('\n')
@@ -92,7 +99,6 @@ class CompilerBuiltIns:
             return includes
 
         def get_defines(clang_output):
-            _log.debug("!!!!!!!!!!!! %s", clang_output)
             import re
             defines = []
             for line in output.splitlines():

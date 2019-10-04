@@ -14,12 +14,9 @@ class TestFlag(TestCase):
 
     def test_empty(self):
         """Test empty."""
-        builtIns = CompilerBuiltIns([], None)
-        self.assertEqual(len(builtIns.include_paths), 0)
-        self.assertEqual(len(builtIns.defines), 0)
-        self.assertEqual(builtIns.compiler, None)
-        self.assertEqual(builtIns.std, None)
-        self.assertEqual(builtIns.language, None)
+        built_ins = CompilerBuiltIns("", None)
+        self.assertEqual(len(built_ins.includes), 0)
+        self.assertEqual(len(built_ins.defines), 0)
 
     def test_plain(self):
         """Test retrieval of built ins when we are uncertain about the language.
@@ -28,33 +25,25 @@ class TestFlag(TestCase):
         about the target language. Input is a command line with the call to the
         compiler but without a filename. In this case, we expect only the
         compiler to be guessed correctly. Asking it for built ins should
-        yield C flags (which are mostly a sub-set of flags for other languages).
+        yield C flags (which are a sub-set of flags for other languages).
         """
-        builtIns = CompilerBuiltIns(["clang"], None)
-        self.assertTrue(len(builtIns.defines) > 0)
-        self.assertTrue(len(builtIns.include_paths) > 0)
-        self.assertEqual(builtIns.compiler, "clang")
-        self.assertEqual(builtIns.std, None)
-        self.assertEqual(builtIns.language, None)
+        built_ins = CompilerBuiltIns("clang", None)
+        self.assertTrue(len(built_ins.defines) > 0)
+        self.assertTrue(len(built_ins.includes) > 0)
+        self.assertEqual(len(built_ins.flags),
+                         len(built_ins.defines) + len(built_ins.includes))
 
     def test_c(self):
         """Test retrieval of flags for a C compiler.
 
-        In this test we have in addition to the compiler an explicit hint to the
+        Here, in addition to the compiler we have an explicit hint to the
         target language in use. Hence, the correct language (and also standard)
         must be guessed correctly.
         """
-        builtIns = CompilerBuiltIns(["clang", "-std=c99", "-x", "c"], None)
-        self.assertTrue(len(builtIns.defines) > 0)
-        self.assertTrue(len(builtIns.include_paths) > 0)
-        self.assertEqual(builtIns.compiler, "clang")
-        self.assertEqual(builtIns.std, "c99")
-        self.assertEqual(builtIns.language, "c")
-        self.assertIn("-D__clang__=1", builtIns.flags)
-        # TODO: It seems STDC is not set everywhere (at least the test on
-        # Appveyor fails when we check for this). Maybe there's another,
-        # C specific define which it is worth checking for?
-        # self.assertIn("-D__STDC__=1", builtIns.flags)
+        built_ins = CompilerBuiltIns("clang", ["-std=c99", "-x", "c"])
+        self.assertTrue(len(built_ins.defines) > 0)
+        self.assertTrue(len(built_ins.includes) > 0)
+        self.assertIn("-D__clang__=1", built_ins.flags)
 
     def test_cxx(self):
         """Test retrieval of flags for a C++ compiler.
@@ -66,48 +55,22 @@ class TestFlag(TestCase):
         """
         test_data = [
             {
-                "args": ["clang++"],
+                "args": [],
                 "filename": None,
                 "compiler": "clang++"
             },
             {
-                "args": ["clang", "-x", "c++"],
+                "args": ["-x", "c++"],
                 "filename": None,
-                "compiler": "clang"
-            },
-            {
-                "args": ["clang"],
-                "filename": "myfile.cpp",
-                "compiler": "clang"
-            },
-            {
-                "args": ["clang"],
-                "filename": "myfile.cc",
-                "compiler": "clang"
-            },
-            {
-                "args": ["clang"],
-                "filename": "myfile.cxx",
-                "compiler": "clang"
-            },
-            {
-                "args": ["clang"],
-                "filename": "myfile.C",
-                "compiler": "clang"
-            },
-            {
-                "args": ["clang"],
-                "filename": "myfile.c++",
                 "compiler": "clang"
             }
         ]
         for test_set in test_data:
             print("Testing using test set: {}".format(test_set))
-            builtIns = CompilerBuiltIns(test_set["args"], test_set["filename"])
-            self.assertEqual(builtIns.compiler, test_set["compiler"])
-            self.assertEqual(builtIns.language, "c++")
+            built_ins = CompilerBuiltIns(
+                test_set["compiler"], test_set["args"], test_set["filename"])
             is_cpp = False
-            for define in builtIns.defines:
+            for define in built_ins.defines:
                 if define.startswith("-D__cplusplus="):
                     is_cpp = True
             self.assertTrue(is_cpp)
@@ -139,10 +102,11 @@ class TestFlag(TestCase):
         ]
         for test_set in test_data:
             print("Testing using test set: {}".format(test_set))
-            builtIns = CompilerBuiltIns(test_set["args"], test_set["filename"])
-            self.assertEqual(builtIns.compiler, test_set["compiler"])
-            self.assertEqual(builtIns.language, "objective-c")
-            self.assertIn("-D__OBJC__=1", builtIns.flags)
+            built_ins = CompilerBuiltIns(
+                test_set["args"], test_set["filename"])
+            self.assertEqual(built_ins.compiler, test_set["compiler"])
+            self.assertEqual(built_ins.language, "objective-c")
+            self.assertIn("-D__OBJC__=1", built_ins.flags)
 
     def test_objcpp(self):
         """Test retrieval of flags for an Objective-C++ compiler.
@@ -160,12 +124,11 @@ class TestFlag(TestCase):
         ]
         for test_set in test_data:
             print("Testing using test set: {}".format(test_set))
-            builtIns = CompilerBuiltIns(test_set["args"], test_set["filename"])
-            self.assertEqual(builtIns.compiler, test_set["compiler"])
-            self.assertEqual(builtIns.language, "objective-c++")
-            self.assertIn("-D__OBJC__=1", builtIns.flags)
+            built_ins = CompilerBuiltIns(
+                test_set["args"], test_set["filename"])
+            self.assertIn("-D__OBJC__=1", built_ins.flags)
             is_cpp = False
-            for define in builtIns.defines:
+            for define in built_ins.defines:
                 if define.startswith("-D__cplusplus="):
                     is_cpp = True
             self.assertTrue(is_cpp)
