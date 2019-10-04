@@ -47,8 +47,10 @@ class CompilerBuiltIns:
             # Creates the file on disk.
             File(path.join(working_dir, filename))
         else:
-            filename = path.basename(filename)
             working_dir = path.dirname(filename)
+            filename = path.basename(filename)
+        _log.debug("Generating default flags from file '%s' in folder '%s'",
+                   filename, working_dir)
 
         self.__generate_flags(compiler=compiler,
                               filename=filename,
