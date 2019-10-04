@@ -93,6 +93,7 @@ class SettingsStorage:
         "show_type_info",
         "target_compilers",
         "triggers",
+        "use_default_definitions",
         "use_default_includes",
         "use_libclang",
         "use_libclang_caching",

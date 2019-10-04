@@ -109,6 +109,10 @@
   // `clang_binary -c /tmp/test.cc -v`
   "use_default_includes": true,
 
+  // Use default -D definitions that we can get by running the command:
+  // `clang_binary -c /tmp/test.cc -dM -E`
+  "use_default_definitions": true,
+
   // Make the plugin verbose:
   "verbose" : false,
 

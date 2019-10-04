@@ -3,7 +3,7 @@
 2. Global user settings <small>(defined globally for the whole plugin)</small>
 3. Default settings <small>(shipped with the plugin)</small>
 
-!!! warning 
+!!! warning
     Project-related settings will only work when your code has a
     `.sublime-project` file related to it. For documentation on using the
     Sublime Text projects please refer [here][subl-proj].
@@ -43,7 +43,7 @@ The project-specific settings are only available when the code is within a Subli
         }
     }
     ```
-    
+
     Note that for `verbose` setting a prefix `easy_clang_complete_` is used,
     while for `use_libclang` we use `ecc_` prefix.
 
@@ -60,7 +60,7 @@ usually include common include paths that are needed for finding STL etc. Below
 are typical defaults for Linux.
 
 ??? example "Good defaults for Linux <small>(click to expand)</small>"
-    ```json  
+    ```json
     "common_flags" : [
         "-I/usr/include",
         "-I$project_base_path/src",
@@ -70,18 +70,18 @@ are typical defaults for Linux.
     ```
 
 ??? example "Good defaults MacOS <small>(click to expand)</small>"
-    ```json  
+    ```json
     "common_flags" : [
         // some example includes
         "-I/usr/include/",
         "-I/usr/local/include",
         "-I/Library/Developer/CommandLineTools/usr/lib/clang/$clang_version",
-        "-I/Library/Developer/CommandLineTools/usr/include/c++/v1",       
+        "-I/Library/Developer/CommandLineTools/usr/include/c++/v1",
     ],
     ```
 
 ??? example "Good defaults for Windows with MinGW <small>(click to expand)</small>"
-    ```json  
+    ```json
     "common_flags" : [
         "-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include\\c++",
         "-IC:\\MinGW\\lib\\gcc\\mingw32\\6.3.0\\include\\c++\\mingw32"
@@ -103,7 +103,7 @@ These flags are language-specific. They prepend `common_flags` when compiling fi
     },
     ```
 
-!!! warning 
+!!! warning
     When specifying this setting in your user or project settings make sure to
     keep ALL language keys.
 
@@ -129,7 +129,7 @@ page](../configs/#geting-correct-compiler-flags) of the documentation.
     + `".clang_complete"`
     + `"Makefile"`
 - `"search_in": <path>` <small>OPTIONAL</small> - defines a *folder* in which
-  the file should be searched. If it is not defined, the search starts from the current file up the directory tree. 
+  the file should be searched. If it is not defined, the search starts from the current file up the directory tree.
 
 #### CMake-specific options
 CMake is handled in a special way and there are additional settings that can be specified for this type of flag source:
@@ -164,7 +164,7 @@ explanations.
       }
     ],
     ```
-    Here, first the plugin tries to find a `CMakeLists.txt` with `project(<smth>)` inside of it. If this is successful, then it invokes a command 
+    Here, first the plugin tries to find a `CMakeLists.txt` with `project(<smth>)` inside of it. If this is successful, then it invokes a command
     ```bash
     cmake -DCMAKE_PREFIX_PATHS=/opt/ros/indigo -DCMAKE_BUILD_TYPE=Release <folder_to_CMakeLists.txt>
     ```
@@ -202,8 +202,8 @@ Defines the style of the gutter icon shown on the sidebar.
 
 #### Possible values
 - ![image](img/error_color.png): `"color"` <small>default</small>
-- ![image](img/error_mono.png): `"mono"` 
-- ![image](img/error_dot.png): `"dot"` 
+- ![image](img/error_mono.png): `"mono"`
+- ![image](img/error_dot.png): `"dot"`
 - `"none"`
 
 !!! example "Default value"
@@ -255,7 +255,7 @@ that all 4 languages have values.
     },
     ```
 
-!!! warning 
+!!! warning
     When specifying this setting in your user or project settings make sure to
     keep ALL language keys.
 
@@ -287,7 +287,7 @@ If set to `true` will use `libclang` through python bindings. This offers much b
 If set to `true` there will be default includes added to the `"common_flags"`. We generate these includes from running the following command on some empty temp file `test.cc`:
 
 ```bash
-<clang_binary> -c test.cc -v 
+<clang_binary> -c test.cc -v
 ```
 
 See [`clang_binary`](#clang_binary) setting for more details on what clang binary will be in use.
@@ -295,6 +295,21 @@ See [`clang_binary`](#clang_binary) setting for more details on what clang binar
 !!! example "Default value"
     ```json
     "use_default_includes" : true,
+    ```
+
+### **`use_default_definitions`**
+
+If set to `true` there will be default definitions added to the `"common_flags"`. We generate these includes from running the following command on some empty temp file `test.cc`:
+
+```bash
+<clang_binary> -c test.cc -dM -E
+```
+
+See [`clang_binary`](#clang_binary) setting for more details on what clang binary will be in use.
+
+!!! example "Default value"
+    ```json
+    "use_default_definitions" : true,
     ```
 
 ### **`verbose`**
@@ -319,7 +334,7 @@ version of the plugin and pick correct libclang bindings or for code completion 
 
 ### **`cmake_binary`**
 
-Pick the binary used for `cmake`. 
+Pick the binary used for `cmake`.
 
 !!! example "Default value"
     ```json
@@ -492,7 +507,7 @@ in some corner cases it might cause completions to fail entirely.
     },
     ```
 
-!!! warning 
+!!! warning
     When specifying this setting in your user or project settings make sure to
     keep **ALL** language keys. Otherwise the plugin will show you an error dialog and ask you to specify all of them. Put `null` for those you don't want to use.
 

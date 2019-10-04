@@ -381,10 +381,12 @@ class ViewConfig(object):
         if target_compiler is None and settings.use_default_includes:
             target_compiler = settings.clang_binary
         if target_compiler is not None:
-            built_in_flags = CompilerBuiltIns(compiler=target_compiler,
-                                              lang_flags=lang_flags,
-                                              filename=None).flags
-            lang_flags += built_in_flags
+            built_ins = CompilerBuiltIns(compiler=target_compiler,
+                                         lang_flags=lang_flags,
+                                         filename=None)
+            if settings.use_default_definitions:
+                lang_flags += built_ins.defines
+            lang_flags += built_ins.includes
         log.debug("Tokeninzing default flags")
         return Flag.tokenize_list(lang_flags)
 
