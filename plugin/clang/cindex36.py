@@ -3533,13 +3533,20 @@ class Config:
         if Config.library_file:
             return Config.library_file
 
-        from .utils import ClangUtils
-        from os import path
-        filename = ClangUtils.libclang_name
+        import platform
+        name = platform.system()
+
+        if name == 'Darwin':
+            file = 'libclang.dylib'
+        elif name == 'Windows':
+            file = 'libclang.dll'
+        else:
+            file = 'libclang.so'
 
         if Config.library_path:
-            filename = path.join(Config.library_path, filename)
-        return filename
+            file = Config.library_path + '/' + file
+
+        return file
 
     def get_cindex_library(self):
         try:
