@@ -1,14 +1,24 @@
 """Tests for autocompletion."""
+import imp
 import sublime
 import platform
 from os import path
 
-from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
-from EasyClangComplete.plugin.utils.action_request import ActionRequest
-from EasyClangComplete.plugin.view_config import ViewConfigManager
+from EasyClangComplete.plugin.settings import settings_manager
+from EasyClangComplete.plugin.utils import action_request
+from EasyClangComplete.plugin.view_config import view_config_manager
 
+from EasyClangComplete.tests import gui_test_wrapper
 
-from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
+imp.reload(gui_test_wrapper)
+imp.reload(settings_manager)
+imp.reload(view_config_manager)
+imp.reload(action_request)
+
+SettingsManager = settings_manager.SettingsManager
+ActionRequest = action_request.ActionRequest
+ViewConfigManager = view_config_manager.ViewConfigManager
+GuiTestWrapper = gui_test_wrapper.GuiTestWrapper
 
 
 def has_libclang():

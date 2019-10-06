@@ -7,7 +7,7 @@ from collections import namedtuple
 from EasyClangComplete.plugin.error_vis import popup_error_vis
 from EasyClangComplete.plugin.settings import settings_manager
 from EasyClangComplete.plugin.settings import settings_storage
-from EasyClangComplete.plugin.popups import popups
+from EasyClangComplete.plugin.error_vis import popups
 from EasyClangComplete.plugin.view_config import view_config_manager
 from EasyClangComplete.plugin.utils import action_request
 
@@ -66,10 +66,8 @@ class TestErrorVis:
         settings = manager.settings_for_view(self.view)
         settings.use_libclang = self.use_libclang
 
-        view_config_manager = ViewConfigManager()
-        view_config = view_config_manager.load_for_view(self.view, settings)
-        completer = view_config.completer
-        return completer, settings
+        view_config = ViewConfigManager().load_for_view(self.view, settings)
+        return view_config.completer, settings
 
     def tear_down_completer(self):
         """Tear down a completer for the current view.

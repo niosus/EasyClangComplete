@@ -11,6 +11,7 @@ import logging
 from os import path
 
 from ..utils.tools import Tools
+from ..utils.file import File
 from ..utils.subl_bridge import SublBridge
 from .base_complete import BaseCompleter
 from .compiler_variant import ClangCompilerVariant
@@ -121,12 +122,12 @@ class Completer(BaseCompleter):
         information about cursor.
 
         Args:
-            tooltip_request (tools.ActionRequest): A request for action
+            tooltip_request (ActionRequest): A request for action
                 from the plugin.
             settings: All plugin settings.
 
         Returns:
-            (tools.ActionRequest, str): completion request along with the
+            (ActionRequest, str): completion request along with the
                 info details read from the translation unit.
         """
         # This is a dummy implementation that just shows an error to the user.
@@ -177,7 +178,7 @@ class Completer(BaseCompleter):
         """
         file_body = view.substr(sublime.Region(0, view.size()))
 
-        tempdir = Tools.get_temp_dir()
+        tempdir = File.get_temp_dir()
         temp_file_name = path.join(tempdir, path.basename(view.file_name()))
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)

@@ -9,7 +9,7 @@ import re
 from ..utils.macro_parser import MacroParser
 from ..utils.index_location import IndexLocation
 
-POPUP_CSS_FILE = "Packages/EasyClangComplete/plugin/popups/popup.css"
+POPUP_CSS_FILE = "Packages/EasyClangComplete/plugin/error_vis/popup.css"
 
 log = logging.getLogger("ECC")
 

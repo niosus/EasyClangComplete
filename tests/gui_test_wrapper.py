@@ -3,7 +3,7 @@ import sublime
 import time
 from unittest import TestCase
 
-from EasyClangComplete.plugin.tools import PKG_NAME
+from EasyClangComplete.plugin.utils.tools import PKG_NAME
 
 
 class GuiTestWrapper(TestCase):

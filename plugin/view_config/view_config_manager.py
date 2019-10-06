@@ -74,7 +74,7 @@ class ViewConfigManager(object):
             ViewConfig: Config for current view and settings.
         """
         if not SublBridge.is_valid_view(view):
-            log.error("view %s is not valid. Cannot get config.", view)
+            log.error("View %s is not valid. Cannot get config.", view)
             return None
         try:
             v_id = view.buffer_id()
@@ -83,10 +83,10 @@ class ViewConfigManager(object):
             # between creating and removing a config.
             with self.__rlock:
                 if v_id in self.__cache:
-                    log.debug("config exists for path: %s", v_id)
+                    log.debug("Config exists for path: %s", v_id)
                     res = self.__cache[v_id].update_if_needed(view, settings)
                 else:
-                    log.debug("generate new config for path: %s", v_id)
+                    log.debug("Generate new config for path: %s", v_id)
                     config = ViewConfig(view, settings)
                     self.__cache[v_id] = config
                     res = config
@@ -99,14 +99,14 @@ class ViewConfigManager(object):
         except AttributeError as e:
             import traceback
             tb = traceback.format_exc()
-            log.error("view became invalid while loading config: %s", e)
-            log.error("traceback: %s", tb)
+            log.error("View became invalid while loading config: %s", e)
+            log.error("Traceback: %s", tb)
             return None
 
     def clear_for_view(self, v_id):
         """Clear config for a view id."""
         import gc
-        log.debug("trying to clear config for view: %s", v_id)
+        log.debug("Trying to clear config for view: %s", v_id)
         with self.__rlock:
             if v_id in self.__cache:
                 del self.__cache[v_id]
