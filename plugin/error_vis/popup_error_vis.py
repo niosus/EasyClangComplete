@@ -24,7 +24,6 @@ class PopupErrorVis:
         err_regions (dict): dictionary of error regions for view ids
     """
     _TAG = "easy_clang_complete_errors"
-    _ERROR_FLAGS = sublime.DRAW_EMPTY | sublime.DRAW_NO_FILL
     _ERROR_SCOPE = "invalid.illegal"
 
     def __init__(self, settings):
@@ -34,6 +33,7 @@ class PopupErrorVis:
             mark_gutter (bool): add a mark to the gutter for error regions
         """
         gutter_style = settings.gutter_style
+        mark_style = settings.linter_mark_style
         self.settings = settings
 
         self.err_regions = {}
@@ -45,6 +45,22 @@ class PopupErrorVis:
             self.gutter_mark = PATH_TO_ICON.format(icon="error_dot.png")
         else:
             self.gutter_mark = ""
+
+        if mark_style == SettingsStorage.MARK_STYLE_OUTLINE:
+            self.draw_flags = sublime.DRAW_EMPTY | sublime.DRAW_NO_FILL
+        elif mark_style == SettingsStorage.MARK_STYLE_FILL:
+            self.draw_flags = 0
+        elif mark_style == SettingsStorage.MARK_STYLE_SOLID_UNDERLINE:
+            self.draw_flags = sublime.DRAW_NO_FILL | \
+                sublime.DRAW_NO_OUTLINE | sublime.DRAW_SOLID_UNDERLINE
+        elif mark_style == SettingsStorage.MARK_STYLE_STIPPLED_UNDERLINE:
+            self.draw_flags = sublime.DRAW_NO_FILL | \
+                sublime.DRAW_NO_OUTLINE | sublime.DRAW_STIPPLED_UNDERLINE
+        elif mark_style == SettingsStorage.MARK_STYLE_SQUIGGLY_UNDERLINE:
+            self.draw_flags = sublime.DRAW_NO_FILL | \
+                sublime.DRAW_NO_OUTLINE | sublime.DRAW_SQUIGGLY_UNDERLINE
+        else:
+            self.draw_flags = sublime.HIDDEN
 
     def generate(self, view, errors):
         """Generate a dictionary that stores all errors.
@@ -114,7 +130,7 @@ class PopupErrorVis:
             regions,
             PopupErrorVis._ERROR_SCOPE,
             self.gutter_mark,
-            PopupErrorVis._ERROR_FLAGS)
+            self.draw_flags)
 
     def erase_regions(self, view):
         """Erase error regions for view.

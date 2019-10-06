@@ -73,6 +73,15 @@
   // Possible styles: "color", "mono", "dot", "none"
   "gutter_style": "color",
 
+  // Pick style of error line highlighting
+  // - "outline"            : outline regions
+  // - "fill"               : fill regions
+  // - "solid_underline"    : draw a solid underline below regions
+  // - "stippled_underline" : draw a stippled underline below regions
+  // - "squiggly_underline" : draw a squiggly underline below regions
+  // - "none"               : do not draw anything on error lines
+  "linter_mark_style": "outline",
+
   // Maximum width and height for popups eg. declaration info.
   "popup_maximum_width": 1800,
   "popup_maximum_height": 800,

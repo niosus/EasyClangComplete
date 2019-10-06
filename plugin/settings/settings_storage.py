@@ -68,6 +68,20 @@ class SettingsStorage:
                      GUTTER_DOT_STYLE,
                      NONE_STYLE]
 
+    MARK_STYLE_OUTLINE = "outline"
+    MARK_STYLE_FILL = "fill"
+    MARK_STYLE_SOLID_UNDERLINE = "solid_underline"
+    MARK_STYLE_STIPPLED_UNDERLINE = "stippled_underline"
+    MARK_STYLE_SQUIGGLY_UNDERLINE = "squiggly_underline"
+    MARK_STYLE_NONE = "none"
+
+    LINTER_MARK_STYLES = [MARK_STYLE_OUTLINE,
+                          MARK_STYLE_FILL,
+                          MARK_STYLE_SOLID_UNDERLINE,
+                          MARK_STYLE_STIPPLED_UNDERLINE,
+                          MARK_STYLE_SQUIGGLY_UNDERLINE,
+                          MARK_STYLE_NONE]
+
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
@@ -83,6 +97,7 @@ class SettingsStorage:
         "lang_flags",
         "lazy_flag_parsing",
         "libclang_path",
+        "linter_mark_style",
         "max_cache_age",
         "popup_maximum_height",
         "popup_maximum_width",
@@ -189,6 +204,10 @@ class SettingsStorage:
         if self.gutter_style not in SettingsStorage.GUTTER_STYLES:
             error_msg = "Gutter style '{}' is not one of {}".format(
                 self.gutter_style, SettingsStorage.GUTTER_STYLES)
+            return False, error_msg
+        if self.linter_mark_style not in SettingsStorage.LINTER_MARK_STYLES:
+            error_msg = "Linter mark style '{}' is not one of {}".format(
+                self.linter_mark_style, SettingsStorage.LINTER_MARK_STYLES)
             return False, error_msg
         for source_dict in self.flags_sources:
             if SettingsStorage.FILE_TAG not in source_dict:
