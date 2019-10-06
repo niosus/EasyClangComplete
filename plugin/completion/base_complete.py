@@ -6,7 +6,7 @@ Attributes:
 """
 import logging
 
-from ..tools import Tools
+from ..utils.subl_bridge import SublBridge
 
 log = logging.getLogger("ECC")
 
@@ -114,7 +114,7 @@ class BaseCompleter:
         Args:
             view (sublime.View): Current view
         """
-        if not Tools.is_valid_view(view):
+        if not SublBridge.is_valid_view(view):
             log.error("cannot show errors. View became invalid!")
             return
         self.error_vis.generate(view, self.latest_errors)

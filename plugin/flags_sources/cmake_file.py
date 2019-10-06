@@ -5,8 +5,8 @@ Attributes:
 """
 from .flags_source import FlagsSource
 from .compilation_db import CompilationDb
-from ..tools import File
-from ..tools import Tools
+from ..utils.file import File
+from ..utils.tools import Tools
 from ..utils.singleton import CMakeFileCache
 from ..utils.catkinizer import Catkinizer
 from ..utils.search_scope import TreeSearchScope

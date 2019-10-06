@@ -3,7 +3,7 @@ import sys
 import imp
 import logging
 
-from ..tools import PKG_NAME
+from .tools import PKG_NAME
 
 log = logging.getLogger("ECC")
 

@@ -3,8 +3,8 @@
 import logging as _logging
 
 from os import path
-from ..tools import File
-from ..tools import Tools
+from ..utils.file import File
+from ..utils.tools import Tools
 
 _log = _logging.getLogger("ECC")
 
@@ -42,7 +42,7 @@ class CompilerBuiltIns:
 
         working_dir = None
         if filename is None:
-            working_dir = Tools.get_temp_dir()
+            working_dir = File.get_temp_dir()
             filename = CompilerBuiltIns.__TEMP_DEFAULT_FILE_NAME
             # Creates the file on disk.
             File(path.join(working_dir, filename))

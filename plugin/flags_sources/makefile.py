@@ -9,7 +9,7 @@ import shlex
 import logging
 
 from .flags_source import FlagsSource
-from ..tools import File
+from ..utils.file import File
 from ..utils.singleton import MakefileCache
 from ..utils.flag import Flag
 

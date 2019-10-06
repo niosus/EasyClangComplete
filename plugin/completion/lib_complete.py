@@ -12,34 +12,14 @@ import logging
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
-from ..tools import Tools
-from ..tools import SublBridge
-from ..tools import PKG_NAME
-from ..clang.utils import ClangUtils
-from ..popups.popups import Popup
+from ..utils.clang_utils import ClangUtils
+from ..utils.subl_bridge import SublBridge
+from ..error_vis.popups import Popup
 
 from threading import RLock
 from os import path
 
 log = logging.getLogger("ECC")
-
-cindex_dict = {
-    '3.2': PKG_NAME + ".plugin.clang.cindex32",
-    '3.3': PKG_NAME + ".plugin.clang.cindex33",
-    '3.4': PKG_NAME + ".plugin.clang.cindex34",
-    '3.5': PKG_NAME + ".plugin.clang.cindex35",
-    '3.6': PKG_NAME + ".plugin.clang.cindex36",
-    '3.7': PKG_NAME + ".plugin.clang.cindex37",
-    '3.8': PKG_NAME + ".plugin.clang.cindex38",
-    '3.9': PKG_NAME + ".plugin.clang.cindex39",
-    '4.0': PKG_NAME + ".plugin.clang.cindex40",
-    '5.0': PKG_NAME + ".plugin.clang.cindex50",
-    '6.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
-    '7.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
-    '7.1': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
-    '8.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
-    '9.0': PKG_NAME + ".plugin.clang.cindex50",  # No need for newer cindex.
-}
 
 # Triggers that should show types.
 GLOBAL_TRIGGERS = [":", "\t", " "]
@@ -85,11 +65,11 @@ class Completer(BaseCompleter):
 
             # slightly more complicated name retrieving to allow for more
             # complex version strings, e.g. 3.8.0
-            cindex_module_name = Completer._cindex_for_version(
+            cindex_module_name = ClangUtils.get_cindex_module_for_version(
                 self.version_str)
 
             if not cindex_module_name:
-                log.critical(" No cindex module for clang version: %s",
+                log.critical("No cindex module for clang version: %s",
                              self.version_str)
                 return
 
@@ -135,7 +115,7 @@ class Completer(BaseCompleter):
             ValueError: if file name does not exist - throw exception.
         """
         # Return early if this is an invalid view.
-        if not Tools.is_valid_view(view):
+        if not SublBridge.is_valid_view(view):
             return
 
         file_name = view.file_name()
@@ -390,21 +370,6 @@ class Completer(BaseCompleter):
                     ref_new = ref.get_definition()
                 return (ref_new or ref).location
             return None
-
-    @staticmethod
-    def _cindex_for_version(version):
-        """Get cindex module name from version string.
-
-        Args:
-            version (str): version string, such as "3.8" or "3.8.0"
-
-        Returns:
-            str: cindex module name
-        """
-        for version_str in cindex_dict.keys():
-            if version.startswith(version_str):
-                return cindex_dict[version_str]
-        return None
 
     @staticmethod
     def _is_valid_result(completion_result, excluded_kinds):

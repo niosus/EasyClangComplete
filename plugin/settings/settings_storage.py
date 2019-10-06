@@ -5,9 +5,11 @@ Attributes:
 """
 import logging
 
-from ..tools import Tools
-from ..tools import File
+from ..utils.subl_bridge import SublBridge
+from ..utils.tools import Tools
+from ..utils.file import File
 from ..utils.flag import Flag
+from ..utils.clang_utils import ClangUtils
 
 log = logging.getLogger("ECC")
 
@@ -126,7 +128,7 @@ class SettingsStorage:
         """
         try:
             # Init current and parent folders.
-            if not Tools.is_valid_view(view):
+            if not SublBridge.is_valid_view(view):
                 log.error("no view to populate common flags from")
                 return
             self.__load_vars_from_settings(view.settings(),
@@ -203,7 +205,7 @@ class SettingsStorage:
                     SettingsStorage.FLAG_SOURCES)
                 return False, error_msg
         # Check if all languages are present in language-specific settings.
-        for lang_tag in Tools.LANG_TAGS:
+        for lang_tag in SublBridge.LANG_TAGS:
             if lang_tag not in self.lang_flags.keys():
                 error_msg = "lang '{}' is not in {}".format(
                     lang_tag, self.lang_flags)
@@ -308,7 +310,7 @@ class SettingsStorage:
             variables.get("project_base_name", "")
 
         # get clang version string
-        version_str = Tools.get_clang_version_str(self.clang_binary)
+        version_str = ClangUtils.get_clang_version_str(self.clang_binary)
         self._wildcard_values[Wildcards.CLANG_VERSION] = version_str
 
         # duplicate as fields

@@ -9,16 +9,13 @@ from unittest import TestCase
 
 from EasyClangComplete.plugin.flags_sources import flags_file
 from EasyClangComplete.plugin.utils import flag
-from EasyClangComplete.plugin import tools
 from EasyClangComplete.plugin.utils import search_scope
 
 imp.reload(flags_file)
-imp.reload(tools)
 imp.reload(flag)
 imp.reload(search_scope)
 
 SearchScope = search_scope.TreeSearchScope
-PKG_NAME = tools.PKG_NAME
 
 FlagsFile = flags_file.FlagsFile
 

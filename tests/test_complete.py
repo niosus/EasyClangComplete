@@ -4,7 +4,7 @@ import platform
 from os import path
 
 from EasyClangComplete.plugin.settings.settings_manager import SettingsManager
-from EasyClangComplete.plugin.tools import ActionRequest
+from EasyClangComplete.plugin.utils.action_request import ActionRequest
 from EasyClangComplete.plugin.view_config import ViewConfigManager
 
 

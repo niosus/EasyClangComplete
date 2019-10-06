@@ -10,8 +10,8 @@ import logging
 
 from os import path
 
-from ..tools import Tools
-from ..tools import SublBridge
+from ..utils.tools import Tools
+from ..utils.subl_bridge import SublBridge
 from .base_complete import BaseCompleter
 from .compiler_variant import ClangCompilerVariant
 from .compiler_variant import ClangClCompilerVariant

@@ -9,8 +9,7 @@ from os import path
 
 from ..completion.compiler_variant import LibClangCompilerVariant
 from ..settings.settings_storage import SettingsStorage
-from ..popups.popups import Popup
-from ..tools import Tools
+from .popups import Popup
 
 log = logging.getLogger("ECC")
 
@@ -142,7 +141,7 @@ class PopupErrorVis:
         if row in current_err_region_dict:
             errors_dict = current_err_region_dict[row]
             max_severity, error_list = PopupErrorVis._as_msg_list(errors_dict)
-            text_to_show = Tools.to_md(error_list)
+            text_to_show = PopupErrorVis.__to_md(error_list)
             if max_severity > 2:
                 popup = Popup.error(text_to_show, self.settings)
             else:
@@ -196,3 +195,14 @@ class PopupErrorVis:
             for error in errors_list:
                 region_list.append(error['region'])
         return region_list
+
+    @staticmethod
+    def __to_md(error_list):
+        """Convert an error dict to markdown string."""
+        if len(error_list) > 1:
+            # Make it a markdown list.
+            text_to_show = '\n- '.join(error_list)
+            text_to_show = '- ' + text_to_show
+        else:
+            text_to_show = error_list[0]
+        return text_to_show

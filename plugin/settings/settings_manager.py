@@ -7,8 +7,8 @@ import sublime
 import logging
 import copy
 
-from ..tools import PKG_NAME
-from ..tools import SublBridge
+from ..utils.tools import PKG_NAME
+from ..utils.subl_bridge import SublBridge
 
 from .settings_storage import SettingsStorage
 

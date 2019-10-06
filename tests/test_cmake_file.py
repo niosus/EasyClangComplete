@@ -8,7 +8,7 @@ from EasyClangComplete.plugin.flags_sources import cmake_file
 from EasyClangComplete.plugin.flags_sources import compilation_db
 from EasyClangComplete.plugin.utils import flag
 from EasyClangComplete.plugin.utils import search_scope
-from EasyClangComplete.plugin import tools
+from EasyClangComplete.plugin.utils import tools
 
 imp.reload(cmake_file)
 imp.reload(compilation_db)

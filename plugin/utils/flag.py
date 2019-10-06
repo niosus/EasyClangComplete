@@ -1,6 +1,6 @@
 """Wraps a flag class."""
 import logging
-from ..tools import File
+from .file import File
 
 
 log = logging.getLogger("ECC")
@@ -112,6 +112,21 @@ class Flag:
                 .from_unparsed_string(entry)\
                 .build_with_expansion(current_folder)
         return flags
+
+        @staticmethod
+        def find_flag_idx(flags, prefix):
+            """Find index of flag with given prefix in list.
+
+            Args:
+            flags (str[]): A list of all flags.
+            prefix (str): A query prefix that the flag has to start with.
+
+            Returns: index of found flag or None if not found
+            """
+            for idx, flag in enumerate(flags):
+                if flag.startswith(prefix):
+                    return idx
+            return None
 
     class Builder:
         """Builder for flags providing a nicer interface."""

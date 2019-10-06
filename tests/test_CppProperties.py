@@ -4,7 +4,7 @@ from os import path, environ
 from unittest import TestCase
 
 from EasyClangComplete.plugin.flags_sources import CppProperties
-from EasyClangComplete.plugin import tools
+from EasyClangComplete.plugin.utils import tools
 from EasyClangComplete.plugin.utils import flag
 from EasyClangComplete.plugin.utils import search_scope
 

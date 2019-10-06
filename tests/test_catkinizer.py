@@ -7,12 +7,12 @@ from os import path
 
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 from EasyClangComplete.plugin.utils import catkinizer
-from EasyClangComplete.plugin import tools
-imp.reload(tools)
+from EasyClangComplete.plugin.utils import file
+imp.reload(file)
 imp.reload(catkinizer)
 
 Catkinizer = catkinizer.Catkinizer
-File = tools.File
+File = file.File
 
 
 class BaseTestCatkinizer(object):

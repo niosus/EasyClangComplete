@@ -14,16 +14,19 @@ import shutil
 
 from os import path
 
-from .plugin import tools
-from .plugin import view_config
+from .plugin.utils import tools
+from .plugin.view_config import view_config_manager
 from .plugin import flags_sources
 from .plugin.utils import singleton_thread_pool
 from .plugin.utils import thread_job
 from .plugin.utils import progress_status
 from .plugin.utils import quick_panel_handler
+from .plugin.utils import subl_bridge
+from .plugin.utils import action_request
 from .plugin.utils import module_reloader
 from .plugin.utils import singleton
 from .plugin.utils import include_parser
+from .plugin.utils import file
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 
@@ -34,19 +37,21 @@ module_reloader.ModuleReloader.reload_all(ignore_string='singleton')
 # Set some aliases for simplicity.
 SettingsManager = settings_manager.SettingsManager
 SettingsStorage = settings_storage.SettingsStorage
-ViewConfigManager = view_config.ViewConfigManager
-SublBridge = tools.SublBridge
+ViewConfigManager = view_config_manager.ViewConfigManager
+SublBridge = subl_bridge.SublBridge
 Tools = tools.Tools
+File = file.File
 MoonProgressStatus = progress_status.MoonProgressStatus
 ColorSublimeProgressStatus = progress_status.ColorSublimeProgressStatus
 NoneSublimeProgressStatus = progress_status.NoneSublimeProgressStatus
-PosStatus = tools.PosStatus
+PosStatus = subl_bridge.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = singleton.CMakeFileCache
 GenericCache = singleton.GenericCache
 ThreadPool = singleton_thread_pool.ThreadPool
 ThreadJob = thread_job.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
+ActionRequest = action_request.ActionRequest
 
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
@@ -92,7 +97,7 @@ class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
         This function shows all errors that are available from within a view.
         Note that the errors can be from different files.
         """
-        if not Tools.is_valid_view(self.view):
+        if not SublBridge.is_valid_view(self.view):
             return
         config_manager = EasyClangComplete.view_config_manager
         if not config_manager:
@@ -125,7 +130,7 @@ class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
         Navigates to delcaration of entity located by current position
         of cursor.
         """
-        if not Tools.is_valid_view(self.view):
+        if not SublBridge.is_valid_view(self.view):
             return
         config_manager = EasyClangComplete.view_config_manager
         if not config_manager:
@@ -148,7 +153,7 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
         Detects if there is a CMakeLists.txt associated to current view and
         cleans all related information in case there is one.
         """
-        if not Tools.is_valid_view(self.view):
+        if not SublBridge.is_valid_view(self.view):
             return
         import gc
         file_path = self.view.file_name()
@@ -265,7 +270,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
-        if not Tools.is_valid_view(view):
+        if not SublBridge.is_valid_view(view):
             try:
                 EasyClangComplete.thread_pool.progress_status.erase_status()
             except AttributeError as e:
@@ -273,8 +278,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return
 
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
-        if (not Tools.has_valid_syntax(view, settings)) \
-                or Tools.is_ignored(view.file_name(), settings.ignore_list):
+        if (not SublBridge.has_valid_syntax(view, settings)) \
+                or File.is_ignored(
+                    view.file_name(), settings.ignore_list):
             try:
                 EasyClangComplete.thread_pool.progress_status.erase_status()
             except AttributeError as e:
@@ -296,12 +302,12 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        if not Tools.is_valid_view(view):
+        if not SublBridge.is_valid_view(view):
             return
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
-        if not Tools.has_valid_syntax(view, settings):
+        if not SublBridge.has_valid_syntax(view, settings):
             return
-        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+        if File.is_ignored(view.file_name(), settings.ignore_list):
             return
         (row, _) = SublBridge.cursor_pos(view)
         view_config = EasyClangComplete.view_config_manager.get_from_cache(
@@ -318,7 +324,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Args:
             view (sublime.View): current view
         """
-        if Tools.is_valid_view(view):
+        if SublBridge.is_valid_view(view):
             log.debug("on_modified_async view id %s", view.buffer_id())
             view_config = EasyClangComplete.view_config_manager.get_from_cache(
                 view)
@@ -338,7 +344,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # disable on_activated_async when running tests
         if view.settings().get("disable_easy_clang_complete"):
             return
-        if not Tools.is_valid_view(view):
+        if not SublBridge.is_valid_view(view):
             return
         if view.file_name().endswith('.sublime-project'):
             if not EasyClangComplete.settings_manager:
@@ -347,9 +353,9 @@ class EasyClangComplete(sublime_plugin.EventListener):
             log.debug("Project file changed. Reloading settings.")
             EasyClangComplete.settings_manager.on_settings_changed()
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
-        if not Tools.has_valid_syntax(view, settings):
+        if not SublBridge.has_valid_syntax(view, settings):
             return
-        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+        if File.is_ignored(view.file_name(), settings.ignore_list):
             return
         log.debug("saving view: %s", view.buffer_id())
         job = ThreadJob(
@@ -368,7 +374,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
             view (sublime.View): current view
 
         """
-        if not Tools.is_valid_view(view):
+        if not SublBridge.is_valid_view(view):
             # View is invalid, so just ignore it.
             return
         if not EasyClangComplete.settings_manager.has_settings_for_view(view):
@@ -493,16 +499,16 @@ class EasyClangComplete(sublime_plugin.EventListener):
         Triggers showing popup with additional information about about
         element at position.
         """
-        if not Tools.is_valid_view(view):
+        if not SublBridge.is_valid_view(view):
             return
 
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
-        if not Tools.has_valid_syntax(view, settings):
+        if not SublBridge.has_valid_syntax(view, settings):
             return
         if not settings.show_type_info:
             return
 
-        tooltip_request = tools.ActionRequest(view, position)
+        tooltip_request = ActionRequest(view, position)
         EasyClangComplete.current_job_id = tooltip_request.get_identifier()
 
         job = ThreadJob(
@@ -524,27 +530,27 @@ class EasyClangComplete(sublime_plugin.EventListener):
             sublime.Completions: completions with a flag.
 
         """
-        if not Tools.is_valid_view(view):
+        if not SublBridge.is_valid_view(view):
             log.debug("not a valid view")
-            return Tools.SHOW_DEFAULT_COMPLETIONS
+            return SublBridge.SHOW_DEFAULT_COMPLETIONS
 
         # get settings for this view
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
 
-        if not Tools.has_valid_syntax(view, settings):
+        if not SublBridge.has_valid_syntax(view, settings):
             log.debug("we don't work with this syntax")
-            return Tools.SHOW_DEFAULT_COMPLETIONS
+            return SublBridge.SHOW_DEFAULT_COMPLETIONS
 
-        if Tools.is_ignored(view.file_name(), settings.ignore_list):
+        if File.is_ignored(view.file_name(), settings.ignore_list):
             log.debug("This file matches 'ignore_list' setting. Ignoring.")
-            return Tools.SHOW_DEFAULT_COMPLETIONS
+            return SublBridge.SHOW_DEFAULT_COMPLETIONS
 
         log.debug("on_query_completions view id %s", view.buffer_id())
         log.debug("prefix: %s, locations: %s" % (prefix, locations))
         trigger_pos = locations[0] - len(prefix)
-        completion_request = tools.ActionRequest(view, trigger_pos)
+        completion_request = ActionRequest(view, trigger_pos)
         current_pos_id = completion_request.get_identifier()
-        pos_status = Tools.get_pos_status(trigger_pos, view, settings)
+        pos_status = SublBridge.get_pos_status(trigger_pos, view, settings)
         log.debug("this position has identifier: '%s'", current_pos_id)
 
         current_job_id = EasyClangComplete.current_job_id
@@ -559,15 +565,15 @@ class EasyClangComplete(sublime_plugin.EventListener):
             # we are at a wrong trigger, remove all completions from the list
             log.debug("wrong trigger")
             log.debug("hiding default completions")
-            return Tools.HIDE_DEFAULT_COMPLETIONS
+            return SublBridge.HIDE_DEFAULT_COMPLETIONS
         if pos_status == PosStatus.COMPLETION_NOT_NEEDED:
             log.debug("completion not needed")
             # show default completions for now if allowed
             if settings.hide_default_completions:
                 log.debug("hiding default completions")
-                return Tools.HIDE_DEFAULT_COMPLETIONS
+                return SublBridge.HIDE_DEFAULT_COMPLETIONS
             log.debug("showing default completions")
-            return Tools.SHOW_DEFAULT_COMPLETIONS
+            return SublBridge.SHOW_DEFAULT_COMPLETIONS
 
         EasyClangComplete.current_job_id = current_pos_id
         log.debug("starting async auto_complete with id: %s",
@@ -602,6 +608,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
         # show default completions for now if allowed
         if settings.hide_default_completions:
             log.debug("hiding default completions")
-            return Tools.HIDE_DEFAULT_COMPLETIONS
+            return SublBridge.HIDE_DEFAULT_COMPLETIONS
         log.debug("showing default completions")
-        return Tools.SHOW_DEFAULT_COMPLETIONS
+        return SublBridge.SHOW_DEFAULT_COMPLETIONS

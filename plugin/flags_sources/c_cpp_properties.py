@@ -6,7 +6,7 @@ Attributes:
     log (logging.Log): Current logger.
 """
 from .flags_source import FlagsSource
-from ..tools import File
+from ..utils.file import File
 from ..utils.singleton import CCppPropertiesCache
 from ..utils.flag import Flag
 

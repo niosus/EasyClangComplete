@@ -4,7 +4,7 @@ Attributes:
     log (logging.Logger): current logger.
 """
 from .flags_source import FlagsSource
-from ..tools import File
+from ..utils.file import File
 from ..utils.unique_list import UniqueList
 from ..utils.singleton import ComplationDbCache
 from ..utils.flag import Flag
