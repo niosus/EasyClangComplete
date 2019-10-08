@@ -7,6 +7,7 @@ from .flags_source import FlagsSource
 from .compilation_db import CompilationDb
 from ..utils.file import File
 from ..utils.tools import Tools
+from ..utils.subl_bridge import SublBridge
 from ..utils.singleton import CMakeFileCache
 from ..utils.catkinizer import Catkinizer
 from ..utils.search_scope import TreeSearchScope
@@ -200,8 +201,8 @@ class CMakeFile(FlagsSource):
 
         # If target compilers are set, create a toolchain file to force
         # cmake using them:
-        c_compiler = target_compilers.get(Tools.LANG_C_TAG, None)
-        cpp_compiler = target_compilers.get(Tools.LANG_CPP_TAG, None)
+        c_compiler = target_compilers.get(SublBridge.LANG_C_TAG, None)
+        cpp_compiler = target_compilers.get(SublBridge.LANG_CPP_TAG, None)
         # Note: CMake does not let us explicitly set Objective-C/C++ compilers.
         #       Hence, we only set ones for C/C++ and let it derive the rest.
         if c_compiler is not None or cpp_compiler is not None:
