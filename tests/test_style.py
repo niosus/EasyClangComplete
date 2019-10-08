@@ -2,7 +2,7 @@
 from unittest import TestCase
 from os import path
 
-from EasyClangComplete.plugin.tools import Tools
+from EasyClangComplete.plugin.utils.tools import Tools
 
 PEP_257_IGNORE = [
     "D209",

@@ -151,7 +151,7 @@ class CMakeFile(FlagsSource):
         """
         unique_proj_str = Tools.get_unique_str(cmake_path)
         tempdir = path.join(
-            Tools.get_temp_dir(), 'cmake_builds', unique_proj_str)
+            File.get_temp_dir(), 'cmake_builds', unique_proj_str)
         return tempdir
 
     @staticmethod
