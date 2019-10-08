@@ -1,0 +1,1 @@
+"""Handle different flags sources."""
