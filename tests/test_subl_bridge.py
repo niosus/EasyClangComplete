@@ -71,7 +71,9 @@ class test_tools_command(GuiTestWrapper):
 
     def test_wrong_triggers(self):
         """Test that we don't complete on numbers and wrong triggers."""
-        self.set_up_view(path.join('test_files', 'test_wrong_triggers.cpp'))
+        self.set_up_view(path.join(path.dirname(__file__),
+                                   'test_files',
+                                   'test_wrong_triggers.cpp'))
         # Load the completions.
         manager = SettingsManager()
         settings = manager.user_settings()
