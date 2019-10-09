@@ -42,7 +42,8 @@ class SettingsStorage:
                     "compile_commands.json",
                     "CppProperties.json",
                     "c_cpp_properties.json",
-                    ".clang_complete"]
+                    ".clang_complete",
+                    ".clang-complete"]
 
     SEARCH_IN_TAG = "search_in"
     PREFIX_PATHS_TAG = "prefix_paths"
