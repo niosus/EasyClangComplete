@@ -57,6 +57,7 @@
     {"file": "CppProperties.json"},
     {"file": "c_cpp_properties.json"},
     {"file": ".clang_complete"},
+    {"file": ".clang-complete"},
   ],
 
   // When getting flags from a compile_commands.json file defer parsing these
