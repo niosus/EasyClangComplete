@@ -302,6 +302,8 @@ class SettingsStorage:
 
     def __update_ignore_list(self):
         """Populate variables inside of the ignore list."""
+        from os import path
+        import sublime
         if not self.ignore_list:
             log.critical(" Cannot update paths of ignore list.")
             return
