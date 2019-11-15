@@ -312,8 +312,8 @@ class SettingsStorage:
             expanded_path = path.expandvars(ignore_path)
             expanded_path = sublime.expand_variables(
                 expanded_path, self._wildcard_values)
-            result.append( path.expanduser(expanded_path) )
-        self.ignore_list = result;
+            result.append(path.expanduser(expanded_path))
+        self.ignore_list = result
 
     def __replace_wildcard_if_needed(self, query):
         if isinstance(query, str):
