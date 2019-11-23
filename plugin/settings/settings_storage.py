@@ -154,6 +154,7 @@ class SettingsStorage:
             self.__populate_common_flags()
             self.__populate_flags_source_paths()
             self.__update_ignore_list()
+            self.__update_header_to_source_mapping()
             self.libclang_path = self.__replace_wildcard_if_needed(
                 self.libclang_path)[0]
             self.clang_binary = self.__replace_wildcard_if_needed(
@@ -307,6 +308,15 @@ class SettingsStorage:
             return
         self.ignore_list = self.__replace_wildcard_if_needed(
             query=self.ignore_list,
+            expand_globbing=False)
+
+    def __update_header_to_source_mapping(self):
+        """Populate variables inside of the header_to_source_mapping list."""
+        if not self.header_to_source_mapping:
+            log.critical("Cannot update paths of header_to_source_mapping.")
+            return
+        self.header_to_source_mapping = self.__replace_wildcard_if_needed(
+            query=self.header_to_source_mapping,
             expand_globbing=False)
 
     def __replace_wildcard_if_needed(self, query, expand_globbing=True):
