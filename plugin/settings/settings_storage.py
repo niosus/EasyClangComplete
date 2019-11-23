@@ -305,9 +305,11 @@ class SettingsStorage:
         if not self.ignore_list:
             log.critical("Cannot update paths of ignore list.")
             return
-        self.ignore_list = self.__replace_wildcard_if_needed(self.ignore_list)
+        self.ignore_list = self.__replace_wildcard_if_needed(
+            query=self.ignore_list,
+            expand_globbing=False)
 
-    def __replace_wildcard_if_needed(self, query):
+    def __replace_wildcard_if_needed(self, query, expand_globbing=True):
         if isinstance(query, str):
             return self.__replace_wildcard_if_needed([query])
         if not isinstance(query, list):
@@ -316,7 +318,7 @@ class SettingsStorage:
         for query_path in query:
             result += File.expand_all(input_path=query_path,
                                       wildcard_values=self._wildcard_values,
-                                      expand_globbing=False)
+                                      expand_globbing=expand_globbing)
         return result
 
     def __update_wildcard_values(self, view):
