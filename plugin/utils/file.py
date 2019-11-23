@@ -143,7 +143,10 @@ class File:
         return normpath
 
     @staticmethod
-    def expand_all(input_path, wildcard_values={}, current_folder=''):
+    def expand_all(input_path,
+                   wildcard_values={},
+                   current_folder='',
+                   expand_globbing=True):
         """Expand everything in this path.
 
         This returns a list of canonical paths.
@@ -154,8 +157,11 @@ class File:
         expanded_path = File.canonical_path(expanded_path, current_folder)
         if not expanded_path:
             return []
-        from glob import glob
-        all_paths = glob(expanded_path)
+        if expand_globbing:
+            from glob import glob
+            all_paths = glob(expanded_path)
+        else:
+            all_paths = [expanded_path]
         if len(all_paths) > 0 and all_paths[0] != input_path:
             log.debug("Populated '%s' to '%s'", input_path, all_paths)
             return all_paths

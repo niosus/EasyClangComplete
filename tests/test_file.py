@@ -112,4 +112,22 @@ class test_file(TestCase):
         self.assertTrue(File.is_ignored('/tmp/hello', ['/tmp*']))
         self.assertTrue(File.is_ignored('/tmp/hello', ['', '/tmp*']))
         self.assertTrue(File.is_ignored('/tmp/hello', ['', '/tmp/hell*']))
+        self.assertTrue(File.is_ignored('/tmp/hello/world', ['/tmp/*']))
+
         self.assertFalse(File.is_ignored('/tmp/hello', ['/tmp/c*']))
+
+    def test_expand_all(self):
+        """Test the globbing and wildcard expansion."""
+        current_dir_glob = path.join(path.dirname(__file__), '*')
+        result = File.expand_all(current_dir_glob)
+        self.assertIn(__file__, result)
+
+        result = File.expand_all(current_dir_glob, expand_globbing=False)
+        self.assertEquals(len(result), 1)
+        self.assertIn(current_dir_glob, result)
+
+        path_with_wildcard = "hello$world"
+        wildcards = {"world": "BLAH"}
+        result = File.expand_all(path_with_wildcard, wildcard_values=wildcards)
+        self.assertEquals(len(result), 1)
+        self.assertIn("helloBLAH", result)

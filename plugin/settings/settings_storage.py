@@ -303,7 +303,7 @@ class SettingsStorage:
     def __update_ignore_list(self):
         """Populate variables inside of the ignore list."""
         if not self.ignore_list:
-            log.critical(" Cannot update paths of ignore list.")
+            log.critical("Cannot update paths of ignore list.")
             return
         self.ignore_list = self.__replace_wildcard_if_needed(self.ignore_list)
 
@@ -314,7 +314,9 @@ class SettingsStorage:
             log.critical("We can only update wildcards in a list!")
         result = []
         for query_path in query:
-            result += File.expand_all(query_path, self._wildcard_values)
+            result += File.expand_all(input_path=query_path,
+                                      wildcard_values=self._wildcard_values,
+                                      expand_globbing=False)
         return result
 
     def __update_wildcard_values(self, view):
