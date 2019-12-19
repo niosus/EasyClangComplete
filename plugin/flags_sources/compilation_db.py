@@ -200,9 +200,13 @@ class CompilationDb(FlagsSource):
                     skip_next = True
 
                 continue
-            if i == len(argument_list) - 1:
-                # ignore the last element as it is a file to compile, something
-                # like 'test.cpp'
+            if argument.endswith('.c'):
+                continue
+            if argument.endswith('.cpp'):
+                continue
+            if argument.endswith('.m'):
+                continue
+            if argument.endswith('.mm'):
                 continue
             if argument == '-c':
                 # ignore -c too
