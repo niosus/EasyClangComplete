@@ -25,4 +25,8 @@
         "caption": "EasyClangComplete: Show popup info",
         "command": "ecc_show_popup_info"
     },
+    {
+        "caption": "EasyClangComplete: Build Xcode command list",
+        "command": "ecc_generate_xcode_commands"
+    }
 ]

@@ -69,6 +69,17 @@ class Tools:
         return output_text
 
     @staticmethod
+    def run_command_with_logging(command, cwd=path.curdir):
+        proc = subprocess.Popen([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
+        while proc.poll() is None:
+            try:
+                output = proc.stdout.readline().decode('UTF-8')
+                print(output, end='')
+            except:
+                pass
+        return proc.returncode
+
+    @staticmethod
     def get_unique_str(init_string):
         """Generate md5 unique sting hash given init_string."""
         import hashlib

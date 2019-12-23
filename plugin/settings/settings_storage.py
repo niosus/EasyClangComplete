@@ -116,6 +116,8 @@ class SettingsStorage:
         "use_libclang_caching",
         "valid_lang_syntaxes",
         "verbose",
+        "xcode_project",
+        "xcode_scheme"
     ]
 
     def __init__(self, settings_handle):

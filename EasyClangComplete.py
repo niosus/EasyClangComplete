@@ -183,6 +183,44 @@ class EccShowPopupInfoCommand(sublime_plugin.TextCommand):
         EasyClangComplete.begin_show_info_job(self.view, position)
 
 
+class EccGenerateXcodeCommandsCommand(sublime_plugin.TextCommand):
+    """Command that generates compile_commands.json using xcodebuild and xcpretty"""
+
+    def run(self, edit):
+        settings = EasyClangComplete.settings_manager.settings_for_view(self.view)
+        project_file = self.view.window().project_file_name()
+        if settings.xcode_project and project_file:
+            project_dir = path.dirname(project_file)
+            os.chdir(project_dir)
+            print("dir:", project_dir)
+
+            def gen_func(xcode_project, xcode_scheme):
+                scheme_arg = ""
+                if xcode_scheme:
+                    scheme_arg = ' -scheme "{}"'.format(xcode_scheme)
+                command = 'xcodebuild clean -project "{}"{}'.format(xcode_project, scheme_arg)
+
+                returncode = Tools.run_command_with_logging(command, cwd=project_dir)
+                if returncode != 0:
+                    print("Xcode clean error:", returncode)
+                    return
+
+                command = 'xcodebuild -project "{}"{} | xcpretty -r json-compilation-database -o compile_commands.json'.format(xcode_project, scheme_arg)
+                Tools.run_command_with_logging(command, cwd=project_dir)
+
+            def gen_finished(arg):
+                print("xcodebuild finished")
+
+            EasyClangComplete.thread_pool.progress_status.showing = True
+
+            job = ThreadJob(
+                name="GenerateXcodeCommands",
+                callback=gen_finished,
+                function=gen_func,
+                args=[settings.xcode_project, settings.xcode_scheme])
+            EasyClangComplete.thread_pool.new_job(job)
+
+
 class EasyClangComplete(sublime_plugin.EventListener):
     """Base class for this plugin.
 
