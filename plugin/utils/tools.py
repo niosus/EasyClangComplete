@@ -1,6 +1,7 @@
 """Collection of various tools."""
 from os import path
 from os import environ
+import sys
 
 import sublime
 import logging
@@ -74,7 +75,7 @@ class Tools:
         while proc.poll() is None:
             try:
                 output = proc.stdout.readline().decode('UTF-8')
-                print(output, end='')
+                sys.stdout.write(output)
             except:
                 pass
         return proc.returncode

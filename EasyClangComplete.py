@@ -191,8 +191,6 @@ class EccGenerateXcodeCommandsCommand(sublime_plugin.TextCommand):
         project_file = self.view.window().project_file_name()
         if settings.xcode_project and project_file:
             project_dir = path.dirname(project_file)
-            os.chdir(project_dir)
-            print("dir:", project_dir)
 
             def gen_func(xcode_project, xcode_scheme):
                 scheme_arg = ""
