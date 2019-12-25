@@ -229,4 +229,7 @@
 
   // If true, on Windows, the paths will have a '/' too.
   "force_unix_includes": true,
+  
+  "xcode_project": "",
+  "xcode_scheme": ""
 }

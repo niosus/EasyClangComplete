@@ -13,6 +13,7 @@ import logging
 import shutil
 
 from os import path
+import json
 
 from .plugin.utils import tools
 from .plugin.view_config import view_config_manager
@@ -190,13 +191,12 @@ class EccGenerateXcodeCommandsCommand(sublime_plugin.TextCommand):
         settings = EasyClangComplete.settings_manager.settings_for_view(self.view)
         project_file = self.view.window().project_file_name()
         if settings.xcode_project and project_file:
-            project_dir = path.dirname(project_file)
-
             def gen_func(xcode_project, xcode_scheme):
                 scheme_arg = ""
                 if xcode_scheme:
                     scheme_arg = ' -scheme "{}"'.format(xcode_scheme)
                 command = 'xcodebuild clean -project "{}"{}'.format(xcode_project, scheme_arg)
+                project_dir = path.dirname(xcode_project)
 
                 returncode = Tools.run_command_with_logging(command, cwd=project_dir)
                 if returncode != 0:
@@ -204,7 +204,18 @@ class EccGenerateXcodeCommandsCommand(sublime_plugin.TextCommand):
                     return
 
                 command = 'xcodebuild -project "{}"{} | xcpretty -r json-compilation-database -o compile_commands.json'.format(xcode_project, scheme_arg)
-                Tools.run_command_with_logging(command, cwd=project_dir)
+                returncode = Tools.run_command_with_logging(command, cwd=project_dir)
+                if returncode != 0:
+                    print("Xcode build errpr:", returncode)
+                    return
+
+                commands_path = path.join(project_dir, "compile_commands.json")
+                with open(commands_path, "r") as read_file:
+                    db = json.load(read_file)
+                    for entry in db:
+                        entry["directory"] = project_dir
+                with open(commands_path, "w") as write_file:
+                    json.dump(db, write_file)
 
             def gen_finished(arg):
                 print("xcodebuild finished")
