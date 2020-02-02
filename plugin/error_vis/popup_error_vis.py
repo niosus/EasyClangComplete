@@ -50,8 +50,10 @@ class PopupErrorVis:
             self.gutter_mark_warning = PATH_TO_ICON.format(
                 icon="warning_mono.png")
         elif gutter_style == SettingsStorage.GUTTER_DOT_STYLE:
-            self.gutter_mark_error = PATH_TO_ICON.format(icon="dot.png")
-            self.gutter_mark_warning = PATH_TO_ICON.format(icon="dot.png")
+            self.gutter_mark_error = PATH_TO_ICON.format(
+                icon="error_dot.png")
+            self.gutter_mark_warning = PATH_TO_ICON.format(
+                icon="warning_dot.png")
         else:
             log.error("Unknown option for gutter_style: %s", gutter_style)
             self.gutter_mark_error = ""

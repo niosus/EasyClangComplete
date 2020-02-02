@@ -198,12 +198,12 @@ When this option is `true` the errors will be highlighted upon every file save.
 
 ### **`gutter_style`**
 
-Defines the style of the gutter icon shown on the sidebar.
+Defines the style of the gutter icon for errors and warnings shown on the sidebar.
 
 #### Possible values
-- ![image](img/error_color.png): `"color"` <small>default</small>
-- ![image](img/error_mono.png): `"mono"`
-- ![image](img/error_dot.png): `"dot"`
+- ![image](img/error.png)![image](img/warning.png): `"color"` <small>default</small>
+- ![image](img/error_mono.png)![image](img/warning_mono.png): `"mono"`
+- ![image](img/error_dot.png)![image](img/warning_dot.png): `"dot"`
 - `"none"`
 
 !!! example "Default value"
