@@ -120,7 +120,7 @@
 
   // Use default -D definitions that we can get by running the command:
   // `clang_binary -c /tmp/test.cc -dM -E`
-  "use_default_definitions": true,
+  "use_default_definitions": false,
 
   // Make the plugin verbose:
   "verbose" : false,
