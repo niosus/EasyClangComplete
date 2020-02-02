@@ -22,8 +22,10 @@ class PopupErrorVis:
     Attributes:
         err_regions (dict): dictionary of error regions for view ids
     """
-    _TAG = "easy_clang_complete_errors"
-    _ERROR_SCOPE = "invalid.illegal"
+    _TAG_ERRORS = "easy_clang_complete_errors"
+    _TAG_WARNINGS = "easy_clang_complete_warnings"
+    _ERROR_SCOPE = "undefined"
+    _WARNING_SCOPE = "undefined"
 
     def __init__(self, settings):
         """Initialize error visualization.
@@ -37,13 +39,19 @@ class PopupErrorVis:
 
         self.err_regions = {}
         if gutter_style == SettingsStorage.GUTTER_COLOR_STYLE:
-            self.gutter_mark = PATH_TO_ICON.format(icon="error_color.png")
+            self.gutter_mark_error = PATH_TO_ICON.format(
+                icon="error.png")
+            self.gutter_mark_warning = PATH_TO_ICON.format(
+                icon="warning.png")
         elif gutter_style == SettingsStorage.GUTTER_MONO_STYLE:
-            self.gutter_mark = PATH_TO_ICON.format(icon="error_mono.png")
+            self.gutter_mark_error = PATH_TO_ICON.format(
+                icon="error_mono.png")
+            self.gutter_mark_warning = PATH_TO_ICON.format(
+                icon="warning_mono.png")
         elif gutter_style == SettingsStorage.GUTTER_DOT_STYLE:
-            self.gutter_mark = PATH_TO_ICON.format(icon="error_dot.png")
+            self.gutter_mark_error = PATH_TO_ICON.format(icon="dot.png")
         else:
-            self.gutter_mark = ""
+            self.gutter_mark_error = ""
 
         if mark_style == SettingsStorage.MARK_STYLE_OUTLINE:
             self.draw_flags = sublime.DRAW_EMPTY | sublime.DRAW_NO_FILL
@@ -73,12 +81,12 @@ class PopupErrorVis:
         """
         view_id = view.buffer_id()
         if view_id == 0:
-            log.error("trying to show error on invalid view. Abort.")
+            log.error("Trying to show error on invalid view. Abort.")
             return
-        log.debug("generating error regions for view %s", view_id)
+        log.debug("Generating error regions for view %s", view_id)
         # first clear old regions
         if view_id in self.err_regions:
-            log.debug("removing old error regions")
+            log.debug("Removing old error regions")
             del self.err_regions[view_id]
         # create an empty region dict for view id
         self.err_regions[view_id] = {}
@@ -90,8 +98,8 @@ class PopupErrorVis:
                 self.add_error(view, error)
             log.debug("%s error regions ready", len(self.err_regions))
         except (AttributeError, KeyError, TypeError) as e:
-            log.error("view was closed -> cannot generate error vis in it")
-            log.info("original exception: '%s'", repr(e))
+            log.error("View was closed -> cannot generate error vis in it")
+            log.info("Original exception: '%s'", repr(e))
 
     def add_error(self, view, error_dict):
         """Put new compile error in the dictionary of errors.
@@ -100,7 +108,7 @@ class PopupErrorVis:
             view (sublime.View): current view
             error_dict (dict): current error dict {row, col, file, region}
         """
-        logging.debug(" adding error %s", error_dict)
+        logging.debug("Adding error %s", error_dict)
         error_source_file = path.basename(error_dict['file'])
         if error_source_file == path.basename(view.file_name()):
             row = int(error_dict['row'])
@@ -122,14 +130,22 @@ class PopupErrorVis:
             # view has no errors for it
             return
         current_error_dict = self.err_regions[view.buffer_id()]
-        regions = PopupErrorVis._as_region_list(current_error_dict)
-        log.debug("showing error regions: %s", regions)
+        error_regions, warning_regions = PopupErrorVis._as_region_list(
+            current_error_dict)
+        log.debug("Showing error regions: %s", error_regions)
+        log.debug("Showing warning regions: %s", warning_regions)
         view.add_regions(
-            PopupErrorVis._TAG,
-            regions,
-            PopupErrorVis._ERROR_SCOPE,
-            self.gutter_mark,
-            self.draw_flags)
+            key=PopupErrorVis._TAG_ERRORS,
+            regions=error_regions,
+            scope=PopupErrorVis._ERROR_SCOPE,
+            icon=self.gutter_mark_error,
+            flags=self.draw_flags)
+        view.add_regions(
+            key=PopupErrorVis._TAG_WARNINGS,
+            regions=warning_regions,
+            scope=PopupErrorVis._WARNING_SCOPE,
+            icon=self.gutter_mark_warning,
+            flags=self.draw_flags)
 
     def erase_regions(self, view):
         """Erase error regions for view.
@@ -140,8 +156,9 @@ class PopupErrorVis:
         if view.buffer_id() not in self.err_regions:
             # view has no errors for it
             return
-        log.debug("erasing error regions for view %s", view.buffer_id())
-        view.erase_regions(PopupErrorVis._TAG)
+        log.debug("Erasing error regions for view %s", view.buffer_id())
+        view.erase_regions(PopupErrorVis._TAG_ERRORS)
+        view.erase_regions(PopupErrorVis._TAG_WARNINGS)
 
     def show_popup_if_needed(self, view, row):
         """Show a popup if it is needed in this row.
@@ -164,7 +181,7 @@ class PopupErrorVis:
                 popup = Popup.warning(text_to_show, self.settings)
             popup.show(view)
         else:
-            log.debug("no error regions for row: %s", row)
+            log.debug("No error regions for row: %s", row)
 
     def clear(self, view):
         """Clear errors from dict for view.
@@ -206,11 +223,18 @@ class PopupErrorVis:
         Returns:
             list(Region): list of regions to show on sublime view
         """
-        region_list = []
+        errors = []
+        warnings = []
         for errors_list in err_regions_dict.values():
-            for error in errors_list:
-                region_list.append(error['region'])
-        return region_list
+            for entry in errors_list:
+                severity = 3
+                if LibClangCompilerVariant.SEVERITY_TAG in entry:
+                    severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
+                if severity < 3:
+                    warnings.append(entry['region'])
+                else:
+                    errors.append(entry['region'])
+        return errors, warnings
 
     @staticmethod
     def __to_md(error_list):
