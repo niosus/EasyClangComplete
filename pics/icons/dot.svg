@@ -14,11 +14,11 @@
    viewBox="0 0 8.4666665 8.4666669"
    version="1.1"
    id="svg8"
-   sodipodi:docname="warning.svg"
-   inkscape:export-filename="/home/igor/.config/sublime-text-3/Packages/EasyClangComplete/pics/icons/warning.png"
-   inkscape:export-xdpi="96.000008"
-   inkscape:export-ydpi="96.000008"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="dot.svg"
+   inkscape:export-filename="/home/igor/.config/sublime-text-3/Packages/EasyClangComplete/pics/icons/error.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="15.839192"
-     inkscape:cx="-4.4614346"
-     inkscape:cy="19.182875"
+     inkscape:cx="-8.8492845"
+     inkscape:cy="16.657494"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -40,20 +40,7 @@
      inkscape:window-height="1024"
      inkscape:window-x="55"
      inkscape:window-y="30"
-     inkscape:window-maximized="1"
-     showguides="true"
-     inkscape:guide-bbox="true">
-    <sodipodi:guide
-       position="4.1760863,7.7341122"
-       orientation="0,1"
-       id="guide871"
-       inkscape:locked="false" />
-    <sodipodi:guide
-       position="6.8654859,0.71828688"
-       orientation="0,1"
-       id="guide873"
-       inkscape:locked="false" />
-  </sodipodi:namedview>
+     inkscape:window-maximized="1" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -62,7 +49,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -71,21 +58,21 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-288.53332)">
-    <path
-       sodipodi:type="star"
-       style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#ffc11b;stroke-width:0.80855542;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
-       id="path875"
-       sodipodi:sides="3"
-       sodipodi:cx="4.2333333"
-       sodipodi:cy="293.57794"
-       sodipodi:r1="3.2452741"
-       sodipodi:r2="1.6226372"
-       sodipodi:arg1="0.52359878"
-       sodipodi:arg2="1.5707963"
-       inkscape:flatsided="true"
-       inkscape:rounded="0"
-       inkscape:randomized="0"
-       d="m 7.0438229,295.20058 -5.6209796,0 2.8104898,-4.86791 z"
-       inkscape:transform-center-y="-0.81131847" />
+    <g
+       id="g823"
+       transform="matrix(0.90450376,0,0,0.90450376,0.40426739,27.958115)"
+       style="stroke:#d63b00;stroke-opacity:1">
+      <circle
+         r="2.99843"
+         cy="292.76666"
+         cx="4.2333331"
+         id="path815"
+         style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#d63b00;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path819"
+         d="M 6.3062946,290.69369 2.160372,294.83961"
+         style="fill:none;fill-rule:evenodd;stroke:#d63b00;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
   </g>
 </svg>

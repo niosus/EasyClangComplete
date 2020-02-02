@@ -15,7 +15,10 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.3 (2405546, 2018-03-11)"
-   sodipodi:docname="error.svg">
+   sodipodi:docname="error.svg"
+   inkscape:export-filename="/home/igor/.config/sublime-text-3/Packages/EasyClangComplete/pics/icons/error.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -26,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="15.839192"
-     inkscape:cx="10.027941"
-     inkscape:cy="11.606731"
+     inkscape:cx="3.1147096"
+     inkscape:cy="16.657494"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -46,7 +49,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -56,18 +59,20 @@
      id="layer1"
      transform="translate(0,-288.53332)">
     <g
-       id="g823">
+       id="g823"
+       transform="matrix(0.90450376,0,0,0.90450376,0.40426739,27.958115)"
+       style="stroke:#d63b00;stroke-opacity:1">
       <circle
          r="2.99843"
          cy="292.76666"
          cx="4.2333331"
          id="path815"
-         style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
+         style="opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#d63b00;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill" />
       <path
          inkscape:connector-curvature="0"
          id="path819"
          d="M 6.3062946,290.69369 2.160372,294.83961"
-         style="fill:none;fill-rule:evenodd;stroke:#ffffff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="fill:none;fill-rule:evenodd;stroke:#d63b00;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
   </g>
 </svg>

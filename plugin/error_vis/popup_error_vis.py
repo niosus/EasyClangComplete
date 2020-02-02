@@ -26,6 +26,7 @@ class PopupErrorVis:
     _TAG_WARNINGS = "easy_clang_complete_warnings"
     _ERROR_SCOPE = "undefined"
     _WARNING_SCOPE = "undefined"
+    _MIN_ERROR_SEVERITY = 3
 
     def __init__(self, settings):
         """Initialize error visualization.
@@ -50,8 +51,11 @@ class PopupErrorVis:
                 icon="warning_mono.png")
         elif gutter_style == SettingsStorage.GUTTER_DOT_STYLE:
             self.gutter_mark_error = PATH_TO_ICON.format(icon="dot.png")
+            self.gutter_mark_warning = PATH_TO_ICON.format(icon="dot.png")
         else:
+            log.error("Unknown option for gutter_style: %s", gutter_style)
             self.gutter_mark_error = ""
+            self.gutter_mark_warning = ""
 
         if mark_style == SettingsStorage.MARK_STYLE_OUTLINE:
             self.draw_flags = sublime.DRAW_EMPTY | sublime.DRAW_NO_FILL
@@ -175,10 +179,10 @@ class PopupErrorVis:
             errors_dict = current_err_region_dict[row]
             max_severity, error_list = PopupErrorVis._as_msg_list(errors_dict)
             text_to_show = PopupErrorVis.__to_md(error_list)
-            if max_severity > 2:
-                popup = Popup.error(text_to_show, self.settings)
-            else:
+            if max_severity < PopupErrorVis._MIN_ERROR_SEVERITY:
                 popup = Popup.warning(text_to_show, self.settings)
+            else:
+                popup = Popup.error(text_to_show, self.settings)
             popup.show(view)
         else:
             log.debug("No error regions for row: %s", row)
@@ -227,10 +231,10 @@ class PopupErrorVis:
         warnings = []
         for errors_list in err_regions_dict.values():
             for entry in errors_list:
-                severity = 3
+                severity = PopupErrorVis._MIN_ERROR_SEVERITY
                 if LibClangCompilerVariant.SEVERITY_TAG in entry:
                     severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
-                if severity < 3:
+                if severity < PopupErrorVis._MIN_ERROR_SEVERITY:
                     warnings.append(entry['region'])
                 else:
                     errors.append(entry['region'])
