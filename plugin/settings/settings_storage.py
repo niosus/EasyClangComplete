@@ -155,11 +155,11 @@ class SettingsStorage:
             self.__populate_common_flags()
             self.__populate_flags_source_paths()
             if not self.__expand_setting(self.ignore_list):
-                log.critical("Cannot expand ignore list")
+                log.critical("Cannot expand ignore_list")
             if not self.__expand_setting(self.ignore_flags):
-                log.critical("Cannot expand ignore flags")
+                log.critical("Cannot expand ignore_flags")
             if not self.__expand_setting(self.header_to_source_mapping):
-                log.critical("Cannot expand header to source mapping")
+                log.critical("Cannot expand header_to_source_mapping")
             self.libclang_path = self.__replace_wildcard_if_needed(
                 self.libclang_path)[0]
             self.clang_binary = self.__replace_wildcard_if_needed(

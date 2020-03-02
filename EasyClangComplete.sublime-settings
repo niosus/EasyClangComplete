@@ -109,6 +109,14 @@
     "$project_path/some/project/path/*",
   ],
 
+  // Ignore all flags that match any of the following glob-style patterns. You
+  // can use shell-style wildcard expansion as well as sublime variables and ~
+  // for home director.
+  "ignore_flags": [
+    "some_flag_pattern*",
+    "-W_other_pattern_$project_path*",
+  ],
+
   // Use libclang.
   // If set to false will use clang_binary and parse the output of
   // `clang_binary -Xclang -code-complete-at...` instead.
