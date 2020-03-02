@@ -95,6 +95,7 @@ class SettingsStorage:
         "gutter_style",
         "header_to_source_mapping",
         "hide_default_completions",
+        "ignore_flags",
         "ignore_list",
         "lang_flags",
         "lazy_flag_parsing",
@@ -153,8 +154,12 @@ class SettingsStorage:
             # Replace wildcards in various paths.
             self.__populate_common_flags()
             self.__populate_flags_source_paths()
-            self.__update_ignore_list()
-            self.__update_header_to_source_mapping()
+            if not self.__expand_setting(self.ignore_list):
+                log.critical("Cannot expand ignore list")
+            if not self.__expand_setting(self.ignore_flags):
+                log.critical("Cannot expand ignore flags")
+            if not self.__expand_setting(self.header_to_source_mapping):
+                log.critical("Cannot expand header to source mapping")
             self.libclang_path = self.__replace_wildcard_if_needed(
                 self.libclang_path)[0]
             self.clang_binary = self.__replace_wildcard_if_needed(
@@ -301,23 +306,14 @@ class SettingsStorage:
                     current_folder=self.project_folder)
         self.common_flags = new_common_flags
 
-    def __update_ignore_list(self):
+    def __expand_setting(self, setting):
         """Populate variables inside of the ignore list."""
-        if not self.ignore_list:
-            log.critical("Cannot update paths of ignore list.")
-            return
+        if not setting:
+            return False
         self.ignore_list = self.__replace_wildcard_if_needed(
             query=self.ignore_list,
             expand_globbing=False)
-
-    def __update_header_to_source_mapping(self):
-        """Populate variables inside of the header_to_source_mapping list."""
-        if not self.header_to_source_mapping:
-            log.critical("Cannot update paths of header_to_source_mapping.")
-            return
-        self.header_to_source_mapping = self.__replace_wildcard_if_needed(
-            query=self.header_to_source_mapping,
-            expand_globbing=False)
+        return True
 
     def __replace_wildcard_if_needed(self, query, expand_globbing=True):
         if isinstance(query, str):
