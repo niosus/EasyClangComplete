@@ -290,6 +290,17 @@ Do not run the plugin for any files that match these paths. Use
     ],
     ```
 
+### **`ignore_flags`**
+Ignore all flags that match any of the following glob-style patterns. You can use `glob/fnmatch` shell-style wildcard expansion as well as sublime variables and `~` for home director.
+
+!!! example "Default value"
+    ```json
+    "ignore_flags": [
+        "some_flag_pattern*",
+        "-W_other_pattern_$project_path*",
+    ],
+    ```
+
 ### **`use_libclang`**
 
 If set to `true` will use `libclang` through python bindings. This offers much better performance generally, but can be buggy on some systems. When set to `false` will use clang_binary and parse the output of `clang -Xclang -code-complete-at <some_file>` instead.
