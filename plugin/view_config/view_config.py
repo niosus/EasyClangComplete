@@ -189,10 +189,13 @@ class ViewConfig(object):
             init_flags, lang_flags, common_flags, source_flags)
 
         flags_as_str_list = []
+        log.debug("Appending and filtering flags with ignore patterns: %s",
+                  settings.ignore_flags)
         for flag in flags:
             ignore_this_flag = False
             for pattern in settings.ignore_flags:
                 if fnmatch.fnmatch(flag.body, pattern):
+                    log.debug("Ignoring flag: %s", flag)
                     ignore_this_flag = True
                     break
             if ignore_this_flag:
