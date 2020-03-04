@@ -340,8 +340,7 @@ class SettingsStorage:
 
         # We need to expand clang binary path *before* we set all wildcards.
         self.clang_binary = self.__replace_wildcard_if_needed(
-            input_path=self.clang_binary,
-            wildcard_values=self._wildcard_values,
+            query=self.clang_binary,
             expand_globbing=False)[0]
         # get clang version string
         version_str = ClangUtils.get_clang_version_str(self.clang_binary)
