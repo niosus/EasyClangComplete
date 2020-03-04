@@ -355,6 +355,11 @@ Output lots of additional information in the console. Useful for debugging. Off 
 Pick the clang binary used by the plugin. This is used to determine the
 version of the plugin and pick correct libclang bindings or for code completion when the setting [`use_libclang`](#use_libclang) is set to `false`.
 
+Note that this should either be a full (local or global) path to the binary or
+it should be available in your PATH. You can use all wildcards apart from
+`$clang_version` as it would not be available before we point to the correct
+version of the clang binary.
+
 !!! example "Default value"
     ```json
     "clang_binary" : "clang++",
