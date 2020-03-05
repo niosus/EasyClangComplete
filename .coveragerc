@@ -8,4 +8,4 @@ omit =
 ignore_errors = True
 
 [xml]
-output = .coverage
+output = .cobertura
