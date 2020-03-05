@@ -23,6 +23,7 @@ before_install:
     - curl -OL https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/travis.sh
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             pip install --upgrade pip pycodestyle pep257;
+            pip install --upgrade coverage;
             pip install --upgrade mkdocs==1.0.4 mkdocs-material;
             sudo apt-get update -yqq;
             sudo apt-get install -y clang;
@@ -36,12 +37,12 @@ script:
     - ls
     - sh travis.sh run_tests --coverage
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
-            coverage xml -o cobertura.xml;
+            coverage xml -o coverage.xml;
             mkdocs build --verbose --clean --strict;
       fi
 
 after_success:
-    - bash <(curl -Ls https://coverage.codacy.com/get.sh)
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh) -r coverage.xml
 
 deploy:
  provider: pages
