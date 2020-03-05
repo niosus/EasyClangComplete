@@ -37,12 +37,12 @@ script:
     - ls
     - sh travis.sh run_tests --coverage
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
-            coverage xml -o coverage.xml;
+            coverage xml -o cobertura.xml;
             mkdocs build --verbose --clean --strict;
       fi
 
 after_success:
-    - bash <(curl -Ls https://coverage.codacy.com/get.sh) -r coverage.xml
+    - bash <(curl -Ls https://coverage.codacy.com/get.sh)
 
 deploy:
  provider: pages
