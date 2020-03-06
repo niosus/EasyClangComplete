@@ -173,7 +173,7 @@ class Completer(BaseCompleter):
         view = completion_request.get_view()
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
-        (row, col) = SublBridge.cursor_pos(
+        pos = SublBridge.cursor_pos(
             view, completion_request.get_trigger_position())
 
         # unsaved files
@@ -206,7 +206,7 @@ class Completer(BaseCompleter):
                     include_brief_comments = False
                 complete_obj = self.tu.codeComplete(
                     file_name,
-                    row, col,
+                    pos.row, pos.col,
                     unsaved_files=unsaved_files,
                     include_macros=True,
                     include_brief_comments=include_brief_comments)
@@ -267,11 +267,12 @@ class Completer(BaseCompleter):
             if not self.tu:
                 return empty_info
             view = tooltip_request.get_view()
-            (row, col) = SublBridge.cursor_pos(
+            pos = SublBridge.cursor_pos(
                 view, tooltip_request.get_trigger_position())
 
             cursor = self.tu.cursor.from_location(
-                self.tu, self.tu.get_location(view.file_name(), (row, col)))
+                self.tu,
+                self.tu.get_location(view.file_name(), (pos.row, pos.col)))
             if not cursor:
                 return empty_info
             if cursor.kind in objc_types:

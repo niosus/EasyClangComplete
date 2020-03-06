@@ -32,7 +32,7 @@ class GuiTestWrapper(TestCase):
             self.view.window().run_command("close_file")
             self.view = None
 
-    def set_up_view(self, file_path=None):
+    def set_up_view(self, file_path=None, cursor_position=None):
         """Open the view and wait until its open.
 
         Args:
@@ -48,6 +48,11 @@ class GuiTestWrapper(TestCase):
         # Ensure it's loaded.
         while self.view.is_loading():
             time.sleep(0.1)
+
+        if cursor_position:
+            self.view.sel().clear()
+            self.view.sel().add(
+                sublime.Region(cursor_position.location(self.view)))
 
     def get_row(self, row):
         """Get text of a particular row.

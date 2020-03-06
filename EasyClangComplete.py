@@ -309,14 +309,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return
         if File.is_ignored(view.file_name(), settings.ignore_list):
             return
-        (row, _) = SublBridge.cursor_pos(view)
+        pos = SublBridge.cursor_pos(view)
         view_config = EasyClangComplete.view_config_manager.get_from_cache(
             view)
         if not view_config:
             return
         if not view_config.completer:
             return
-        view_config.completer.error_vis.show_popup_if_needed(view, row)
+        view_config.completer.error_vis.show_popup_if_needed(view, pos.row)
 
     def on_modified_async(self, view):
         """Call in a worker thread when view is modified.

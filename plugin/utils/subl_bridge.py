@@ -75,9 +75,7 @@ class SublBridge:
             # we care about the first position
             pos = pos[0].a
         (row, col) = view.rowcol(pos)
-        row += 1
-        col += 1
-        return (row, col)
+        return CursorPosition(row + 1, col + 1)
 
     @staticmethod
     def get_line(view, pos=None):
@@ -89,8 +87,8 @@ class SublBridge:
         Returns:
             str: text that the next line contains
         """
-        (row, _) = SublBridge.cursor_pos(view, pos)
-        point_on_line = view.text_point(row - 1, 0)
+        pos = SublBridge.cursor_pos(view, pos)
+        point_on_line = view.text_point(pos.row - 1, 0)
         line = view.line(point_on_line)
         return view.substr(line)
 
@@ -104,8 +102,8 @@ class SublBridge:
         Returns:
             str: text that the next line contains
         """
-        (row, _) = SublBridge.cursor_pos(view)
-        point_on_next_line = view.text_point(row, 0)
+        pos = SublBridge.cursor_pos(view)
+        point_on_next_line = view.text_point(pos.row + 1, 0)
         line = view.line(point_on_next_line)
         return view.substr(line)
 
@@ -310,3 +308,24 @@ class PosStatus:
     COMPLETION_NOT_NEEDED = 1
     WRONG_TRIGGER = 2
     COMPLETE_INCLUDES = 3
+
+
+class CursorPosition():
+    """Stores a cursor position."""
+
+    def __init__(self, row, col):
+        """Initialize from row and column as seen in file (start with 1)."""
+        self.row = row - 1
+        self.col = col - 1
+
+    def file_row(self):
+        """Get 1-based row index."""
+        return self.row + 1
+
+    def file_col(self):
+        """Get 1-based column index."""
+        return self.col + 1
+
+    def location(self, view):
+        """Return the cursor position as sublime text location."""
+        return view.text_point(self.row, self.col)

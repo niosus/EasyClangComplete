@@ -49,17 +49,17 @@ class test_tools_command(GuiTestWrapper):
         """Test cursor position."""
         self.set_up_view()
         self.set_text("hello")
-        (row, col) = SublBridge.cursor_pos(self.view)
-        self.assertEqual(row, 1)
-        self.assertEqual(col, 6)
+        pos = SublBridge.cursor_pos(self.view)
+        self.assertEqual(pos.row, 0)
+        self.assertEqual(pos.col, 5)
         self.set_text("\nworld!")
-        (row, col) = SublBridge.cursor_pos(self.view)
-        self.assertEqual(row, 2)
-        self.assertEqual(col, 7)
+        pos = SublBridge.cursor_pos(self.view)
+        self.assertEqual(pos.row, 1)
+        self.assertEqual(pos.col, 6)
         self.move(10, forward=False)
-        (row, col) = SublBridge.cursor_pos(self.view)
-        self.assertEqual(row, 1)
-        self.assertEqual(col, 3)
+        pos = SublBridge.cursor_pos(self.view)
+        self.assertEqual(pos.row, 0)
+        self.assertEqual(pos.col, 2)
 
     def test_next_line(self):
         """Test returning next line."""
