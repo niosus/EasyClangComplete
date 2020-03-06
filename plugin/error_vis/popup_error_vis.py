@@ -15,6 +15,8 @@ log = logging.getLogger("ECC")
 
 PATH_TO_ICON = "Packages/EasyClangComplete/pics/icons/{icon}"
 
+MIN_ERROR_SEVERITY = 3
+
 
 class PopupErrorVis:
     """A class for compile error visualization with popups.
@@ -22,11 +24,11 @@ class PopupErrorVis:
     Attributes:
         err_regions (dict): dictionary of error regions for view ids
     """
+
     _TAG_ERRORS = "easy_clang_complete_errors"
     _TAG_WARNINGS = "easy_clang_complete_warnings"
     _ERROR_SCOPE = "undefined"
     _WARNING_SCOPE = "undefined"
-    _MIN_ERROR_SEVERITY = 3
 
     def __init__(self, settings):
         """Initialize error visualization.
@@ -181,7 +183,7 @@ class PopupErrorVis:
             errors_dict = current_err_region_dict[row]
             max_severity, error_list = PopupErrorVis._as_msg_list(errors_dict)
             text_to_show = PopupErrorVis.__to_md(error_list)
-            if max_severity < PopupErrorVis._MIN_ERROR_SEVERITY:
+            if max_severity < MIN_ERROR_SEVERITY:
                 popup = Popup.warning(text_to_show, self.settings)
             else:
                 popup = Popup.error(text_to_show, self.settings)
@@ -233,10 +235,10 @@ class PopupErrorVis:
         warnings = []
         for errors_list in err_regions_dict.values():
             for entry in errors_list:
-                severity = PopupErrorVis._MIN_ERROR_SEVERITY
+                severity = MIN_ERROR_SEVERITY
                 if LibClangCompilerVariant.SEVERITY_TAG in entry:
                     severity = entry[LibClangCompilerVariant.SEVERITY_TAG]
-                if severity < PopupErrorVis._MIN_ERROR_SEVERITY:
+                if severity < MIN_ERROR_SEVERITY:
                     warnings.append(entry['region'])
                 else:
                     errors.append(entry['region'])
