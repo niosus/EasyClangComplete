@@ -88,7 +88,7 @@ class SublBridge:
             str: text that the next line contains
         """
         pos = SublBridge.cursor_pos(view, pos)
-        point_on_line = view.text_point(pos.row - 1, 0)
+        point_on_line = view.text_point(pos.row, 0)
         line = view.line(point_on_line)
         return view.substr(line)
 

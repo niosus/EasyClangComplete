@@ -10,6 +10,7 @@ from EasyClangComplete.plugin.settings import settings_storage
 from EasyClangComplete.plugin.error_vis import popups
 from EasyClangComplete.plugin.view_config import view_config_manager
 from EasyClangComplete.plugin.utils import action_request
+from EasyClangComplete.plugin.utils import subl_bridge
 
 from EasyClangComplete.tests import gui_test_wrapper
 
@@ -21,8 +22,10 @@ imp.reload(settings_storage)
 imp.reload(view_config_manager)
 imp.reload(popups)
 imp.reload(action_request)
+imp.reload(subl_bridge)
 
 ActionRequest = action_request.ActionRequest
+CursorPosition = subl_bridge.CursorPosition
 PopupErrorVis = popup_error_vis.PopupErrorVis
 GuiTestWrapper = gui_test_wrapper.GuiTestWrapper
 SettingsManager = settings_manager.SettingsManager
@@ -345,10 +348,12 @@ allow_code_wrap: true
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
         settings.show_index_references = False
+        pos = subl_bridge.CursorPosition(10, 15)
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(9), "  cool_class.foo(Foo(), nullptr);")
-        pos = self.view.text_point(9, 15)
-        action_request = ActionRequest(self.view, pos)
+        self.assertEqual(self.get_row(pos.row),
+                         "  cool_class.foo(Foo(), nullptr);")
+        location = pos.location(self.view)
+        action_request = ActionRequest(self.view, location)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None
         expected_info_msg = """\

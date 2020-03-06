@@ -193,7 +193,7 @@ class Completer(BaseCompleter):
             pos = SublBridge.cursor_pos(view, cursor_pos)
             complete_at_str = Completer.compl_str_mask.format(
                 complete_flag="-code-completion-at",
-                file=temp_file_name, row=pos.row, col=pos.col)
+                file=temp_file_name, row=pos.file_row(), col=pos.file_col())
             flags += ["-Xclang"] + [complete_at_str]
         else:
             log.critical(" unknown type of cmd command wanted.")

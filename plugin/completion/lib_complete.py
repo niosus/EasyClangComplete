@@ -206,7 +206,7 @@ class Completer(BaseCompleter):
                     include_brief_comments = False
                 complete_obj = self.tu.codeComplete(
                     file_name,
-                    pos.row, pos.col,
+                    pos.file_row(), pos.file_col(),
                     unsaved_files=unsaved_files,
                     include_macros=True,
                     include_brief_comments=include_brief_comments)
@@ -272,7 +272,8 @@ class Completer(BaseCompleter):
 
             cursor = self.tu.cursor.from_location(
                 self.tu,
-                self.tu.get_location(view.file_name(), (pos.row, pos.col)))
+                self.tu.get_location(
+                    view.file_name(), (pos.file_row(), pos.file_col())))
             if not cursor:
                 return empty_info
             if cursor.kind in objc_types:
