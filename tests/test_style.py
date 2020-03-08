@@ -13,8 +13,9 @@ PEP_257_IGNORE = [
     "D407"
 ]
 
-PEP257_CMD = "pep257 '{}' --match-dir='^(?!clang$).*' --ignore={}"
-PEP8_CMD = 'pycodestyle --exclude=clang --count --max-line-length=80 "{}"'
+PEP257_CMD = "pep257 '{}' --match-dir='^(?!clang|external).*' --ignore={}"
+PEP8_CMD = 'pycodestyle --exclude=clang,external,.git '\
+    '--show-source --show-pep8 --count --max-line-length=80 "{}"'
 
 PLUGIN_SOURCE_FOLDER = path.dirname(path.dirname(__file__))
 
@@ -27,21 +28,20 @@ class TestStyle(TestCase):
 
     def test_pep8(self):
         """Test conformance to pep8."""
+        self.maxDiff = None
         cmd = PEP8_CMD.format(PLUGIN_SOURCE_FOLDER)
         output = Tools.run_command(cmd, shell=True)
-        print(output)
         if LINUX_MISSING_MSG in output or WINDOWS_MISSING_MSG in output:
             print('no pep8 found in path!')
             return
-        self.assertTrue(len(output) == 0)
+        self.assertEquals(output, "")
 
     def test_pep257(self):
         """Test conformance to pep257."""
+        self.maxDiff = None
         cmd = PEP257_CMD.format(PLUGIN_SOURCE_FOLDER, ','.join(PEP_257_IGNORE))
-        print(cmd)
         output = Tools.run_command(cmd, shell=True)
-        print(output)
         if LINUX_MISSING_MSG in output or WINDOWS_MISSING_MSG in output:
             print('no pep257 found in path!')
             return
-        self.assertTrue(len(output) == 0)
+        self.assertEquals(output, "")
