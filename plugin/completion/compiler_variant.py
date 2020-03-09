@@ -29,6 +29,12 @@ class CompilerVariant(object):
         """
         raise NotImplementedError("calling abstract method")
 
+    @staticmethod
+    def _to_zero_based_index(error_dict):
+        for tag in ["row", "col"]:
+            error_dict[tag] = int(error_dict[tag]) - 1
+        return error_dict
+
 
 class ClangCompilerVariant(CompilerVariant):
     """Encapsulation of clang/clang++ specific options.
@@ -57,6 +63,7 @@ class ClangCompilerVariant(CompilerVariant):
             if not error_search:
                 continue
             error_dict = error_search.groupdict()
+            error_dict = CompilerVariant._to_zero_based_index(error_dict)
             errors.append(error_dict)
         return errors
 
@@ -112,6 +119,7 @@ class LibClangCompilerVariant(ClangCompilerVariant):
                 continue
             error_dict = pos_search.groupdict()
             error_dict.update({'error': spelling})
+            error_dict = CompilerVariant._to_zero_based_index(error_dict)
             error_dict[LibClangCompilerVariant.SEVERITY_TAG] = severity
             errors.append(error_dict)
         return errors
