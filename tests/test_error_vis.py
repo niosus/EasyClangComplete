@@ -104,12 +104,12 @@ class TestErrorVis:
         v_id = self.view.buffer_id()
         self.assertTrue(v_id in err_dict)
         self.assertEqual(len(err_dict[v_id]), 1)
-        self.assertTrue(10 in err_dict[v_id])
-        self.assertEqual(len(err_dict[v_id][10]), 1)
-        self.assertEqual(err_dict[v_id][10][0]['row'], '10')
-        self.assertEqual(err_dict[v_id][10][0]['col'], '3')
+        self.assertTrue(9 in err_dict[v_id])
+        self.assertEqual(len(err_dict[v_id][9]), 1)
+        self.assertEqual(err_dict[v_id][9][0]['row'], 9)
+        self.assertEqual(err_dict[v_id][9][0]['col'], 2)
         expected_error = "expected unqualified-id"
-        self.assertTrue(expected_error in err_dict[v_id][10][0]['error'])
+        self.assertTrue(expected_error in err_dict[v_id][9][0]['error'])
 
         # not clear errors:
         completer.error_vis.clear(self.view)
