@@ -1,0 +1,6 @@
+sudo: false  # Not needing sudo enables container builds.
+dist: xenial
+
+script:
+  - tests/run_tests.sh
+  - tests/check_migration.sh
