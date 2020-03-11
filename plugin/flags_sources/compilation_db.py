@@ -136,7 +136,6 @@ class CompilationDb(FlagsSource):
             # TODO(igor): maybe show message to the user instead here
             log.critical("Compilation database has unsupported format")
             return None
-        argument_list = CompilationDb.filter_bad_arguments(argument_list)
         return Flag.tokenize_list(argument_list, base_path)
 
     def _parse_database(self, current_db_path):
