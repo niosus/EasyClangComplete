@@ -1,5 +1,6 @@
 """Wraps a flag class."""
 import logging
+import platform
 from .file import File
 
 
@@ -9,11 +10,17 @@ log = logging.getLogger("ECC")
 class Flag:
     """Utility class for storing possibly separated flag.
 
+    Note that only flags that start with a valid indicator ("-" or "/") are
+    considered valid.
+
     Attributes:
         PREFIXES_WITH_PATHS (str[]): Full list of prefixes that are followed
                                      by paths.
         SEPARABLE_PREFIXES (str[]): Full list of prefixes that may take a
                                     second part as an input.
+        POSSIBLE_SEPARATORS (str[]): A list of strings that can separate the
+                                    prefix of a flag from its body.
+        FLAG_INDICATORS (str[]): A list of all chars that indicate a flag prefix
     """
 
     def __init__(self, prefix, body, separator=''):
@@ -43,6 +50,16 @@ class Flag:
     def separator(self):
         """Separator of the flag. Empty if not separable."""
         return self.__separator
+
+    @staticmethod
+    def indicates_flag(string):
+        """Check if the flag starts with a valid flag indicator."""
+        for flag_indicator in Flag.FLAG_INDICATORS:
+            if string.startswith(flag_indicator):
+                return True
+        log.debug("'%s' doesn't start with any valid flag prefix: %s",
+                  string, Flag.FLAG_INDICATORS)
+        return False
 
     def as_list(self):
         """Return flag as list of its parts."""
@@ -77,11 +94,13 @@ class Flag:
             and self.__separator == other.separator
 
     @staticmethod
-    def tokenize_list(all_split_line, current_folder=''):
+    def tokenize_list(all_split_line,
+                      current_folder=''):
         """Find flags, that need to be separated and separate them.
 
         Args:
             all_split_line (str[]): A list of all flags split.
+            current_folder (str): Current folder.
 
         Returns (Flag[]): A list of flags containing two parts if needed.
         """
@@ -148,10 +167,13 @@ class Flag:
                         self.__separator = rest[0]
                         rest = rest[1:]
                     self.__body = rest.strip()
-                    break
+                    return self
             # We did not find any separable prefix, so it's all body.
             if not self.__body:
                 self.__body = chunk
+            if not Flag.indicates_flag(self.__body):
+                # This is not a valid flag, so reset all values to default.
+                self.__init__()
             return self
 
         def with_body(self, body):
@@ -173,6 +195,8 @@ class Flag:
 
         def build_with_expansion(self, current_folder='', wildcard_values={}):
             """Expand all expandable entries and return a resulting list."""
+            if not self.__body and not self.__prefix:
+                return []
             if self.__prefix in Flag.PREFIXES_WITH_PATHS:
                 all_flags = []
                 for expanded_body in File.expand_all(
@@ -196,10 +220,17 @@ class Flag:
                         body=self.__body,
                         separator=self.__separator)
 
-    POSSIBLE_SEPARATORS = set([
-        " ",
-        "="
-    ])
+    # All strings that might separate the prefix of a flag from its body.
+    POSSIBLE_SEPARATORS = [" ", "="]
+
+    # All strings that indicate that a string is a flag.
+    ALL_FLAG_INDICATORS = {
+        "Windows": ["-", "/"],
+        "Linux": ["-"],
+        "Darwin": ["-"],
+    }
+
+    FLAG_INDICATORS = ALL_FLAG_INDICATORS[platform.system()]
 
     # All prefixes that denote includes.
     PREFIXES_WITH_PATHS = set([

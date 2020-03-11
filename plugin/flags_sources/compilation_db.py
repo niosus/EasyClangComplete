@@ -174,46 +174,6 @@ class CompilationDb(FlagsSource):
             parsed_db[CompilationDb.ALL_TAG] = unique_list_of_flags.as_list()
         return parsed_db
 
-    @staticmethod
-    def filter_bad_arguments(argument_list):
-        """Filter out the arguments that we don't care about.
-
-        Args:
-            argument_list (str[]): a list of flags.
-
-        Returns:
-            str[]: Flags without the unneeded ones.
-        """
-        new_args = []
-        skip_next = False
-        for i, argument in enumerate(argument_list):
-            if skip_next:
-                # somebody told us to skip this
-                skip_next = False
-                continue
-            if i == 0:
-                # ignore first element as it is always the program to run,
-                # something like 'c++'
-
-                if argument == 'ccache':
-                    # if it is ccache, we might need to skip the second as well
-                    skip_next = True
-
-                continue
-            if i == len(argument_list) - 1:
-                # ignore the last element as it is a file to compile, something
-                # like 'test.cpp'
-                continue
-            if argument == '-c':
-                # ignore -c too
-                continue
-            if argument == '-o':
-                # ignore the -o flag and whatever comes after it
-                skip_next = True
-                continue
-            new_args.append(argument)
-        return new_args
-
     def _find_related_sources(self, file_path, db):
         if not file_path:
             log.debug("[db]:[header-to-source]: skip retrieving related "

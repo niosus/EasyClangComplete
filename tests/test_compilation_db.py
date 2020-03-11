@@ -46,20 +46,9 @@ class TestCompilationDb(object):
         if self.lazy_parsing:
             self.assertIsNone(db.get_flags(search_scope=scope))
         else:
-            self.assertEqual(expected, db.get_flags(search_scope=scope))
-
-    def test_get_all_flags_arguments(self):
-        """Test argument filtering."""
-        arguments = [
-            "/usr/bin/c++",
-            "-I/lib_include_dir",
-            "-o",
-            "CMakeFiles/main_obj.o",
-            "-c",
-            "/home/user/dummy_main.cpp"]
-        expected = ["-I/lib_include_dir"]
-        result = CompilationDb.filter_bad_arguments(arguments)
-        self.assertEqual(result, expected)
+            self.assertIn(expected[0], db.get_flags(search_scope=scope))
+            self.assertIn(expected[1], db.get_flags(search_scope=scope))
+            self.assertIn(expected[2], db.get_flags(search_scope=scope))
 
     def test_strip_wrong_arguments(self):
         """Test if compilation db is found and flags loaded from arguments."""
@@ -77,18 +66,21 @@ class TestCompilationDb(object):
         if self.lazy_parsing:
             import sublime
             if sublime.platform() != 'windows':
-                expected = [Flag('', '-Dlib_EXPORTS'),
-                            Flag('', '-fPIC')]
                 file_path = path.realpath("/home/user/dummy_lib.cpp")
-                self.assertEqual(expected, db.get_flags(file_path=file_path,
-                                                        search_scope=scope))
+                self.assertIn(Flag('', '-Dlib_EXPORTS'),
+                              db.get_flags(file_path=file_path,
+                                           search_scope=scope))
+                self.assertIn(Flag('', '-fPIC'),
+                              db.get_flags(file_path=file_path,
+                                           search_scope=scope))
             # Check that we don't get the 'all' entry.
             self.assertIsNone(db.get_flags(search_scope=scope))
         else:
             expected = [Flag('-I', path.normpath('/lib_include_dir')),
                         Flag('', '-Dlib_EXPORTS'),
                         Flag('', '-fPIC')]
-            self.assertEqual(expected, db.get_flags(search_scope=scope))
+            for expected_flag in expected:
+                self.assertIn(expected_flag, db.get_flags(search_scope=scope))
 
     def test_get_flags_for_path(self):
         """Test if compilation db is found."""
@@ -99,8 +91,11 @@ class TestCompilationDb(object):
             lazy_flag_parsing=self.lazy_parsing
         )
 
-        expected_lib = [Flag('', '-Dlib_EXPORTS'), Flag('', '-fPIC')]
-        expected_main = [Flag('-I', path.normpath('/lib_include_dir'))]
+        expected_lib = [Flag('', '-Dlib_EXPORTS'),
+                        Flag('', '-fPIC'),
+                        Flag('-o', 'CMakeFiles/lib_obj.o', ' '),
+                        Flag('', '-c')]
+        expected_main = Flag('-I', path.normpath('/lib_include_dir'))
         lib_file_path = path.normpath('/home/user/dummy_lib.cpp')
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
         # also try to test a header
@@ -111,7 +106,7 @@ class TestCompilationDb(object):
         scope = SearchScope(from_folder=path_to_db)
         self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
         self.assertEqual(expected_lib, db.get_flags(lib_file_path_h, scope))
-        self.assertEqual(expected_main, db.get_flags(main_file_path, scope))
+        self.assertIn(expected_main, db.get_flags(main_file_path, scope))
         self.assertIn(lib_file_path, db._cache)
         self.assertIn(main_file_path, db._cache)
         path_to_db = path.join(path.dirname(__file__),
@@ -125,7 +120,7 @@ class TestCompilationDb(object):
         if self.lazy_parsing:
             self.assertNotIn(CompilationDb.ALL_TAG, db._cache[path_to_db])
         else:
-            self.assertIn(expected_main[0],
+            self.assertIn(expected_main,
                           db._cache[path_to_db][CompilationDb.ALL_TAG])
             self.assertIn(
                 expected_lib[0], db._cache[path_to_db][CompilationDb.ALL_TAG])
@@ -153,16 +148,18 @@ class TestCompilationDb(object):
             lazy_flag_parsing=self.lazy_parsing
         )
 
-        expected_lib = [Flag('', '-Dlib_EXPORTS'), Flag('', '-fPIC')]
-        expected_main = [Flag('-I', path.normpath('/lib_include_dir'))]
+        expected_main = Flag('-I', path.normpath('/lib_include_dir'))
         lib_file_path = path.normpath('/home/user/dummy_lib.cpp')
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
         path_to_db = path.join(path.dirname(__file__),
                                'compilation_db_files',
                                'command')
         scope = SearchScope(from_folder=path_to_db)
-        self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
-        self.assertEqual(expected_main, db.get_flags(main_file_path, scope))
+        self.assertIn(Flag('', '-Dlib_EXPORTS'),
+                      db.get_flags(lib_file_path, scope))
+        self.assertIn(Flag('', '-fPIC'),
+                      db.get_flags(lib_file_path, scope))
+        self.assertIn(expected_main, db.get_flags(main_file_path, scope))
         # check persistence
         self.assertGreater(len(db._cache), 2)
         self.assertEqual(path.join(path_to_db, "compile_commands.json"),
@@ -217,10 +214,6 @@ class TestCompilationDb(object):
                                'command_c')
         scope = SearchScope(from_folder=path_to_db)
         flags = db.get_flags(main_file_path, scope)
-        self.assertNotIn(Flag('-c', ''), flags)
-        self.assertNotIn(Flag('', '-c'), flags)
-        self.assertNotIn(Flag('-o', ''), flags)
-        self.assertNotIn(Flag('', '-o'), flags)
         self.assertIn(Flag('', '-Wno-poison-system-directories'), flags)
         self.assertIn(Flag('', '-march=armv7-a'), flags)
 
@@ -244,16 +237,11 @@ class TestCompilationDb(object):
         self.assertNotIn(Flag('', 'ccache'), flags)
         self.assertNotIn(Flag('cc', ''), flags)
         self.assertNotIn(Flag('', 'cc'), flags)
-        self.assertNotIn(Flag('-c', ''), flags)
-        self.assertNotIn(Flag('', '-c'), flags)
-        self.assertNotIn(Flag('-o', ''), flags)
-        self.assertNotIn(Flag('', '-o'), flags)
         self.assertIn(Flag('', '-Wno-poison-system-directories'), flags)
         self.assertIn(Flag('', '-march=armv7-a'), flags)
 
     def test_get_c_flags_ccache_irrelevant(self):
-        """Test argument filtering when ccache string is present, but not the
-           first argument (e.g. strangely named source file)"""
+        """Test filtering when ccache string is not the first argument."""
         include_prefixes = ['-I']
         db = CompilationDb(
             include_prefixes,
@@ -272,10 +260,6 @@ class TestCompilationDb(object):
         self.assertNotIn(Flag('', 'ccache'), flags)
         self.assertNotIn(Flag('cc', ''), flags)
         self.assertNotIn(Flag('', 'cc'), flags)
-        self.assertNotIn(Flag('-c', ''), flags)
-        self.assertNotIn(Flag('', '-c'), flags)
-        self.assertNotIn(Flag('-o', ''), flags)
-        self.assertNotIn(Flag('', '-o'), flags)
         self.assertIn(Flag('', '-Wno-poison-system-directories'), flags)
         self.assertIn(Flag('', '-march=armv7-a'), flags)
 
