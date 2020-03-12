@@ -1,7 +1,7 @@
 [
 {
   "arguments": [
-    "/usr/bin/c++",
+    "c++",
     "-I/lib_include_dir",
     "-o",
     "CMakeFiles/main_obj.o",
@@ -13,7 +13,7 @@
 },
 {
   "arguments": [
-    "/usr/bin/c++",
+    "c++",
     "-Dlib_EXPORTS",
     "-fPIC",
     "-o",

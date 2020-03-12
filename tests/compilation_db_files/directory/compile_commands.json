@@ -1,7 +1,7 @@
 [
 {
   "arguments": [
-    "/usr/bin/c++",
+    "c++",
     "-I./include",
     "-I../../include",
     "-isystem",

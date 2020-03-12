@@ -92,9 +92,7 @@ class TestCompilationDb(object):
         )
 
         expected_lib = [Flag('', '-Dlib_EXPORTS'),
-                        Flag('', '-fPIC'),
-                        Flag('-o', 'CMakeFiles/lib_obj.o', ' '),
-                        Flag('', '-c')]
+                        Flag('', '-fPIC')]
         expected_main = Flag('-I', path.normpath('/lib_include_dir'))
         lib_file_path = path.normpath('/home/user/dummy_lib.cpp')
         main_file_path = path.normpath('/home/user/dummy_main.cpp')
@@ -104,8 +102,8 @@ class TestCompilationDb(object):
                                'compilation_db_files',
                                'command')
         scope = SearchScope(from_folder=path_to_db)
-        self.assertEqual(expected_lib, db.get_flags(lib_file_path, scope))
-        self.assertEqual(expected_lib, db.get_flags(lib_file_path_h, scope))
+        self.assertIn(expected_lib[0], db.get_flags(lib_file_path, scope))
+        self.assertIn(expected_lib[0], db.get_flags(lib_file_path_h, scope))
         self.assertIn(expected_main, db.get_flags(main_file_path, scope))
         self.assertIn(lib_file_path, db._cache)
         self.assertIn(main_file_path, db._cache)
@@ -196,7 +194,8 @@ class TestCompilationDb(object):
             self.assertIsNone(db.get_flags(search_scope=scope))
         else:
             db.get_flags(search_scope=scope)
-            self.assertEqual(expected, db.get_flags(search_scope=scope))
+            for expected_flag in expected:
+                self.assertIn(expected_flag, db.get_flags(search_scope=scope))
 
     def test_get_c_flags(self):
         """Test argument filtering for c language."""
