@@ -14,11 +14,11 @@ class TestFlag(TestCase):
 
     def test_init(self):
         """Initialization test."""
-        flag = Flag.Builder().from_unparsed_string("hello").build()
-        self.assertEqual(flag.as_list(), ["hello"])
-        self.assertEqual(flag.prefix, "")
+        flag = Flag.Builder().from_unparsed_string("-Ihello").build()
+        self.assertEqual(flag.as_list(), ["-I", "hello"])
+        self.assertEqual(flag.prefix, "-I")
         self.assertEqual(flag.body, "hello")
-        self.assertEqual(str(flag), "hello")
+        self.assertEqual(str(flag), "-Ihello")
         flag = Flag("hello", "world", " ")
         self.assertEqual(flag.as_list(), ["hello", "world"])
         self.assertEqual(flag.prefix, "hello")
@@ -62,9 +62,12 @@ class TestFlag(TestCase):
         """Test tokenizing a list of all split flags."""
         flag1 = Flag.Builder().with_prefix('hello').with_body('world').build()
         self.assertEqual(Flag("hello", "world"), flag1)
-        flag2 = Flag.Builder().from_unparsed_string('hello world').build()
-        self.assertEqual(Flag("", "hello world"), flag2)
         flag3 = Flag.Builder().from_unparsed_string('-Iworld').build()
         self.assertEqual(Flag("-I", "world"), flag3)
         flag4 = Flag.Builder().from_unparsed_string('-include world').build()
         self.assertEqual(Flag("-include", "world", " "), flag4)
+
+    def test_builder_invalid(self):
+        """Test tokenizing invalid flags."""
+        flag2 = Flag.Builder().from_unparsed_string('hello world').build()
+        self.assertEqual(Flag("", ""), flag2)
