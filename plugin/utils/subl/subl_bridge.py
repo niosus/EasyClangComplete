@@ -4,6 +4,7 @@ import sublime
 import logging
 import re
 
+from .row_col import ZeroIndexedRowCol
 
 _log = logging.getLogger("ECC")
 
@@ -57,27 +58,6 @@ class SublBridge:
         return SublBridge.active_view().buffer_id()
 
     @staticmethod
-    def cursor_pos(view, pos=None):
-        """Get current cursor position.
-
-        Args:
-            view (sublime.View): current view
-            pos (int, optional): given position. First selection by default.
-
-        Returns:
-            (row, col): tuple of row and col for cursor position
-        """
-        if not pos:
-            pos = view.sel()
-            if len(pos) < 1:
-                # something is wrong
-                return None
-            # we care about the first position
-            pos = pos[0].a
-        (row, col) = view.rowcol(pos)
-        return CursorPosition(row + 1, col + 1)
-
-    @staticmethod
     def get_line(view, pos=None):
         """Get next line as text.
 
@@ -87,8 +67,8 @@ class SublBridge:
         Returns:
             str: text that the next line contains
         """
-        pos = SublBridge.cursor_pos(view, pos)
-        point_on_line = view.text_point(pos.row, 0)
+        row_col = ZeroIndexedRowCol.from_1d_location(view, pos)
+        point_on_line = view.text_point(row_col.row, 0)
         line = view.line(point_on_line)
         return view.substr(line)
 
@@ -102,8 +82,8 @@ class SublBridge:
         Returns:
             str: text that the next line contains
         """
-        pos = SublBridge.cursor_pos(view)
-        point_on_next_line = view.text_point(pos.row + 1, 0)
+        row_col = ZeroIndexedRowCol.from_current_cursor_pos(view)
+        point_on_next_line = view.text_point(row_col.row + 1, 0)
         line = view.line(point_on_next_line)
         return view.substr(line)
 
@@ -308,24 +288,3 @@ class PosStatus:
     COMPLETION_NOT_NEEDED = 1
     WRONG_TRIGGER = 2
     COMPLETE_INCLUDES = 3
-
-
-class CursorPosition():
-    """Stores a cursor position."""
-
-    def __init__(self, row, col):
-        """Initialize from row and column as seen in file (start with 1)."""
-        self.row = row - 1
-        self.col = col - 1
-
-    def file_row(self):
-        """Get 1-based row index."""
-        return self.row + 1
-
-    def file_col(self):
-        """Get 1-based column index."""
-        return self.col + 1
-
-    def location(self, view):
-        """Return the cursor position as sublime text location."""
-        return view.text_point(self.row, self.col)

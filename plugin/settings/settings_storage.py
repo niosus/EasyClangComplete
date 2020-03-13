@@ -5,11 +5,11 @@ Attributes:
 """
 import logging
 
-from ..utils.subl_bridge import SublBridge
 from ..utils.tools import Tools
 from ..utils.file import File
 from ..utils.flag import Flag
 from ..utils.clang_utils import ClangUtils
+from ..utils.subl.subl_bridge import SublBridge
 
 log = logging.getLogger("ECC")
 

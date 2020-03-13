@@ -9,6 +9,7 @@ from os import path
 
 from ..completion.compiler_variant import LibClangCompilerVariant
 from ..settings.settings_storage import SettingsStorage
+from ..utils.subl.row_col import ZeroIndexedRowCol
 from .popups import Popup
 
 log = logging.getLogger("ECC")
@@ -119,14 +120,13 @@ class PopupErrorVis:
         logging.debug("Adding error %s", error_dict)
         error_source_file = path.basename(error_dict['file'])
         if error_source_file == path.basename(view.file_name()):
-            row = int(error_dict['row'])
-            col = int(error_dict['col'])
-            point = view.text_point(row - 1, col - 1)
+            row_col = ZeroIndexedRowCol(error_dict['row'], error_dict['col'])
+            point = row_col.as_1d_location(view)
             error_dict['region'] = view.word(point)
-            if row in self.err_regions[view.buffer_id()]:
-                self.err_regions[view.buffer_id()][row] += [error_dict]
+            if row_col.row in self.err_regions[view.buffer_id()]:
+                self.err_regions[view.buffer_id()][row_col.row] += [error_dict]
             else:
-                self.err_regions[view.buffer_id()][row] = [error_dict]
+                self.err_regions[view.buffer_id()][row_col.row] = [error_dict]
 
     def show_errors(self, view):
         """Show current error regions.

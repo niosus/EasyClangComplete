@@ -1,4 +1,4 @@
-"""This module contains a class for clang binary based completion.
+"""Contains a class for clang binary based completion.
 
 Attributes:
     log (logging.Logger): logger for this module
@@ -12,7 +12,8 @@ from os import path
 
 from ..utils.tools import Tools
 from ..utils.file import File
-from ..utils.subl_bridge import SublBridge
+from ..utils.subl.row_col import ZeroIndexedRowCol
+from ..utils.subl.row_col import OneIndexedRowCol
 from .base_complete import BaseCompleter
 from .compiler_variant import ClangCompilerVariant
 from .compiler_variant import ClangClCompilerVariant
@@ -154,24 +155,17 @@ class Completer(BaseCompleter):
         self.save_errors(output_text)
         self.show_errors(view)
 
-    def get_declaration_location(self, view, row, col):
-        """Get location of declaration from given location in file.
-
-        Args:
-            view (sublime.View): current view
-
-        Returns:
-            Location: location of declaration
-        """
+    def get_declaration_location(self, view, row_col):
+        """Get location of declaration from given location in file."""
         sublime.error_message("Not supported for this backend.")
 
-    def run_clang_command(self, view, task_type, cursor_pos=0):
+    def run_clang_command(self, view, task_type, location=0):
         """Construct and run clang command based on task.
 
         Args:
             view (sublime.View): current view
             task_type (str): one of: {"complete", "update"}
-            cursor_pos (int, optional): cursor position (used in completion)
+            location (int, optional): cursor location
 
         Returns:
             str: Output from command
@@ -190,10 +184,13 @@ class Completer(BaseCompleter):
             pass
         elif task_type == "complete":
             # we construct command for complete task
-            pos = SublBridge.cursor_pos(view, cursor_pos)
+            file_row_col = OneIndexedRowCol.from_zero_indexed(
+                ZeroIndexedRowCol.from_1d_location(view, location))
             complete_at_str = Completer.compl_str_mask.format(
                 complete_flag="-code-completion-at",
-                file=temp_file_name, row=pos.file_row(), col=pos.file_col())
+                file=temp_file_name,
+                row=file_row_col.row,
+                col=file_row_col.col)
             flags += ["-Xclang"] + [complete_at_str]
         else:
             log.critical(" unknown type of cmd command wanted.")
@@ -201,8 +198,8 @@ class Completer(BaseCompleter):
         # construct cmd from building parts
         complete_cmd = [self.clang_binary] + flags + [temp_file_name]
         # now run this command
-        log.debug("clang command: \n%s", complete_cmd)
-
+        log.debug("clang command: \n%s",
+                  " ".join(["'" + s + "'" for s in complete_cmd]))
         return Tools.run_command(complete_cmd)
 
     @staticmethod

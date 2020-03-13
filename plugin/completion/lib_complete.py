@@ -1,4 +1,4 @@
-"""This module contains class for libclang based completions.
+"""Contains class for libclang based completions.
 
 Attributes:
     cindex_dict (dict): dict of cindex entries for each version of clang.
@@ -13,7 +13,9 @@ import logging
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
 from ..utils.clang_utils import ClangUtils
-from ..utils.subl_bridge import SublBridge
+from ..utils.subl.subl_bridge import SublBridge
+from ..utils.subl.row_col import ZeroIndexedRowCol
+from ..utils.subl.row_col import OneIndexedRowCol
 from ..error_vis.popups import Popup
 
 from threading import RLock
@@ -173,8 +175,9 @@ class Completer(BaseCompleter):
         view = completion_request.get_view()
         file_name = view.file_name()
         file_body = view.substr(sublime.Region(0, view.size()))
-        pos = SublBridge.cursor_pos(
+        row_col = ZeroIndexedRowCol.from_1d_location(
             view, completion_request.get_trigger_position())
+        file_row_col = OneIndexedRowCol.from_zero_indexed(row_col)
 
         # unsaved files
         unsaved_files = [(file_name, file_body)]
@@ -206,7 +209,7 @@ class Completer(BaseCompleter):
                     include_brief_comments = False
                 complete_obj = self.tu.codeComplete(
                     file_name,
-                    pos.file_row(), pos.file_col(),
+                    file_row_col.row, file_row_col.col,
                     unsaved_files=unsaved_files,
                     include_macros=True,
                     include_brief_comments=include_brief_comments)
@@ -267,13 +270,14 @@ class Completer(BaseCompleter):
             if not self.tu:
                 return empty_info
             view = tooltip_request.get_view()
-            pos = SublBridge.cursor_pos(
+            row_col = ZeroIndexedRowCol.from_1d_location(
                 view, tooltip_request.get_trigger_position())
+            file_row_col = OneIndexedRowCol.from_zero_indexed(row_col)
 
             cursor = self.tu.cursor.from_location(
                 self.tu,
                 self.tu.get_location(
-                    view.file_name(), (pos.file_row(), pos.file_col())))
+                    view.file_name(), (file_row_col.row, file_row_col.col)))
             if not cursor:
                 return empty_info
             if cursor.kind in objc_types:
@@ -348,23 +352,15 @@ class Completer(BaseCompleter):
         log.error("no translation unit for view id %s", v_id)
         return False
 
-    def get_declaration_location(self, view, row, col):
-        """Get location of declaration from given location in file.
-
-        Args:
-            view (sublime.View): current view
-            row (int): cursor row
-            col (int): cursor col
-
-        Returns:
-            Location: location of declaration
-
-        """
+    def get_declaration_location(self, view, row_col):
+        """Get location of declaration from given location in file."""
+        file_row_col = OneIndexedRowCol.from_zero_indexed(row_col)
         with Completer.rlock:
             if not self.tu:
                 return None
             cursor = self.tu.cursor.from_location(
-                self.tu, self.tu.get_location(view.file_name(), (row, col)))
+                self.tu, self.tu.get_location(view.file_name(),
+                                              file_row_col.as_tuple()))
             ref_new = None
             if cursor and cursor.referenced:
                 ref = cursor.referenced

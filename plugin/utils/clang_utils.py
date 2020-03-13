@@ -12,7 +12,7 @@ from os import path
 
 from .tools import Tools
 from .tools import PKG_NAME
-from .subl_bridge import SublBridge
+from .subl.subl_bridge import SublBridge
 
 
 log = logging.getLogger("ECC")

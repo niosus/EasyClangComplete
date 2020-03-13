@@ -8,7 +8,7 @@ import imp
 from os import path
 
 from EasyClangComplete.plugin.settings import settings_manager
-from EasyClangComplete.plugin.utils import subl_bridge
+from EasyClangComplete.plugin.utils.subl import subl_bridge
 
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
@@ -44,22 +44,6 @@ class test_tools_command(GuiTestWrapper):
         for _ in range(dist):
             self.view.run_command("move",
                                   {"by": "characters", "forward": forward})
-
-    def test_cursor_pos(self):
-        """Test cursor position."""
-        self.set_up_view()
-        self.set_text("hello")
-        pos = SublBridge.cursor_pos(self.view)
-        self.assertEqual(pos.row, 0)
-        self.assertEqual(pos.col, 5)
-        self.set_text("\nworld!")
-        pos = SublBridge.cursor_pos(self.view)
-        self.assertEqual(pos.row, 1)
-        self.assertEqual(pos.col, 6)
-        self.move(10, forward=False)
-        pos = SublBridge.cursor_pos(self.view)
-        self.assertEqual(pos.row, 0)
-        self.assertEqual(pos.col, 2)
 
     def test_next_line(self):
         """Test returning next line."""

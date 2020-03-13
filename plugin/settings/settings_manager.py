@@ -1,4 +1,4 @@
-"""This module holds a class that manages access to plugin settings.
+"""Holds a class that manages access to plugin settings.
 
 Attributes:
     log (logging.Logger): logger for current module
@@ -8,7 +8,7 @@ import logging
 import copy
 
 from ..utils.tools import PKG_NAME
-from ..utils.subl_bridge import SublBridge
+from ..utils.subl.subl_bridge import SublBridge
 
 from .settings_storage import SettingsStorage
 

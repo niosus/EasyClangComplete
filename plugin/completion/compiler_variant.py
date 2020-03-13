@@ -63,7 +63,9 @@ class ClangCompilerVariant(CompilerVariant):
             if not error_search:
                 continue
             error_dict = error_search.groupdict()
+            print("error_dict before:", error_dict)
             error_dict = CompilerVariant._to_zero_based_index(error_dict)
+            print("error_dict after:", error_dict)
             errors.append(error_dict)
         return errors
 

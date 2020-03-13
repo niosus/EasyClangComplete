@@ -21,7 +21,6 @@ from .plugin.utils import singleton_thread_pool
 from .plugin.utils import thread_job
 from .plugin.utils import progress_status
 from .plugin.utils import quick_panel_handler
-from .plugin.utils import subl_bridge
 from .plugin.utils import action_request
 from .plugin.utils import module_reloader
 from .plugin.utils import singleton
@@ -29,6 +28,8 @@ from .plugin.utils import include_parser
 from .plugin.utils import file
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
+from .plugin.utils.subl import subl_bridge
+from .plugin.utils.subl import row_col
 
 
 # Reload all modules modules ignoring those that contain the given string.
@@ -52,6 +53,7 @@ ThreadPool = singleton_thread_pool.ThreadPool
 ThreadJob = thread_job.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 ActionRequest = action_request.ActionRequest
+ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
 
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
@@ -118,7 +120,6 @@ class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
             sublime.MONOSPACE_FONT,
             start_idx,
             handler.on_highlighted)
-        print(config.completer.latest_errors)
 
 
 class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
@@ -309,14 +310,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
             return
         if File.is_ignored(view.file_name(), settings.ignore_list):
             return
-        pos = SublBridge.cursor_pos(view)
+        row_col = ZeroIndexedRowCol.from_current_cursor_pos(view)
         view_config = EasyClangComplete.view_config_manager.get_from_cache(
             view)
         if not view_config:
             return
         if not view_config.completer:
             return
-        view_config.completer.error_vis.show_popup_if_needed(view, pos.row)
+        view_config.completer.error_vis.show_popup_if_needed(view, row_col.row)
 
     def on_modified_async(self, view):
         """Call in a worker thread when view is modified.

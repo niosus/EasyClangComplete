@@ -8,7 +8,7 @@ import logging
 from os import path
 
 from ..utils.file import File
-from ..utils.subl_bridge import SublBridge
+from ..utils.subl.subl_bridge import SublBridge
 
 from ..utils.flag import Flag
 from ..utils.unique_list import UniqueList

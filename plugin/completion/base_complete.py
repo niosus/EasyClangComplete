@@ -6,7 +6,7 @@ Attributes:
 """
 import logging
 
-from ..utils.subl_bridge import SublBridge
+from ..utils.subl.subl_bridge import SublBridge
 
 log = logging.getLogger("ECC")
 
@@ -89,11 +89,12 @@ class BaseCompleter:
         """
         raise NotImplementedError("calling abstract method")
 
-    def get_declaration_location(self, view, row, col):
+    def get_declaration_location(self, view, row_col):
         """Get location of declaration from given location in file.
 
         Args:
-            view (sublime.View): current view
+            view (sublime.View): current view.
+            row_col (ZeroBasedRowCol): location of the cursor.
 
         Returns:
             Location: location of declaration

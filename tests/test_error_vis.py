@@ -10,7 +10,7 @@ from EasyClangComplete.plugin.settings import settings_storage
 from EasyClangComplete.plugin.error_vis import popups
 from EasyClangComplete.plugin.view_config import view_config_manager
 from EasyClangComplete.plugin.utils import action_request
-from EasyClangComplete.plugin.utils import subl_bridge
+from EasyClangComplete.plugin.utils.subl import row_col
 
 from EasyClangComplete.tests import gui_test_wrapper
 
@@ -22,10 +22,11 @@ imp.reload(settings_storage)
 imp.reload(view_config_manager)
 imp.reload(popups)
 imp.reload(action_request)
-imp.reload(subl_bridge)
+imp.reload(row_col)
 
 ActionRequest = action_request.ActionRequest
-CursorPosition = subl_bridge.CursorPosition
+ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
+OneIndexedRowCol = row_col.OneIndexedRowCol
 PopupErrorVis = popup_error_vis.PopupErrorVis
 GuiTestWrapper = gui_test_wrapper.GuiTestWrapper
 SettingsManager = settings_manager.SettingsManager
@@ -89,7 +90,7 @@ class TestErrorVis:
         self.set_up_view(file_name)
         completer, _ = self.set_up_completer()
         self.assertIsNotNone(completer.error_vis)
-        self.assertTrue(isinstance(completer.error_vis, PopupErrorVis))
+        self.assertIsNotNone(completer.error_vis.err_regions)
         self.tear_down_completer()
 
     def test_generate_errors(self):
@@ -102,14 +103,21 @@ class TestErrorVis:
         self.assertIsNotNone(completer.error_vis)
         err_dict = completer.error_vis.err_regions
         v_id = self.view.buffer_id()
+
+        cursor_row_col = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(10, 3))
+
         self.assertTrue(v_id in err_dict)
         self.assertEqual(len(err_dict[v_id]), 1)
-        self.assertTrue(9 in err_dict[v_id])
-        self.assertEqual(len(err_dict[v_id][9]), 1)
-        self.assertEqual(err_dict[v_id][9][0]['row'], 9)
-        self.assertEqual(err_dict[v_id][9][0]['col'], 2)
+        self.assertIn(cursor_row_col.row, err_dict[v_id])
+        self.assertEqual(len(err_dict[v_id][cursor_row_col.row]), 1)
+        self.assertEqual(err_dict[v_id][cursor_row_col.row][0]['row'],
+                         cursor_row_col.row)
+        self.assertEqual(err_dict[v_id][cursor_row_col.row][0]['col'],
+                         cursor_row_col.col)
         expected_error = "expected unqualified-id"
-        self.assertTrue(expected_error in err_dict[v_id][9][0]['error'])
+        self.assertIn(expected_error,
+                      err_dict[v_id][cursor_row_col.row][0]['error'])
 
         # not clear errors:
         completer.error_vis.clear(self.view)
@@ -348,11 +356,12 @@ allow_code_wrap: true
         self.set_up_view(file_name)
         completer, settings = self.set_up_completer()
         settings.show_index_references = False
-        pos = subl_bridge.CursorPosition(10, 15)
+        cursor_row_col = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(10, 15))
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(pos.row),
+        self.assertEqual(self.get_row(cursor_row_col.row),
                          "  cool_class.foo(Foo(), nullptr);")
-        location = pos.location(self.view)
+        location = cursor_row_col.as_1d_location(self.view)
         action_request = ActionRequest(self.view, location)
         request, info_popup = completer.info(action_request, settings)
         self.maxDiff = None

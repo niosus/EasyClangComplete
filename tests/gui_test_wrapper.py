@@ -37,6 +37,7 @@ class GuiTestWrapper(TestCase):
 
         Args:
             file_path (str): The path to a file to open in a new view.
+            cursor_position (ZeroIndexedRowCol): row and column of the cursor.
         """
         # Open the view.
         if file_path:
@@ -52,7 +53,7 @@ class GuiTestWrapper(TestCase):
         if cursor_position:
             self.view.sel().clear()
             self.view.sel().add(
-                sublime.Region(cursor_position.location(self.view)))
+                sublime.Region(cursor_position.as_1d_location(self.view)))
 
     def get_row(self, row):
         """Get text of a particular row.

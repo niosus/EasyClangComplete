@@ -6,13 +6,13 @@ from os import path
 
 from EasyClangComplete.plugin.settings import settings_manager
 from EasyClangComplete.plugin.utils import action_request
-from EasyClangComplete.plugin.utils import subl_bridge
+from EasyClangComplete.plugin.utils.subl import row_col
 from EasyClangComplete.plugin.view_config import view_config_manager
 
 from EasyClangComplete.tests import gui_test_wrapper
 
 imp.reload(gui_test_wrapper)
-imp.reload(subl_bridge)
+imp.reload(row_col)
 imp.reload(settings_manager)
 imp.reload(view_config_manager)
 imp.reload(action_request)
@@ -21,7 +21,8 @@ SettingsManager = settings_manager.SettingsManager
 ActionRequest = action_request.ActionRequest
 ViewConfigManager = view_config_manager.ViewConfigManager
 GuiTestWrapper = gui_test_wrapper.GuiTestWrapper
-CursorPosition = subl_bridge.CursorPosition
+ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
+OneIndexedRowCol = row_col.OneIndexedRowCol
 
 
 def has_libclang():
@@ -109,9 +110,10 @@ class BaseTestCompleter(object):
         completer = self.set_up_completer()
 
         # Check the current cursor position is completable.
-        cursor_pos = CursorPosition(9, 5)
-        self.assertEqual(self.get_row(cursor_pos.row), "  a.")
-        location = self.view.text_point(cursor_pos.row, cursor_pos.col)
+        cursor_row_col = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(9, 5))
+        self.assertEqual(self.get_row(cursor_row_col.row), "  a.")
+        location = cursor_row_col.as_1d_location(self.view)
         current_word = self.view.substr(self.view.word(location))
         self.assertEqual(current_word, ".\n")
 
@@ -136,13 +138,15 @@ class BaseTestCompleter(object):
         completer = self.set_up_completer()
 
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(8), "  a.")
-        pos = self.view.text_point(8, 4)
-        current_word = self.view.substr(self.view.word(pos))
+        cursor_row_col = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(9, 5))
+        self.assertEqual(self.get_row(cursor_row_col.row), "  a.")
+        location = cursor_row_col.as_1d_location(self.view)
+        current_word = self.view.substr(self.view.word(location))
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        request = ActionRequest(self.view, pos)
+        request = ActionRequest(self.view, location)
         (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.
@@ -164,13 +168,15 @@ class BaseTestCompleter(object):
         completer = self.set_up_completer()
 
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(8), "  a.")
-        pos = self.view.text_point(8, 4)
-        current_word = self.view.substr(self.view.word(pos))
+        cursor_row_col = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(9, 5))
+        self.assertEqual(self.get_row(cursor_row_col.row), "  a.")
+        location = cursor_row_col.as_1d_location(self.view)
+        current_word = self.view.substr(self.view.word(location))
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        request = ActionRequest(self.view, pos)
+        request = ActionRequest(self.view, location)
         (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.
@@ -192,13 +198,15 @@ class BaseTestCompleter(object):
         completer = self.set_up_completer()
 
         # Check the current cursor position is completable.
-        self.assertEqual(self.get_row(3), "  vec.")
-        pos = self.view.text_point(3, 6)
-        current_word = self.view.substr(self.view.word(pos))
+        cursor_row_col = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(4, 7))
+        self.assertEqual(self.get_row(cursor_row_col.row), "  vec.")
+        location = cursor_row_col.as_1d_location(self.view)
+        current_word = self.view.substr(self.view.word(location))
         self.assertEqual(current_word, ".\n")
 
         # Load the completions.
-        request = ActionRequest(self.view, pos)
+        request = ActionRequest(self.view, location)
         (_, completions) = completer.complete(request)
 
         # Verify that we got the expected completions back.
@@ -392,14 +400,17 @@ class BaseTestCompleter(object):
         completer = self.set_up_completer()
 
         # Check the current cursor position is completable.
-        row = 9
+        row = 10
         col = 15
-        self.assertEqual(self.get_row(row), "  cool_class.foo();")
-        pos = self.view.text_point(row, col)
-        current_word = self.view.substr(self.view.word(pos))
+        cursor_row_col = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(row, col))
+        self.assertEqual(self.get_row(cursor_row_col.row),
+                         "  cool_class.foo();")
+        location = cursor_row_col.as_1d_location(self.view)
+        current_word = self.view.substr(self.view.word(location))
         self.assertEqual(current_word, "foo")
 
-        loc = completer.get_declaration_location(self.view, row + 1, col)
+        loc = completer.get_declaration_location(self.view, cursor_row_col)
         self.assertEqual(loc.file.name, file_name)
         self.assertEqual(loc.line, 3)
         self.assertEqual(loc.column, 8)

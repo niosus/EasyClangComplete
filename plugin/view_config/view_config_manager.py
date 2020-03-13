@@ -8,7 +8,7 @@ import weakref
 from threading import RLock
 from threading import Timer
 
-from ..utils.subl_bridge import SublBridge
+from ..utils.subl.subl_bridge import SublBridge
 
 from .view_config import ViewConfig
 

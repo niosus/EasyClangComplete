@@ -7,10 +7,10 @@ from .flags_source import FlagsSource
 from .compilation_db import CompilationDb
 from ..utils.file import File
 from ..utils.tools import Tools
-from ..utils.subl_bridge import SublBridge
 from ..utils.singleton import CMakeFileCache
 from ..utils.catkinizer import Catkinizer
 from ..utils.search_scope import TreeSearchScope
+from ..utils.subl.subl_bridge import SublBridge
 
 from os import path
 
