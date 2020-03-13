@@ -10,13 +10,14 @@ from os import path
 
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 from EasyClangComplete.plugin.utils import action_request
-from EasyClangComplete.plugin.utils import subl_bridge
+from EasyClangComplete.plugin.utils.subl import row_col
 
 imp.reload(action_request)
-imp.reload(subl_bridge)
+imp.reload(row_col)
 
 ActionRequest = action_request.ActionRequest
-CursorPosition = subl_bridge.CursorPosition
+ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
+OneIndexedRowCol = row_col.OneIndexedRowCol
 
 
 class test_action_request(GuiTestWrapper):
@@ -34,15 +35,16 @@ class test_action_request(GuiTestWrapper):
         file_name = path.join(path.dirname(__file__),
                               'test_files',
                               'test.cpp')
-        query_pos = CursorPosition(row=5, col=9)
+        query_pos = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(5, 9))
         self.set_up_view(file_path=file_name, cursor_position=query_pos)
         self.assertEqual(self.get_row(query_pos.row), "  void foo(double a);")
-        (row, col) = self.view.rowcol(query_pos.location(self.view))
-        equal_pos = CursorPosition(row=row + 1, col=col + 1)
+        equal_pos = ZeroIndexedRowCol.from_1d_location(
+            self.view, query_pos.as_1d_location(self.view))
         self.assertEqual(equal_pos.row, query_pos.row)
         self.assertEqual(equal_pos.col, query_pos.col)
-        self.assertEqual(equal_pos.location(self.view),
-                         query_pos.location(self.view))
+        self.assertEqual(equal_pos.as_1d_location(self.view),
+                         query_pos.as_1d_location(self.view))
 
     def test_create(self):
         """Test creation."""
@@ -61,7 +63,8 @@ class test_action_request(GuiTestWrapper):
         file_path = path.join(path.dirname(__file__),
                               'test_files',
                               'test.cpp')
-        query_pos = CursorPosition(row=5, col=9)
+        query_pos = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(5, 9))
         self.set_up_view(file_path=file_path, cursor_position=query_pos)
         self.assertEqual(self.get_row(query_pos.row), "  void foo(double a);")
         trigger_position = self.view.text_point(query_pos.row, query_pos.col)
@@ -76,7 +79,8 @@ class test_action_request(GuiTestWrapper):
         file_path = path.join(path.dirname(__file__),
                               'test_files',
                               'test.cpp')
-        query_pos = CursorPosition(row=5, col=9)
+        query_pos = ZeroIndexedRowCol.from_one_indexed(
+            OneIndexedRowCol(5, 9))
         self.set_up_view(file_path=file_path, cursor_position=query_pos)
         self.assertEqual(self.get_row(query_pos.row), "  void foo(double a);")
         trigger_position = self.view.text_point(query_pos.row, query_pos.col)
