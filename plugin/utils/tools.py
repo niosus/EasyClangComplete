@@ -72,4 +72,5 @@ class Tools:
     def get_unique_str(init_string):
         """Generate md5 unique sting hash given init_string."""
         import hashlib
-        return hashlib.md5(init_string.encode('utf-8')).hexdigest()
+        augmented_string = init_string + path.expanduser('~')
+        return hashlib.md5(augmented_string.encode('utf-8')).hexdigest()
