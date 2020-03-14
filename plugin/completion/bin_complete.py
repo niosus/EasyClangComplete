@@ -173,7 +173,9 @@ class Completer(BaseCompleter):
         file_body = view.substr(sublime.Region(0, view.size()))
 
         tempdir = File.get_temp_dir()
-        temp_file_name = path.join(tempdir, path.basename(view.file_name()))
+        temp_file_name = path.join(tempdir,
+                                   Tools.get_unique_str(view.file_name()),
+                                   path.basename(view.file_name()))
         with open(temp_file_name, "w", encoding='utf-8') as tmp_file:
             tmp_file.write(file_body)
 
