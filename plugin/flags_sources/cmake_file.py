@@ -150,10 +150,8 @@ class CMakeFile(FlagsSource):
         Returns:
             str: Path to a unique temp folder.
         """
-        unique_proj_str = Tools.get_unique_str(cmake_path)
-        tempdir = path.join(
-            File.get_temp_dir(), 'cmake_builds', unique_proj_str)
-        return tempdir
+        return File.get_temp_dir('cmake_builds',
+                                 Tools.get_unique_str(cmake_path))
 
     @staticmethod
     def __compile_cmake(cmake_file, cmake_binary, prefix_paths, flags,
@@ -183,10 +181,6 @@ class CMakeFile(FlagsSource):
         cmake_cmd = [cmake_binary, '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'] \
             + flags + [cmake_file.folder]
         tempdir = CMakeFile.unique_folder_name(cmake_file.full_path)
-        try:
-            os.makedirs(tempdir)
-        except OSError:
-            log.debug("Folder %s exists.", tempdir)
         # sometimes there are variables missing to carry out the build. We
         # can set them here from the settings.
         my_env = os.environ.copy()

@@ -219,9 +219,11 @@ class File:
         return None
 
     @staticmethod
-    def get_temp_dir():
+    def get_temp_dir(*subfolders):
         """Create a temporary folder if needed and return it."""
-        tempdir = path.join(tempfile.gettempdir(), PKG_NAME)
-        if not path.exists(tempdir):
+        tempdir = path.join(tempfile.gettempdir(), PKG_NAME, *subfolders)
+        try:
             makedirs(tempdir)
+        except OSError:
+            log.debug("Folder %s exists.", tempdir)
         return tempdir
