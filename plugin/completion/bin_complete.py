@@ -9,7 +9,6 @@ import time
 import logging
 
 from os import path
-from os import makedirs
 
 from ..utils.tools import Tools
 from ..utils.file import File
