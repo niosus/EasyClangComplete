@@ -159,6 +159,9 @@ class Flag:
         def from_unparsed_string(self, chunk):
             """Parse an unknown string into body and prefix."""
             chunk = chunk.strip()
+            if not Flag.indicates_flag(chunk):
+                # This is not a valid flag, so reset all values to default.
+                return Flag.Builder()
             for prefix in Flag.SEPARABLE_PREFIXES:
                 if chunk.startswith(prefix):
                     self.__prefix = prefix
@@ -171,9 +174,6 @@ class Flag:
             # We did not find any separable prefix, so it's all body.
             if not self.__body:
                 self.__body = chunk
-            if not Flag.indicates_flag(self.__body):
-                # This is not a valid flag, so reset all values to default.
-                self.__init__()
             return self
 
         def with_body(self, body):
