@@ -67,8 +67,10 @@ class TestFlag(TestCase):
         flag4 = Flag.Builder().from_unparsed_string('-include world').build()
         self.assertEqual(Flag("-include", "world", " "), flag4)
         # Check that we don't trigger on /U flag.
-        flag5 = Flag.Builder().from_unparsed_string('/User/blah').build()
-        self.assertEqual(Flag("", "", ""), flag5)
+        import platform
+        if platform.system() != "Windows":
+            flag5 = Flag.Builder().from_unparsed_string('/User/blah').build()
+            self.assertEqual(Flag("", "", ""), flag5)
 
     def test_builder_invalid(self):
         """Test tokenizing invalid flags."""
