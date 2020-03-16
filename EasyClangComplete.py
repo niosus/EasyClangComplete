@@ -26,10 +26,12 @@ from .plugin.utils import module_reloader
 from .plugin.utils import singleton
 from .plugin.utils import include_parser
 from .plugin.utils import file
+from .plugin.utils import search_scope
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 from .plugin.utils.subl import subl_bridge
 from .plugin.utils.subl import row_col
+from .plugin.flags_sources import compilation_db
 
 
 # Reload all modules modules ignoring those that contain the given string.
@@ -42,6 +44,7 @@ ViewConfigManager = view_config_manager.ViewConfigManager
 SublBridge = subl_bridge.SublBridge
 Tools = tools.Tools
 File = file.File
+SearchScope = search_scope.TreeSearchScope
 MoonProgressStatus = progress_status.MoonProgressStatus
 ColorSublimeProgressStatus = progress_status.ColorSublimeProgressStatus
 NoneSublimeProgressStatus = progress_status.NoneSublimeProgressStatus
@@ -54,6 +57,7 @@ ThreadJob = thread_job.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 ActionRequest = action_request.ActionRequest
 ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
+CompilationDb = compilation_db.CompilationDb
 
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
@@ -173,6 +177,26 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
                 shutil.rmtree(temp_proj_dir, ignore_errors=True)
         except KeyError:
             log.debug("Nothing to clean")
+
+
+class GenerateBazelCompDbCommand(sublime_plugin.TextCommand):
+    """Command that generates a compilation database with bazel."""
+
+    def run(self, edit):
+        """Run compdb generation command.
+
+        Find a WORKSPACE file up the directory tree and run the compilation
+        database generation command there.
+        """
+        log.debug("Starting generating compilation database.")
+        if not SublBridge.is_valid_view(self.view):
+            return
+        job = ThreadJob(
+            name=ThreadJob.GENERATE_DB_TAG,
+            callback=EasyClangComplete.db_generated,
+            function=CompilationDb.generate_with_bazel,
+            args=[self.view])
+        EasyClangComplete.thread_pool.new_job(job)
 
 
 class EccShowPopupInfoCommand(sublime_plugin.TextCommand):
@@ -518,6 +542,14 @@ class EasyClangComplete(sublime_plugin.EventListener):
             function=EasyClangComplete.view_config_manager.trigger_info,
             args=[view, tooltip_request, settings])
         EasyClangComplete.thread_pool.new_job(job)
+
+    @staticmethod
+    def db_generated(future):
+        """Generate a compilation database."""
+        if future.done() and not future.cancelled():
+            log.debug("Database generated. Output: \n%s", future.result())
+        else:
+            log.debug("Could not generate compilation database.")
 
     def on_query_completions(self, view, prefix, locations):
         """Call this when user queries completions in the code.

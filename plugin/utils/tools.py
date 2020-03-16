@@ -8,6 +8,7 @@ import subprocess
 
 
 PKG_NAME = path.basename(path.dirname(path.dirname(path.dirname(__file__))))
+PKG_FOLDER = path.dirname(path.dirname(path.dirname(__file__)))
 
 _log = logging.getLogger("ECC")
 

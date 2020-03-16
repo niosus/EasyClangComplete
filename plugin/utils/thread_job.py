@@ -23,6 +23,7 @@ class ThreadJob:
     CLEAR_TAG = "clear"
     COMPLETE_TAG = "complete"
     COMPLETE_INCLUDES_TAG = "complete_includes"
+    GENERATE_DB_TAG = "generate_db"
     INFO_TAG = "info"
 
     def __init__(self, name, callback, function, args):
