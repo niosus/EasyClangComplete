@@ -1,9 +1,10 @@
 """Test OutputPanelHandler."""
-import imp
-import sublime
-from unittest import TestCase
 
 from EasyClangComplete.plugin.utils import output_panel_handler
+from unittest import TestCase
+
+import sublime
+import imp
 
 imp.reload(output_panel_handler)
 
@@ -11,7 +12,7 @@ OutputPanelHandler = output_panel_handler.OutputPanelHandler
 
 
 class test_output_panel_handler(TestCase):
-    """Test other things."""
+    """Test that we can create an output panel."""
 
     def test_panel_creation(self):
         """Test that we can convert time to seconds."""

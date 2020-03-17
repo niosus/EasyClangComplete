@@ -32,6 +32,7 @@ from .plugin.settings import settings_storage
 from .plugin.utils.subl import subl_bridge
 from .plugin.utils.subl import row_col
 from .plugin.flags_sources import compilation_db
+from .plugin.utils import output_panel_handler
 
 
 # Reload all modules modules ignoring those that contain the given string.
@@ -58,6 +59,7 @@ QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 ActionRequest = action_request.ActionRequest
 ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
 CompilationDb = compilation_db.CompilationDb
+OutputPanelHandler = output_panel_handler.OutputPanelHandler
 
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
@@ -547,6 +549,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
     def db_generated(future):
         """Generate a compilation database."""
         if future.done() and not future.cancelled():
+            OutputPanelHandler.show(future.result())
             log.debug("Database generated. Output: \n%s", future.result())
         else:
             log.debug("Could not generate compilation database.")
