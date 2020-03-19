@@ -4,7 +4,6 @@ environment:
         PACKAGE: "EasyClangComplete"
     matrix:
         - SUBLIME_TEXT_VERSION : "3"
-          PCINSTALL: true
           PYTHON: "C:\\Python36"
           PYTHON_VERSION: 3.6
 
@@ -12,21 +11,19 @@ init:
   - ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
 
 install:
-    - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+    - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%;%APPVEYOR_BUILD_FOLDER%
     - ps: appveyor DownloadFile "https://raw.githubusercontent.com/randy3k/UnitTesting/master/sbin/appveyor.ps1"
     - ps: .\appveyor.ps1 "bootstrap" -verbose
-    - ps: if (${env:PCINSTALL} -eq $true) { .\appveyor.ps1 "install_package_control" -verbose }
+    - ps: .\appveyor.ps1 "install_package_control" -verbose
+    - ps: appveyor DownloadFile https://github.com/bazelbuild/bazel/releases/download/2.2.0/bazel-2.2.0-windows-x86_64.exe -FileName bazel.exe
     # install Package Control
     # - ps: .\appveyor.ps1 "install_package_control" -verbose
     - "python --version"
     - "python -m pip install --upgrade pep8"
     - "python -m pip install --upgrade pep257"
     - "python -m pip install --upgrade pycodestyle"
-    - choco install bazel
 
 build: off
 
 test_script:
     - ps: .\appveyor.ps1 "run_tests" -verbose
-    # testing syntax_test files
-    # - ps: .\appveyor.ps1 "run_syntax_tests" -verbose
