@@ -3,7 +3,6 @@
 from EasyClangComplete.plugin.utils import output_panel_handler
 from unittest import TestCase
 
-import platform
 import sublime
 import imp
 
@@ -12,7 +11,7 @@ imp.reload(output_panel_handler)
 OutputPanelHandler = output_panel_handler.OutputPanelHandler
 
 
-class TestOutputPanelHandler(object):
+class TestOutputPanelHandler(TestCase):
     """Test that we can create an output panel."""
 
     def tearDown(self):
@@ -27,9 +26,3 @@ class TestOutputPanelHandler(object):
         panel_view = window.find_output_panel(OutputPanelHandler._PANEL_TAG)
         contents = panel_view.substr(sublime.Region(0, panel_view.size()))
         self.assertEquals(contents, "hello world")
-
-
-if platform.system() != "Windows":
-    class OutputPanelHandlerTestRunner(TestOutputPanelHandler, TestCase):
-        """Run only if we are not on windows."""
-        pass

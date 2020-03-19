@@ -6,6 +6,7 @@ from EasyClangComplete.tests import gui_test_wrapper
 
 from os import path
 
+import platform
 import sublime
 import imp
 
@@ -37,7 +38,7 @@ class MockFuture():
         return True
 
 
-class test_output_panel_handler(GuiTestWrapper):
+class TestBazelDbGeneration(object):
     """Test that we can create an output panel."""
 
     def tearDown(self):
@@ -116,3 +117,9 @@ class test_output_panel_handler(GuiTestWrapper):
             with open(compdb_file) as f:
                 data = yaml.load(f, Loader=yaml.FullLoader)
                 self.assertEquals(len(data), 0)
+
+
+if platform.system() != "Windows":
+    class BazelTestRunner(TestBazelDbGeneration, GuiTestWrapper):
+        """Run only if we are not on windows."""
+        pass
