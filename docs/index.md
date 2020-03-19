@@ -68,9 +68,12 @@ the box! For more details, read [here](configs/#using-cmake-recommended).
 !!! tip
     Make sure `cmake` is available in your `PATH` or that the setting [cmake binary](settings/#cmake_binary) is set to the full path to your `clang` binary.
 
+#### Bazel <small>(Linux and MacOS only)</small>
+If you have a Bazel project, just run the command `ECC: (Bazel) Generate compile_commands.json` to generate a compilation database file. The plugin can then use this database to complete your code.
+
 #### Other options
-If you cannot use `CMake` in your project there are multiple ways to configure
-the correct compiler flags. The plugin can use:
+If you cannot use CMake or Bazel in your project there are multiple ways to
+configure the correct compiler flags. The plugin can use:
 
 - Settings of the plugin: `common_flags` and `lang_flags`
 - Compilation database: `compile_commands.json`.

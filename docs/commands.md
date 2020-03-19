@@ -28,3 +28,8 @@ Show an information popup with the type of the symbol under the cursor.
 
 Open a new window with **Default** and **User** settings opened side by side for quick adjustment of the settings used by the plugin.
 
+## Generate a compilation database with Bazel
+<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> -> `Generate compile_commands.json`
+
+Uses Bazel through the script provided by [@grailbio](https://github.com/grailbio/bazel-compilation-database) to generate a `compile_commands.json` file in the folder of your `WORKSPACE` file. By default, the plugin will then be able to read this file to get the correct flags.
+

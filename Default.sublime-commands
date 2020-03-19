@@ -1,32 +1,32 @@
 [
     {
-        "caption": "EasyClangComplete: Settings",
+        "caption": "ECC: Settings",
         "command": "edit_settings",
         "args": {
             "base_file": "${packages}/EasyClangComplete/EasyClangComplete.sublime-settings"
         }
     },
     {
-        "caption": "EasyClangComplete: Open completion triggers location",
+        "caption": "ECC: Open completion triggers location",
         "command": "edit_settings",
         "args": {
             "base_file": "${packages}/EasyClangComplete/Preferences.sublime-settings"
         }
     },
     {
-        "caption": "EasyClangComplete: Show all errors",
+        "caption": "ECC: Show all errors",
         "command": "ecc_show_all_errors"
     },
     {
-        "caption": "EasyClangComplete: Clean current CMake cache",
+        "caption": "ECC: Clean current CMake cache",
         "command": "clean_cmake"
     },
     {
-        "caption": "EasyClangComplete: Show popup info",
+        "caption": "ECC: Show popup info",
         "command": "ecc_show_popup_info"
     },
     {
-        "caption": "EasyClangComplete: Bazel: Generate compile_commands.json",
+        "caption": "ECC: (Bazel) Generate compile_commands.json",
         "command": "generate_bazel_comp_db"
     },
 ]

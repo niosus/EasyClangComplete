@@ -37,7 +37,10 @@ the box! For more details, read the plugin
 [docs](https://niosus.github.io/EasyClangComplete/configs/#using-cmake-recommended)
 about CMake.
 
-#### Don't like CMake?
+#### Bazel? (Linux and MacOS only)
+If you use Bazel, you can run a command `Generate compilation database` that is shipped with this plugin, which will generate a `compile_commands.json` in the source folder of your project. The plugin will take it from there. 
+
+#### Don't like CMake or Bazel?
 Don't worry! There are plenty of ways to configure the plugin! Read the
 [related documentation](https://niosus.github.io/EasyClangComplete/configs/)
 for more info!
