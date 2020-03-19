@@ -10,6 +10,7 @@ environment:
 
 init:
   - ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%
+  - choco install bazel
 
 install:
     - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
