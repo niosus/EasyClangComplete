@@ -24,16 +24,15 @@ class Bazel():
             return None
         cmd = [path.join(PKG_FOLDER, 'external',
                          'bazel-compilation-database', 'generate.sh')]
-        output, return_code = Tools.run_command(cmd, cwd=workspace_file.folder)
-        return output, return_code
+        output = Tools.run_command(cmd, cwd=workspace_file.folder)
+        return output
 
     @staticmethod
     def compdb_generated(future):
         """Generate a compilation database."""
         if future.done() and not future.cancelled():
-            output_text, return_code = future.result()
-            log.debug("Database generated. Return Code: %s, Output: \n%s",
-                      return_code, output_text)
+            output_text = future.result()
+            log.debug("Database generated. Output: \n%s", output_text)
             if "ERROR: " in output_text:
                 log.error("Could not generate compilation database. Output: %s",
                           output_text)

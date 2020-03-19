@@ -24,3 +24,8 @@ EasyClangComplete.sublime-workspace
 /docs/.sass-cache/
 
 /site/
+/tests/bazel_project/bazel-bazel_project
+/tests/bazel_project/bazel-bin
+/tests/bazel_project/bazel-out
+/tests/bazel_project/bazel-testlogs
+/tests/bazel_project/compile_commands.json
