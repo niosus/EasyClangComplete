@@ -20,8 +20,9 @@ matrix:
       language: generic
       addons:
         homebrew:
-          packages:
-          - bazel
+          taps: homebrew/cask-versions
+          casks: java8
+          packages: bazel
           update: true
 
 before_install:
