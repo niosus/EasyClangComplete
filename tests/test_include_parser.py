@@ -19,7 +19,7 @@ class TestIncludeParser(TestCase):
             prefix='',
             force_unix_includes=False,
             completion_request=None)
-        self.assertEqual(len(res), 5)
+        self.assertEqual(len(res), 9)
         local_file_path = path.normpath('cmake_tests/lib/a.h')
         expected_completion = [
             '{}\t{}'.format(local_file_path, base_folder), local_file_path]
