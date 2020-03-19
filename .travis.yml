@@ -11,12 +11,12 @@ matrix:
     include:
     - os: linux
       dist: xenial
-      env: DISTRO="Ubuntu"
+      env: DISTRO="linux"
       sudo: required
       services:
       - xvfb
     - os: osx
-      env: DISTRO="OSX"
+      env: DISTRO="darwin"
       language: generic
 
 before_install:
@@ -28,7 +28,7 @@ before_install:
             sudo apt-get update -yqq;
             sudo apt-get install -y clang;
       fi
-    - curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64"
+    - curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-$DISTRO-amd64"
     - chmod +x bazelisk && sudo mv bazelisk /usr/local/bin/bazel
 
 install:
