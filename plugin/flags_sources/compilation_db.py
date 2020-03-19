@@ -153,7 +153,7 @@ class CompilationDb(FlagsSource):
         data = None
         with open(current_db_path) as data_file:
             # We load our json file with yaml to allow for trailing commas.
-            data = yaml.load(data_file)
+            data = yaml.load(data_file, Loader=yaml.FullLoader)
         if not data:
             return None
         parsed_db = {}

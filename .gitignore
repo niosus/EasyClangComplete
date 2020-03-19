@@ -29,3 +29,6 @@ EasyClangComplete.sublime-workspace
 /tests/bazel_project/bazel-out
 /tests/bazel_project/bazel-testlogs
 /tests/bazel_project/compile_commands.json
+tests/bazel/good_project/bazel-*
+*compile_commands.json
+tests/bazel/bad_project/bazel-*
