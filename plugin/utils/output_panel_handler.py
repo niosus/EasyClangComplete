@@ -9,13 +9,16 @@ class OutputPanelHandler():
     @staticmethod
     def show(text):
         """Show the panel with text."""
+        import time
         window = sublime.active_window()
         panel_view = window.find_output_panel(OutputPanelHandler._PANEL_TAG)
-        panel_view.run_command("select_all")
-        panel_view.run_command("right_delete")
         if panel_view is None:
             panel_view = window.create_output_panel(
                 OutputPanelHandler._PANEL_TAG)
+            while panel_view.is_loading():
+                time.sleep(0.1)
+            panel_view.run_command("select_all")
+            panel_view.run_command("right_delete")
 
         settings = panel_view.settings()
         settings.set("tab_size", 0)

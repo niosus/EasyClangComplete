@@ -14,6 +14,11 @@ OutputPanelHandler = output_panel_handler.OutputPanelHandler
 class test_output_panel_handler(TestCase):
     """Test that we can create an output panel."""
 
+    def tearDown(self):
+        """Cleanup method run after every test."""
+        window = sublime.active_window()
+        window.run_command("show_panel", {"panel": "output.UnitTesting"})
+
     def test_panel_creation(self):
         """Test that we can convert time to seconds."""
         OutputPanelHandler.show("hello world")
