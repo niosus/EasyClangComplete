@@ -96,11 +96,6 @@ class test_output_panel_handler(GuiTestWrapper):
         self.assertIn("ERROR: ", output)
         future = MockFuture(output)
         Bazel.compdb_generated(future)
-        compdb_file = path.join(path.dirname(__file__),
-                                'bazel',
-                                'bad_project',
-                                'compile_commands.json')
-        self.assertTrue(path.exists(compdb_file))
         window = sublime.active_window()
         panel_view = window.find_output_panel(OutputPanelHandler._PANEL_TAG)
         panel_content = panel_view.substr(sublime.Region(0, panel_view.size()))
@@ -112,8 +107,12 @@ class test_output_panel_handler(GuiTestWrapper):
         self.assertEquals(len(split_panel_content), len(split_output))
         for panel_str, output_str in zip(split_panel_content, split_output):
             self.assertEquals(panel_str, output_str)
-
-        import yaml
-        with open(compdb_file) as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-            self.assertEquals(len(data), 0)
+        compdb_file = path.join(path.dirname(__file__),
+                                'bazel',
+                                'bad_project',
+                                'compile_commands.json')
+        if path.exists(compdb_file):
+            import yaml
+            with open(compdb_file) as f:
+                data = yaml.load(f, Loader=yaml.FullLoader)
+                self.assertEquals(len(data), 0)
