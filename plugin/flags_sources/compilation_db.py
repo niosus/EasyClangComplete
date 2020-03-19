@@ -7,10 +7,7 @@ from .flags_source import FlagsSource
 from ..utils.file import File
 from ..utils.unique_list import UniqueList
 from ..utils.singleton import ComplationDbCache
-from ..utils.search_scope import TreeSearchScope
 from ..utils.flag import Flag
-from ..utils.tools import PKG_FOLDER
-from ..utils.tools import Tools
 
 from os import path
 from fnmatch import fnmatch
@@ -55,20 +52,6 @@ class CompilationDb(FlagsSource):
         self._header_to_source_map = header_to_source_map
         self._lazy_flag_parsing = lazy_flag_parsing
 
-    @staticmethod
-    def generate_with_bazel(view):
-        """Start thead job to generate the compilation database."""
-        output = ''
-        with CompilationDb._LOCK:
-            workspace_file = File.search(
-                'WORKSPACE', TreeSearchScope(path.dirname(view.file_name())))
-            if not workspace_file:
-                return None
-            cmd = [path.join(PKG_FOLDER, 'external',
-                             'bazel-compilation-database', 'generate.sh')]
-            output = Tools.run_command(cmd, cwd=workspace_file.folder)
-        return output
-
     def get_flags(self, file_path=None, search_scope=None):
         """Get flags for file.
 
@@ -82,43 +65,42 @@ class CompilationDb(FlagsSource):
             given, return a list of all unique flags in this compilation
             database
         """
-        with CompilationDb._LOCK:
-            file_path = File.canonical_path(file_path)
-            current_db_path = self._get_db_path(file_path, search_scope)
-            if not current_db_path:
-                return None
-            db = self._load_current_db(current_db_path)
-            if not db:
-                log.debug("Compilation db not found.")
-                return None
-            # If the file is not in the DB, try to find a related file:
-            if file_path and file_path not in db:
-                log.debug("Searching for related files in db.")
-                related_file_path = self._find_related_sources(file_path, db)
-                if related_file_path:
-                    db[file_path] = db[related_file_path]
-                    file_path = related_file_path
-            # If there are any flags in the DB (directly or via a related file),
-            # retrieve them:
-            if file_path and file_path in db:
-                self._cache[file_path] = current_db_path
-                File.update_mod_time(current_db_path)
-                if self._lazy_flag_parsing and isinstance(db[file_path], dict):
-                    # We only need to parse the entry if we have lazy parsing
-                    # enabled and we haven't parsed it before.
-                    list_of_flags = self._parse_entry(
-                        db[file_path],
-                        path.dirname(current_db_path))
-                    db[file_path] = list_of_flags  # Store parsed flags.
-                    self._cache[current_db_path] = db  # Update db in cache.
-                    return list_of_flags
-                else:
-                    return db[file_path]
-            if CompilationDb.ALL_TAG in db:
-                log.debug("Return 'all' entry of the compilation db.")
-                return db[CompilationDb.ALL_TAG]
-            log.debug("No flags in compilation db for file: '%s'.", file_path)
+        file_path = File.canonical_path(file_path)
+        current_db_path = self._get_db_path(file_path, search_scope)
+        if not current_db_path:
             return None
+        db = self._load_current_db(current_db_path)
+        if not db:
+            log.debug("Compilation db not found.")
+            return None
+        # If the file is not in the DB, try to find a related file:
+        if file_path and file_path not in db:
+            log.debug("Searching for related files in db.")
+            related_file_path = self._find_related_sources(file_path, db)
+            if related_file_path:
+                db[file_path] = db[related_file_path]
+                file_path = related_file_path
+        # If there are any flags in the DB (directly or via a related file),
+        # retrieve them:
+        if file_path and file_path in db:
+            self._cache[file_path] = current_db_path
+            File.update_mod_time(current_db_path)
+            if self._lazy_flag_parsing and isinstance(db[file_path], dict):
+                # We only need to parse the entry if we have lazy parsing
+                # enabled and we haven't parsed it before.
+                list_of_flags = self._parse_entry(
+                    db[file_path],
+                    path.dirname(current_db_path))
+                db[file_path] = list_of_flags  # Store parsed flags.
+                self._cache[current_db_path] = db  # Update db in cache.
+                return list_of_flags
+            else:
+                return db[file_path]
+        if CompilationDb.ALL_TAG in db:
+            log.debug("Return 'all' entry of the compilation db.")
+            return db[CompilationDb.ALL_TAG]
+        log.debug("No flags in compilation db for file: '%s'.", file_path)
+        return None
 
     def _get_db_path(self, file_path, search_scope):
         search_scope = self._update_search_scope_if_needed(search_scope,

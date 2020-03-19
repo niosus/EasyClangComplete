@@ -32,7 +32,7 @@ from .plugin.settings import settings_storage
 from .plugin.utils.subl import subl_bridge
 from .plugin.utils.subl import row_col
 from .plugin.flags_sources import compilation_db
-from .plugin.utils import output_panel_handler
+from .plugin.flags_sources import bazel
 
 
 # Reload all modules modules ignoring those that contain the given string.
@@ -59,7 +59,7 @@ QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 ActionRequest = action_request.ActionRequest
 ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
 CompilationDb = compilation_db.CompilationDb
-OutputPanelHandler = output_panel_handler.OutputPanelHandler
+Bazel = bazel.Bazel
 
 log = logging.getLogger("ECC")
 log.setLevel(logging.DEBUG)
@@ -195,8 +195,8 @@ class GenerateBazelCompDbCommand(sublime_plugin.TextCommand):
             return
         job = ThreadJob(
             name=ThreadJob.GENERATE_DB_TAG,
-            callback=EasyClangComplete.db_generated,
-            function=CompilationDb.generate_with_bazel,
+            function=Bazel.generate_compdb,
+            callback=Bazel.compdb_generated,
             args=[self.view])
         EasyClangComplete.thread_pool.new_job(job)
 
@@ -544,15 +544,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
             function=EasyClangComplete.view_config_manager.trigger_info,
             args=[view, tooltip_request, settings])
         EasyClangComplete.thread_pool.new_job(job)
-
-    @staticmethod
-    def db_generated(future):
-        """Generate a compilation database."""
-        if future.done() and not future.cancelled():
-            OutputPanelHandler.show(future.result())
-            log.debug("Database generated. Output: \n%s", future.result())
-        else:
-            log.debug("Could not generate compilation database.")
 
     def on_query_completions(self, view, prefix, locations):
         """Call this when user queries completions in the code.
