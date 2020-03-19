@@ -12,7 +12,7 @@ imp.reload(output_panel_handler)
 OutputPanelHandler = output_panel_handler.OutputPanelHandler
 
 
-class TestOutputPanelHandler(TestCase):
+class TestOutputPanelHandler(object):
     """Test that we can create an output panel."""
 
     def tearDown(self):
