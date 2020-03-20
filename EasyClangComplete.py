@@ -26,12 +26,10 @@ from .plugin.utils import module_reloader
 from .plugin.utils import singleton
 from .plugin.utils import include_parser
 from .plugin.utils import file
-from .plugin.utils import search_scope
 from .plugin.settings import settings_manager
 from .plugin.settings import settings_storage
 from .plugin.utils.subl import subl_bridge
 from .plugin.utils.subl import row_col
-from .plugin.flags_sources import compilation_db
 from .plugin.flags_sources import bazel
 
 
@@ -45,7 +43,6 @@ ViewConfigManager = view_config_manager.ViewConfigManager
 SublBridge = subl_bridge.SublBridge
 Tools = tools.Tools
 File = file.File
-SearchScope = search_scope.TreeSearchScope
 MoonProgressStatus = progress_status.MoonProgressStatus
 ColorSublimeProgressStatus = progress_status.ColorSublimeProgressStatus
 NoneSublimeProgressStatus = progress_status.NoneSublimeProgressStatus
@@ -58,7 +55,6 @@ ThreadJob = thread_job.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 ActionRequest = action_request.ActionRequest
 ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
-CompilationDb = compilation_db.CompilationDb
 Bazel = bazel.Bazel
 
 log = logging.getLogger("ECC")
