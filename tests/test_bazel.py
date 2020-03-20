@@ -119,7 +119,7 @@ class TestBazelDbGeneration(object):
                 self.assertEquals(len(data), 0)
 
 
-if platform.system() != "Windows":
+if platform.system() == "Linux":
     class BazelTestRunner(TestBazelDbGeneration, GuiTestWrapper):
         """Run only if we are not on windows."""
         pass

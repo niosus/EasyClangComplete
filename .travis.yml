@@ -27,14 +27,9 @@ before_install:
             pip install --upgrade mkdocs==1.0.4 mkdocs-material;
             sudo apt-get update -yqq;
             sudo apt-get install -y clang;
-            curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-$DISTRO-amd64";
+            curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64";
             chmod +x bazelisk && sudo mv bazelisk /usr/local/bin/bazel;
       fi
-    - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-          brew tap bazelbuild/tap;
-          brew install bazelbuild/tap/bazel;
-      fi
-    - bazel --version
 
 install:
     - sh travis.sh bootstrap
