@@ -19,7 +19,9 @@ class BaseProgressStatus(object):
     """A base class for progress status."""
 
     MSG_TAG = '000_ECC'
-    MSG_MASK = 'ECC: [{}]'
+    MSG_MASK = ' | {msg} |'
+    PROGRESS_MASK = 'ECC: [{progress}]'
+    FULL_MASK = PROGRESS_MASK + MSG_MASK
 
     def __init__(self):
         """Initialize progress status."""
@@ -39,14 +41,14 @@ class BaseProgressStatus(object):
         view = sublime.active_window().active_view()
         view.erase_status(BaseProgressStatus.MSG_TAG)
 
-    def show_ready_message(self):
-        """Show ready message."""
+    def show_as_ready(self):
+        """Show ready state."""
         if not self.showing:
             return
         BaseProgressStatus.set_status(
-            BaseProgressStatus.MSG_MASK.format(self.msg_ready))
+            BaseProgressStatus.PROGRESS_MASK.format(progress=self.msg_ready))
 
-    def show_next_message(self):
+    def update_progress(self, message=''):
         """Abstract method. Generate next message."""
         raise NotImplementedError("abstract method is called")
 
@@ -61,15 +63,16 @@ class MoonProgressStatus(BaseProgressStatus):
         self.msg_chars = MSG_CHARS_MOON
         self.msg_ready = MSG_READY_MOON
 
-    def show_next_message(self):
-        """Show next moon phase message."""
+    def update_progress(self, message):
+        """Show next moon phase and a custom message."""
         if not self.showing:
             return
         chars = self.msg_chars
         mod = len(chars)
         self.idx = (self.idx + 1) % mod
         BaseProgressStatus.set_status(
-            BaseProgressStatus.MSG_MASK.format(chars[self.idx]))
+            BaseProgressStatus.FULL_MASK.format(
+                progress=chars[self.idx], msg=message))
 
 
 class ColorSublimeProgressStatus(BaseProgressStatus):
@@ -81,15 +84,16 @@ class ColorSublimeProgressStatus(BaseProgressStatus):
         self.msg_chars = MSG_CHARS_COLOR_SUBLIME
         self.msg_ready = MSG_READY_COLOR_SUBLIME
 
-    def show_next_message(self):
-        """Show next random progress message."""
+    def update_progress(self, message):
+        """Show next random progress indicator and a custom message."""
         if not self.showing:
             return
         from random import sample
         mod = len(self.msg_chars)
         rands = [self.msg_chars[x % mod] for x in sample(range(100), 10)]
         BaseProgressStatus.set_status(
-            BaseProgressStatus.MSG_MASK.format(''.join(rands)))
+            BaseProgressStatus.FULL_MASK.format(
+                progress=''.join(rands), msg=message))
 
 
 class NoneSublimeProgressStatus(BaseProgressStatus):
@@ -100,10 +104,10 @@ class NoneSublimeProgressStatus(BaseProgressStatus):
         super().__init__()
         self.showing = False
 
-    def show_ready_message(self):
+    def show_as_ready(self):
         """Empty implementation."""
         pass
 
-    def show_next_message(self):
+    def update_progress(self, message):
         """Empty implementation."""
         pass

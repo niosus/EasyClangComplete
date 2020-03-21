@@ -47,6 +47,7 @@ class ThreadPool:
         self.__progress_lock = Lock()
 
         self.__show_animation = False
+        self.__current_operation_name = ''
 
         self.__progress_update_delay = 0.1
         self.__progress_idle_delay = 0.3
@@ -91,6 +92,7 @@ class ThreadPool:
         job.future = future  # Set the future for this job.
         with self.__lock:
             self.__active_jobs.append(job)
+            self.__current_operation_name = job.name
             self.__show_animation = True
 
     def __on_job_done(self, future):
@@ -111,10 +113,11 @@ class ThreadPool:
                 if not self.__progress_status:
                     sleep_time = self.__progress_idle_delay
                 elif self.__show_animation:
-                    self.__progress_status.show_next_message()
+                    self.__progress_status.update_progress(
+                        self.__current_operation_name)
                     sleep_time = self.__progress_update_delay
                 else:
-                    self.__progress_status.show_ready_message()
+                    self.__progress_status.show_as_ready()
                     sleep_time = self.__progress_idle_delay
             # Allow some time for progress status to be updated.
             time.sleep(sleep_time)

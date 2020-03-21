@@ -19,12 +19,12 @@ class ThreadJob:
         args (object[]): Sequence of additional arguments for `function`.
     """
 
-    UPDATE_TAG = "update"
-    CLEAR_TAG = "clear"
-    COMPLETE_TAG = "complete"
-    COMPLETE_INCLUDES_TAG = "complete_includes"
-    GENERATE_DB_TAG = "generate_db"
-    INFO_TAG = "info"
+    UPDATE_TAG = "Updating translation unit"
+    CLEAR_TAG = "Clearing"
+    COMPLETE_TAG = "Completing"
+    COMPLETE_INCLUDES_TAG = "Competing includes"
+    GENERATE_DB_TAG = "Generating compilation database"
+    INFO_TAG = "Showing info"
 
     def __init__(self, name, callback, function, args):
         """Initialize a job.
