@@ -7,6 +7,13 @@ class OutputPanelHandler():
     _PANEL_TAG = "ECC"
 
     @staticmethod
+    def hide_panel():
+        """Hide the output panel."""
+        window = sublime.active_window()
+        window.run_command(
+            "hide_panel", {"panel": "output." + OutputPanelHandler._PANEL_TAG})
+
+    @staticmethod
     def show(text):
         """Show the panel with text."""
         import time

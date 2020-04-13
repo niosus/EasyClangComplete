@@ -17,6 +17,7 @@ class Bazel():
     @staticmethod
     def generate_compdb(view):
         """Generate the compilation database."""
+        OutputPanelHandler.hide_panel()
         output = ''
         workspace_file = File.search(
             'WORKSPACE', TreeSearchScope(path.dirname(view.file_name())))

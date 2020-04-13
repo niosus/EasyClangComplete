@@ -193,6 +193,8 @@ class CMakeFile(FlagsSource):
         if not cmake_file or not cmake_file.loaded():
             return None
 
+        OutputPanelHandler.hide_panel()
+
         if not prefix_paths:
             prefix_paths = []
         if not flags:
@@ -227,7 +229,12 @@ class CMakeFile(FlagsSource):
         log.debug(' running command: %s', cmake_cmd)
         output_text = Tools.run_command(
             command=cmake_cmd, cwd=tempdir, env=updated_environment)
-        log.debug("cmake produced output: \n%s", output_text)
+        log.debug("Cmake produced output: \n%s", output_text)
+        if "CMake Error" in output_text:
+            error_msg = "Error in file:\n{}\n\n{}".format(
+                cmake_file.full_path, output_text)
+            OutputPanelHandler.show(error_msg)
+            return None
         database_path = path.join(tempdir, CompilationDb._FILE_NAME)
         if not path.exists(database_path):
             log.error(
