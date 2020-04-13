@@ -11,6 +11,7 @@ from ..utils.singleton import CMakeFileCache
 from ..utils.catkinizer import Catkinizer
 from ..utils.search_scope import TreeSearchScope
 from ..utils.subl.subl_bridge import SublBridge
+from ..utils.output_panel_handler import OutputPanelHandler
 
 from os import path
 
@@ -31,6 +32,7 @@ class CMakeFile(FlagsSource):
     """
     _FILE_NAME = 'CMakeLists.txt'
     _DEP_REGEX = re.compile(r'\"(.+\..+)\"')
+    _CMAKE_PREFIX_PATHS_TAG = 'CMAKE_PREFIX_PATH'
 
     def __init__(self,
                  include_prefixes,
@@ -154,6 +156,24 @@ class CMakeFile(FlagsSource):
                                  Tools.get_unique_str(cmake_path))
 
     @staticmethod
+    def __prepend_prefix_paths(prefix_paths):
+        updated_environment = os.environ.copy()
+        log.debug("Prefix paths to prepend: %s", prefix_paths)
+        merged_paths = ""
+        for prefix_path in prefix_paths:
+            merged_paths += prefix_path + ":"
+        log.debug("Prepended prefix paths: %s", merged_paths)
+        if CMakeFile._CMAKE_PREFIX_PATHS_TAG not in updated_environment:
+            updated_environment[CMakeFile._CMAKE_PREFIX_PATHS_TAG] = ''
+        merged_paths = "{}{}".format(
+            merged_paths,
+            updated_environment[CMakeFile._CMAKE_PREFIX_PATHS_TAG])
+        updated_environment[CMakeFile._CMAKE_PREFIX_PATHS_TAG] = merged_paths
+        log.debug("Updated CMAKE_PREFIX_PATH: %s",
+                  updated_environment[CMakeFile._CMAKE_PREFIX_PATHS_TAG])
+        return updated_environment
+
+    @staticmethod
     def __compile_cmake(cmake_file, cmake_binary, prefix_paths, flags,
                         target_compilers):
         """Compile cmake given a CMakeLists.txt file.
@@ -183,15 +203,7 @@ class CMakeFile(FlagsSource):
         tempdir = CMakeFile.unique_folder_name(cmake_file.full_path)
         # sometimes there are variables missing to carry out the build. We
         # can set them here from the settings.
-        my_env = os.environ.copy()
-        log.debug("prefix paths: %s", prefix_paths)
-        merged_paths = ""
-        for prefix_path in prefix_paths:
-            merged_paths += prefix_path + ":"
-        merged_paths = merged_paths[:-1]
-        log.debug("merged paths: %s", merged_paths)
-        my_env['CMAKE_PREFIX_PATH'] = merged_paths
-        log.debug("CMAKE_PREFIX_PATH: %s", my_env['CMAKE_PREFIX_PATH'])
+        updated_environment = CMakeFile.__prepend_prefix_paths(prefix_paths)
 
         # If target compilers are set, create a toolchain file to force
         # cmake using them:
@@ -214,11 +226,13 @@ class CMakeFile(FlagsSource):
 
         log.debug(' running command: %s', cmake_cmd)
         output_text = Tools.run_command(
-            command=cmake_cmd, cwd=tempdir, env=my_env)
+            command=cmake_cmd, cwd=tempdir, env=updated_environment)
         log.debug("cmake produced output: \n%s", output_text)
         database_path = path.join(tempdir, CompilationDb._FILE_NAME)
         if not path.exists(database_path):
-            log.error("cmake has finished, but no compilation database.")
+            log.error(
+                "Cmake has finished, but generated no compilation database.")
+            OutputPanelHandler.show(output_text)
             return None
         # update the dependency modification time
         dep_file_path = path.join(tempdir, 'CMakeFiles', 'Makefile.cmake')
