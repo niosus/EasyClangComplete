@@ -1,0 +1,36 @@
+Version 6.4.1
+=============
+
+Improvements and bug fixes:
+---------------------------
+- Fix progress showing a wrong job name.
+- Show console output if CMake generation fails.
+- Fix cmake flags source overwriting CMAKE_PREFIX_PATHS environment variable.
+- Add more suffixes to find libclang, thanks @jeeb.
+- Fix docs generation after updating the theme.
+
+Development announcement:
+-------------------------
+I decided to move away from using the "dev" branch. Now all the development
+will be happening in the "master" branch. The releases will be sourced from
+the "release" branch. See contribution guidelines for details.
+
+
+💜 this plugin? Consider supporting its development! 💰💸💶
+------------------------------------------------------------
+‼️NEW‼️ Head to GitHub Sponsors and support my work if you enjoy the plugin!
+https://github.com/sponsors/niosus
+
+Alternatively, become a backer on Open Collective!
+https://opencollective.com/EasyClangComplete#backers
+
+I you use this plugin in a company, push to become a sponsor!
+https://opencollective.com/EasyClangComplete#sponsor
+
+This plugin took a significant amount of effort. It is available and will always
+be available for free, both as freedom and as beer.
+
+If you appreciate it - support it. How much would you say it is worth to you?
+
+For more info head here:
+https://github.com/niosus/EasyClangComplete#support-it
