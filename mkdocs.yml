@@ -17,12 +17,12 @@ theme:
   favicon: 'img/favicon.ico'
 extra:
   social:
-    - type: 'github'
-      link: 'https://github.com/niosus'
-    - type: 'linkedin'
-      link: 'https://www.linkedin.com/in/igor-bogoslavskyi-72650b43/'
+    - icon: fontawesome/brands/github
+      link: https://github.com/niosus
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/igor-bogoslavskyi-72650b43/
 
-copyright: 'Copyright &copy; 2015 - 2019 Igor Bogoslavskyi'
+copyright: 'Copyright &copy; 2015 - 2020 Igor Bogoslavskyi'
 
 markdown_extensions:
   - admonition

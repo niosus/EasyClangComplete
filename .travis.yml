@@ -22,7 +22,7 @@ before_install:
     - if [ "$TRAVIS_OS_NAME" == "linux"  ]; then
             pip install --upgrade pip pycodestyle pep257;
             pip install --upgrade coverage==4.5.4;
-            pip install --upgrade mkdocs==1.0.4 mkdocs-material;
+            pip install --upgrade mkdocs mkdocs-material;
             sudo apt-get update -yqq;
             sudo apt-get install -y clang;
             curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64";
