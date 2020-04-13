@@ -92,9 +92,8 @@ class ThreadPool:
         job.future = future  # Set the future for this job.
         with self.__lock:
             self.__active_jobs.append(job)
-            with self.__progress_lock:
-                self.__show_animation = True
-                self.__current_operation_name = self.__active_jobs[0].name
+            self.__show_animation = True
+            self.__current_operation_name = self.__active_jobs[0].name
 
     def __on_job_done(self, future):
         """Call this when the job is done or cancelled."""
@@ -103,11 +102,10 @@ class ThreadPool:
         with self.__lock:
             self.__active_jobs[:] = [
                 job for job in self.__active_jobs if not job.future.done()]
-            with self.__progress_lock:
-                if len(self.__active_jobs) < 1:
-                    self.__show_animation = False
-                else:
-                    self.__current_operation_name = self.__active_jobs[0].name
+            if len(self.__active_jobs) < 1:
+                self.__show_animation = False
+            else:
+                self.__current_operation_name = self.__active_jobs[0].name
 
     def __animate_progress(self):
         """Change the status message, mostly used to animate progress."""
