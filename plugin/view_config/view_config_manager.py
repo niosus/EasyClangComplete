@@ -9,6 +9,7 @@ from threading import RLock
 from threading import Timer
 
 from ..utils.subl.subl_bridge import SublBridge
+from ..utils.subl.row_col import ZeroIndexedRowCol
 
 from .view_config import ViewConfig
 
@@ -119,8 +120,8 @@ class ViewConfigManager(object):
         if not config:
             log.debug("Config is not ready yet. No reference is available.")
             return None
-        (row, col) = SublBridge.cursor_pos(view)
-        return config.completer.get_declaration_location(view, row, col)
+        rowcol = ZeroIndexedRowCol.from_1d_location(view, None)
+        return config.completer.get_declaration_location(view, rowcol)
 
     def trigger_info(self, view, tooltip_request, settings):
         """Handle getting info from completer.
