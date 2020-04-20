@@ -14,7 +14,7 @@ https://github.com/sponsors/niosus
 Alternatively, become a backer on Open Collective!
 https://opencollective.com/EasyClangComplete#backers
 
-I you use this plugin in a company, push to become a sponsor!
+If you use this plugin in a company, push to become a sponsor!
 https://opencollective.com/EasyClangComplete#sponsor
 
 This plugin took a significant amount of effort. It is available and will always
