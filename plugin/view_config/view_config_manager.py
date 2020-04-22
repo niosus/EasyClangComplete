@@ -120,7 +120,7 @@ class ViewConfigManager(object):
         if not config:
             log.debug("Config is not ready yet. No reference is available.")
             return None
-        rowcol = ZeroIndexedRowCol.from_1d_location(view, None)
+        rowcol = ZeroIndexedRowCol.from_current_cursor_pos(view)
         return config.completer.get_declaration_location(view, rowcol)
 
     def trigger_info(self, view, tooltip_request, settings):
