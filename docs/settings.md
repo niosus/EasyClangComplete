@@ -134,8 +134,23 @@ page](../configs/#geting-correct-compiler-flags) of the documentation.
 #### CMake-specific options
 CMake is handled in a special way and there are additional settings that can be specified for this type of flag source:
 
-- `"flags": [<flags>]` <small>OPTIONAL</small> - defines a list of flags that can be passed to the `cmake` program upon calling it
-- `"prefix_paths": [<paths>]` <small>OPTIONAL</small> - defines a list of paths that will be set as prefix paths when running `cmake`
+- `"flags": [<flags>]` <small>OPTIONAL</small> - defines a list of flags that can be passed to the `cmake` program upon calling it. Note, that you can still use any variables or glob expansion in the flags and it should just work. 
+
+??? example "Example cmake flags <small>(click to expand)</small>"
+    ```json
+    "ecc_flags_sources":
+    [
+        {
+            "file": "CMakeLists.txt",
+            "flags":
+            [
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DCMAKE_PREFIX_PATH=~/some_folder/*",
+                "-D SOME_FLAG=ON"
+            ]
+        }
+    ]
+    ```
 
 #### Search order
 The flag sources are searched in a strictly hierarchical order from top to
@@ -153,8 +168,7 @@ explanations.
         "flags":
         [
           "-DCMAKE_BUILD_TYPE=Release",
-        ],
-        "prefix_paths": ["/opt/ros/indigo"]
+        ]
       },
       {
         "file": "Makefile"
@@ -166,7 +180,7 @@ explanations.
     ```
     Here, first the plugin tries to find a `CMakeLists.txt` with `project(<smth>)` inside of it. If this is successful, then it invokes a command
     ```bash
-    cmake -DCMAKE_PREFIX_PATHS=/opt/ros/indigo -DCMAKE_BUILD_TYPE=Release <folder_to_CMakeLists.txt>
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release <folder_to_CMakeLists.txt>
     ```
     storing the generated files in a temporary build folder.
 
