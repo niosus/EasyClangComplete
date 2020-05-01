@@ -136,7 +136,7 @@ class SettingsStorage:
         self.__load_vars_from_settings(settings_handle,
                                        project_specific=False)
 
-    def update_from_view(self, view):
+    def update_from_view(self, view, project_specific=True):
         """Update from view using view-specific settings.
 
         Args:
@@ -148,7 +148,7 @@ class SettingsStorage:
                 log.error("no view to populate common flags from")
                 return
             self.__load_vars_from_settings(view.settings(),
-                                           project_specific=True)
+                                           project_specific=project_specific)
             # Initialize wildcard values with view.
             self.__update_wildcard_values(view)
             # Replace wildcards in various paths.
@@ -217,6 +217,16 @@ class SettingsStorage:
             error_msg = "Linter mark style '{}' is not one of {}".format(
                 self.linter_mark_style, SettingsStorage.LINTER_MARK_STYLES)
             return False, error_msg
+        flags_sources_valid, error_msg = self.__flag_sources_are_valid()
+        if not flags_sources_valid:
+            return False, error_msg
+        lang_tags_valid, error_msg = self.__are_language_tags_valid()
+        if not lang_tags_valid:
+            return False, error_msg
+        return True, None
+
+    def __flag_sources_are_valid(self):
+        """Check that flag sources are valid."""
         for source_dict in self.flags_sources:
             if SettingsStorage.FILE_TAG not in source_dict:
                 error_msg = "No '%s' setting in a flags source '{}'".format(
@@ -229,7 +239,10 @@ class SettingsStorage:
                     source_dict[SettingsStorage.FILE_TAG],
                     SettingsStorage.FLAG_SOURCES)
                 return False, error_msg
-        # Check if all languages are present in language-specific settings.
+        return True, None
+
+    def __are_language_tags_valid(self):
+        """Check that language tags are valid."""
         for lang_tag in SublBridge.LANG_TAGS:
             if lang_tag not in self.lang_flags.keys():
                 error_msg = "lang '{}' is not in {}".format(
@@ -243,7 +256,7 @@ class SettingsStorage:
                 error_msg = "No '{}' in syntaxes '{}'".format(
                     lang_tag, self.target_compilers)
                 return False, error_msg
-        return True, ""
+        return True, None
 
     def __load_vars_from_settings(self, settings, project_specific=False):
         """Load all settings and add them as attributes of self.
@@ -283,6 +296,28 @@ class SettingsStorage:
 
     def __populate_flags_source_paths(self):
         """Populate variables inside flags sources."""
+        def expand_paths_in_flags_if_needed(flags):
+            """Expand paths in flags if they are present."""
+            from os import path
+            new_flags = []
+            for flag in flags:
+                if '=' not in flag:
+                    new_flags.append(flag)
+                split_flag = flag.split('=')
+                prefix = split_flag[0].strip()
+                value = split_flag[1].strip()
+                expanded_values = self.__replace_wildcard_if_needed(
+                    value)
+                if not expanded_values:
+                    continue
+                joined_values = ';'.join(expanded_values)
+                if path.isabs(expanded_values[0]):
+                    new_flags.append(
+                        prefix + '="' + joined_values + '"')
+                else:
+                    new_flags.append(prefix + '=' + joined_values)
+            return new_flags
+
         if not self.flags_sources:
             log.critical(" Cannot update paths of flag sources.")
             return
@@ -292,8 +327,12 @@ class SettingsStorage:
                     continue
                 if not source_dict[option]:
                     continue
-                source_dict[option] = self.__replace_wildcard_if_needed(
-                    source_dict[option])
+                if option == SettingsStorage.FLAGS_TAG:
+                    source_dict[option] = expand_paths_in_flags_if_needed(
+                        source_dict[option])
+                else:
+                    source_dict[option] = self.__replace_wildcard_if_needed(
+                        source_dict[option])
 
     def __populate_common_flags(self):
         """Populate the variables inside common_flags with real values."""
@@ -320,6 +359,7 @@ class SettingsStorage:
             return self.__replace_wildcard_if_needed([query])
         if not isinstance(query, list):
             log.critical("We can only update wildcards in a list!")
+            return None
         result = []
         for query_path in query:
             result += File.expand_all(input_path=query_path,

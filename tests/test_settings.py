@@ -7,12 +7,15 @@ from os import path
 from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 
 from EasyClangComplete.plugin.settings import settings_manager
+from EasyClangComplete.plugin.settings import settings_storage
 from EasyClangComplete.plugin.utils import flag
 
 imp.reload(settings_manager)
+imp.reload(settings_storage)
 imp.reload(flag)
 
 SettingsManager = settings_manager.SettingsManager
+SettingsStorage = settings_storage.SettingsStorage
 Flag = flag.Flag
 
 
@@ -44,6 +47,43 @@ class test_settings(GuiTestWrapper):
         settings = manager.user_settings()
         valid, _ = settings.is_valid()
         self.assertTrue(valid)
+
+    def test_parse_cmake_flags(self):
+        """Testing that we can parse cmake flags."""
+        file_name = path.join(path.dirname(__file__),
+                              'test_files',
+                              'test_wrong_triggers.cpp')
+        self.set_up_view(file_name)
+        current_folder = path.dirname(__file__)
+        flags_sources = [
+            {
+                "file": "CMakeLists.txt",
+                "flags": [
+                    "-DBLAH={}/*".format(current_folder),
+                    "-DSMTH=ON",
+                    "-D XXX=1",
+                    "-D FLAG=word"
+                ]
+            }
+        ]
+
+        self.view.settings().set("flags_sources", flags_sources)
+        settings = SettingsManager().user_settings()
+        settings.update_from_view(self.view, project_specific=False)
+        valid, _ = settings.is_valid()
+        self.assertTrue(valid)
+        self.assertEquals(len(settings.flags_sources), 1)
+        entry = settings.flags_sources[0]
+        self.assertIn('flags', entry)
+        flags = entry['flags']
+        self.assertEquals(len(flags), 4)
+        self.assertIn('-DSMTH=ON', flags)
+        self.assertIn('-D FLAG=word', flags)
+        self.assertIn('-D XXX=1', flags)
+        import glob
+        all_files = glob.glob(path.join(current_folder, "*"))
+        for file in all_files:
+            self.assertIn(file, flags[0])
 
     def test_populate_flags(self):
         """Testing include population."""

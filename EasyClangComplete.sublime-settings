@@ -44,13 +44,13 @@
   //  - ".clang_complete"
   //
   // Every entry has an option:
-  //  - "search_in": <path>  <-- a path to the folder[s] containing the file.
+  //    "search_in": <path>  <-- a path to the folder containing the file.
   //
-  // "cmake" entry has additional options:
-  //  - "flags": [<flags>]        <-- Additional flags to pass to cmake.
-  //  - "prefix_paths": [<paths>] <-- array of folders that should be
-  //                                  appended to CMAKE_PREFIX_PATHS before
-  //                                  cmake is run.
+  // The entry with "CMakeLists.txt" entry has additional option to set flags.
+  //  Note that if any variables from above or globbing symbols are encountered
+  //  in the body of the flag, the flag will be treated as a path and these
+  //  symbols will be expanded. Set these flags as follows:
+  //    "flags": [<flags>]  <-- Flags to pass to cmake.
   "flags_sources": [
     {"file": "CMakeLists.txt"},
     {"file": "compile_commands.json"},
