@@ -1,0 +1,35 @@
+Version 6.4.3
+=============
+
+Improvements and bug fixes:
+---------------------------
+- More powerful cmake-related flags parsing. If you ever wanted to use flags
+  like `-DCMAKE_PREFIX_PATH=~/some_path/*`, now you can!
+  See [1] for details.
+- **WARNING**: the sub-setting of the `CMakeLists.txt` entry `prefix_paths`
+  is now deprecated as all the functionality is covered by the more useful
+  `flags` sub-setting. You can still use it for now, but I will remove it
+  in the future.
+- Fixed a jump to a wrong location when going to declaration, thanks @berteauxjb
+- Fixed typo in the message below, thanks @berkus
+
+[1]: https://niosus.github.io/EasyClangComplete/settings/#cmake-specific-options
+
+Love this plugin? Support its development! 💰💸💶
+-------------------------------------------------
+‼️NEW‼️ Head to GitHub Sponsors and support my work if you enjoy the plugin!
+https://github.com/sponsors/niosus
+
+Alternatively, become a backer on Open Collective!
+https://opencollective.com/EasyClangComplete#backers
+
+If you use this plugin in a company, push to become a sponsor!
+https://opencollective.com/EasyClangComplete#sponsor
+
+This plugin took a significant amount of effort. It is available and will always
+be available for free, both as freedom and as beer.
+
+If you appreciate it - support it. How much would you say it is worth to you?
+
+For more info head here:
+https://github.com/niosus/EasyClangComplete#support-it
