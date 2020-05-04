@@ -12,6 +12,7 @@ import logging
 
 from .base_complete import BaseCompleter
 from .compiler_variant import LibClangCompilerVariant
+from .compiler_variant import LibClangClCompilerVariant
 from ..utils.clang_utils import ClangUtils
 from ..utils.subl.subl_bridge import SublBridge
 from ..utils.subl.row_col import ZeroIndexedRowCol
@@ -58,7 +59,11 @@ class Completer(BaseCompleter):
         super().__init__(settings, error_vis)
 
         # Create compiler options of specific variant of the compiler.
-        self.compiler_variant = LibClangCompilerVariant()
+        filename = path.splitext(path.basename(self.clang_binary))[0]
+        if filename.startswith('clang-cl'):
+            self.compiler_variant = LibClangClCompilerVariant()
+        else:
+            self.compiler_variant = LibClangCompilerVariant()
 
         # init tu related variables
         with Completer.rlock:

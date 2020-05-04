@@ -123,3 +123,46 @@ class LibClangCompilerVariant(ClangCompilerVariant):
             error_dict[LibClangCompilerVariant.SEVERITY_TAG] = severity
             errors.append(error_dict)
         return errors
+
+class LibClangClCompilerVariant(ClangClCompilerVariant):
+    """Encapsulation of libclang (with clang-cl) specific options.
+
+    Attributes:
+        POS_REGEX (re): regex to find position of an error
+    """
+    POS_REGEX = re.compile(r"'(?P<file>.+)'.*" +  # file
+                           r"line\s(?P<row>\d+), " +  # row
+                           r"column\s(?P<col>\d+)")  # col
+    SEVERITY_TAG = 'severity'
+
+    def errors_from_output(self, output):
+        """Parse errors received from diagnostics of a translation unit.
+
+        This is used with libclang.
+
+        Args:
+            output (diagnostics): diagnostics from a translation unit
+
+        Returns:
+            list(dict): a list of parsed errors
+        """
+        errors = []
+        for diag in output:
+            location = str(diag.location)
+            spelling = str(diag.spelling)
+            severity = diag.severity
+            # [HACK]: have found no other way as there seems to be no option to
+            # pass to libclang to avoid producing this error
+            if "#pragma once" in spelling:
+                log.debug("explicitly omit warning about pragma once.")
+                continue
+            pos_search = self.POS_REGEX.search(location)
+            if not pos_search:
+                # not valid, continue
+                continue
+            error_dict = pos_search.groupdict()
+            error_dict.update({'error': spelling})
+            error_dict = CompilerVariant._to_zero_based_index(error_dict)
+            error_dict[LibClangClCompilerVariant.SEVERITY_TAG] = severity
+            errors.append(error_dict)
+        return errors
