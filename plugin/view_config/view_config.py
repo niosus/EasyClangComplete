@@ -386,7 +386,7 @@ class ViewConfig(object):
         if target_compiler is None and settings.use_default_includes:
             target_compiler = settings.clang_binary
 
-        compiler_flags=settings.compiler_args_to_get_builtins[lang_tag]
+        compiler_flags = settings.compiler_args_to_get_builtins[lang_tag]
 
         if target_compiler is not None:
             built_ins = CompilerBuiltIns(compiler=target_compiler,
