@@ -22,7 +22,7 @@ class CompilerBuiltIns:
     __cache = dict()
     __TEMP_DEFAULT_FILE_NAME = "ECC_temp_file.cpp"
 
-    def __init__(self, compiler, lang_flags, filename=None):
+    def __init__(self, compiler, compiler_flags, lang_flags, filename=None):
         """
         Create an object holding the built-in flags of a compiler.
 
@@ -53,23 +53,24 @@ class CompilerBuiltIns:
                    filename, working_dir)
 
         self.__generate_flags(compiler=compiler,
+                              compiler_flags=compiler_flags,
                               filename=filename,
                               working_dir=working_dir,
                               lang_flags=lang_flags)
 
-    def __generate_flags(self, compiler, filename, working_dir, lang_flags):
+    def __generate_flags(self, compiler, compiler_flags, filename, working_dir, lang_flags):
         if not lang_flags:
             lang_flags = []
         if not compiler:
             return
-        cmd = [compiler] + lang_flags + ['-c', filename, '-dM', '-v', '-E']
+        cmd = [compiler] + lang_flags + compiler_flags + ['-c', filename, '-dM', '-v', '-E']
         cmd_str = ' '.join(cmd)
         if cmd_str in CompilerBuiltIns.__cache:
             _log.debug("Using cached default flags.")
             self.__includes, self.__defines = CompilerBuiltIns.__cache[cmd_str]
             return
         _log.debug("Generating new default flags with cmd: '%s'", cmd)
-        output = Tools.run_command(cmd, cwd=working_dir)
+        output = Tools.run_command(command=cmd, cwd=working_dir)
         if not output:
             _log.warning("No output from cmd to get default flags: %s", cmd)
             return
