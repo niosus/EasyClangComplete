@@ -58,16 +58,16 @@ class CompilerBuiltIns:
                               working_dir=working_dir,
                               lang_flags=lang_flags)
 
-    def __generate_flags(self, 
-                         compiler, compiler_flags, 
-                         filename, working_dir, 
+    def __generate_flags(self,
+                         compiler, compiler_flags,
+                         filename, working_dir,
                          lang_flags):
         if not lang_flags:
             lang_flags = []
         if not compiler:
             return
         cmd = [compiler] + lang_flags + compiler_flags \
-              + ['-c', filename, '-dM', '-v', '-E']
+            + ['-c', filename, '-dM', '-v', '-E']
         cmd_str = ' '.join(cmd)
         if cmd_str in CompilerBuiltIns.__cache:
             _log.debug("Using cached default flags.")
