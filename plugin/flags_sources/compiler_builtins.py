@@ -22,7 +22,7 @@ class CompilerBuiltIns:
     __cache = dict()
     __TEMP_DEFAULT_FILE_NAME = "ECC_temp_file.cpp"
 
-    def __init__(self, compiler, compiler_flags, lang_flags, filename=None):
+    def __init__(self, compiler, lang_flags, filename=None, compiler_flags):
         """
         Create an object holding the built-in flags of a compiler.
 
