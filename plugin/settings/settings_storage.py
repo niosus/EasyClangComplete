@@ -90,6 +90,7 @@ class SettingsStorage:
         "clang_binary",
         "cmake_binary",
         "common_flags",
+        "compiler_args_to_get_builtins",
         "flags_sources",
         "force_unix_includes",
         "gutter_style",
@@ -255,6 +256,10 @@ class SettingsStorage:
             if lang_tag not in self.target_compilers:
                 error_msg = "No '{}' in syntaxes '{}'".format(
                     lang_tag, self.target_compilers)
+                return False, error_msg
+            if lang_tag not in self.compiler_args_to_get_builtins:
+                error_msg = "lang '{}' is not in {}".format(
+                    lang_tag, self.compiler_args_to_get_builtins)
                 return False, error_msg
         return True, None
 
