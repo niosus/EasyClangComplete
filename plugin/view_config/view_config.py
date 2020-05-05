@@ -391,8 +391,8 @@ class ViewConfig(object):
         if target_compiler is not None:
             built_ins = CompilerBuiltIns(compiler=target_compiler,
                                          lang_flags=lang_flags,
-                                         filename=None,
-                                         compiler_flags=compiler_flags)
+                                         compiler_flags=compiler_flags,
+                                         filename=None)
             if settings.use_default_definitions:
                 lang_flags += built_ins.defines
             lang_flags += built_ins.includes
