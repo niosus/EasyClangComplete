@@ -388,7 +388,6 @@ class ViewConfig(object):
             compiler_flags = target_compiler["flags"]
             target_compiler = target_compiler["compiler"]
 
-
         if target_compiler is None and settings.use_default_includes:
             target_compiler = settings.clang_binary
 
