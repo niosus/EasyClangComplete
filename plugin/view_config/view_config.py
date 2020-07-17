@@ -383,7 +383,7 @@ class ViewConfig(object):
         # If the user provided explicit target compilers, retrieve their
         # default flags and append them to the list:
         target_compiler = settings.target_compilers[lang_tag]
-        flags = []
+        compiler_flags = []
         if isinstance(target_compiler, dict):
             compiler_flags = target_compiler["flags"]
             target_compiler = target_compiler["compiler"]
