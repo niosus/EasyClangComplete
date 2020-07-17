@@ -383,10 +383,14 @@ class ViewConfig(object):
         # If the user provided explicit target compilers, retrieve their
         # default flags and append them to the list:
         target_compiler = settings.target_compilers[lang_tag]
+        flags = []
+        if isinstance(target_compiler, dict):
+            compiler_flags = target_compiler["flags"]
+            target_compiler = target_compiler["compiler"]
+
+
         if target_compiler is None and settings.use_default_includes:
             target_compiler = settings.clang_binary
-
-        compiler_flags = settings.compiler_args_to_get_builtins[lang_tag]
 
         if target_compiler is not None:
             built_ins = CompilerBuiltIns(compiler=target_compiler,

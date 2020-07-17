@@ -231,23 +231,10 @@
   // quality of the completions, however, in some corner cases it might cause
   // completions to fail entirely.
   "target_compilers": {
-    "C":              null,
+    "C":              {"compiler": "clang", "flags": ["-flag1", "-flag2"]},
     "CPP":            null,
     "OBJECTIVE_C":    null,
     "OBJECTIVE_CPP":  null
-  },
-
-  // Additional compiler arguments that are used when retrieving default includes
-  // and definitions from the target compiler.
-  // Useful when cross developing.
-  // example:
-
-  // "C":             ["--sysroot=~/GCC/arm-none-eabi", "target=arm-none-eabi"]
-  "compiler_args_to_get_builtins": {
-    "C":              [],
-    "CPP":            [],
-    "OBJECTIVE_C":    [],
-    "OBJECTIVE_CPP":  []
   },
 
   // If true, on Windows, the paths will have a '/' too.

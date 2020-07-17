@@ -90,7 +90,6 @@ class SettingsStorage:
         "clang_binary",
         "cmake_binary",
         "common_flags",
-        "compiler_args_to_get_builtins",
         "flags_sources",
         "force_unix_includes",
         "gutter_style",
@@ -257,10 +256,15 @@ class SettingsStorage:
                 error_msg = "No '{}' in syntaxes '{}'".format(
                     lang_tag, self.target_compilers)
                 return False, error_msg
-            if lang_tag not in self.compiler_args_to_get_builtins:
-                error_msg = "lang '{}' is not in {}".format(
-                    lang_tag, self.compiler_args_to_get_builtins)
-                return False, error_msg
+            elif isinstance(self.target_compilers[lang_tag],dict):
+                if "compiler" not in self.target_compilers[lang_tag]:
+                    error_msg = "'compiler' not in '{}'".format(
+                        self.target_compilers[lang_tag])
+                    return False, error_msg
+                if "flags" not in self.target_compilers[lang_tag]:
+                    error_msg = "'flags' not in '{}'".format(
+                        self.target_compilers[lang_tag])
+                    return False, error_msg 
         return True, None
 
     def __load_vars_from_settings(self, settings, project_specific=False):
