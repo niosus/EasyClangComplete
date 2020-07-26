@@ -106,6 +106,7 @@ class ViewConfigManager(object):
 
     def clear_for_view(self, v_id):
         """Clear config for a view id."""
+        assert isinstance(v_id, int), "View id should be an int."
         import gc
         log.debug("Trying to clear config for view: %s", v_id)
         with self.__rlock:

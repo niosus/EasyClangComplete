@@ -166,7 +166,8 @@ class CleanCmakeCommand(sublime_plugin.TextCommand):
             log.debug("Cleaning file: '%s'", cmake_file_path)
             del cmake_cache[file_path]
             del cmake_cache[cmake_file_path]
-            EasyClangComplete.view_config_manager.clear_for_view(self.view)
+            EasyClangComplete.view_config_manager.clear_for_view(
+                self.view.buffer_id())
             # Better safe than sorry. Cleanup!
             gc.collect()
             temp_proj_dir = CMakeFile.unique_folder_name(cmake_file_path)
