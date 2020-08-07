@@ -303,6 +303,7 @@ class SettingsStorage:
             for flag in flags:
                 if '=' not in flag:
                     new_flags.append(flag)
+                    continue
                 split_flag = flag.split('=')
                 prefix = split_flag[0].strip()
                 value = split_flag[1].strip()
