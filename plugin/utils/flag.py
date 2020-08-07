@@ -306,6 +306,7 @@ class Flag:
         "-mthread-model",
         "-o",
         "-serialize-diagnostics",
+        "-target",
         "-T",
         "-Tbss",
         "-Tdata",
