@@ -131,7 +131,9 @@ class CompilationDb(FlagsSource):
             base_path = path.realpath(entry['directory'])
         if 'command' in entry:
             import shlex
-            argument_list = shlex.split(entry['command'])
+            import os
+            argument_list = shlex.split(entry['command'],
+                                        posix=os.name == 'posix')
         elif 'arguments' in entry:
             argument_list = entry['arguments']
         else:
