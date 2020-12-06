@@ -3,8 +3,12 @@
 
   // Every path variable in settings can contain wildcards (without the "").
   // Most commonly used:
-  //  - "$project_path"       <-- replaced by the full path to the project to
-  //                              which the currently opened view belongs.
+  //  - "$project_path"       <-- replaced by the full path to the project
+  //                              (NOT including the project folder itself)
+  //                               to which the currently opened view belongs.
+  //  - "$project_base_path"  <-- replaced by the full path to the project
+  //                              including the project folder. This is more
+  //                              commonly used than "$project_path" above.
   //  - "$project_name"       <-- replaced by the name of the current project.
   //  - "$clang_version"      <-- replaced by the numeric version of used clang.
   //  - "~"                   <-- replaced by the path to user home directory.
@@ -21,7 +25,7 @@
   "common_flags" : [
     // some example includes
     "-I/usr/include",
-    "-I$project_path/src",
+    "-I$project_base_path/src",
     // this is needed to include the correct headers for clang
     "-I/usr/lib/clang/$clang_version/include",
     // For simple projects, you can add a folder where your current file is
@@ -106,7 +110,7 @@
   "ignore_list": [
     "~/some_folder/*",
     "/some/absolute/file.ext",
-    "$project_path/some/project/path/*",
+    "$project_base_path/some/project/path/*",
   ],
 
   // Ignore all flags that match any of the following glob-style patterns. You

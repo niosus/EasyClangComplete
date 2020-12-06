@@ -17,8 +17,8 @@
 Every path variable in settings can contain wildcards:
 
 - Any of [Sublime Text variables](https://www.sublimetext.com/docs/3/build_systems.html#variables). Most common ones:
-    + `$project_path` is replaced by the full path to the folder of the project
-      to which the currently opened view belongs.
+    + `$project_base_path` is replaced by the full path to the folder of the project
+      to which the currently opened view belongs, including the project folder name.
     + `$project_name` is replaced by the name of the current project.
 - `$clang_version` is replaced by the numeric version of used clang.
 - `~` is replaced by the path to user home directory.
