@@ -1,0 +1,42 @@
+Version 6.4.5
+=============
+
+Improvements and bug fixes:
+---------------------------
+- Add `-target` as a separable flag, thanks @papadokolos
+- Fix a bug in parsing flags with =, thanks @papadokolos
+- Parse non-posix compilation dbs on non-posix systems, thanks @papadokolos
+- Update docs about `$project_base_path`, thanks @dot4qu
+- Fix missing enum completions
+
+Hey! It's been a while!
+-----------------------
+There has not been updates for a while and I think it is good. The plugin still
+gets installed often but there is really not that many issues being opened. I
+undestand, however, that not everone will open an issue if something does not
+work.
+
+At this point, I would like to ask you take action:
+- If something does not work - please open an issue! It will force me to go
+back to work on this.
+- If everything has been working without much updates: consider supporting this
+development. Sending some money my way is always welcome, but if you don't have
+any to spare - shoot me an email (or open an issue) and tell about how you use
+the plugin.
+
+At this point, with >35K downloads I feel a bit discouraged by the lack of
+feedback and it is hard to put in work on issues that I don't personnaly
+experience after a full day of work. If you appreciate this effort, do show
+your support.
+
+GitHub Sponsors is the preferred way to support the development
+https://github.com/sponsors/niosus
+
+Alternatively, become a backer on Open Collective!
+https://opencollective.com/EasyClangComplete#backers
+
+If you use this plugin in a company, push to become a sponsor!
+https://opencollective.com/EasyClangComplete#sponsor
+
+For more info head here:
+https://github.com/niosus/EasyClangComplete#support-it
