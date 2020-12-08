@@ -24,7 +24,7 @@ from os import path
 log = logging.getLogger("ECC")
 
 # Triggers that should show types.
-GLOBAL_TRIGGERS = [":", "\t", " "]
+GLOBAL_TRIGGERS = ["::", "\t", " "]
 # All symbols that can be part of a valid trigger.
 ALLOWED_TRIGGER_SYMBOLS = [":", " ", "\t", ".", "-", ">"]
 
