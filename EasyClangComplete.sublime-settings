@@ -3,12 +3,9 @@
 
   // Every path variable in settings can contain wildcards (without the "").
   // Most commonly used:
-  //  - "$project_path"       <-- replaced by the full path to the project
-  //                              (NOT including the project folder itself)
-  //                               to which the currently opened view belongs.
-  //  - "$project_base_path"  <-- replaced by the full path to the project
-  //                              including the project folder. This is more
-  //                              commonly used than "$project_path" above.
+  //  - "$project_base_path"  <-- replaced by the path to the root of the
+  //                              project. This is usually specified under
+  //                              "folder" within the sublime project file.
   //  - "$project_name"       <-- replaced by the name of the current project.
   //  - "$clang_version"      <-- replaced by the numeric version of used clang.
   //  - "~"                   <-- replaced by the path to user home directory.
