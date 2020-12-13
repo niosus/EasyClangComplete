@@ -1,3 +1,23 @@
 [
   { "keys": ["shift+f12"], "command": "ecc_goto_declaration"},
+  {
+    "keys": ["<"],
+    "command": "ecc_complete_includes",
+    "args": {"opening_char": "<"},
+    "context":
+    [
+      {"key": "selector", "operand": "meta.preprocessor.include"},
+      {"key": "auto_complete_visible", "operand": false }
+    ]
+  },
+  {
+    "keys": ["\""],
+    "command": "ecc_complete_includes",
+    "args": {"opening_char": "\""},
+    "context":
+    [
+      {"key": "selector", "operand": "meta.preprocessor.include"},
+      {"key": "auto_complete_visible", "operand": false }
+    ]
+  }
 ]

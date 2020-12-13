@@ -52,7 +52,8 @@ CMakeFileCache = singleton.CMakeFileCache
 GenericCache = singleton.GenericCache
 ThreadPool = thread_pool.ThreadPool
 ThreadJob = thread_job.ThreadJob
-QuickPanelHandler = quick_panel_handler.QuickPanelHandler
+ErrorQuickPanelHandler = quick_panel_handler.ErrorQuickPanelHandler
+IncludeCompleter = quick_panel_handler.IncludeCompleter
 ActionRequest = action_request.ActionRequest
 ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
 Bazel = bazel.Bazel
@@ -114,14 +115,8 @@ class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
             return
         if not config.completer:
             log.error("No Completer for view: %s.", self.view.buffer_id())
-        handler = QuickPanelHandler(self.view, config.completer.latest_errors)
-        start_idx = 0
-        self.view.window().show_quick_panel(
-            handler.items_to_show(),
-            handler.on_done,
-            sublime.MONOSPACE_FONT,
-            start_idx,
-            handler.on_highlighted)
+        window = self.view.window()
+        ErrorQuickPanelHandler(self.view, config.completer.latest_errors).show(window)
 
 
 class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
@@ -145,6 +140,32 @@ class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
             loc += ":" + str(location.column)
             log.debug("Navigating to declaration: %s", loc)
             sublime.active_window().open_file(loc, sublime.ENCODED_POSITION)
+
+
+class EccCompleteIncludesCommand(sublime_plugin.TextCommand):
+    """Handle easy_clang_goto_declaration command."""
+
+    def run(self, edit, opening_char):
+        """Run goto declaration command.
+
+        Navigates to delcaration of entity located by current position
+        of cursor.
+        """
+        if not SublBridge.is_valid_view(self.view):
+            return
+        config_manager = EasyClangComplete.view_config_manager
+        if not config_manager:
+            return
+        config = config_manager.get_from_cache(self.view)
+        if not config:
+            log.error("No ViewConfig for view: %s.", self.view.buffer_id())
+            return
+        panel_handler = IncludeCompleter(
+            view=self.view,
+            edit=edit,
+            opening_char=opening_char,
+            thread_pool=EasyClangComplete.thread_pool)
+        panel_handler.start_completion(config.include_folders)
 
 
 class CleanCmakeCommand(sublime_plugin.TextCommand):

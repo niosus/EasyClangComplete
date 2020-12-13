@@ -39,6 +39,9 @@
 				"file": ".clang_complete"
 			}
 		],
-		"ecc_use_libclang": true
+		"ecc_use_libclang": true,
+		"sublack": {
+      "black_on_save": false
+    }
 	}
 }
