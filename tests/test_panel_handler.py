@@ -5,7 +5,7 @@ from EasyClangComplete.tests.gui_test_wrapper import GuiTestWrapper
 from EasyClangComplete.plugin.utils import quick_panel_handler
 imp.reload(quick_panel_handler)
 
-QuickPanelHandler = quick_panel_handler.QuickPanelHandler
+ErrorQuickPanelHandler = quick_panel_handler.ErrorQuickPanelHandler
 
 
 class test_panel_handler(GuiTestWrapper):
@@ -15,7 +15,7 @@ class test_panel_handler(GuiTestWrapper):
         """Test initialization."""
         self.set_up_view()
         errors = [{"hello": "world"}]
-        panel_handler = QuickPanelHandler(self.view, errors)
+        panel_handler = ErrorQuickPanelHandler(self.view, errors)
         self.assertEqual(self.view, panel_handler.view)
         self.assertEqual(errors, panel_handler.errors)
 
@@ -34,7 +34,7 @@ class test_panel_handler(GuiTestWrapper):
                 "file": "warning_file"
             }
         ]
-        panel_handler = QuickPanelHandler(self.view, errors)
+        panel_handler = ErrorQuickPanelHandler(self.view, errors)
         items_to_show = panel_handler.items_to_show()
         expected = [["ERROR: ERROR_MSG", "error_file"],
                     ["WARNING: WARNING_MSG", "warning_file"]]
@@ -52,7 +52,7 @@ class test_panel_handler(GuiTestWrapper):
                 "col": 0
             },
         ]
-        panel_handler = QuickPanelHandler(self.view, errors)
+        panel_handler = ErrorQuickPanelHandler(self.view, errors)
         self.assertIsNone(panel_handler.on_done(-1))
         self.assertIsNone(panel_handler.on_done(1))
         view = panel_handler.on_done(0)

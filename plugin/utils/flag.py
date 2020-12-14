@@ -132,21 +132,6 @@ class Flag:
                 .build_with_expansion(current_folder)
         return flags
 
-        @staticmethod
-        def find_flag_idx(flags, prefix):
-            """Find index of flag with given prefix in list.
-
-            Args:
-            flags (str[]): A list of all flags.
-            prefix (str): A query prefix that the flag has to start with.
-
-            Returns: index of found flag or None if not found
-            """
-            for idx, flag in enumerate(flags):
-                if flag.startswith(prefix):
-                    return idx
-            return None
-
     class Builder:
         """Builder for flags providing a nicer interface."""
 
@@ -193,8 +178,10 @@ class Flag:
                 log.warning("Unexpected flag prefix: '%s'", self.__prefix)
             return self
 
-        def build_with_expansion(self, current_folder='', wildcard_values={}):
+        def build_with_expansion(self, current_folder='', wildcard_values=None):
             """Expand all expandable entries and return a resulting list."""
+            if not wildcard_values:
+                wildcard_values = {}
             if not self.__body and not self.__prefix:
                 return []
             if self.__prefix in Flag.PREFIXES_WITH_PATHS:

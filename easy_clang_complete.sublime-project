@@ -40,8 +40,9 @@
 			}
 		],
 		"ecc_use_libclang": true,
-		"sublack": {
-      "black_on_save": false
-    }
+		"sublack":
+		{
+			"black_on_save": false
+		}
 	}
 }

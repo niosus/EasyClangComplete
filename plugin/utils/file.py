@@ -144,13 +144,15 @@ class File:
 
     @staticmethod
     def expand_all(input_path,
-                   wildcard_values={},
+                   wildcard_values=None,
                    current_folder='',
                    expand_globbing=True):
         """Expand everything in this path.
 
         This returns a list of canonical paths.
         """
+        if not wildcard_values:
+            wildcard_values = {}
         expanded_path = path.expandvars(input_path)
         expanded_path = sublime.expand_variables(
             expanded_path, wildcard_values)
@@ -165,7 +167,7 @@ class File:
         if len(all_paths) > 0 and all_paths[0] != input_path:
             log.debug("Populated '%s' to '%s'", input_path, all_paths)
             return all_paths
-        elif expanded_path != input_path:
+        if expanded_path != input_path:
             log.debug("Populated '%s' to '%s'", input_path, expanded_path)
         return [expanded_path]
 

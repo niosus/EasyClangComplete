@@ -151,18 +151,24 @@ class EccCompleteIncludesCommand(sublime_plugin.TextCommand):
         Navigates to delcaration of entity located by current position
         of cursor.
         """
+        def passthrough(view, trigger):
+            """Passthrough a trigger."""
+            view.run_command("insert", {"characters": trigger})
+
         if not SublBridge.is_valid_view(self.view):
+            passthrough(self.view, opening_char)
             return
         config_manager = EasyClangComplete.view_config_manager
         if not config_manager:
+            passthrough(self.view, opening_char)
             return
         config = config_manager.get_from_cache(self.view)
-        if not config:
+        if not config or not config.include_folders:
             log.error("No ViewConfig for view: %s.", self.view.buffer_id())
+            passthrough(self.view, opening_char)
             return
         panel_handler = IncludeCompleter(
             view=self.view,
-            edit=edit,
             opening_char=opening_char,
             thread_pool=EasyClangComplete.thread_pool)
         panel_handler.start_completion(config.include_folders)
@@ -355,8 +361,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         if File.is_ignored(view.file_name(), settings.ignore_list):
             return
         row_col = ZeroIndexedRowCol.from_current_cursor_pos(view)
-        view_config = EasyClangComplete.view_config_manager.get_from_cache(
-            view)
+        view_config = EasyClangComplete.view_config_manager.get_from_cache(view)
         if not view_config:
             return
         if not view_config.completer:

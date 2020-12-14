@@ -94,8 +94,7 @@ class CompilationDb(FlagsSource):
                 db[file_path] = list_of_flags  # Store parsed flags.
                 self._cache[current_db_path] = db  # Update db in cache.
                 return list_of_flags
-            else:
-                return db[file_path]
+            return db[file_path]
         if CompilationDb.ALL_TAG in db:
             log.debug("Return 'all' entry of the compilation db.")
             return db[CompilationDb.ALL_TAG]

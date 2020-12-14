@@ -42,7 +42,7 @@ class ClangCompilerVariant(CompilerVariant):
     Attributes:
         error_regex (re): regex to find contents of an error
     """
-    include_prefixes = ["-isystem", "-I", "-isysroot"]
+    include_prefixes = ["-isystem", "-I", "-isysroot", "-iquote"]
     error_regex = re.compile(r"(?P<file>.*)" +
                              r":(?P<row>\d+):(?P<col>\d+)" +
                              r":\s*.*error: (?P<error>.*)")
@@ -75,7 +75,7 @@ class ClangClCompilerVariant(ClangCompilerVariant):
         error_regex (re): regex to find contents of an error
     """
     need_lang_flags = False
-    include_prefixes = ["-I", "/I", "-msvc", "/msvc"]
+    include_prefixes = ["-I", "/I", "-msvc", "/msvc", "-iquote", "/iquote"]
     error_regex = re.compile(r"(?P<file>.*)" +
                              r"\((?P<row>\d+),(?P<col>\d+)\)\s*" +
                              r":\s*.*error: (?P<error>.*)")
