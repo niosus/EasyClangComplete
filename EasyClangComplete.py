@@ -17,7 +17,7 @@ from os import path
 from .plugin.utils import tools
 from .plugin.view_config import view_config_manager
 from .plugin import flags_sources
-from .plugin.utils import singleton_thread_pool
+from .plugin.utils import thread_pool
 from .plugin.utils import thread_job
 from .plugin.utils import progress_status
 from .plugin.utils import quick_panel_handler
@@ -50,7 +50,7 @@ PosStatus = subl_bridge.PosStatus
 CMakeFile = flags_sources.cmake_file.CMakeFile
 CMakeFileCache = singleton.CMakeFileCache
 GenericCache = singleton.GenericCache
-ThreadPool = singleton_thread_pool.ThreadPool
+ThreadPool = thread_pool.ThreadPool
 ThreadJob = thread_job.ThreadJob
 QuickPanelHandler = quick_panel_handler.QuickPanelHandler
 ActionRequest = action_request.ActionRequest
@@ -212,7 +212,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
 
     Most of the functionality is delegated.
     """
-    thread_pool = ThreadPool()
+    thread_pool = ThreadPool(with_progress=True)
 
     view_config_manager = None
     settings_manager = None

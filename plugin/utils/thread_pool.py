@@ -9,12 +9,9 @@ from concurrent import futures
 from threading import Lock
 from threading import Thread
 
-from .singleton import singleton
-
 log = logging.getLogger("ECC")
 
 
-@singleton
 class ThreadPool:
     """Thread pool that makes sure we don't get recurring jobs.
 
@@ -33,8 +30,11 @@ class ThreadPool:
     Now there are two 'update' jobs, one running, one pending. Adding another
     'update' job will replace the pending update job.
     """
+    PROGRESS_UPDATE_DELAY = 0.1
+    PROGRESS_IDLE_DELAY = 0.3
 
-    def __init__(self, max_workers=1):
+    def __init__(
+            self, max_workers=1, common_callback=None, with_progress=False):
         """Create a thread pool.
 
         Args:
@@ -46,19 +46,21 @@ class ThreadPool:
         self.__lock = Lock()
         self.__progress_lock = Lock()
 
+        self.__common_callback = common_callback
+
         self.__show_animation = False
         self.__current_operation_name = ''
-
-        self.__progress_update_delay = 0.1
-        self.__progress_idle_delay = 0.3
 
         # All the jobs that are currently active are stored here.
         self.__active_jobs = []
 
-        # start animation thread
         self.__progress_status = None
-        self.__progress_thread = Thread(target=self.__animate_progress,
-                                        daemon=True).start()
+        self.__progress_thread = None
+        if with_progress:
+            # Start animation thread
+            self.__progress_thread = Thread(target=self.__animate_progress,
+                                            daemon=True)
+            self.__progress_thread.start()
 
     @property
     def progress_status(self):
@@ -89,20 +91,22 @@ class ThreadPool:
         future = self.__thread_pool.submit(job.function, *job.args)
         future.add_done_callback(job.callback)
         future.add_done_callback(self.__on_job_done)
+        if self.__common_callback:
+            future.add_done_callback(self.__common_callback)
         job.future = future  # Set the future for this job.
         with self.__lock:
             self.__active_jobs.append(job)
             self.__show_animation = True
             self.__current_operation_name = self.__active_jobs[0].name
 
-    def __on_job_done(self, future):
+    def __on_job_done(self, _):
         """Call this when the job is done or cancelled."""
         # We want to clear the old list and alter the positions of elements.
         # This is a potentially dangerous operation, so protect it by a mutex.
         with self.__lock:
             self.__active_jobs[:] = [
                 job for job in self.__active_jobs if not job.future.done()]
-            if len(self.__active_jobs) < 1:
+            if not self.__active_jobs:
                 self.__show_animation = False
             else:
                 self.__current_operation_name = self.__active_jobs[0].name
@@ -110,16 +114,16 @@ class ThreadPool:
     def __animate_progress(self):
         """Change the status message, mostly used to animate progress."""
         while True:
-            sleep_time = self.__progress_idle_delay
+            sleep_time = ThreadPool.PROGRESS_IDLE_DELAY
             with self.__progress_lock:
                 if not self.__progress_status:
-                    sleep_time = self.__progress_idle_delay
+                    sleep_time = ThreadPool.PROGRESS_IDLE_DELAY
                 elif self.__show_animation:
                     self.__progress_status.update_progress(
                         self.__current_operation_name)
-                    sleep_time = self.__progress_update_delay
+                    sleep_time = ThreadPool.PROGRESS_UPDATE_DELAY
                 else:
                     self.__progress_status.show_as_ready()
-                    sleep_time = self.__progress_idle_delay
+                    sleep_time = ThreadPool.PROGRESS_IDLE_DELAY
             # Allow some time for progress status to be updated.
             time.sleep(sleep_time)

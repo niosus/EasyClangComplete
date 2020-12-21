@@ -42,7 +42,7 @@ class ThreadJob:
         self.args = args
         self.future = None
 
-    def __is_high_priority(self):
+    def is_high_priority(self):
         """Check if job is high priority."""
         return self.name in [ThreadJob.UPDATE_TAG,
                              ThreadJob.CLEAR_TAG,
@@ -56,7 +56,7 @@ class ThreadJob:
         """Define if one job overrides another."""
         if self.is_same_type_as(other):
             return True
-        if self.__is_high_priority() and not other.__is_high_priority():
+        if self.is_high_priority() and not other.is_high_priority():
             return True
         return False
 
