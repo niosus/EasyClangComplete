@@ -29,9 +29,16 @@ DECLARATION_TEMPLATE = """## Declaration:
 {type_declaration}
 """
 
-REFERENCES_TEMPLATE = \
+INDEX_REFERENCES_TEMPLATE = \
     """### References: <small><small>(from sublime index)</small></small>
-{type_references}
+
+{references}
+"""
+
+OPEN_FILES_REFERENCES_TEMPLATE = \
+    """### References: <small><small>(from open files)</small></small>
+
+{references}
 """
 
 BRIEF_DOC_TEMPLATE = """### Brief documentation:
@@ -173,25 +180,8 @@ class Popup:
             type_declaration=markupsafe.escape(declaration_text))
 
         if settings.show_index_references:
-            index = sublime.active_window().lookup_symbol_in_index(
-                cursor.spelling)
-            index_references = []
-            for location_tuple in index:
-                location = IndexLocation(filename=location_tuple[0],
-                                         line=location_tuple[2][0],
-                                         column=location_tuple[2][1])
-                index_references.append(
-                    "{reference}: `{file}:{line}:{col}`".format(
-                        reference=Popup.link_from_location(location,
-                                                           cursor.spelling),
-                        file=location.file.short_name,
-                        line=location.line,
-                        col=location.column))
-            log.debug("references from index: %s", index_references)
-            if index_references:
-                popup.__text += REFERENCES_TEMPLATE.format(
-                    type_references=markupsafe.escape(
-                        "\n".join(index_references)))
+            popup.__text += Popup.__lookup_in_sublime_index(
+                sublime.active_window(), cursor.spelling)
 
         # Doxygen comments
         if cursor.brief_comment:
@@ -217,6 +207,33 @@ class Popup:
             popup.__text += BODY_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="c++", code=body))
         return popup
+
+    @staticmethod
+    def __lookup_in_sublime_index(window, spelling):
+        def lookup(lookup_function, spelling):
+            index = lookup_function(spelling)
+            references = []
+            for location_tuple in index:
+                location = IndexLocation(filename=location_tuple[0],
+                                         line=location_tuple[2][0],
+                                         column=location_tuple[2][1])
+                references.append(
+                    "{reference}: `{file}:{line}:{col}`".format(
+                        reference=Popup.link_from_location(location, spelling),
+                        file=location.file.short_name,
+                        line=location.line,
+                        col=location.column))
+            return " - " + markupsafe.escape("\n - ".join(references))
+        index_references = lookup(window.lookup_symbol_in_index, spelling)
+        usage_references = lookup(window.lookup_symbol_in_open_files, spelling)
+        output_text = ""
+        if index_references:
+            output_text += INDEX_REFERENCES_TEMPLATE.format(
+                references=index_references)
+        if usage_references:
+            output_text += OPEN_FILES_REFERENCES_TEMPLATE.format(
+                references=usage_references)
+        return output_text
 
     def info_objc(cursor, cindex, settings):
         """Provide information about Objective C cursors."""
