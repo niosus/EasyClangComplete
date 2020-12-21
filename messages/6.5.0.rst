@@ -13,6 +13,7 @@ Improvements and bug fixes:
     end, the picked file is committed to file.
   - Details here:
     https://niosus.github.io/EasyClangComplete/settings/#autocomplete_includes
+- Info popup now also shows references from open files.
 - Get rid of a singleton in the thread pool. Use a single instance per
   plugin.
 
