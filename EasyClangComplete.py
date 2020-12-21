@@ -175,7 +175,8 @@ class EccCompleteIncludesCommand(sublime_plugin.TextCommand):
             view=self.view,
             opening_char=opening_char,
             thread_pool=EasyClangComplete.thread_pool)
-        panel_handler.start_completion(config.include_folders)
+        panel_handler.start_completion(config.include_folders,
+                                       settings.force_unix_includes)
 
 
 class CleanCmakeCommand(sublime_plugin.TextCommand):
