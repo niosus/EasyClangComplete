@@ -460,7 +460,10 @@ symbol under cursor taking them from Sublime Text index.
     ```
 
 
+
 ### **`autocomplete_includes`**
+
+![Example](img/includes.gif)
 
 When an includes trigger is typed (`"` or `<`) a quick panel will appear that
 will guide the user in picking their includes based on the current compilation
