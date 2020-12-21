@@ -76,7 +76,8 @@ class TestIncludeParser(TestCase):
         include_completer.start_completion(test_folders)
         receiver.wait_until_got_number_of_callbacks(1)
         view.window().show_quick_panel.assert_called_once_with(
-            [['[file]   a.h', expected_file], ['[folder] lib', expected_folder]],
+            [[include_parser.FOLDER_TAG + 'lib', expected_folder],
+             [include_parser.FILE_TAG + 'a.h', expected_file]],
             include_completer.on_include_picked, sublime.MONOSPACE_FONT, 0)
         view.window().show_quick_panel.reset_mock()
 
@@ -86,12 +87,12 @@ class TestIncludeParser(TestCase):
         view.run_command.reset_mock()
 
         file_choice_completer = copy(include_completer)
-        file_choice_completer.on_include_picked(0)
+        file_choice_completer.on_include_picked(1)
         view.run_command.assert_called_once_with("insert", {"characters": "<a.h>"})
         view.run_command.reset_mock()
 
-        include_completer.on_include_picked(1)
+        include_completer.on_include_picked(0)
         receiver.wait_until_got_number_of_callbacks(2)
         view.window().show_quick_panel.assert_called_once_with(
-            [['[file]   a.h', expected_file]],
+            [[include_parser.FILE_TAG + 'a.h', expected_file]],
             include_completer.on_include_picked, sublime.MONOSPACE_FONT, 0)

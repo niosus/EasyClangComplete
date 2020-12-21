@@ -44,9 +44,11 @@ class IncludeCompleter():
         log.debug("Picked index: %s", idx)
         if not self.folders_and_headers:
             log.debug("No folders to show for includes yet.")
-            return IncludeCompleter.__commit_include_path(self.view, self.opening_char)
+            return IncludeCompleter.__commit_include_path(
+                self.view, self.opening_char)
         if idx < 0 or idx >= len(self.folders_and_headers):
-            return IncludeCompleter.__commit_include_path(self.view, self.opening_char)
+            return IncludeCompleter.__commit_include_path(
+                self.view, self.opening_char)
         tag, name, paths = self.folders_and_headers[idx]
         if not self.full_include_path:
             self.full_include_path = ''

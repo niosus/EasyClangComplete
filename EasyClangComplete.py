@@ -116,7 +116,8 @@ class EccShowAllErrorsCommand(sublime_plugin.TextCommand):
         if not config.completer:
             log.error("No Completer for view: %s.", self.view.buffer_id())
         window = self.view.window()
-        ErrorQuickPanelHandler(self.view, config.completer.latest_errors).show(window)
+        ErrorQuickPanelHandler(
+            self.view, config.completer.latest_errors).show(window)
 
 
 class EccGotoDeclarationCommand(sublime_plugin.TextCommand):
@@ -157,7 +158,8 @@ class EccCompleteIncludesCommand(sublime_plugin.TextCommand):
 
         if not SublBridge.is_valid_view(self.view):
             return passthrough(self.view, opening_char)
-        settings = EasyClangComplete.settings_manager.settings_for_view(self.view)
+        settings = EasyClangComplete.settings_manager.settings_for_view(
+            self.view)
         if not settings.autocomplete_includes:
             log.debug("Includes completion disabled.")
             return passthrough(self.view, opening_char)
