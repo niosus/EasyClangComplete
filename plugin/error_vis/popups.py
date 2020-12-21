@@ -223,16 +223,16 @@ class Popup:
                         file=location.file.short_name,
                         line=location.line,
                         col=location.column))
-            return " - " + markupsafe.escape("\n - ".join(references))
+            return markupsafe.escape("\n - ".join(references))
         index_references = lookup(window.lookup_symbol_in_index, spelling)
         usage_references = lookup(window.lookup_symbol_in_open_files, spelling)
         output_text = ""
         if index_references:
             output_text += INDEX_REFERENCES_TEMPLATE.format(
-                references=index_references)
+                references=" - " + index_references)
         if usage_references:
             output_text += OPEN_FILES_REFERENCES_TEMPLATE.format(
-                references=usage_references)
+                references=" - " + usage_references)
         return output_text
 
     def info_objc(cursor, cindex, settings):
