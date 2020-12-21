@@ -75,10 +75,28 @@ class TestIncludeParser(TestCase):
         expected_file = path.join(expected_folder, "a.h")
         include_completer.start_completion(test_folders)
         receiver.wait_until_got_number_of_callbacks(1)
+        self.assertEqual(len(include_completer.folders_and_headers), 2)
+        self.assertEqual(len(include_completer.folders_and_headers[0]), 3)
+        self.assertEqual(len(include_completer.folders_and_headers[1]), 3)
+        first_tag = include_completer.folders_and_headers[0][0]
+        if first_tag == include_parser.FOLDER_TAG:
+            expected_argument = [
+                [include_parser.FOLDER_TAG + 'lib', expected_folder],
+                [include_parser.FILE_TAG + 'a.h', expected_file]
+            ]
+            folder_index = 0
+            file_index = 1
+        else:
+            expected_argument = [
+                [include_parser.FILE_TAG + 'a.h', expected_file],
+                [include_parser.FOLDER_TAG + 'lib', expected_folder]
+            ]
+            folder_index = 1
+            file_index = 0
         view.window().show_quick_panel.assert_called_once_with(
-            [[include_parser.FOLDER_TAG + 'lib', expected_folder],
-             [include_parser.FILE_TAG + 'a.h', expected_file]],
-            include_completer.on_include_picked, sublime.MONOSPACE_FONT, 0)
+            expected_argument,
+            include_completer.on_include_picked,
+            sublime.MONOSPACE_FONT, 0)
         view.window().show_quick_panel.reset_mock()
 
         wrong_choice_completer = copy(include_completer)
@@ -87,11 +105,12 @@ class TestIncludeParser(TestCase):
         view.run_command.reset_mock()
 
         file_choice_completer = copy(include_completer)
-        file_choice_completer.on_include_picked(1)
-        view.run_command.assert_called_once_with("insert", {"characters": "<a.h>"})
+        file_choice_completer.on_include_picked(file_index)
+        view.run_command.assert_called_once_with(
+            "insert", {"characters": "<a.h>"})
         view.run_command.reset_mock()
 
-        include_completer.on_include_picked(0)
+        include_completer.on_include_picked(folder_index)
         receiver.wait_until_got_number_of_callbacks(2)
         view.window().show_quick_panel.assert_called_once_with(
             [[include_parser.FILE_TAG + 'a.h', expected_file]],
