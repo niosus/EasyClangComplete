@@ -1,0 +1,33 @@
+Version 6.5.0
+=============
+
+Improvements and bug fixes:
+---------------------------
+- New include autocompletion!
+  - New setting "autocomplete_includes" defaulted to true, so make
+    sure to reload sublime text!
+  - Press `<` or `"` after `#include` to open quick panel with guided
+    completion for your includes. The initial list is populated from
+    the current translation unit (make sure the initial parsing is
+    complete!) while the next layers stem from chosen folders. In the
+    end, the picked file is committed to file.
+  - Details here:
+    https://niosus.github.io/EasyClangComplete/settings/#autocomplete_includes
+- Get rid of a singleton in the thread pool. Use a single instance per
+  plugin.
+
+Huuuge thanks to my GitHub Sponsors! You're amazing! 🙏
+-------------------------------------------------------
+- @vaporstack
+- @Andreasdahlberg
+
+Join them on GitHub Sponsors and support the development!
+https://github.com/sponsors/niosus
+
+Reach out! 😉
+-------------
+
+Tell me how YOU use the plugin! Tweet at me at @igor_niosus 🐦
+
+Other means of support here:
+https://github.com/niosus/EasyClangComplete#support-it
