@@ -9,8 +9,8 @@ from ..utils import thread_job
 
 log = logging.getLogger("ECC")
 
-FILE_TAG = "[file]   "
-FOLDER_TAG = "[folder] "
+FILE_TAG = "📄 "
+FOLDER_TAG = "📂 "
 
 
 class IncludeCompleter():
