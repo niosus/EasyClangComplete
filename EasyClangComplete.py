@@ -53,7 +53,7 @@ GenericCache = singleton.GenericCache
 ThreadPool = thread_pool.ThreadPool
 ThreadJob = thread_job.ThreadJob
 ErrorQuickPanelHandler = quick_panel_handler.ErrorQuickPanelHandler
-IncludeCompleter = quick_panel_handler.IncludeCompleter
+IncludeCompleter = include_parser.IncludeCompleter
 ActionRequest = action_request.ActionRequest
 ZeroIndexedRowCol = row_col.ZeroIndexedRowCol
 Bazel = bazel.Bazel
@@ -153,20 +153,22 @@ class EccCompleteIncludesCommand(sublime_plugin.TextCommand):
         """
         def passthrough(view, trigger):
             """Passthrough a trigger."""
-            view.run_command("insert", {"characters": trigger})
+            return view.run_command("insert", {"characters": trigger})
 
         if not SublBridge.is_valid_view(self.view):
-            passthrough(self.view, opening_char)
-            return
+            return passthrough(self.view, opening_char)
+        settings = EasyClangComplete.settings_manager.settings_for_view(self.view)
+        if not settings.autocomplete_includes:
+            log.debug("Includes completion disabled.")
+            return passthrough(self.view, opening_char)
         config_manager = EasyClangComplete.view_config_manager
         if not config_manager:
-            passthrough(self.view, opening_char)
-            return
+            return passthrough(self.view, opening_char)
         config = config_manager.get_from_cache(self.view)
+
         if not config or not config.include_folders:
             log.error("No ViewConfig for view: %s.", self.view.buffer_id())
-            passthrough(self.view, opening_char)
-            return
+            return passthrough(self.view, opening_char)
         panel_handler = IncludeCompleter(
             view=self.view,
             opening_char=opening_char,
@@ -637,22 +639,6 @@ class EasyClangComplete(sublime_plugin.EventListener):
                 callback=self.completion_finished,
                 function=config_manager.trigger_completion,
                 args=[view, completion_request])
-            EasyClangComplete.thread_pool.new_job(job)
-        elif pos_status == PosStatus.COMPLETE_INCLUDES:
-            log.debug("Completing includes")
-            # submit async completion job
-            config_manager = EasyClangComplete.view_config_manager
-            view_config = config_manager.get_from_cache(view)
-            include_folders = view_config.include_folders
-            # submit async completion job for getting headers
-            job = ThreadJob(
-                name=ThreadJob.COMPLETE_INCLUDES_TAG,
-                callback=self.completion_finished,
-                function=include_parser.get_all_headers,
-                args=[include_folders,
-                      prefix,
-                      settings.force_unix_includes,
-                      completion_request])
             EasyClangComplete.thread_pool.new_job(job)
 
         # show default completions for now if allowed

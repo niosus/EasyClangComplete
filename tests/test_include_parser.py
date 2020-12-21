@@ -1,60 +1,97 @@
 """Test compilation database flags generation."""
 import imp
-from unittest import TestCase
+import time
+import sublime
 
 from os import path
+from copy import copy
+
+from unittest import TestCase
+from unittest.mock import MagicMock
 
 from EasyClangComplete.plugin.utils import include_parser
+from EasyClangComplete.plugin.utils import thread_pool
+from EasyClangComplete.plugin.utils.tools import PKG_FOLDER
+
 imp.reload(include_parser)
+imp.reload(thread_pool)
+
+IncludeCompleter = include_parser.IncludeCompleter
+ThreadPool = thread_pool.ThreadPool
+
+
+TIMEOUT = 5.0
+
+
+class TestCallbackReceiver():
+    """A test container to store results of the operation."""
+
+    def __init__(self):
+        """Initialize this object."""
+        self.futures = []
+
+    def on_job_done(self, future):
+        """Call this when the job is done."""
+        self.futures.append(future)
+
+    def wait_until_got_number_of_callbacks(self, number):
+        """Wait until callback is called."""
+        slept = 0.0
+        time_step = 0.1
+        while not len(self.futures) == number and slept < TIMEOUT:
+            time.sleep(time_step)
+            slept += time_step
 
 
 class TestIncludeParser(TestCase):
     """Test unique list."""
 
-    def test_get_all_includes(self):
-        """Test getting all includes."""
-        self.assertTrue(True)
-        # base_folder = path.dirname(__file__)
-        # _, res = include_parser.get_all_headers(
-        #     folders=[base_folder],
-        #     prefix='',
-        #     force_unix_includes=False,
-        #     completion_request=None)
-        # self.assertEqual(len(res), 9)
-        # local_file_path = path.normpath('cmake_tests/lib/a.h')
-        # expected_completion = [
-        #     '{}\t{}'.format(local_file_path, base_folder), local_file_path]
-        # self.assertIn(expected_completion, res)
+    def test_create_empty(self):
+        """Test that getting no includes works."""
+        receiver = TestCallbackReceiver()
+        view = MagicMock()
+        pool = ThreadPool(common_callback=receiver.on_job_done)
+        include_completer = IncludeCompleter(view, "<", pool)
+        self.assertIsNotNone(include_completer)
+        self.assertEqual(include_completer.opening_char, "<")
+        include_completer.start_completion(["non_existing_folder"])
+        receiver.wait_until_got_number_of_callbacks(1)
+        view.window().show_quick_panel.assert_called_once_with(
+            [], include_completer.on_include_picked, sublime.MONOSPACE_FONT, 0)
 
-        # local_file_path = path.normpath('makefile_files/inc/bar.h')
-        # expected_completion = [
-        #     '{}\t{}'.format(local_file_path, base_folder), local_file_path]
-        # self.assertIn(expected_completion, res)
+    def test_load_includes(self):
+        """Test that getting no includes works."""
+        receiver = TestCallbackReceiver()
+        view = MagicMock()
+        pool = ThreadPool(common_callback=receiver.on_job_done)
+        include_completer = IncludeCompleter(view, "<", pool)
+        self.assertIsNotNone(include_completer)
+        self.assertEqual(include_completer.opening_char, "<")
+        test_folders = [
+            path.join(PKG_FOLDER, "tests", "cmake_tests"),
+            path.join(PKG_FOLDER, "tests", "cmake_tests", "lib")
+        ]
+        expected_folder = path.join(PKG_FOLDER, "tests", "cmake_tests", "lib")
+        expected_file = path.join(expected_folder, "a.h")
+        include_completer.start_completion(test_folders)
+        receiver.wait_until_got_number_of_callbacks(1)
+        view.window().show_quick_panel.assert_called_once_with(
+            [['[file]   a.h', expected_file], ['[folder] lib', expected_folder]],
+            include_completer.on_include_picked, sublime.MONOSPACE_FONT, 0)
+        view.window().show_quick_panel.reset_mock()
 
-    # def test_get_specific_includes(self):
-    #     """Test getting only specific includes."""
-    #     base_folder = path.dirname(__file__)
-    #     _, res = include_parser.get_all_headers(
-    #         folders=[base_folder],
-    #         prefix='cmake_',
-    #         force_unix_includes=False,
-    #         completion_request=None)
-    #     self.assertEqual(len(res), 1)
-    #     local_file_path = path.normpath('cmake_tests/lib/a.h')
-    #     expected_completion = [
-    #         '{}\t{}'.format(local_file_path, base_folder), local_file_path]
-    #     self.assertIn(expected_completion, res)
+        wrong_choice_completer = copy(include_completer)
+        wrong_choice_completer.on_include_picked(-1)
+        view.run_command.assert_called_once_with("insert", {"characters": "<"})
+        view.run_command.reset_mock()
 
-    # def test_get_specific_includes_force_unix(self):
-    #     """Test getting only specific includes."""
-    #     base_folder = path.dirname(__file__)
-    #     _, res = include_parser.get_all_headers(
-    #         folders=[base_folder],
-    #         prefix='cmake_',
-    #         force_unix_includes=True,
-    #         completion_request=None)
-    #     self.assertEqual(len(res), 1)
-    #     local_file_path = 'cmake_tests/lib/a.h'
-    #     expected_completion = [
-    #         '{}\t{}'.format(local_file_path, base_folder), local_file_path]
-    #     self.assertIn(expected_completion, res)
+        file_choice_completer = copy(include_completer)
+        file_choice_completer.on_include_picked(0)
+        view.run_command.assert_called_once_with("insert", {"characters": "<a.h>"})
+        view.run_command.reset_mock()
+
+        include_completer.on_include_picked(1)
+        receiver.wait_until_got_number_of_callbacks(2)
+        view.window().show_quick_panel.assert_called_once_with(
+            [['[file]   a.h', expected_file]],
+            include_completer.on_include_picked, sublime.MONOSPACE_FONT, 0)

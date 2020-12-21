@@ -87,6 +87,7 @@ class SettingsStorage:
     # refer to Preferences.sublime-settings for usage explanation
     NAMES_ENUM = [
         "autocomplete_all",
+        "autocomplete_includes",
         "clang_binary",
         "cmake_binary",
         "common_flags",

@@ -459,6 +459,18 @@ symbol under cursor taking them from Sublime Text index.
     "show_index_references": true,
     ```
 
+
+### **`autocomplete_includes`**
+
+When an includes trigger is typed (`"` or `<`) a quick panel will appear that
+will guide the user in picking their includes based on the current compilation
+database' include flags.
+
+!!! example "Default value"
+    ```json
+    "autocomplete_includes": true,
+    ```
+
 ### **`libclang_path`**
 
 If the libclang library cannot be found in standard places, the user can
