@@ -98,7 +98,7 @@ class TestBazelDbGeneration(object):
         future = MockFuture(output)
         Bazel.compdb_generated(future)
         window = sublime.active_window()
-        panel_view = window.find_output_panel(OutputPanelHandler._PANEL_TAG)
+        panel_view = window.find_output_panel(OutputPanelHandler.PANEL_TAG)
         panel_content = panel_view.substr(sublime.Region(0, panel_view.size()))
         split_output = output.split('\n')
         split_panel_content = panel_content.split('\n')
