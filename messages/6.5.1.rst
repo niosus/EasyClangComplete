@@ -1,0 +1,25 @@
+Version 6.5.1
+=============
+
+Improvements and bug fixes:
+---------------------------
+- ECC now plays well with other panels being open and won't force
+  close them in case CMake has failed.
+
+Huuuge thanks to my GitHub Sponsors! You're amazing! 🙏
+-------------------------------------------------------
+- @vaporstack
+- @Andreasdahlberg
+
+Join them on GitHub Sponsors and support the development!
+https://github.com/sponsors/niosus
+
+Reach out! 😉
+-------------
+
+Tell me how YOU use the plugin!
+- PM me on reddit: @soinus
+- Tweet at me on twitter: @igor_niosus 🐦
+
+Other means of support here:
+https://github.com/niosus/EasyClangComplete#support-it
