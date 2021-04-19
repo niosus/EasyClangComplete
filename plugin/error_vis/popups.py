@@ -480,7 +480,7 @@ class Popup:
 
         import string
         lines = raw_comment.split('\n')
-        chars_to_strip = '/' + '*' + string.whitespace
+        chars_to_strip = '/' + '*' + '!' + string.whitespace
         lines = [line.lstrip(chars_to_strip) for line in lines]
         lines = pop_prepending_empty_lines(lines)
         clean_lines = []
