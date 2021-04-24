@@ -50,6 +50,19 @@ class TestCCppProperties(TestCase):
         print(scope)
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
+    def test_expand_vscode_variables(self):
+        """Test vscode variables are expanded."""
+        include_prefixes = ['-I']
+        db = CCppProperties(include_prefixes)
+
+        expected = [Flag('-I', path.normpath('/source'))]
+        path_to_db = path.join(path.dirname(__file__),
+                               'c_cpp_properties_files',
+                               'vscode_vars')
+        scope = SearchScope(from_folder=path_to_db)
+        print(scope)
+        self.assertEqual(expected, db.get_flags(search_scope=scope))
+
     def test_no_db_in_folder(self):
         """Test if no json is found."""
         include_prefixes = ['-I']
