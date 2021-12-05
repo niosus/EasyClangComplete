@@ -262,6 +262,7 @@ class Flag:
     SEPARABLE_PREFIXES = set([
         "--analyzer-output",
         "--config",
+        "-arch",  # This seems to be M1 MacOS specific.
         "-arcmt-migrate-report-output",
         "-cxx-isystem",
         "-dependency-dot",
@@ -293,8 +294,8 @@ class Flag:
         "-mthread-model",
         "-o",
         "-serialize-diagnostics",
-        "-target",
         "-T",
+        "-target",
         "-Tbss",
         "-Tdata",
         "-Ttext",
