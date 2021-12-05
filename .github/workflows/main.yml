@@ -1,6 +1,6 @@
 name: test
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
   run-tests:
@@ -15,6 +15,11 @@ jobs:
       - uses: SublimeText/UnitTesting/actions/setup@v1
         with:
           sublime-text-version: ${{ matrix.st-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip pycodestyle pep257
+          curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64"
+          chmod +x bazelisk && sudo mv bazelisk /usr/local/bin/bazel
       - uses: SublimeText/UnitTesting/actions/run-tests@v1
         with:
           coverage: true
