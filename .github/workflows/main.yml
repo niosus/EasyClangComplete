@@ -17,9 +17,12 @@ jobs:
           sublime-text-version: ${{ matrix.st-version }}
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip pycodestyle pep257
-          curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64"
-          chmod +x bazelisk && sudo mv bazelisk /usr/local/bin/bazel
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            python -m pip install --upgrade pip pycodestyle pep257
+            curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64"
+            chmod +x bazelisk && sudo mv bazelisk /usr/local/bin/bazel
+          fi
+        shell: bash
       - uses: SublimeText/UnitTesting/actions/run-tests@v1
         with:
           coverage: true
