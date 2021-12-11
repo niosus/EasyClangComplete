@@ -8,8 +8,7 @@ C, C++, Objective-C, and Objective-C++.
 [![Documentation][img-docs]][docs]
 [![Release][img-release]][release]
 [![Downloads Month][img-downloads]][downloads]
-[![Travis Build][img-travis]][travis]
-[![Windows Build][img-appveyor]][appveyor]
+[![GitHub build][img-github-actions]][github-actions]
 [![Coverage Badge][img-coverage]][coverage]
 [![Donate][img-paypal]][donate-paypal]
 [![OpenCollective Backers][img-open-backers]][opencollective]
@@ -67,10 +66,8 @@ missing functionality or fix a bug. Check out the contribution
 
 [release]: https://github.com/niosus/EasyClangComplete/releases
 [downloads]: https://packagecontrol.io/packages/EasyClangComplete
-[travis]: https://travis-ci.org/niosus/EasyClangComplete
-[appveyor]: https://ci.appveyor.com/project/niosus/easyclangcomplete/branch/master
-[codacy]: https://www.codacy.com/app/zabugr/EasyClangComplete/dashboard
-[coverage]: https://www.codacy.com/app/zabugr/EasyClangComplete/dashboard
+[github-actions]: https://github.com/niosus/EasyClangComplete/actions
+[coverage]: https://app.codecov.io/gh/niosus/EasyClangComplete/branch/master
 [gitter]: https://gitter.im/niosus/EasyClangComplete?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
 [donate-paypal]: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2QLY7J4Q944HS
 [donate-flattr]: https://flattr.com/submit/auto?user_id=niosus&url=https://github.com/niosus/EasyClangComplete&title=EasyClangComplete&language=Python&tags=github&category=software
@@ -86,8 +83,7 @@ missing functionality or fix a bug. Check out the contribution
 [img-gratipay]: https://img.shields.io/gratipay/user/niosus.svg?style=flat-square
 [img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg?style=flat-square
-[img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?style=flat-square&label=windows
-[img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?style=flat-square&label=linux%20|%20osx
+[img-github-actions]: https://img.shields.io/github/checks-status/niosus/EasyClangComplete/master?style=flat-square
 [img-coverage]: https://img.shields.io/codecov/c/gh/niosus/EasyClangComplete?style=flat-square&token=KJ8IuinGs1
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?style=flat-square
 [img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600&style=flat-square
