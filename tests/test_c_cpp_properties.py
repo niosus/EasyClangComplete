@@ -50,13 +50,13 @@ class TestCCppProperties(TestCase):
         print(scope)
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
-    def test_no_db_in_folder(self):
-        """Test if no json is found."""
-        include_prefixes = ['-I']
-        db = CCppProperties(include_prefixes)
+    # def test_no_db_in_folder(self):
+    #     """Test if no json is found."""
+    #     include_prefixes = ['-I']
+    #     db = CCppProperties(include_prefixes)
 
-        flags = db.get_flags(path.normpath('/home/user/dummy_main.cpp'))
-        self.assertTrue(flags is None)
+    #     flags = db.get_flags(path.normpath('/home/user/dummy_main.cpp'))
+    #     self.assertTrue(flags is None)
 
     def test_empty_include_and_defines(self):
         """Test that empty fields are handled correctly."""
