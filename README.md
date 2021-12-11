@@ -10,7 +10,6 @@ C, C++, Objective-C, and Objective-C++.
 [![Downloads Month][img-downloads]][downloads]
 [![Travis Build][img-travis]][travis]
 [![Windows Build][img-appveyor]][appveyor]
-[![Codacy Badge][img-codacy]][codacy]
 [![Coverage Badge][img-coverage]][coverage]
 [![Donate][img-paypal]][donate-paypal]
 [![OpenCollective Backers][img-open-backers]][opencollective]
@@ -89,8 +88,7 @@ missing functionality or fix a bug. Check out the contribution
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg?style=flat-square
 [img-appveyor]: https://img.shields.io/appveyor/ci/niosus/easyclangcomplete/master.svg?style=flat-square&label=windows
 [img-travis]: https://img.shields.io/travis/niosus/EasyClangComplete/master.svg?style=flat-square&label=linux%20|%20osx
-[img-codacy]: https://img.shields.io/codacy/grade/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square&label=quality
-[img-coverage]: https://img.shields.io/codacy/coverage/254f8db44b004dffa76b8cebfece4c06.svg?style=flat-square
+[img-coverage]: https://img.shields.io/codecov/c/gh/niosus/EasyClangComplete?style=flat-square&token=KJ8IuinGs1
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?style=flat-square
 [img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600&style=flat-square
 [img-downloads-month]: https://img.shields.io/packagecontrol/dm/EasyClangComplete.svg?maxAge=2592000&style=flat-square

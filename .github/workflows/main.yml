@@ -1,6 +1,6 @@
 name: test
 
-on: [pull_request]
+on: [push]
 
 jobs:
   run-tests:
@@ -30,7 +30,7 @@ jobs:
         if: runner.os == 'Linux'
         run: mkdocs build --verbose --clean --strict;
       - name: Deploy to GitHub Pages
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && github.ref == 'refs/heads/master'
         uses: JamesIves/github-pages-deploy-action@4.1.7
         with:
           branch: gh-pages
