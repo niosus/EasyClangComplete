@@ -128,17 +128,17 @@ class TestCompilationDb(object):
             self.assertIn(
                 expected_lib[1], db._cache[path_to_db][CompilationDb.ALL_TAG])
 
-    # def test_no_db_in_folder(self):
-    #     """Test that a non-existing file is not found in db."""
-    #     include_prefixes = ['-I']
-    #     db = CompilationDb(
-    #         include_prefixes,
-    #         header_to_source_map=[],
-    #         lazy_flag_parsing=self.lazy_parsing
-    #     )
+    def test_no_db_in_folder(self):
+        """Test that a non-existing file is not found in db."""
+        include_prefixes = ['-I']
+        db = CompilationDb(
+            include_prefixes,
+            header_to_source_map=[],
+            lazy_flag_parsing=self.lazy_parsing
+        )
 
-    #     flags = db.get_flags(path.normpath('/home/user/dummy_main.cpp'))
-    #     self.assertTrue(flags is None)
+        flags = db.get_flags(File.canonical_path('/home/user/dummy_main.cpp'))
+        self.assertTrue(flags is None)
 
     def test_persistence(self):
         """Test if compilation db is persistent."""

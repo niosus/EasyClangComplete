@@ -6,16 +6,19 @@ from unittest import TestCase
 from EasyClangComplete.plugin.flags_sources import CppProperties
 from EasyClangComplete.plugin.utils import tools
 from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import file
 from EasyClangComplete.plugin.utils import search_scope
 
 imp.reload(CppProperties)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(file)
 imp.reload(search_scope)
 
 CppProperties = CppProperties.CppProperties
 SearchScope = search_scope.TreeSearchScope
 Flag = flag.Flag
+File = file.File
 
 
 def _get_test_folder(name):
@@ -51,15 +54,15 @@ class TestCppProperties(TestCase):
         scope = SearchScope(from_folder=_get_test_folder('environment'))
         self.assertEqual(expected, db.get_flags(search_scope=scope))
 
-    # def test_no_db_in_folder(self):
-    #     """Test if no json is found."""
-    #     include_prefixes = ['-I']
-    #     db = CppProperties(include_prefixes)
+    def test_no_db_in_folder(self):
+        """Test if no json is found."""
+        include_prefixes = ['-I']
+        db = CppProperties(include_prefixes)
 
-    #     expected = None
+        expected = None
 
-    #     self.assertEqual(expected, db.get_flags(
-    #         path.normpath('/home/user/dummy_main.cpp')))
+        self.assertEqual(expected, db.get_flags(
+            File.canonical_path('/home/user/dummy_main.cpp')))
 
     def test_empty_include_and_defines(self):
         """Test that empty fields are handled correctly."""
