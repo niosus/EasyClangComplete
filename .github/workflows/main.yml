@@ -16,14 +16,22 @@ jobs:
         with:
           sublime-text-version: ${{ matrix.st-version }}
       - name: Install dependencies
+        if: runner.os == 'Linux'
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            python -m pip install --upgrade pip pycodestyle pep257
-            curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64"
-            chmod +x bazelisk && sudo mv bazelisk /usr/local/bin/bazel
-          fi
+          python -m pip install --upgrade pip pycodestyle pep257 mkdocs mkdocs-material
+          curl -L -o bazelisk "https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64"
+          chmod +x bazelisk && sudo mv bazelisk /usr/local/bin/bazel
         shell: bash
       - uses: SublimeText/UnitTesting/actions/run-tests@v1
         with:
           coverage: true
           codecov-upload: true
+      - name: Build mkdocs
+        if: runner.os == 'Linux'
+        run: mkdocs build --verbose --clean --strict;
+      - name: Deploy to GitHub Pages
+        if: runner.os == 'Linux'
+        uses: JamesIves/github-pages-deploy-action@4.1.7
+        with:
+          branch: gh-pages
+          folder: site
