@@ -6,18 +6,21 @@ from unittest import TestCase
 from EasyClangComplete.plugin.flags_sources import compilation_db
 from EasyClangComplete.plugin.utils import tools
 from EasyClangComplete.plugin.utils import flag
+from EasyClangComplete.plugin.utils import file
 from EasyClangComplete.plugin.utils import search_scope
 from EasyClangComplete.plugin.utils import singleton
 
 imp.reload(compilation_db)
 imp.reload(tools)
 imp.reload(flag)
+imp.reload(file)
 imp.reload(search_scope)
 
 CompilationDb = compilation_db.CompilationDb
 ComplationDbCache = singleton.ComplationDbCache
 SearchScope = search_scope.TreeSearchScope
 Flag = flag.Flag
+File = file.File
 
 
 class TestCompilationDb(object):
@@ -66,7 +69,7 @@ class TestCompilationDb(object):
         if self.lazy_parsing:
             import sublime
             if sublime.platform() != 'windows':
-                file_path = path.realpath("/home/user/dummy_lib.cpp")
+                file_path = File.canonical_path("/home/user/dummy_lib.cpp")
                 self.assertIn(Flag('', '-Dlib_EXPORTS'),
                               db.get_flags(file_path=file_path,
                                            search_scope=scope))
