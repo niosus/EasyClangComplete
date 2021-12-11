@@ -33,6 +33,10 @@ class BaseProgressStatus(object):
     def set_status(message):
         """Set status message for the current view."""
         view = sublime.active_window().active_view()
+        if not view:
+            # In some situations as described in issue 745 this view would end
+            # up being None. So we check it obsessively here again.
+            return
         view.set_status(BaseProgressStatus.MSG_TAG, message)
 
     def erase_status(self):
