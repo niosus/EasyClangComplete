@@ -1,0 +1,26 @@
+Version 6.5.2
+=============
+
+Improvements and bug fixes:
+---------------------------
+- A fix for a missing flag for M1 Apple arm architecture
+- [dev] Rewrite the CI setup to ease further development
+ 
+Huuuge thanks to my GitHub Sponsors! You're amazing! 🙏
+-------------------------------------------------------
+- @vaporstack
+- @Andreasdahlberg
+
+Join them on GitHub Sponsors and support the development!
+https://github.com/sponsors/niosus
+
+Reach out! 😉
+-------------
+
+Tell me how YOU are using the plugin!
+- PM me on reddit: @soinus
+- Tweet at me on twitter: @igor_niosus 🐦
+
+Other means of support here:
+----------------------------
+https://github.com/niosus/EasyClangComplete#support-it
