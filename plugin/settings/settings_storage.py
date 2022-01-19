@@ -374,6 +374,16 @@ class SettingsStorage:
         variables = view.window().extract_variables()
         self._wildcard_values.update(variables)
 
+        # For the directories mounted on the sidebar of a window,
+        # `variables["folder"]` is the first one, not the one
+        # containing the file corresponding to the current view.
+        filename = view.file_name()
+        if filename is not None:
+            for folder in view.window().folders():
+                if filename.startswith(folder):
+                    variables["folder"] = folder
+                    break
+
         self._wildcard_values[Wildcards.PROJECT_PATH] = \
             variables.get("folder", "").replace("\\", "\\\\")
 
