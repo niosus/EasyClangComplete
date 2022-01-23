@@ -18,8 +18,8 @@
         "command": "ecc_show_all_errors"
     },
     {
-        "caption": "ECC: Clean current CMake cache",
-        "command": "clean_cmake"
+        "caption": "ECC: Clean internal cache",
+        "command": "clean_internal_cache"
     },
     {
         "caption": "ECC: Show popup info",

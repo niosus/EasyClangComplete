@@ -64,9 +64,9 @@ class Tools:
             output_text = e.output.decode("utf-8")
             _log.debug("Command finished with code: %s", e.returncode)
             _log.debug("Command output: \n%s", output_text)
-        except OSError:
+        except OSError as e:
             _log.debug(
-                "Executable file not found executing: {}".format(command))
+                "Error while executing command: %s", e.strerror)
         return output_text
 
     @staticmethod
