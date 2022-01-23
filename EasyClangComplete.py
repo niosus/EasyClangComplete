@@ -83,8 +83,14 @@ def plugin_loaded():
     We need it to initialize all the different classes that encapsulate
     functionality. We can only properly init them after sublime api is
     available."""
+    log.debug("Reloading the plugin")
     module_reloader.ModuleReloader.reload_all(ignore_string='singleton')
     GenericCache.clear_all_caches()
+    # Clear the old cache directory.
+    cache_dir = File.get_temp_dir()
+    if path.exists(cache_dir):
+        log.debug("Removing the build cache folder %s", cache_dir)
+        shutil.rmtree(cache_dir, ignore_errors=True)
     handle_plugin_loaded_function()
 
 
@@ -179,36 +185,26 @@ class EccCompleteIncludesCommand(sublime_plugin.TextCommand):
                                        settings.force_unix_includes)
 
 
-class CleanCmakeCommand(sublime_plugin.TextCommand):
-    """Command that cleans cmake build directory."""
+class CleanInternalCacheCommand(sublime_plugin.TextCommand):
+    """Command that cleans the internal build directory and all caches."""
 
     def run(self, edit):
-        """Run clean command.
-
-        Detects if there is a CMakeLists.txt associated to current view and
-        cleans all related information in case there is one.
-        """
+        """Run clean command."""
         if not SublBridge.is_valid_view(self.view):
+            log.debug("Cannot clean build for view: '%s'", 
+                self.view.file_name())
             return
-        import gc
-        file_path = self.view.file_name()
-        cmake_cache = CMakeFileCache()
-        try:
-            cmake_file_path = cmake_cache[file_path]
-            log.debug("Cleaning file: '%s'", cmake_file_path)
-            del cmake_cache[file_path]
-            del cmake_cache[cmake_file_path]
-            EasyClangComplete.view_config_manager.clear_for_view(
+        log.debug("Clearing config for view: '%s'", self.view.file_name())
+        EasyClangComplete.view_config_manager.clear_for_view(
                 self.view.buffer_id())
-            # Better safe than sorry. Cleanup!
-            gc.collect()
-            temp_proj_dir = CMakeFile.unique_folder_name(cmake_file_path)
-            if path.exists(temp_proj_dir):
-                log.debug("Cleaning build directory: '%s'", temp_proj_dir)
-                shutil.rmtree(temp_proj_dir, ignore_errors=True)
-        except KeyError:
-            log.debug("Nothing to clean")
-
+        cache_dir = File.get_temp_dir()
+        if path.exists(cache_dir):
+            log.debug("Removing the build cache folder %s", cache_dir)
+            shutil.rmtree(cache_dir, ignore_errors=True)
+        else:
+            log.warning("Cloud not clean folder: %s", cache_dir)
+        GenericCache().clear_all_caches()
+        EasyClangComplete.view_config_manager.clear()
 
 class GenerateBazelCompDbCommand(sublime_plugin.TextCommand):
     """Command that generates a compilation database with bazel."""
