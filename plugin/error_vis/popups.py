@@ -105,6 +105,13 @@ class Popup:
         ]
         is_macro = cursor.kind == cindex.CursorKind.MACRO_DEFINITION
         is_class_template = cursor.kind == cindex.CursorKind.CLASS_TEMPLATE
+        is_function = cursor.kind in [
+            cindex.CursorKind.FUNCTION_DECL,
+            cindex.CursorKind.CXX_METHOD,
+            cindex.CursorKind.CONSTRUCTOR,
+            cindex.CursorKind.DESTRUCTOR,
+            cindex.CursorKind.CONVERSION_FUNCTION,
+            cindex.CursorKind.FUNCTION_TEMPLATE]
 
         # Show the return type of the function/method if applicable,
         # macros just show that they are a macro.
@@ -156,12 +163,9 @@ class Popup:
                     args.append(arg_type_decl + " " + arg.spelling)
                 else:
                     args.append(arg_type_decl)
-            if cursor.kind in [cindex.CursorKind.FUNCTION_DECL,
-                               cindex.CursorKind.CXX_METHOD,
-                               cindex.CursorKind.CONSTRUCTOR,
-                               cindex.CursorKind.DESTRUCTOR,
-                               cindex.CursorKind.CONVERSION_FUNCTION,
-                               cindex.CursorKind.FUNCTION_TEMPLATE]:
+            if is_function:
+                if cursor.type is not None and cursor.type.is_function_variadic():
+                    args.append("...")
                 args_string = '('
                 if len(args):
                     args_string += ', '.join(args)
