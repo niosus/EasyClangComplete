@@ -45,7 +45,7 @@ BRIEF_DOC_TEMPLATE = """### Brief documentation:
 {content}
 """
 
-FULL_DOC_TEMPLATE = """### Full doxygen comment:
+FULL_DOC_TEMPLATE = """### Detailed documentation:
 {content}
 """
 
@@ -187,11 +187,12 @@ class Popup:
             popup.__text += Popup.__lookup_in_sublime_index(
                 sublime.active_window(), cursor.spelling)
 
-        # Doxygen comments
+        # Doxygen comment: single-line brief description
         if cursor.brief_comment:
             popup.__text += BRIEF_DOC_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="",
                                              code=cursor.brief_comment))
+        # Doxygen comment: multi-line detailed description
         if cursor.raw_comment:
             clean_comment = Popup.cleanup_comment(cursor.raw_comment).strip()
             print(clean_comment)
@@ -201,11 +202,34 @@ class Popup:
                     content=CODE_TEMPLATE.format(lang="", code=clean_comment))
         # Show macro body
         if is_macro:
+            body = "#define "
+            body += cursor.spelling
+            body += macro_parser.args_string
+            body += macro_parser.body_string
             popup.__text += BODY_TEMPLATE.format(
-                content=CODE_TEMPLATE.format(lang="c++",
-                                             code=macro_parser.body_string))
+                content=CODE_TEMPLATE.format(lang="c++", code=body))
+        # Show function declaration
+        elif is_function:
+            body = cursor.result_type.spelling
+            body += " "
+            body += cursor.spelling
+            args = []
+            for arg in cursor.get_arguments():
+                if arg.spelling:
+                    args.append(arg.type.spelling + " " + arg.spelling)
+                else:
+                    args.append(arg.type.spelling)
+            if cursor.type is not None and cursor.type.is_function_variadic():
+                args.append("...")
+            body += '('
+            if len(args):
+                body += ', '.join(args)
+            body += ');'
+            body = Popup.prettify_body(body)
+            popup.__text += BODY_TEMPLATE.format(
+                content=CODE_TEMPLATE.format(lang="c++", code=body))
         # Show type declaration
-        if settings.show_type_body and body_cursor and body_cursor.extent:
+        elif settings.show_type_body and body_cursor and body_cursor.extent:
             body = Popup.get_text_by_extent(body_cursor.extent)
             body = Popup.prettify_body(body)
             popup.__text += BODY_TEMPLATE.format(
