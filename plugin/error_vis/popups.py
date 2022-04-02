@@ -204,7 +204,7 @@ class Popup:
         if is_macro:
             body = "#define "
             body += cursor.spelling
-            body += macro_parser.args_string
+            body += macro_parser.args_string if len(macro_parser.args_string) else " "
             body += macro_parser.body_string
             popup.__text += BODY_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="c++", code=body))
