@@ -245,6 +245,10 @@ allow_code_wrap: true
 !!! panel-info "ECC: Info"
     ## Declaration:
     int [main]({file}:7:5) (int argc, const char *[] argv)
+    ### Body:
+    ```c++
+    int main(int argc, const char *[] argv);
+    ```
 """.format(file=file_name)
         self.assertEqual(info_popup.as_markdown(), expected_info_msg)
         # cleanup
@@ -337,6 +341,10 @@ allow_code_wrap: true
     @param[in]  a     param a
     @param[in]  b     param b
     ```
+    ### Body:
+    ```c++
+    void foo(int a, int b);
+    ```
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -372,6 +380,10 @@ allow_code_wrap: true
 !!! panel-info "ECC: Info"
     ## Declaration:
     void [foo]({file}:5:8) ([Foo]({file}:1:7) a, [Foo]({file}:1:7) \\* b)
+    ### Body:
+    ```c++
+    void foo(Foo a, Foo * b);
+    ```
 """.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
         # sublime text handles this.
@@ -1191,6 +1203,10 @@ allow_code_wrap: true
     ## Declaration:
     void [foo]({file}:6:8) ([TemplateClass]({file}:3:7)&lt;Foo \
 &amp;&amp;, int, 12&gt;)
+    ### Body:
+    ```c++
+    void foo(TemplateClass<Foo &&, int, 12>);
+    ```
 """
         expected_info_msg = fmt.format(file=file_name)
         # Make sure we remove trailing spaces on the right to comply with how
