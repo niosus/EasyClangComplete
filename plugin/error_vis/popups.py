@@ -164,8 +164,10 @@ class Popup:
                 else:
                     args.append(arg_type_decl)
             if is_function:
-                if (cursor.type is not None and
-                    cursor.type.is_function_variadic()):
+                is_variadic = False
+                if (cursor.type is not None):
+                    is_variadic = cursor.type.is_function_variadic()
+                if is_variadic:
                     args.append("...")
                 args_string = '('
                 if len(args):

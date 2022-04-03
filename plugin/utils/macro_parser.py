@@ -59,20 +59,18 @@ class MacroParser(object):
                 break
             prevline = macro_file_lines[lineno].lstrip()
             # skip any #if or #ifdef guards before the #define, if applicable
-            if re.match(r'^[ \t]*#[ \t]*(if|elif|else|ifn?def)[ \t]+',
-                prevline):
+            if re.match(r'^[ \t]*#[ \t]*(if|elif|else|ifn?def)\s', prevline):
                 continue
             # parse single-line comments
             if (parser_state != 2) and re.match(r'^\s*//', prevline):
                 parser_state = 1
-                if (re.match(r'^\s*//!', prevline) or
-                    re.match(r'^\s*///', prevline)):
+                if (re.match(r'^\s*//[/!]', prevline)):
                     self._raw_comment = prevline + "\n" + self._raw_comment
                 else:
                     parser_state = 3
                     log.debug("Error while parsing macro doc comment, " +
-                        "found normal single-line comment: " +
-                        self._raw_comment)
+                              "found normal single-line comment: " +
+                              self._raw_comment)
                 parser_state = 0 if len(self._raw_comment) == 0 else 3
                 continue
             # parse multi-line comments
@@ -82,8 +80,8 @@ class MacroParser(object):
                         self._raw_comment = prevline + "\n" + self._raw_comment
                     else:
                         log.debug("Error while parsing macro doc comment, " +
-                            "found normal multi-line comment: " +
-                            self._raw_comment)
+                                  "found normal multi-line comment: " +
+                                  self._raw_comment)
                     parser_state = 0 if len(self._raw_comment) == 0 else 3
                 else:
                     self._raw_comment = prevline + "\n" + self._raw_comment
@@ -94,7 +92,7 @@ class MacroParser(object):
                 continue
             if (len(prevline) > 0):
                 log.debug("Error while parsing macro doc comment, " +
-                    "found: " + prevline)
+                          "found: " + prevline)
                 break
 
         macro_line = macro_file_lines[macro_line_number - 1].strip()
