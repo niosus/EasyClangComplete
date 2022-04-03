@@ -214,7 +214,7 @@ class Popup:
             popup.__text += BODY_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="c++", code=body))
         # Show function declaration
-        elif is_function:
+        elif settings.show_type_body and is_function:
             body = cursor.result_type.spelling
             body += " "
             body += cursor.spelling
