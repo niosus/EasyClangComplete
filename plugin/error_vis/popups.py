@@ -164,7 +164,8 @@ class Popup:
                 else:
                     args.append(arg_type_decl)
             if is_function:
-                if cursor.type is not None and cursor.type.is_function_variadic():
+                if (cursor.type is not None and
+                    cursor.type.is_function_variadic()):
                     args.append("...")
                 args_string = '('
                 if len(args):
@@ -209,7 +210,10 @@ class Popup:
         if is_macro:
             body = "#define "
             body += cursor.spelling
-            body += macro_parser.args_string if len(macro_parser.args_string) else " "
+            if (len(macro_parser.args_string) > 0):
+                body += macro_parser.args_string
+            else:
+                body += " "
             body += macro_parser.body_string
             popup.__text += BODY_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="c++", code=body))

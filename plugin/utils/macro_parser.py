@@ -5,6 +5,7 @@ import logging
 
 log = logging.getLogger("ECC")
 
+
 class MacroParser(object):
     """Parse info from macros.
 
@@ -57,17 +58,21 @@ class MacroParser(object):
             if (lineno == 0):
                 break
             prevline = macro_file_lines[lineno].lstrip()
-            # skip any `#if`/`#ifdef` guards before the macro `#define` line, if applicable
-            if re.match(r'^[ \t]*#[ \t]*(if|elif|else|ifn?def)[ \t]+', prevline):
+            # skip any #if or #ifdef guards before the #define, if applicable
+            if re.match(r'^[ \t]*#[ \t]*(if|elif|else|ifn?def)[ \t]+',
+                prevline):
                 continue
             # parse single-line comments
             if (parser_state != 2) and re.match(r'^\s*//', prevline):
                 parser_state = 1
-                if (re.match(r'^\s*//!', prevline) or re.match(r'^\s*///', prevline)):
+                if (re.match(r'^\s*//!', prevline) or
+                    re.match(r'^\s*///', prevline)):
                     self._raw_comment = prevline + "\n" + self._raw_comment
                 else:
                     parser_state = 3
-                    log.debug("Error while parsing macro doc comment: found normal single-line comment: " + self._raw_comment)
+                    log.debug("Error while parsing macro doc comment, " +
+                        "found normal single-line comment: " +
+                        self._raw_comment)
                 parser_state = 0 if len(self._raw_comment) == 0 else 3
                 continue
             # parse multi-line comments
@@ -76,7 +81,9 @@ class MacroParser(object):
                     if re.match(r'^\s*/\*[\*!]', prevline):
                         self._raw_comment = prevline + "\n" + self._raw_comment
                     else:
-                        log.debug("Error while parsing macro doc comment: found normal multi-line comment: " + self._raw_comment)
+                        log.debug("Error while parsing macro doc comment, " +
+                            "found normal multi-line comment: " +
+                            self._raw_comment)
                     parser_state = 0 if len(self._raw_comment) == 0 else 3
                 else:
                     self._raw_comment = prevline + "\n" + self._raw_comment
@@ -86,7 +93,8 @@ class MacroParser(object):
                 parser_state = 2
                 continue
             if (len(prevline) > 0):
-                log.debug("Error while parsing macro doc comment: found " + prevline)
+                log.debug("Error while parsing macro doc comment, " +
+                    "found: " + prevline)
                 break
 
         macro_line = macro_file_lines[macro_line_number - 1].strip()
@@ -135,12 +143,14 @@ class MacroParser(object):
     def doc_string(self):
         """Get documentation comment string.
 
-        This follows conventional doxygen syntax, so your comment can use any of these syntaxes:
+        This follows conventional doxygen syntax,
+        so your comment can use any of these syntaxes:
         - /** doc comment (Java style) */
         - /// doc comment (C# style)
         - //! doc comment (Qt style), single-line
         - /*! doc comment (Qt style), block */
-        This means that the following comment syntaxes are NOT valid documentation comments:
+        Conversely, this means that the following comment
+        syntaxes are NOT valid documentation comments:
         - // normal single-line comment
         - /* normal block comment */
         """
