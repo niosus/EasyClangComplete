@@ -65,7 +65,7 @@ class MacroParser(object):
             if (parser_state != 2) and re.match(r'^\s*//', prevline):
                 parser_state = 1
                 if (re.match(r'^\s*//[/!]', prevline)):
-                    self._raw_comment = prevline + "\n" + self._raw_comment
+                    self._raw_comment = prevline + self._raw_comment
                 else:
                     parser_state = 3
                     log.debug("Error while parsing macro doc comment, " +
@@ -77,17 +77,17 @@ class MacroParser(object):
             if (parser_state == 2):
                 if re.match(r'^\s*/\*', prevline):
                     if re.match(r'^\s*/\*[\*!]', prevline):
-                        self._raw_comment = prevline + "\n" + self._raw_comment
+                        self._raw_comment = prevline + self._raw_comment
                     else:
                         log.debug("Error while parsing macro doc comment, " +
                                   "found normal multi-line comment: " +
                                   self._raw_comment)
                     parser_state = 0 if len(self._raw_comment) == 0 else 3
                 else:
-                    self._raw_comment = prevline + "\n" + self._raw_comment
+                    self._raw_comment = prevline + self._raw_comment
                 continue
             elif re.match(r'^\s*\*/', prevline):
-                self._raw_comment = prevline + "\n" + self._raw_comment
+                self._raw_comment = prevline + self._raw_comment
                 parser_state = 2
                 continue
             if (len(prevline) > 0):
@@ -119,7 +119,7 @@ class MacroParser(object):
         while self._body.endswith("\\"):
             macro_line_number += 1
             line = macro_file_lines[macro_line_number - 1].rstrip()
-            self._body += "\n" + line
+            self._body += line
 
     @property
     def args_string(self):

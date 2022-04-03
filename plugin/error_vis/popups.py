@@ -190,24 +190,25 @@ class Popup:
             popup.__text += Popup.__lookup_in_sublime_index(
                 sublime.active_window(), cursor.spelling)
 
-        raw_comment = None
+        has_comment = None
         if is_macro:
-            raw_comment = macro_parser.doc_string
+            has_comment = macro_parser.doc_string
         else:
-            raw_comment = cursor.raw_comment
+            has_comment = cursor.raw_comment
         # Doxygen comment: single-line brief description
-        if raw_comment and cursor.brief_comment:
+        if cursor.brief_comment or (is_macro and has_comment):
             popup.__text += BRIEF_DOC_TEMPLATE.format(
                 content=CODE_TEMPLATE.format(lang="",
                                              code=cursor.brief_comment))
         # Doxygen comment: multi-line detailed description
-        if raw_comment and cursor.raw_comment:
-            clean_comment = Popup.cleanup_comment(cursor.raw_comment).strip()
+        if cursor.raw_comment or (is_macro and has_comment):
+            clean_comment = Popup.cleanup_comment(has_comment).strip()
             print(clean_comment)
             if clean_comment:
                 # Only add this if there is a Doxygen comment.
                 popup.__text += FULL_DOC_TEMPLATE.format(
                     content=CODE_TEMPLATE.format(lang="", code=clean_comment))
+
         # Show macro body
         if is_macro:
             body = "#define "
