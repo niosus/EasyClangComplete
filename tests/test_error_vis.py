@@ -330,7 +330,7 @@ allow_code_wrap: true
     ```
     This is short.
     ```
-    ### Full doxygen comment:
+    ### Detailed documentation:
     ```
     And this is a full comment.
 
