@@ -265,12 +265,12 @@ class Popup:
                         content=mdcomment)
             else:
                 # Doxygen comment: single-line brief description
-                if cursor.brief_comment:
+                if cursor.brief_comment or (is_macro and has_comment):
                     documentation_text += BRIEF_DOC_TEMPLATE.format(
                         content=CODE_TEMPLATE.format(code=cursor.brief_comment,
                                                      lang=""))
                 # Doxygen comment: multi-line detailed description
-                if cursor.raw_comment:
+                if cursor.raw_comment or (is_macro and has_comment):
                     clean_comment = Popup.cleanup_comment(has_comment).strip()
                     if clean_comment:
                         # Only add this if there is a Doxygen comment.
