@@ -1,5 +1,6 @@
 """Incapsulate popup creation."""
 
+import string
 import sublime
 import mdpopups
 import markupsafe
@@ -45,7 +46,7 @@ BRIEF_DOC_TEMPLATE = """### Brief documentation:
 {content}
 """
 
-FULL_DOC_TEMPLATE = """### Full doxygen comment:
+FULL_DOC_TEMPLATE = """### Detailed documentation:
 {content}
 """
 
@@ -94,31 +95,54 @@ class Popup:
             settings.popup_maximum_width, settings.popup_maximum_height
         ))
         popup.__popup_type = 'panel-info "ECC: Info"'
-        is_type_decl = cursor.kind in [
-            cindex.CursorKind.STRUCT_DECL,
-            cindex.CursorKind.UNION_DECL,
-            cindex.CursorKind.CLASS_DECL,
-            cindex.CursorKind.ENUM_DECL,
-            cindex.CursorKind.TYPEDEF_DECL,
-            cindex.CursorKind.TYPE_ALIAS_DECL,
-            cindex.CursorKind.TYPE_REF
-        ]
-        is_macro = cursor.kind == cindex.CursorKind.MACRO_DEFINITION
-        is_class_template = cursor.kind == cindex.CursorKind.CLASS_TEMPLATE
 
-        # Show the return type of the function/method if applicable,
-        # macros just show that they are a macro.
         macro_parser = None
-        body_cursor = None
-        if is_type_decl:
-            body_cursor = cursor
-        elif is_class_template:
-            body_cursor = cursor.get_definition()
-
-        # Initialize the text the declaration.
-        declaration_text = ''
-        if is_macro:
+        if cursor.kind == cindex.CursorKind.MACRO_DEFINITION:
             macro_parser = MacroParser(cursor.spelling, cursor.location)
+
+        if not isinstance(settings.popup_sections, list):
+            log.error("Bad config value: \"popup_sections\" " +
+                      "should be a list of strings")
+        elif len(settings.popup_sections) == 0:
+            log.error("Bad config value: \"popup_sections\" " +
+                      "setting should have at least one element")
+        else:
+            popup.__text = ""
+            for i in settings.popup_sections:
+                if not isinstance(i, str):
+                    log.error("Bad config value: \"popup_sections\" " +
+                              "should be a list containing only strings")
+                elif re.match(r'[Dd]eclaration', i):
+                    popup.__text += Popup.info_section_declaration(
+                        cursor, cindex, settings, macro_parser)
+                elif re.match(r'[Rr]eferences', i):
+                    popup.__text += Popup.info_section_references(
+                        cursor, cindex, settings, macro_parser)
+                elif re.match(r'[Dd]ocumentation', i):
+                    popup.__text += Popup.info_section_documentation(
+                        cursor, cindex, settings, macro_parser)
+                elif re.match(r'([Bb]ody|[Ss]ource)', i):
+                    popup.__text += Popup.info_section_body(
+                        cursor, cindex, settings, macro_parser)
+                else:
+                    log.error("Bad config value: \"popup_sections\" " +
+                              "has unknown value: \"" + i + "\"")
+
+        return popup
+
+    @staticmethod
+    def info_section_declaration(cursor, cindex, settings, macro_parser):
+        """Generate the info text for the declaration."""
+        is_function = cursor.kind in [
+            cindex.CursorKind.FUNCTION_DECL,
+            cindex.CursorKind.CXX_METHOD,
+            cindex.CursorKind.CONSTRUCTOR,
+            cindex.CursorKind.DESTRUCTOR,
+            cindex.CursorKind.CONVERSION_FUNCTION,
+            cindex.CursorKind.FUNCTION_TEMPLATE
+        ]
+        declaration_text = ''
+        if macro_parser is not None:
             declaration_text += r'\#define '
         else:
             if cursor.result_type.spelling:
@@ -143,7 +167,7 @@ class Popup:
             declaration_text += cursor.spelling
         # Macro/function/method arguments
         args_string = None
-        if is_macro:
+        if macro_parser is not None:
             # cursor.get_arguments() doesn't give us anything for macros,
             # so we have to parse those ourselves
             args_string = macro_parser.args_string
@@ -156,12 +180,12 @@ class Popup:
                     args.append(arg_type_decl + " " + arg.spelling)
                 else:
                     args.append(arg_type_decl)
-            if cursor.kind in [cindex.CursorKind.FUNCTION_DECL,
-                               cindex.CursorKind.CXX_METHOD,
-                               cindex.CursorKind.CONSTRUCTOR,
-                               cindex.CursorKind.DESTRUCTOR,
-                               cindex.CursorKind.CONVERSION_FUNCTION,
-                               cindex.CursorKind.FUNCTION_TEMPLATE]:
+            if is_function:
+                is_variadic = False
+                if (cursor.type is not None):
+                    is_variadic = cursor.type.is_function_variadic()
+                if is_variadic:
+                    args.append("...")
                 args_string = '('
                 if len(args):
                     args_string += ', '.join(args)
@@ -176,40 +200,17 @@ class Popup:
         if cursor.is_const_method():
             declaration_text += " const"
         # Save declaration text.
-        popup.__text = DECLARATION_TEMPLATE.format(
+        return DECLARATION_TEMPLATE.format(
             type_declaration=markupsafe.escape(declaration_text))
 
-        if settings.show_index_references:
-            popup.__text += Popup.__lookup_in_sublime_index(
-                sublime.active_window(), cursor.spelling)
-
-        # Doxygen comments
-        if cursor.brief_comment:
-            popup.__text += BRIEF_DOC_TEMPLATE.format(
-                content=CODE_TEMPLATE.format(lang="",
-                                             code=cursor.brief_comment))
-        if cursor.raw_comment:
-            clean_comment = Popup.cleanup_comment(cursor.raw_comment).strip()
-            print(clean_comment)
-            if clean_comment:
-                # Only add this if there is a Doxygen comment.
-                popup.__text += FULL_DOC_TEMPLATE.format(
-                    content=CODE_TEMPLATE.format(lang="", code=clean_comment))
-        # Show macro body
-        if is_macro:
-            popup.__text += BODY_TEMPLATE.format(
-                content=CODE_TEMPLATE.format(lang="c++",
-                                             code=macro_parser.body_string))
-        # Show type declaration
-        if settings.show_type_body and body_cursor and body_cursor.extent:
-            body = Popup.get_text_by_extent(body_cursor.extent)
-            body = Popup.prettify_body(body)
-            popup.__text += BODY_TEMPLATE.format(
-                content=CODE_TEMPLATE.format(lang="c++", code=body))
-        return popup
-
     @staticmethod
-    def __lookup_in_sublime_index(window, spelling):
+    def info_section_references(cursor, cindex, settings, macro_parser):
+        """Generate the info text for the declaration."""
+        window = sublime.active_window()
+        spelling = cursor.spelling
+        if not settings.show_index_references:
+            return ""
+
         def lookup(lookup_function, spelling):
             index = lookup_function(spelling)
             references = []
@@ -224,6 +225,7 @@ class Popup:
                         line=location.line,
                         col=location.column))
             return markupsafe.escape("\n - ".join(references))
+
         index_references = lookup(window.lookup_symbol_in_index, spelling)
         usage_references = lookup(window.lookup_symbol_in_open_files, spelling)
         output_text = ""
@@ -234,6 +236,114 @@ class Popup:
             output_text += OPEN_FILES_REFERENCES_TEMPLATE.format(
                 references=" - " + usage_references)
         return output_text
+
+    @staticmethod
+    def info_section_documentation(cursor, cindex, settings, macro_parser):
+        """Generate text for documentation comment(s), if any."""
+        documentation_text = ""
+        has_comment = None
+        if macro_parser is not None:
+            has_comment = macro_parser.doc_string
+        else:
+            has_comment = cursor.raw_comment
+        if has_comment:
+            if settings.show_doc_as_markdown:
+                # Doxygen comment: single-line brief description
+                charset_comment = '/' + '*' + '!' + string.whitespace
+                brief_comment = has_comment.split("\n")[0]
+                brief_comment = brief_comment.lstrip(charset_comment)
+                if len(brief_comment) > 0:
+                    brief_comment = Popup.doxygen_comment(brief_comment)
+                    documentation_text += BRIEF_DOC_TEMPLATE.format(
+                        content=brief_comment)
+                # Doxygen comment: multi-line detailed description
+                mdcomment = Popup.cleanup_comment(has_comment)
+                if len(mdcomment) > 0:
+                    mdcomment = Popup.doxygen_comment(mdcomment)
+                    # Only add this if there is a Doxygen comment.
+                    documentation_text += FULL_DOC_TEMPLATE.format(
+                        content=mdcomment)
+            else:
+                # Doxygen comment: single-line brief description
+                if cursor.brief_comment or (is_macro and has_comment):
+                    documentation_text += BRIEF_DOC_TEMPLATE.format(
+                        content=CODE_TEMPLATE.format(code=cursor.brief_comment,
+                                                     lang=""))
+                # Doxygen comment: multi-line detailed description
+                if cursor.raw_comment or (is_macro and has_comment):
+                    clean_comment = Popup.cleanup_comment(has_comment).strip()
+                    if clean_comment:
+                        # Only add this if there is a Doxygen comment.
+                        documentation_text += FULL_DOC_TEMPLATE.format(
+                            content=CODE_TEMPLATE.format(code=clean_comment,
+                                                         lang=""))
+        log.debug("Processed comment:\n" + documentation_text)
+        return documentation_text
+
+    @staticmethod
+    def info_section_body(cursor, cindex, settings, macro_parser):
+        """Generate info text for the "body" section."""
+        is_type_decl = cursor.kind in [
+            cindex.CursorKind.STRUCT_DECL,
+            cindex.CursorKind.UNION_DECL,
+            cindex.CursorKind.CLASS_DECL,
+            cindex.CursorKind.ENUM_DECL,
+            cindex.CursorKind.TYPEDEF_DECL,
+            cindex.CursorKind.TYPE_ALIAS_DECL,
+            cindex.CursorKind.TYPE_REF
+        ]
+        is_function = cursor.kind in [
+            cindex.CursorKind.FUNCTION_DECL,
+            cindex.CursorKind.CXX_METHOD,
+            cindex.CursorKind.CONSTRUCTOR,
+            cindex.CursorKind.DESTRUCTOR,
+            cindex.CursorKind.CONVERSION_FUNCTION,
+            cindex.CursorKind.FUNCTION_TEMPLATE
+        ]
+        body_cursor = None
+        if is_type_decl:
+            body_cursor = cursor
+        elif cursor.kind == cindex.CursorKind.CLASS_TEMPLATE:
+            body_cursor = cursor.get_definition()
+        body = ""
+        # Show macro body
+        if macro_parser is not None:
+            body += "#define "
+            body += cursor.spelling
+            if (len(macro_parser.args_string) > 0):
+                body += macro_parser.args_string
+            else:
+                body += " "
+            body += macro_parser.body_string
+        # Show function declaration
+        elif settings.show_type_body and is_function:
+            body += cursor.result_type.spelling
+            body += " "
+            body += cursor.spelling
+            args = []
+            for arg in cursor.get_arguments():
+                if arg.spelling:
+                    args.append(arg.type.spelling + " " + arg.spelling)
+                else:
+                    args.append(arg.type.spelling)
+            if cursor.type is not None and cursor.type.is_function_variadic():
+                args.append("...")
+            body += '('
+            if len(args):
+                body += ', '.join(args)
+            body += ');'
+            body = Popup.prettify_body(body)
+        # Show type declaration
+        elif settings.show_type_body and body_cursor and body_cursor.extent:
+            body = Popup.get_text_by_extent(body_cursor.extent)
+            body = Popup.prettify_body(body)
+
+        # Format into code block with syntax highlighting
+        if len(body) > 0:
+            return BODY_TEMPLATE.format(
+                content=CODE_TEMPLATE.format(lang="c++", code=body))
+        else:
+            return ""
 
     def info_objc(cursor, cindex, settings):
         """Provide information about Objective C cursors."""
@@ -478,7 +588,6 @@ class Popup:
                     break
             return lines[first_non_empty_line_idx:]
 
-        import string
         lines = raw_comment.split('\n')
         chars_to_strip = '/' + '*' + '!' + string.whitespace
         lines = [line.lstrip(chars_to_strip) for line in lines]
@@ -494,6 +603,45 @@ class Popup:
                 continue
             clean_lines.append(line)
         return '\n'.join(clean_lines)
+
+    @staticmethod
+    def doxygen_comment(mdcomment):
+        """Transform cleaned doxygen comment to valid markdown."""
+        result = mdcomment
+        index = mdcomment.find("@param")
+        if (index >= 0):
+            result = result[:index] + "\n**Parameters**:\n" + result[index:]
+        doc_replace = [
+            [r'@param\s+([_a-zA-Z0-9.]+)\s*', "- `\\1`: "],
+            [r'@(retval|returns?)\b\s*',   "\n**Returns**:\n"],
+            [r'@(exception|throws?)\b\s*', "\n**Exceptions**:\n"],
+            [r'@(sa|see(also)?)\b\s*',     "\n**See also**:\n"],
+            [r'@f\$', "`"],
+            [r'@[{}]', ""],
+        ]
+        for replace in doc_replace:
+            result = re.sub(replace[0], replace[1], result)
+        window = sublime.active_window()
+
+        def _make_doxygen_hyperlink(match):
+            spelling = match.group(1)
+            if len(spelling) == 0:
+                return spelling
+            symbol = window.lookup_symbol_in_index(spelling)
+            if len(symbol) == 0:
+                return spelling
+            location_tuple = symbol[0]
+            location = IndexLocation(filename=location_tuple[0],
+                                     line=location_tuple[2][0],
+                                     column=location_tuple[2][1])
+            link = Popup.link_from_location(location, spelling,
+                                            trailing_space=False)
+            return link
+        result = re.sub(r'\b([_a-zA-Z0-9]+)(?=\(\))',
+                        _make_doxygen_hyperlink, result)
+        result = re.sub(r'#([_a-zA-Z0-9]+)\b',
+                        _make_doxygen_hyperlink, result)
+        return result
 
     @staticmethod
     def location_from_type(clang_type):

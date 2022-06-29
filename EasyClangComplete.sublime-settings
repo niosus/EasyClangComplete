@@ -87,6 +87,16 @@
   "popup_maximum_width": 1800,
   "popup_maximum_height": 800,
 
+  // This array determines which sections should appear inside info popups,
+  // and in what order they should be displayed within the popup.
+  // By default, all of the possible sections are present.
+  "popup_sections": [
+    "Declaration",
+    "References",
+    "Documentation",
+    "Body",
+  ],
+
   // Triggers for auto-completion
   "triggers" : [ ".", "->", "::", " ", "	", "(", "[" ],
 
@@ -169,6 +179,11 @@
   // We only can get declarations from clang AST. This will show references to
   // the symbol under cursor taking them from Sublime Text index.
   "show_index_references": true,
+
+  // Makes any documentation comments show up as rendered Markdown in the popup.
+  // By default, this value is set to `false`, which means that any documentation
+  // comments will be displayed within a literal text block (```).
+  "show_doc_as_markdown": false,
 
   // When an includes trigger is typed (" or <) a quick panel will appear that
   // will guide the user in picking their includes based on the current
