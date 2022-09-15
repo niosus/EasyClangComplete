@@ -97,6 +97,11 @@ class CCppProperties(FlagsSource):
                 include_paths = content["configurations"][0]["includePath"]
             except Exception:
                 include_paths = []
+
+            # VSCode variable for current working directory
+            vsc_ws = '${workspaceFolder}'
+            # Attempt to replace VSCode variables if any
+            includes = [i.replace(vsc_ws, '.') for i in include_paths]
             includes = [path.expandvars(i) for i in include_paths]
             includes = ["-I{}".format(include) for include in includes]
             return includes
