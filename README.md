@@ -83,7 +83,7 @@ missing functionality or fix a bug. Check out the contribution
 [img-gratipay]: https://img.shields.io/gratipay/user/niosus.svg?style=flat-square
 [img-beerpay]: https://beerpay.io/niosus/EasyClangComplete/badge.svg?style=flat-square
 [img-bountysource]: https://img.shields.io/bountysource/team/easyclangcomplete/activity.svg?style=flat-square
-[img-github-actions]: https://img.shields.io/github/workflow/status/niosus/EasyClangComplete/test?style=flat-square
+[img-github-actions]: https://img.shields.io/github/actions/workflow/status/niosus/EasyClangComplete/main.yml?branch=master&style=flat-square
 [img-coverage]: https://img.shields.io/codecov/c/gh/niosus/EasyClangComplete?style=flat-square&token=KJ8IuinGs1
 [img-release]: https://img.shields.io/github/release/niosus/EasyClangComplete.svg?style=flat-square
 [img-downloads]: https://img.shields.io/packagecontrol/dt/EasyClangComplete.svg?maxAge=3600&style=flat-square
