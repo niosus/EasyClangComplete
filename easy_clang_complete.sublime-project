@@ -43,6 +43,14 @@
 		"sublack":
 		{
 			"black_on_save": false
+		},
+		"LSP":{
+			"LSP-pyright":
+			{
+				"settings": {
+					"pyright.dev_environment": "sublime_text_38"
+				}
+			}
 		}
 	}
 }

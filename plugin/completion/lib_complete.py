@@ -287,6 +287,9 @@ class Completer(BaseCompleter):
                 info_popup = Popup.info(
                     cursor.referenced, self.cindex, settings)
                 return tooltip_request, info_popup
+            if cursor.kind == self.cindex.CursorKind.MACRO_DEFINITION:
+                info_popup = Popup.info(cursor, self.cindex, settings)
+                return tooltip_request, info_popup
             return empty_info
 
     def update(self, view, settings):
