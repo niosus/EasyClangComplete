@@ -236,7 +236,7 @@ class EccShowPopupInfoCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         """Run show popup info command."""
         position = self.view.sel()[0].begin()
-        EasyClangComplete.begin_show_info_job(self.view, position)
+        EasyClangComplete.begin_show_info_job(self.view, position, True)
 
 
 class EasyClangComplete(sublime_plugin.EventListener):
@@ -548,7 +548,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         EasyClangComplete.begin_show_info_job(view, point)
 
     @staticmethod
-    def begin_show_info_job(view, position):
+    def begin_show_info_job(view, position, force=False):
         """Start thead job to show popup info.
 
         Triggers showing popup with additional information about about
@@ -560,7 +560,7 @@ class EasyClangComplete(sublime_plugin.EventListener):
         settings = EasyClangComplete.settings_manager.settings_for_view(view)
         if not SublBridge.has_valid_syntax(view, settings):
             return
-        if not settings.show_type_info:
+        if not force and not settings.show_type_info:
             return
 
         tooltip_request = ActionRequest(view, position)
