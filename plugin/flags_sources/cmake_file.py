@@ -143,6 +143,15 @@ class CMakeFile(FlagsSource):
         return flags
 
     @staticmethod
+    def get_cache_dir():
+        """Get all builds folder name.
+
+        Returns:
+            str: Path to a temp folder where all cache is stored.
+        """
+        return File.get_temp_dir('cmake_builds')
+
+    @staticmethod
     def unique_folder_name(cmake_path):
         """Get unique build folder name.
 
@@ -152,8 +161,8 @@ class CMakeFile(FlagsSource):
         Returns:
             str: Path to a unique temp folder.
         """
-        return File.get_temp_dir('cmake_builds',
-                                 Tools.get_unique_str(cmake_path))
+        return File.get_temp_dir('cmake_builds', 
+            Tools.get_unique_str(cmake_path))
 
     @staticmethod
     def __prepend_prefix_paths(prefix_paths):

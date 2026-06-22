@@ -104,6 +104,14 @@ class ViewConfigManager(object):
             log.error("Traceback: %s", tb)
             return None
 
+    def clear(self):
+        """Clear all cache."""
+        import gc
+        log.debug("Trying to clean all view cache")
+        with self.__rlock:
+            self.__cache.clear()
+            gc.collect()  # Explicitly collect garbage.
+
     def clear_for_view(self, v_id):
         """Clear config for a view id."""
         assert isinstance(v_id, int), "View id should be an int."
